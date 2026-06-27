@@ -10,10 +10,19 @@ export interface IAuthTokens {
   refreshToken: string
 }
 
+export const TokenType = {
+  ACCESS: 'access',
+  REFRESH: 'refresh',
+} as const
+
+export type TokenType = (typeof TokenType)[keyof typeof TokenType]
+
 export interface ITokenPayload {
   sub: string
   email: string
   role: UserRole
+  type: TokenType
+  jti?: string
 }
 
 export interface IAuthUser {
@@ -26,4 +35,17 @@ export interface IAuthUser {
 
 export interface IAuthUserWithPassword extends IAuthUser {
   password: string
+}
+
+export interface IRefreshTokenRecord {
+  id: string
+  userId: string
+  expiresAt: Date
+  revokedAt: Date | null
+}
+
+export interface ICreateRefreshTokenData {
+  id: string
+  userId: string
+  expiresAt: Date
 }

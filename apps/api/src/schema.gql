@@ -17,9 +17,14 @@ input LoginWithCodeInput {
   email: String!
 }
 
+input LogoutInput {
+  refreshToken: String!
+}
+
 type Mutation {
   login(input: LoginInput!): AuthTokensType!
   loginWithCode(input: LoginWithCodeInput!): AuthTokensType!
+  logout(input: LogoutInput!): Boolean!
   refreshToken(input: RefreshTokenInput!): AuthTokensType!
   requestLoginCode(input: RequestLoginCodeInput!): Boolean!
 }

@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
 import { IAuthRepository } from './auth.repository.abstract'
-import type { IAuthUser, IAuthUserWithPassword } from '../interfaces/auth.interfaces'
+import type {
+  IAuthUser,
+  IAuthUserWithPassword,
+  ICreateRefreshTokenData,
+  IRefreshTokenRecord,
+} from '../interfaces/auth.interfaces'
 import type { ICreateLoginCodeData, ILoginCode } from '../interfaces/login-code.interfaces'
 
 @Injectable()
@@ -64,13 +69,21 @@ export class AuthRepository extends IAuthRepository {
     })
   }
 
-  incrementAttempts = async (id: string, tx: TxClient): Promise<number> => {
-    const row = await tx.loginCode.update({
-      where: { id },
+  reserveLoginCodeAttempt = async (
+    id: string,
+    maxAttempts: number,
+    tx: TxClient,
+  ): Promise<boolean> => {
+    const result = await tx.loginCode.updateMany({
+      where: {
+        id,
+        consumedAt: null,
+        expiresAt: { gt: new Date() },
+        attempts: { lt: maxAttempts },
+      },
       data: { attempts: { increment: 1 } },
-      select: { attempts: true },
     })
-    return row.attempts
+    return result.count > 0
   }
 
   findLastCodeCreatedAt = async (userId: string, tx: TxClient): Promise<Date | null> => {
@@ -80,5 +93,26 @@ export class AuthRepository extends IAuthRepository {
       select: { createdAt: true },
     })
     return row?.createdAt ?? null
+  }
+
+  createRefreshToken = async (data: ICreateRefreshTokenData, tx: TxClient): Promise<void> => {
+    await tx.refreshToken.create({ data })
+  }
+
+  findRefreshTokenById = async (
+    id: string,
+    tx: TxClient,
+  ): Promise<IRefreshTokenRecord | null> => {
+    return tx.refreshToken.findUnique({
+      where: { id },
+      select: { id: true, userId: true, expiresAt: true, revokedAt: true },
+    })
+  }
+
+  revokeRefreshToken = async (id: string, tx: TxClient): Promise<void> => {
+    await tx.refreshToken.updateMany({
+      where: { id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    })
   }
 }

@@ -38,7 +38,7 @@ export class RequestLoginCodeHandler extends BaseCommandHandler<RequestLoginCode
       return true
     }
 
-    const maxCodesPerHour = Number(process.env.OTP_MAX_CODES_PER_HOUR ?? 3)
+    const maxCodesPerHour = Number(process.env.OTP_MAX_CODES_PER_HOUR ?? 5)
     const recentCount = await this.authRepository.countRecentCodes(user.id, 60, tx)
 
     if (recentCount >= maxCodesPerHour) {

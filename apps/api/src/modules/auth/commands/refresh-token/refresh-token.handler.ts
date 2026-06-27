@@ -7,7 +7,9 @@ import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { AppException, ErrorCode, NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs'
 import { IAuthRepository } from '../../repositories/auth.repository.abstract'
+import { TokenType } from '../../interfaces/auth.interfaces'
 import type { IAuthTokens, ITokenPayload } from '../../interfaces/auth.interfaces'
+import { issueTokens } from '../../auth.tokens'
 import { RefreshTokenCommand } from './refresh-token.command'
 
 @CommandHandler(RefreshTokenCommand)
@@ -34,21 +36,24 @@ export class RefreshTokenHandler extends BaseCommandHandler<RefreshTokenCommand,
       throw new AppException('Invalid token', ErrorCode.INVALID_TOKEN)
     }
 
+    if (payload.type !== TokenType.REFRESH || !payload.jti) {
+      throw new AppException('Invalid token', ErrorCode.INVALID_TOKEN)
+    }
+
+    const stored = await this.authRepository.findRefreshTokenById(payload.jti, tx)
+
+    if (!stored || stored.revokedAt || stored.expiresAt.getTime() < Date.now()) {
+      throw new AppException('Invalid token', ErrorCode.INVALID_TOKEN)
+    }
+
     const user = await this.authRepository.findById(payload.sub, tx)
 
     if (!user) {
       throw new NotFoundException('User')
     }
 
-    const newPayload: ITokenPayload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    }
+    await this.authRepository.revokeRefreshToken(payload.jti, tx)
 
-    const accessToken = this.jwtService.sign(newPayload, { expiresIn: '1d' })
-    const refreshToken = this.jwtService.sign(newPayload, { expiresIn: '7d' })
-
-    return { accessToken, refreshToken }
+    return issueTokens(this.jwtService, this.authRepository, tx, user)
   }
 }

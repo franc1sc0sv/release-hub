@@ -8,7 +8,9 @@ import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { InvalidCredentialsException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs'
 import { IAuthRepository } from '../../repositories/auth.repository.abstract'
-import type { IAuthTokens, ITokenPayload } from '../../interfaces/auth.interfaces'
+import type { IAuthTokens } from '../../interfaces/auth.interfaces'
+import { DUMMY_HASH } from '../../auth.constants'
+import { issueTokens } from '../../auth.tokens'
 import { LoginCommand } from './login.command'
 
 @CommandHandler(LoginCommand)
@@ -30,6 +32,7 @@ export class LoginHandler extends BaseCommandHandler<LoginCommand, IAuthTokens> 
     const user = await this.authRepository.findByEmail(command.email, tx)
 
     if (!user) {
+      await bcrypt.compare(command.password, DUMMY_HASH)
       throw new InvalidCredentialsException()
     }
 
@@ -39,15 +42,6 @@ export class LoginHandler extends BaseCommandHandler<LoginCommand, IAuthTokens> 
       throw new InvalidCredentialsException()
     }
 
-    const payload: ITokenPayload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    }
-
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' })
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' })
-
-    return { accessToken, refreshToken }
+    return issueTokens(this.jwtService, this.authRepository, tx, user)
   }
 }

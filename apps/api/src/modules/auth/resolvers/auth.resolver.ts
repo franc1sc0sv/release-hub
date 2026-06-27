@@ -1,5 +1,6 @@
 import { Resolver, Mutation, Query, Args } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard'
 import { CurrentUser } from '../../../common/decorators/current-user.decorator'
@@ -10,12 +11,16 @@ import { LoginInput } from '../types/login.input'
 import { RefreshTokenInput } from '../types/refresh-token.input'
 import { RequestLoginCodeInput } from '../types/request-login-code.input'
 import { LoginWithCodeInput } from '../types/login-with-code.input'
+import { LogoutInput } from '../types/logout.input'
 import { LoginCommand } from '../commands/login/login.command'
 import { RefreshTokenCommand } from '../commands/refresh-token/refresh-token.command'
 import { RequestLoginCodeCommand } from '../commands/request-login-code/request-login-code.command'
 import { LoginWithCodeCommand } from '../commands/login-with-code/login-with-code.command'
+import { LogoutCommand } from '../commands/logout/logout.command'
 import { GetMeQuery } from '../queries/get-me/get-me.query'
 import type { IAuthTokens, IAuthUser } from '../interfaces/auth.interfaces'
+
+const AUTH_THROTTLE = { default: { ttl: 60_000, limit: 10 } }
 
 @Resolver()
 export class AuthResolver {
@@ -24,6 +29,7 @@ export class AuthResolver {
     private readonly queryBus: QueryBus,
   ) {}
 
+  @Throttle(AUTH_THROTTLE)
   @Mutation(() => AuthTokensType)
   async login(
     @Args('input', { type: () => LoginInput }) input: LoginInput,
@@ -42,6 +48,7 @@ export class AuthResolver {
     )
   }
 
+  @Throttle(AUTH_THROTTLE)
   @Mutation(() => Boolean)
   async requestLoginCode(
     @Args('input', { type: () => RequestLoginCodeInput }) input: RequestLoginCodeInput,
@@ -51,12 +58,22 @@ export class AuthResolver {
     )
   }
 
+  @Throttle(AUTH_THROTTLE)
   @Mutation(() => AuthTokensType)
   async loginWithCode(
     @Args('input', { type: () => LoginWithCodeInput }) input: LoginWithCodeInput,
   ): Promise<IAuthTokens> {
     return this.commandBus.execute<LoginWithCodeCommand, IAuthTokens>(
       new LoginWithCodeCommand(input.email, input.code),
+    )
+  }
+
+  @Mutation(() => Boolean)
+  async logout(
+    @Args('input', { type: () => LogoutInput }) input: LogoutInput,
+  ): Promise<boolean> {
+    return this.commandBus.execute<LogoutCommand, boolean>(
+      new LogoutCommand(input.refreshToken),
     )
   }
 
