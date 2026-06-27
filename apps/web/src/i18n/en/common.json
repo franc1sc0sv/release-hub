@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "dashboard": "Dashboard"
+  },
+  "auth": {
+    "login": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Sign in",
+    "logout": "Sign out",
+    "loginError": "Incorrect email or password",
+    "tabs": {
+      "password": "Password",
+      "code": "Email code"
+    },
+    "sendCode": "Send code",
+    "codeSent": "Code sent to {{email}}",
+    "codeHint": "Enter the 6-digit code we sent you.",
+    "verifyCode": "Verify code",
+    "codeInvalid": "Invalid or expired code.",
+    "codeExpired": "The code expired. Request a new one.",
+    "resendCode": "Resend code",
+    "resendCountdown": "Resend in {{seconds}}s",
+    "codeResent": "Code resent",
+    "changeEmail": "Change email",
+    "createAccount": "Create account",
+    "name": "Name",
+    "registerButton": "Sign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "noAccount": "Don't have an account?",
+    "registerError": "Could not create account"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "user": "User"
+  },
+  "common": {
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "platform": "Platform",
+    "schoolManagement": "Release Hub",
+    "tagline": "Release management platform",
+    "emailPlaceholder": "email@release-hub.dev",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "language": "Language",
+    "schoolName": "Release Hub"
+  }
+}

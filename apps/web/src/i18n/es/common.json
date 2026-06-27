@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "dashboard": "Panel"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "loginButton": "Entrar",
+    "logout": "Cerrar sesión",
+    "loginError": "Correo o contraseña incorrectos",
+    "tabs": {
+      "password": "Contraseña",
+      "code": "Código por correo"
+    },
+    "sendCode": "Enviar código",
+    "codeSent": "Código enviado a {{email}}",
+    "codeHint": "Ingresa el código de 6 dígitos que te enviamos.",
+    "verifyCode": "Verificar código",
+    "codeInvalid": "Código inválido o expirado.",
+    "codeExpired": "El código expiró. Solicita uno nuevo.",
+    "resendCode": "Reenviar código",
+    "resendCountdown": "Reenviar en {{seconds}}s",
+    "codeResent": "Código reenviado",
+    "changeEmail": "Cambiar correo",
+    "createAccount": "Crear cuenta",
+    "name": "Nombre",
+    "registerButton": "Registrarse",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "signIn": "Inicia sesión",
+    "noAccount": "¿No tienes cuenta?",
+    "registerError": "No se pudo crear la cuenta"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "user": "Usuario"
+  },
+  "common": {
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro",
+    "platform": "Plataforma",
+    "schoolManagement": "Release Hub",
+    "tagline": "Plataforma de gestión de releases",
+    "emailPlaceholder": "correo@release-hub.dev",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "language": "Idioma",
+    "schoolName": "Release Hub"
+  }
+}

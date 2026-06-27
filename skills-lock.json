@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "computedHash": "6462f04969f59f771150e6410e6a11fa397f2934be0b51e8650f495feed1e28d"
+    },
+    "agent-pr-creator": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "7c515aad57df7805161ac10558ad005e2d39020c747cb9a837e091df7aafdce0"
+    },
+    "core-coding-standards": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "8bcc809068695139fc1084bcc4d823b2f785c942dfe45fac49f9beb2d4048ab3"
+    },
+    "design-accessibility": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "a82218ad41ea4104b69e1dfd4176c87af19e85ee6e321c0d1f283adeb3880665"
+    },
+    "design-frontend": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "52bbd7adf49bef29fcf513827b74ef8367e2110bd7adabd9afd8312268992e37"
+    },
+    "lang-typescript": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "6420ba417bad34d6180f39209f776ae3219df055f3389fccb52363cf87a108f3"
+    },
+    "nestjs-best-practices": {
+      "source": "kadajett/agent-nestjs-skills",
+      "sourceType": "github",
+      "computedHash": "1b6f82e889d19d305e38e35594de08eca0242321f353cafa4cf5e61dd3aa1a73"
+    },
+    "nodejs-backend-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "c6a99966c2565acc388e574039127abc770bb9a3338be761e421e16f023f702b"
+    },
+    "nodejs-best-practices": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "64f10ff6795265dc4a97a72af86ee309fe57e6c35507775a4da893985984956b"
+    },
+    "platform-backend": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "da025ee9643c3db6bc383bc9b2208391f910f6f3107d46eda0a74a0d68f2ce66"
+    },
+    "platform-database": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "bfff58f7e2b39622e94edb75d0e0a2986326ae8ca4bed826366fe513ef332242"
+    },
+    "platform-frontend": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "96636854fb67626d7417296f9bd26f49dc52f1eb1c891e6d71cea26852c841cc"
+    },
+    "platform-testing": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "ee151704144633effb50132739671f6cb07665aa430d1c2dedd3766a682cbc6c"
+    },
+    "prisma-cli": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "500f80cfb0bebbaf7ef60645b43eb126e6489d6a1a2a592983c37a3ef8a789b5"
+    },
+    "prisma-client-api": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "ea94a5efcd3240e45c389bcdadd4613643245d226ffe1318c396e3b3edeb72ee"
+    },
+    "prisma-database-setup": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "b05e88d284c4a754d3624697c2f749e21f7da3fc1f4319b6658df318e84b0dd9"
+    },
+    "prisma-driver-adapter-implementation": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "866755316f6d86e743dd4ea08411fd3a9be52d34e9cf58db174d97eca56f4e8e"
+    },
+    "prisma-postgres": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "7cf11f4b74c616f1e154c6f00735411b4edbe46e9e968d7c420177b8fa5b1518"
+    },
+    "promptify": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "0db37e14e2c1f96b522d335663e07be32a9e55c92e3f6ec6b9c8d48494b8015a"
+    },
+    "react-router-data-mode": {
+      "source": "remix-run/agent-skills",
+      "sourceType": "github",
+      "computedHash": "76e3e0f70ff47b743bd90999e676515221e25fd7ee89cd9e5b340417b1a601e2"
+    },
+    "seo": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "computedHash": "f1fed683b76913d26fbf1aa1e008e6932f7771701fc3a79925b042236aa4681a"
+    },
+    "tailwind-css-patterns": {
+      "source": "giuseppe-trisciuoglio/developer-kit",
+      "sourceType": "github",
+      "computedHash": "6092620c3af955a46ea2b94ca8a40197ac8392e6bbdc8c7515659328b186c770"
+    },
+    "tech-react": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "03c6b5a647b8ed1bdd395ad0568f9a7690ca469ed44dac698eefe7ea25e9d8bf"
+    },
+    "tech-vitest": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "8594fd9a88d0674ae523a39760ff6d03ad55515e3ba4389ad3f4a8662136e755"
+    },
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "computedHash": "5aab0dfbc0d3fc4f31e6b9088fc34e2e2b176b30e6b8dc606a4235ba487ca89c"
+    },
+    "type-system-audit": {
+      "source": "ravnhq/ai-toolkit",
+      "sourceType": "github",
+      "computedHash": "84203a437e580b33bbb7083641fea64990040bc03c9d9d190bd50c632b8640c3"
+    },
+    "typescript-advanced-types": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "3a3be8c925f96ac4e1280db28a01677e7ca5197f3792de2bbf35ab3bb324b6dd"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "f98931159fa9c7fed043bcd18a891a46dcf89ababa38df13a4c5b7b30dc0ce07"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "1be892a3ea68b74654326ef836a58dd528d99ae0ab8d879764e2519c39068e67"
+    },
+    "vite": {
+      "source": "antfu/skills",
+      "sourceType": "github",
+      "computedHash": "867ff66238f3152e9c494339ad08dc432dd0df5bcf5cc7a00b61a72b580eb908"
+    }
+  }
+}
