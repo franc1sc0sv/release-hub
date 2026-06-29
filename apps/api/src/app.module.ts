@@ -27,7 +27,7 @@ import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
     LoggingModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), 'schema.gql'),
       sortSchema: true,
       subscriptions: {
         'graphql-ws': true,
