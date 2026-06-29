@@ -1,0 +1,37 @@
+{
+  "title": "Collaboration",
+  "subtitle": "Members and access",
+  "invite": {
+    "label": "Invite member",
+    "email": "Email address",
+    "role": "Role",
+    "send": "Send invite",
+    "sending": "Sending...",
+    "sent": "Invitation sent",
+    "error": "Could not send invitation"
+  },
+  "members": {
+    "empty": "No members yet",
+    "remove": "Remove member",
+    "changeRole": "Change role",
+    "confirmRemove": "Remove {{name}} from this project?",
+    "confirmRemoveDescription": "This will revoke their access immediately. They can be re-invited later.",
+    "cancel": "Cancel",
+    "joinedDate": "Joined {{date}}"
+  },
+  "invitations": {
+    "pending": "Pending invitations",
+    "revoke": "Revoke"
+  },
+  "acceptInvite": {
+    "title": "You have been invited",
+    "description": "Accept the invitation to join this project.",
+    "loginPrompt": "Sign in to accept the invitation.",
+    "accept": "Sign in to accept",
+    "accepting": "Joining project...",
+    "accepted": "You have joined the project.",
+    "error": "This invitation is invalid or has expired.",
+    "mismatch": "This invitation was sent to a different email address. Sign in with the correct account to accept it.",
+    "signInDifferent": "Sign in with a different account"
+  }
+}

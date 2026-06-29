@@ -1,6 +1,5 @@
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Rocket } from 'lucide-react'
 import { MainNav } from './MainNav'
 import { UserMenu } from './UserMenu'
 import {
@@ -13,7 +12,6 @@ import {
   SidebarTrigger,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
 } from '@/components/ui/sidebar'
 import {
   Breadcrumb,
@@ -24,17 +22,22 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { BreadcrumbProvider, useBreadcrumb } from '@/context/breadcrumb.context'
+import { ProjectSwitcher } from '@/features/workspace/components/ProjectSwitcher'
 
 const ROUTE_KEYS: Record<string, string> = {
-  dashboard: 'nav.dashboard',
+  workspace: 'nav.workspace',
+  releases: 'nav.releases',
+  features: 'nav.features',
+  flags: 'nav.flags',
+  settings: 'nav.settings',
 }
 
 function AppShellInner() {
   const { t } = useTranslation('common')
   const location = useLocation()
   const { items } = useBreadcrumb()
-  const segment = location.pathname.split('/').filter(Boolean)[0] ?? 'dashboard'
-  const pageTitle = t(ROUTE_KEYS[segment] ?? 'nav.dashboard')
+  const segment = location.pathname.split('/').filter(Boolean)[0] ?? 'workspace'
+  const pageTitle = t(ROUTE_KEYS[segment] ?? 'nav.workspace')
 
   return (
     <SidebarProvider>
@@ -42,17 +45,7 @@ function AppShellInner() {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Rocket className="size-5" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Release Hub</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {t('common.schoolManagement')}
-                  </span>
-                </div>
-              </SidebarMenuButton>
+              <ProjectSwitcher />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
@@ -72,7 +65,7 @@ function AppShellInner() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                Release Hub
+                {t('common.appName')}
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               {items.length > 0 ? (

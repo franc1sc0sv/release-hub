@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { LayoutDashboard, type LucideIcon } from 'lucide-react'
+import { FolderOpen, Rocket, LayoutList, Flag, Settings, type LucideIcon } from 'lucide-react'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -8,6 +8,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
+import { ROUTES } from '@/lib/routes'
 
 interface NavItem {
   to: string
@@ -16,7 +17,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { to: ROUTES.WORKSPACE, labelKey: 'nav.workspace', icon: FolderOpen },
+  { to: ROUTES.RELEASES, labelKey: 'nav.releases', icon: Rocket },
+  { to: ROUTES.FEATURES, labelKey: 'nav.features', icon: LayoutList },
+  { to: ROUTES.FLAGS, labelKey: 'nav.flags', icon: Flag },
+  { to: ROUTES.SETTINGS, labelKey: 'nav.settings', icon: Settings },
 ]
 
 export function MainNav() {

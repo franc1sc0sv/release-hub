@@ -1,0 +1,62 @@
+{
+  "title": "Flags",
+  "subtitle": "Entornos de feature flags",
+  "empty": {
+    "heading": "Sin flags detectados",
+    "description": "Conecta Flagsmith para ver el estado de los feature flags en cada entorno."
+  },
+  "loading": "Cargando flags...",
+  "error": {
+    "heading": "No se pudieron cargar los flags",
+    "description": "Flagsmith devolvió un error. Revisa tu token y URL en Configuración.",
+    "retry": "Reintentar"
+  },
+  "notConnected": {
+    "heading": "Flagsmith no conectado",
+    "description": "Configura tu URL y token de Flagsmith en Configuración para ver el estado de los flags.",
+    "cta": "Ir a Configuración"
+  },
+  "matrix": {
+    "flag": "Flag",
+    "created": "Creado",
+    "count_one": "{{count}} flag",
+    "count_other": "{{count}} flags"
+  },
+  "search": {
+    "placeholder": "Buscar flags..."
+  },
+  "columns": {
+    "label": "Entornos",
+    "button": "Columnas"
+  },
+  "state": {
+    "on": "Activo",
+    "off": "Inactivo"
+  },
+  "stale": {
+    "badge": "Antiguo",
+    "tooltip": "Este flag fue creado hace más de 60 días"
+  },
+  "compare": {
+    "button": "Comparar",
+    "title": "Comparar entornos",
+    "baselineLabel": "Fuente de verdad (producción)",
+    "comparedAgainst": "Comparado contra {{envs}}",
+    "selectBaseline": "Selecciona al menos un entorno de producción.",
+    "selectCompared": "Selecciona al menos otro entorno para comparar.",
+    "count_one": "{{count}} flag con diferencias",
+    "count_other": "{{count}} flags con diferencias",
+    "inSync": "Todos los entornos seleccionados están sincronizados con producción",
+    "loading": "Comparando entornos...",
+    "reRun": "Reejecutar",
+    "group": {
+      "onInProd": "Activo en producción, inactivo en otros entornos",
+      "offInProd": "Inactivo en producción, activo en otros entornos"
+    }
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "pageOf": "Página {{page}} de {{total}}"
+  }
+}

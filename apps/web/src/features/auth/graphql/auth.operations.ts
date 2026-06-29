@@ -24,7 +24,6 @@ export const ME_QUERY = graphql(`
       id
       email
       name
-      role
       avatarUrl
     }
   }
@@ -39,6 +38,15 @@ export const REQUEST_LOGIN_CODE_MUTATION = graphql(`
 export const LOGIN_WITH_CODE_MUTATION = graphql(`
   mutation LoginWithCode($input: LoginWithCodeInput!) {
     loginWithCode(input: $input) {
+      accessToken
+      refreshToken
+    }
+  }
+`)
+
+export const REGISTER_MUTATION = graphql(`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
       accessToken
       refreshToken
     }

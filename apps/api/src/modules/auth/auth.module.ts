@@ -6,6 +6,7 @@ import { IAuthRepository } from './repositories/auth.repository.abstract'
 import { AuthRepository } from './repositories/auth.repository'
 import { AuthResolver } from './resolvers/auth.resolver'
 import { LoginHandler } from './commands/login/login.handler'
+import { RegisterHandler } from './commands/register/register.handler'
 import { RefreshTokenHandler } from './commands/refresh-token/refresh-token.handler'
 import { RequestLoginCodeHandler } from './commands/request-login-code/request-login-code.handler'
 import { LoginWithCodeHandler } from './commands/login-with-code/login-with-code.handler'
@@ -26,6 +27,7 @@ import { JwtStrategy } from './strategies/jwt.strategy'
     AuthResolver,
     { provide: IAuthRepository, useClass: AuthRepository },
     LoginHandler,
+    RegisterHandler,
     RefreshTokenHandler,
     RequestLoginCodeHandler,
     LoginWithCodeHandler,
@@ -34,5 +36,6 @@ import { JwtStrategy } from './strategies/jwt.strategy'
     SendLoginCodeHandler,
     JwtStrategy,
   ],
+  exports: [IAuthRepository],
 })
 export class AuthModule {}

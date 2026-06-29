@@ -1,5 +1,3 @@
-import type { UserRole } from '@release-hub/shared'
-
 export interface ILoginData {
   email: string
   password: string
@@ -20,7 +18,6 @@ export type TokenType = (typeof TokenType)[keyof typeof TokenType]
 export interface ITokenPayload {
   sub: string
   email: string
-  role: UserRole
   type: TokenType
   jti?: string
 }
@@ -28,7 +25,6 @@ export interface ITokenPayload {
 export interface IAuthUser {
   id: string
   email: string
-  role: UserRole
   name: string
   avatarUrl: string | null
 }
@@ -48,4 +44,10 @@ export interface ICreateRefreshTokenData {
   id: string
   userId: string
   expiresAt: Date
+}
+
+export interface ICreateUserData {
+  email: string
+  password: string
+  name: string
 }

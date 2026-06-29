@@ -1,5 +1,5 @@
 import type { IBaseRepository, RepositoryMethod } from '../../../common/cqrs'
-import type { IAuthUser, IAuthUserWithPassword } from '../interfaces/auth.interfaces'
+import type { IAuthUser, IAuthUserWithPassword, ICreateUserData } from '../interfaces/auth.interfaces'
 import type {
   ICreateRefreshTokenData,
   IRefreshTokenRecord,
@@ -8,6 +8,7 @@ import type { ICreateLoginCodeData, ILoginCode } from '../interfaces/login-code.
 
 export abstract class IAuthRepository implements IBaseRepository<IAuthUser> {
   abstract findByEmail: RepositoryMethod<[email: string], IAuthUserWithPassword | null>
+  abstract createUser: RepositoryMethod<[data: ICreateUserData], IAuthUserWithPassword>
   abstract findById: RepositoryMethod<[id: string], IAuthUser | null>
   abstract createLoginCode: RepositoryMethod<[data: ICreateLoginCodeData], ILoginCode>
   abstract findActiveLoginCode: RepositoryMethod<[userId: string], ILoginCode | null>

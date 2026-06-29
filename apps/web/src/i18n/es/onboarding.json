@@ -1,0 +1,25 @@
+{
+  "connectGithub": {
+    "title": "Conectar GitHub",
+    "description": "Release Hub necesita acceso a tu cuenta de GitHub para detectar pull requests fusionados y construir releases. Esta conexión es obligatoria para continuar.",
+    "button": "Conectar GitHub",
+    "note": "Serás redirigido a GitHub para autorizar la aplicación."
+  },
+  "selectRepo": {
+    "title": "Selecciona un repositorio",
+    "description": "Elige el repositorio de GitHub que deseas rastrear para releases.",
+    "searchPlaceholder": "Buscar repositorios…",
+    "noResults": "No se encontraron repositorios.",
+    "privateBadge": "Privado",
+    "projectNameLabel": "Nombre del proyecto",
+    "projectNamePlaceholder": "Ingresa un nombre de proyecto",
+    "createButton": "Crear proyecto",
+    "creating": "Creando…",
+    "loadingRepos": "Cargando repositorios…",
+    "createError": "No se pudo crear el proyecto. Por favor intenta de nuevo.",
+    "connectionError": "No pudimos cargar tus repositorios — tu autorización de GitHub ya no es válida. Vuelve a conectar para continuar.",
+    "reconnectButton": "Reconectar GitHub",
+    "reconnecting": "Redirigiendo a GitHub…"
+  },
+  "loading": "Configurando tu espacio de trabajo…"
+}

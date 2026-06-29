@@ -4,6 +4,7 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "turbo dev",
+    "dev:log": "mkdir -p logs && FORCE_COLOR=0 turbo dev 2>&1 | tee logs/dev.log",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",

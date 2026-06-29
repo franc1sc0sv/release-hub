@@ -1,0 +1,37 @@
+{
+  "title": "Colaboración",
+  "subtitle": "Miembros y acceso",
+  "invite": {
+    "label": "Invitar miembro",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "send": "Enviar invitación",
+    "sending": "Enviando...",
+    "sent": "Invitación enviada",
+    "error": "No se pudo enviar la invitación"
+  },
+  "members": {
+    "empty": "Aún no hay miembros",
+    "remove": "Eliminar miembro",
+    "changeRole": "Cambiar rol",
+    "confirmRemove": "¿Eliminar a {{name}} de este proyecto?",
+    "confirmRemoveDescription": "Esto revocará su acceso de inmediato. Se les puede volver a invitar más tarde.",
+    "cancel": "Cancelar",
+    "joinedDate": "Se unió el {{date}}"
+  },
+  "invitations": {
+    "pending": "Invitaciones pendientes",
+    "revoke": "Revocar"
+  },
+  "acceptInvite": {
+    "title": "Has sido invitado",
+    "description": "Acepta la invitación para unirte a este proyecto.",
+    "loginPrompt": "Inicia sesión para aceptar la invitación.",
+    "accept": "Iniciar sesión para aceptar",
+    "accepting": "Uniéndose al proyecto...",
+    "accepted": "Te has unido al proyecto.",
+    "error": "Esta invitación no es válida o ha expirado.",
+    "mismatch": "Esta invitación fue enviada a un correo electrónico diferente. Inicia sesión con la cuenta correcta para aceptarla.",
+    "signInDifferent": "Iniciar sesión con otra cuenta"
+  }
+}

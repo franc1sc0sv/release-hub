@@ -1,0 +1,30 @@
+{
+  "title": "Workspace",
+  "subtitle": "Your projects",
+  "newProject": "New project",
+  "createProject": {
+    "overline": "Projects",
+    "title": "New project",
+    "back": "Back"
+  },
+  "projectSwitcher": {
+    "label": "Switch project",
+    "noProjects": "No projects yet",
+    "createProject": "New project",
+    "active": "Active project"
+  },
+  "empty": {
+    "heading": "No projects yet",
+    "description": "Connect a repository to start tracking releases.",
+    "cta": "Connect repository"
+  },
+  "loading": "Loading workspace...",
+  "connectionHealth": {
+    "title": "Connection health",
+    "github": "GitHub",
+    "linear": "Linear",
+    "flagsmith": "Flagsmith",
+    "connected": "Connected",
+    "notConfigured": "Not configured"
+  }
+}

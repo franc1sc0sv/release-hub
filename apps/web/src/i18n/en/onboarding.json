@@ -1,0 +1,25 @@
+{
+  "connectGithub": {
+    "title": "Connect GitHub",
+    "description": "Release Hub needs access to your GitHub account to detect merged pull requests and build releases. This connection is required to continue.",
+    "button": "Connect GitHub",
+    "note": "You will be redirected to GitHub to authorize the app."
+  },
+  "selectRepo": {
+    "title": "Select a repository",
+    "description": "Choose the GitHub repository you want to track releases for.",
+    "searchPlaceholder": "Search repositories…",
+    "noResults": "No repositories found.",
+    "privateBadge": "Private",
+    "projectNameLabel": "Project name",
+    "projectNamePlaceholder": "Enter a project name",
+    "createButton": "Create project",
+    "creating": "Creating…",
+    "loadingRepos": "Loading repositories…",
+    "createError": "Could not create project. Please try again.",
+    "connectionError": "We couldn't load your repositories — your GitHub authorization is no longer valid. Reconnect to continue.",
+    "reconnectButton": "Reconnect GitHub",
+    "reconnecting": "Redirecting to GitHub…"
+  },
+  "loading": "Setting up your workspace…"
+}

@@ -5,6 +5,7 @@ import type {
   IAuthUser,
   IAuthUserWithPassword,
   ICreateRefreshTokenData,
+  ICreateUserData,
   IRefreshTokenRecord,
 } from '../interfaces/auth.interfaces'
 import type { ICreateLoginCodeData, ILoginCode } from '../interfaces/login-code.interfaces'
@@ -17,7 +18,6 @@ export class AuthRepository extends IAuthRepository {
       select: {
         id: true,
         email: true,
-        role: true,
         name: true,
         avatarUrl: true,
         password: true,
@@ -31,9 +31,21 @@ export class AuthRepository extends IAuthRepository {
       select: {
         id: true,
         email: true,
-        role: true,
         name: true,
         avatarUrl: true,
+      },
+    })
+  }
+
+  createUser = async (data: ICreateUserData, tx: TxClient): Promise<IAuthUserWithPassword> => {
+    return tx.user.create({
+      data,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        password: true,
       },
     })
   }

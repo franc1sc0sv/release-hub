@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { defineAbilityFor } from '@release-hub/shared'
+import { defineGateAbility } from '@release-hub/shared'
 import {
   CHECK_POLICIES_KEY,
   PolicyHandlerFn,
@@ -27,7 +27,7 @@ export class PoliciesGuard implements CanActivate {
 
     if (!user) throw new UnauthenticatedException()
 
-    const ability = defineAbilityFor(user.role)
+    const ability = defineGateAbility()
     if (!policyHandlers.every((handler) => handler(ability))) {
       throw new ForbiddenException()
     }

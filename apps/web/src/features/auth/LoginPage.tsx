@@ -1,23 +1,20 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useMutation, useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import {
-  GraduationCap,
   Mail,
   Lock,
   Eye,
   EyeOff,
   AlertCircle,
   Loader2,
-  Sun,
-  Moon,
   ArrowLeft,
 } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
 import { Button } from '@/components/ui/button'
-import { useTheme, Theme } from '@/hooks/use-theme'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Input } from '@/components/ui/input'
 import {
   Card,
@@ -54,6 +51,11 @@ const RESEND_COOLDOWN_MS = 60_000
 
 type OtpStep = 'email' | 'code'
 
+function isSafeRedirect(path: string | null): path is string {
+  if (!path) return false
+  return path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/\\')
+}
+
 function cooldownStorageKey(email: string): string {
   return `otp-cooldown:${email}`
 }
@@ -72,6 +74,7 @@ function writeCooldownEnd(email: string, endsAt: number): void {
 export function LoginPage() {
   const { t } = useTranslation('common')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { setUser } = useAuth()
   const client = useApolloClient()
 
@@ -79,7 +82,6 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
-  const { theme, toggleTheme } = useTheme()
 
   const [otpStep, setOtpStep] = useState<OtpStep>('email')
   const [otpEmail, setOtpEmail] = useState('')
@@ -122,7 +124,9 @@ export function LoginPage() {
         fetchPolicy: 'network-only',
       })
       if (meResult.data) setUser(meResult.data.me)
-      navigate(ROUTES.DASHBOARD)
+      const rawReturnTo = searchParams.get('returnTo')
+      const safeReturnTo = isSafeRedirect(rawReturnTo) ? rawReturnTo : ROUTES.WORKSPACE
+      navigate(safeReturnTo)
     } catch {
       setPasswordError(true)
     }
@@ -211,17 +215,7 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
-      <div className="absolute right-4 top-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          aria-label={theme === Theme.Dark ? t('common.lightMode') : t('common.darkMode')}
-        >
-          <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        </Button>
-      </div>
+      <ThemeToggle />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -232,9 +226,6 @@ export function LoginPage() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader className="text-center">
-              <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <GraduationCap className="size-5" />
-              </div>
               <CardTitle className="text-xl font-display">
                 {t('auth.login')}
               </CardTitle>
@@ -479,6 +470,16 @@ export function LoginPage() {
               </Tabs>
             </CardContent>
           </Card>
+
+          <p className="text-center text-sm text-muted-foreground">
+            {t('auth.noAccount')}{' '}
+            <Link
+              to={ROUTES.REGISTER}
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              {t('auth.registerButton')}
+            </Link>
+          </p>
 
           <p className="text-balance text-center text-xs text-muted-foreground">
             Release Hub &middot; {t('common.tagline')}

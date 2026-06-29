@@ -1,0 +1,30 @@
+{
+  "title": "Espacio de trabajo",
+  "subtitle": "Tus proyectos",
+  "newProject": "Nuevo proyecto",
+  "createProject": {
+    "overline": "Proyectos",
+    "title": "Nuevo proyecto",
+    "back": "Volver"
+  },
+  "projectSwitcher": {
+    "label": "Cambiar proyecto",
+    "noProjects": "Sin proyectos",
+    "createProject": "Nuevo proyecto",
+    "active": "Proyecto activo"
+  },
+  "empty": {
+    "heading": "Sin proyectos",
+    "description": "Conecta un repositorio para empezar a gestionar releases.",
+    "cta": "Conectar repositorio"
+  },
+  "loading": "Cargando espacio de trabajo...",
+  "connectionHealth": {
+    "title": "Estado de conexiones",
+    "github": "GitHub",
+    "linear": "Linear",
+    "flagsmith": "Flagsmith",
+    "connected": "Conectado",
+    "notConfigured": "No configurado"
+  }
+}

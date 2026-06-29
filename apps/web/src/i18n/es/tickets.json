@@ -1,0 +1,18 @@
+{
+  "title": "Tickets",
+  "subtitle": "Trazabilidad de incidencias",
+  "confidence": {
+    "high": "Alta confianza",
+    "medium": "Confianza media",
+    "low": "Baja confianza"
+  },
+  "actions": {
+    "confirm": "Confirmar enlace",
+    "dismiss": "Descartar"
+  },
+  "empty": {
+    "heading": "Sin tickets vinculados",
+    "description": "Conecta Linear para detectar automáticamente referencias a incidencias en PRs."
+  },
+  "loading": "Cargando tickets..."
+}

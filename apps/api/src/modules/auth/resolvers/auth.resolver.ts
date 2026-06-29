@@ -8,11 +8,13 @@ import type { IJwtUser } from '../../../common/types'
 import { AuthTokensType } from '../types/auth-tokens.type'
 import { UserProfileType } from '../types/user-profile.type'
 import { LoginInput } from '../types/login.input'
+import { RegisterInput } from '../types/register.input'
 import { RefreshTokenInput } from '../types/refresh-token.input'
 import { RequestLoginCodeInput } from '../types/request-login-code.input'
 import { LoginWithCodeInput } from '../types/login-with-code.input'
 import { LogoutInput } from '../types/logout.input'
 import { LoginCommand } from '../commands/login/login.command'
+import { RegisterCommand } from '../commands/register/register.command'
 import { RefreshTokenCommand } from '../commands/refresh-token/refresh-token.command'
 import { RequestLoginCodeCommand } from '../commands/request-login-code/request-login-code.command'
 import { LoginWithCodeCommand } from '../commands/login-with-code/login-with-code.command'
@@ -28,6 +30,16 @@ export class AuthResolver {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
+
+  @Throttle(AUTH_THROTTLE)
+  @Mutation(() => AuthTokensType)
+  async register(
+    @Args('input', { type: () => RegisterInput }) input: RegisterInput,
+  ): Promise<IAuthTokens> {
+    return this.commandBus.execute<RegisterCommand, IAuthTokens>(
+      new RegisterCommand(input.email, input.password, input.name),
+    )
+  }
 
   @Throttle(AUTH_THROTTLE)
   @Mutation(() => AuthTokensType)
@@ -81,7 +93,7 @@ export class AuthResolver {
   @UseGuards(JwtAuthGuard)
   async me(@CurrentUser() user: IJwtUser): Promise<IAuthUser> {
     return this.queryBus.execute<GetMeQuery, IAuthUser>(
-      new GetMeQuery(user.id, user.role),
+      new GetMeQuery(user.id),
     )
   }
 }

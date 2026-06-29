@@ -1,6 +1,10 @@
 {
   "nav": {
-    "dashboard": "Panel"
+    "workspace": "Espacio de trabajo",
+    "releases": "Releases",
+    "features": "Funcionalidades",
+    "flags": "Flags",
+    "settings": "Configuración"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -29,13 +33,11 @@
     "alreadyHaveAccount": "¿Ya tienes cuenta?",
     "signIn": "Inicia sesión",
     "noAccount": "¿No tienes cuenta?",
-    "registerError": "No se pudo crear la cuenta"
-  },
-  "roles": {
-    "admin": "Administrador",
-    "user": "Usuario"
+    "registerError": "No se pudo crear la cuenta",
+    "emailAlreadyExists": "Ya existe una cuenta con este correo electrónico"
   },
   "common": {
+    "appName": "Release Hub",
     "darkMode": "Modo oscuro",
     "lightMode": "Modo claro",
     "platform": "Plataforma",
@@ -45,6 +47,17 @@
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
     "language": "Idioma",
-    "schoolName": "Release Hub"
+    "schoolName": "Release Hub",
+    "toggleSidebar": "Alternar barra lateral",
+    "connectionError": "No se pudo conectar al servidor",
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "more": "Más",
+    "selectDate": "Seleccionar fecha",
+    "previousSlide": "Diapositiva anterior",
+    "nextSlide": "Diapositiva siguiente",
+    "sidebar": "Barra lateral",
+    "sidebarDescription": "Muestra la barra lateral móvil.",
+    "breadcrumb": "ruta de navegación"
   }
 }

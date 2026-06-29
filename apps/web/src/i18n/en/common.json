@@ -1,6 +1,10 @@
 {
   "nav": {
-    "dashboard": "Dashboard"
+    "workspace": "Workspace",
+    "releases": "Releases",
+    "features": "Features",
+    "flags": "Flags",
+    "settings": "Settings"
   },
   "auth": {
     "login": "Sign in",
@@ -29,13 +33,11 @@
     "alreadyHaveAccount": "Already have an account?",
     "signIn": "Sign in",
     "noAccount": "Don't have an account?",
-    "registerError": "Could not create account"
-  },
-  "roles": {
-    "admin": "Administrator",
-    "user": "User"
+    "registerError": "Could not create account",
+    "emailAlreadyExists": "An account with this email already exists"
   },
   "common": {
+    "appName": "Release Hub",
     "darkMode": "Dark mode",
     "lightMode": "Light mode",
     "platform": "Platform",
@@ -45,6 +47,17 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "language": "Language",
-    "schoolName": "Release Hub"
+    "schoolName": "Release Hub",
+    "toggleSidebar": "Toggle sidebar",
+    "connectionError": "Could not connect to the server",
+    "retry": "Retry",
+    "close": "Close",
+    "more": "More",
+    "selectDate": "Select date",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "sidebar": "Sidebar",
+    "sidebarDescription": "Displays the mobile sidebar.",
+    "breadcrumb": "breadcrumb"
   }
 }

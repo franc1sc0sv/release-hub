@@ -1,0 +1,115 @@
+{
+  "title": "Features",
+  "subtitle": "The permanent ledger",
+  "new": "New feature",
+  "count_one": "{{count}} feature",
+  "count_other": "{{count}} features",
+  "state": {
+    "label": "Feature state",
+    "none": "No release yet"
+  },
+  "fields": {
+    "name": "Name",
+    "description": "Description",
+    "category": "Category",
+    "tags": "Tags"
+  },
+  "tags": {
+    "add": "Add tag",
+    "placeholder": "New tag",
+    "removeAria": "Remove tag {{tag}}"
+  },
+  "clientAvailability": {
+    "in_development": "In development, planned for an upcoming release",
+    "built_not_on": "Built and ready; not yet switched on",
+    "in_final_testing": "In final testing; rolling out shortly",
+    "available_now": "Available now",
+    "first_part_available": "First part available now; the rest is coming",
+    "delayed": "Delayed",
+    "internal_only": "Internal only",
+    "internal_only_badge": "Internal only"
+  },
+  "empty": {
+    "heading": "No features yet",
+    "description": "Features are the permanent ledger — every PR is traceable to one.",
+    "cta": "Create feature"
+  },
+  "loading": "Loading features...",
+  "error": {
+    "heading": "Failed to load features",
+    "description": "Something went wrong while loading the feature ledger."
+  },
+  "back": "Back to features",
+  "tree": {
+    "releaseHeading": "{{name}}",
+    "prCount_one": "{{count}} pull request",
+    "prCount_other": "{{count}} pull requests",
+    "commits": "Commits",
+    "baseRef": "Base",
+    "compareRef": "Compare"
+  },
+  "detail": {
+    "noReleases": "This feature has not appeared in any release yet.",
+    "notFound": "Feature not found",
+    "notFoundDescription": "This feature does not exist or has been deleted.",
+    "releasesHeading": "Releases",
+    "stateLabel": "State",
+    "kindLabel": "Kind",
+    "tagsLabel": "Tags",
+    "noDescription": "No description provided."
+  },
+  "builder": {
+    "refPickerTitle": "Detect pull requests",
+    "detecting": "Detecting pull requests...",
+    "githubNotConnected": {
+      "heading": "GitHub not connected",
+      "description": "Connect a GitHub repository to detect pull requests for this project.",
+      "cta": "Go to settings"
+    },
+    "error": {
+      "heading": "Detection failed",
+      "description": "We could not detect pull requests between those refs."
+    }
+  },
+  "board": {
+    "unassigned": "Unassigned",
+    "unassignedDescription": "Drag a PR onto a feature lane to assign it",
+    "defaultLanesLabel": "System features",
+    "productLanesLabel": "Product features",
+    "prCount_one": "{{count}} PR",
+    "prCount_other": "{{count}} PRs",
+    "dropHere": "Drop here to assign"
+  },
+  "prCard": {
+    "assignTo": "Assign to feature",
+    "assignedTo": "Assigned to {{name}}",
+    "unassigned": "Unassigned",
+    "moveFrom": "Move from {{from}} to {{to}}",
+    "suggestAriaLabel": "AI suggest feature for PR #{{number}}",
+    "suggestApplied": "Suggested: {{name}} ({{confidence}}% confidence)",
+    "suggestError": "Could not get a suggestion"
+  },
+  "suggested": "Suggested",
+  "dialog": {
+    "title": "Create feature",
+    "description": "Add a new product feature to the ledger. Every PR must trace to one.",
+    "namePlaceholder": "e.g. User onboarding flow",
+    "descriptionPlaceholder": "Describe what this feature does — this feeds AI PR matching",
+    "tagPickerPlaceholder": "Pick tags...",
+    "tagPickerAria": "Open tag picker",
+    "tagSearch": "Search tags",
+    "noTags": "No tags found",
+    "submit": "Create feature",
+    "submitting": "Creating..."
+  },
+  "toast": {
+    "assigned": "PR #{{number}} assigned to {{feature}}",
+    "assignError": "Could not assign PR — reverted",
+    "created": "Feature \"{{name}}\" created",
+    "createError": "Could not create feature",
+    "stateChanged": "Feature state updated",
+    "stateError": "Could not update state — reverted",
+    "tagsChanged": "Tags updated",
+    "tagsError": "Could not update tags — reverted"
+  }
+}

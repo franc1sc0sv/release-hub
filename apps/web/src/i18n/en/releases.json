@@ -1,0 +1,276 @@
+{
+  "title": "Releases",
+  "subtitle": "Track and ship versions",
+  "new": "New release",
+  "status": {
+    "draft": "Draft",
+    "pr_created": "PR created",
+    "merged": "Merged",
+    "deployed": "Deployed"
+  },
+  "type": {
+    "feature": "Feature release",
+    "hotfix": "Hotfix"
+  },
+  "fields": {
+    "name": "Release name",
+    "namePlaceholder": "e.g. v1.8.0",
+    "baseRef": "Base branch",
+    "baseRefPlaceholder": "e.g. main",
+    "compareRef": "Compare branch",
+    "compareRefPlaceholder": "e.g. develop",
+    "type": "Type"
+  },
+  "empty": {
+    "heading": "No releases yet",
+    "description": "Create your first release by selecting two branches.",
+    "cta": "Create release"
+  },
+  "loading": "Loading releases...",
+  "wizard": {
+    "subtitle": "Pick branches, review the diff, then create your release.",
+    "next": "Continue",
+    "back": "Back",
+    "createLabel": "Create release",
+    "creating": "Creating...",
+    "createError": "Failed to create the release. Please try again.",
+    "stepper": {
+      "label": "Release creation steps"
+    },
+    "steps": {
+      "branches": "Branches & tags",
+      "diff": "Commit diff",
+      "create": "Create"
+    },
+    "branches": {
+      "loading": "Loading branches…",
+      "base": "Base branch",
+      "basePlaceholder": "Select base branch",
+      "compare": "Compare branch",
+      "comparePlaceholder": "Select compare branch",
+      "searchPlaceholder": "Search branches…",
+      "noResults": "No branches found"
+    },
+    "createBranch": {
+      "triggerLabel": "Create new branch",
+      "title": "Create branch",
+      "description": "Create a new GitHub branch from an existing ref.",
+      "fromRef": "From branch",
+      "fromRefPlaceholder": "Select source branch",
+      "name": "New branch name",
+      "namePlaceholder": "e.g. feature/my-branch",
+      "nameRequired": "Branch name is required",
+      "fromRefRequired": "Source branch is required",
+      "create": "Create branch",
+      "creating": "Creating…",
+      "error": "Failed to create branch. Please try again."
+    },
+    "diff": {
+      "title": "Commit diff",
+      "comparing": "Comparing refs…",
+      "errorHeading": "Comparison failed",
+      "errorDescription": "Something went wrong comparing these branches. Please go back and try again.",
+      "aheadBy": "Ahead by",
+      "behindBy": "Behind by",
+      "total": "Total commits",
+      "gateMessage": "There are no commits ahead of the base branch. Select a different compare branch with at least one new commit.",
+      "commitListLabel": "Commits in this release"
+    },
+    "create": {
+      "refsLabel": "Branch range",
+      "tags": "Tags",
+      "tagPlaceholder": "Add a tag and press Enter",
+      "addTag": "Add tag",
+      "removeTag": "Remove tag {{tag}}",
+      "tagsLabel": "Selected tags"
+    }
+  },
+  "builder": {
+    "title": "New release",
+    "subtitle": "Compare branches to detect merged pull requests",
+    "refPickerTitle": "Ref picker",
+    "detect": "Detect merged PRs",
+    "save": "Save as draft",
+    "saving": "Saving...",
+    "saveError": "Failed to save the release",
+    "detecting": "Detecting...",
+    "githubNotConnected": {
+      "heading": "GitHub not connected",
+      "description": "Connect your GitHub account in Settings to detect pull requests.",
+      "cta": "Go to settings"
+    },
+    "noPrs": {
+      "heading": "No merged PRs found",
+      "description": "There are no merged pull requests between these two refs."
+    },
+    "error": {
+      "heading": "Detection failed",
+      "description": "Something went wrong while fetching pull requests. Please try again."
+    },
+    "prList": {
+      "title": "Merged pull requests",
+      "count_one": "{{count}} pull request",
+      "count_other": "{{count}} pull requests"
+    },
+    "pr": {
+      "expandCommits": "Show commits",
+      "collapseCommits": "Hide commits",
+      "commitsCount_one": "{{count}} commit",
+      "commitsCount_other": "{{count}} commits",
+      "mergedAt": "Merged",
+      "by": "by"
+    },
+    "commit": {
+      "sha": "SHA",
+      "author": "Author",
+      "date": "Date"
+    }
+  },
+  "list": {
+    "viewRelease": "View release",
+    "error": {
+      "heading": "Couldn't load releases",
+      "description": "Something went wrong loading your releases. Please try again."
+    }
+  },
+  "view": {
+    "subtitle": "Release details",
+    "back": "Back to releases",
+    "refs": "{{baseRef}} → {{compareRef}}",
+    "tag": "Tag",
+    "tagsLabel": "Release tags",
+    "prUrl": "Pull request",
+    "prUrlAriaLabel": "Open GitHub pull request",
+    "features": "Features",
+    "loading": "Loading release...",
+    "tabs": {
+      "label": "Release sections",
+      "overview": "Overview",
+      "draft": "Draft",
+      "summary": "Summary"
+    },
+    "error": {
+      "heading": "Failed to load release",
+      "description": "Something went wrong while loading this release. Please try again."
+    },
+    "empty": {
+      "heading": "No features assigned",
+      "description": "This release has no pull requests assigned to features yet.",
+      "prCount_one": "{{count}} PR",
+      "prCount_other": "{{count}} PRs"
+    },
+    "feature": {
+      "expandLabel": "Expand feature {{name}}",
+      "collapseLabel": "Collapse feature {{name}}",
+      "prCount_one": "{{count}} pull request",
+      "prCount_other": "{{count}} pull requests",
+      "suggested": "AI suggested",
+      "flagState": {
+        "staging": "Staging",
+        "production": "Production",
+        "on": "On",
+        "off": "Off"
+      },
+      "state": {
+        "IN_PROGRESS": "In progress",
+        "LIVE_STAGING": "Live staging",
+        "LIVE_PROD": "Live prod",
+        "FULLY_RELEASED": "Fully released",
+        "PARTIAL": "Partial",
+        "BLOCKED": "Blocked",
+        "SHIPPED_FLAG_OFF": "Shipped, flag off",
+        "FLAG_CLEANUP_PENDING": "Flag cleanup pending"
+      }
+    }
+  },
+  "draft": {
+    "drafting": {
+      "heading": "Building your draft…",
+      "description": "The AI is analysing merged PRs and grouping them by feature. This takes a moment."
+    },
+    "suggested": {
+      "heading": "AI-suggested features",
+      "prCount_one": "{{count}} pull request",
+      "prCount_other": "{{count}} pull requests",
+      "accept": "Accept",
+      "reject": "Reject",
+      "acceptAriaLabel": "Accept suggested feature {{name}}",
+      "rejectAriaLabel": "Reject suggested feature {{name}}",
+      "acceptError": "Failed to accept feature",
+      "rejectError": "Failed to reject feature"
+    },
+    "prsByFeature": "Pull requests by feature",
+    "noFeatures": "No features found for this release. Add some merged pull requests first.",
+    "defaultFeature": "Default",
+    "assignTo": "Feature",
+    "selectFeature": "Select feature…",
+    "assignError": "Failed to save assignment",
+    "confirm": "Confirm release",
+    "confirming": "Confirming…",
+    "confirmed": "Release confirmed — GitHub PR created.",
+    "confirmError": "Failed to confirm release",
+    "confidence": {
+      "high": "High confidence",
+      "medium": "Medium confidence",
+      "low": "Low confidence"
+    }
+  },
+  "summary": {
+    "generate": "Generate",
+    "editor": "Client summary",
+    "editorPlaceholder": "Generate or write the client-facing summary here…",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Summary saved",
+    "saveError": "Failed to save summary",
+    "lastSaved": "Last saved {{time}}",
+    "copyLink": "Copy link",
+    "copyLinkAriaLabel": "Copy page link to clipboard",
+    "linkCopied": "Copied!",
+    "featureSelection": {
+      "label": "Include in summary",
+      "hint": "Select at least one feature to generate a summary"
+    }
+  },
+  "prSummary": {
+    "title": "AI summary",
+    "empty": "No summary yet",
+    "generate": "Generate",
+    "regenerate": "Regenerate",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "editedAt": "Edited {{time}}",
+    "generateError": "Failed to generate summary",
+    "saveError": "Failed to save summary"
+  },
+  "coverage": {
+    "title": "Coverage",
+    "assignedOf": "{{assigned}} of {{total}} PRs assigned",
+    "incomplete": "Assign every PR to a feature before shipping",
+    "ready": "All PRs assigned — ready for production",
+    "blockedTooltip": "All PRs must be assigned to a feature before you can ship",
+    "flagBlockedTooltip": "Acknowledge flag parity issues before shipping",
+    "ship": "Ship release",
+    "shipping": "Shipping...",
+    "shipError": "Ship failed"
+  },
+  "delete": {
+    "ariaLabel": "Delete release",
+    "label": "Delete release",
+    "dialogTitle": "Delete release?",
+    "dialogDescription": "\"{{releaseLabel}}\" will be soft-deleted and removed from all views. This cannot be undone.",
+    "confirm": "Delete",
+    "cancel": "Cancel",
+    "success": "Release deleted",
+    "error": "Failed to delete release"
+  },
+  "export": {
+    "markdown": "Export Markdown",
+    "pdf": "Export PDF",
+    "exporting": "Exporting...",
+    "noSummary": "Generate the summary first before exporting",
+    "downloadFailed": "Download failed"
+  }
+}

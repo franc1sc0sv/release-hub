@@ -1,0 +1,31 @@
+{
+  "toolbar": {
+    "label": "Barra de formato",
+    "heading1": "Título 1",
+    "heading2": "Título 2",
+    "heading3": "Título 3",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "bulletList": "Lista con viñetas",
+    "orderedList": "Lista ordenada",
+    "blockquote": "Cita",
+    "link": "Insertar enlace",
+    "textColor": "Color de texto",
+    "removeLink": "Quitar enlace"
+  },
+  "color": {
+    "label": "Color de texto",
+    "default": "Predeterminado",
+    "indigo": "Índigo",
+    "violet": "Violeta",
+    "magenta": "Magenta",
+    "muted": "Suave"
+  },
+  "link": {
+    "title": "Agregar enlace",
+    "urlLabel": "URL",
+    "placeholder": "https://ejemplo.com",
+    "save": "Aplicar",
+    "cancel": "Cancelar"
+  }
+}

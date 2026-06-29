@@ -10,9 +10,16 @@ async function bootstrap() {
   const { AppModule } = await import('./app.module')
 
   const { json, urlencoded } = await import('express')
-  const app = await NestFactory.create(AppModule, { bodyParser: false })
+  const cookieParser = (await import('cookie-parser')).default
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false,
+    bufferLogs: true,
+  })
+  const { Logger: NestPinoLogger } = await import('nestjs-pino')
+  app.useLogger(app.get(NestPinoLogger))
   app.use(json({ limit: '10mb' }))
   app.use(urlencoded({ limit: '10mb', extended: true }))
+  app.use(cookieParser())
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -22,6 +29,7 @@ async function bootstrap() {
   )
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+    credentials: true,
     exposedHeaders: ['Content-Disposition'],
   })
   await app.listen(process.env.PORT ?? 3001)

@@ -1,0 +1,89 @@
+{
+  "title": "Configuración",
+  "subtitle": "Configuración del proyecto",
+  "sections": {
+    "connections": "Conexiones",
+    "tags": "Taxonomía de etiquetas",
+    "members": "Miembros",
+    "project": "Proyecto"
+  },
+  "connections": {
+    "github": {
+      "label": "GitHub",
+      "description": "Requerido — acceso al repositorio y diff de ramas",
+      "connected": "Conectado",
+      "disconnected": "No conectado",
+      "connect": "Conectar GitHub"
+    },
+    "flagsmith": {
+      "label": "Flagsmith",
+      "description": "Opcional — matriz de feature flags y paridad",
+      "connected": "Conectado",
+      "disconnected": "No conectado",
+      "connect": "Conectar Flagsmith"
+    },
+    "linear": {
+      "label": "Linear",
+      "description": "Opcional — detección de tickets en PRs",
+      "connected": "Conectado",
+      "disconnected": "No conectado",
+      "connect": "Conectar Linear",
+      "oauth": {
+        "success": "Linear conectado exitosamente.",
+        "error": "La conexión con Linear falló. Por favor, intenta de nuevo."
+      }
+    },
+    "disconnect": "Desconectar",
+    "reconnect": "Reconectar",
+    "readOnly": "Gestionado vía GitHub App",
+    "dialog": {
+      "apiKey": "Clave de API",
+      "apiKeyPlaceholder": "Pega tu clave de API",
+      "apiKeyHint": "La clave se almacena de forma segura y no se vuelve a mostrar.",
+      "apiKeyRequired": "La clave de API es obligatoria.",
+      "flagsmithUrl": "URL de la API de Flagsmith",
+      "flagsmithUrlPlaceholder": "https://flags.ejemplo.com",
+      "urlRequired": "La URL de la API de Flagsmith es obligatoria.",
+      "flagsmithProject": "Proyecto de Flagsmith",
+      "flagsmithProjectPlaceholder": "Selecciona un proyecto",
+      "flagsmithProjectHint": "Elige el proyecto de Flagsmith cuyos flags usa este repositorio.",
+      "noProjects": "No se encontraron proyectos para este token.",
+      "loadProjectsError": "No se pudieron cargar los proyectos. Verifica la URL y el token de API.",
+      "projectRequired": "Selecciona un proyecto.",
+      "continue": "Continuar",
+      "back": "Atrás",
+      "disconnectTitle": "¿Desconectar {{name}}?",
+      "disconnectDescription": "Al desconectar se eliminará la integración de este proyecto. Puedes volver a conectarla en cualquier momento.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "verify": {
+        "testConnection": "Probar conexión",
+        "verifying": "Verificando…",
+        "environments": "Entornos",
+        "noEnvironments": "No se encontraron entornos",
+        "failed": "La prueba de conexión falló."
+      }
+    }
+  },
+  "tags": {
+    "empty": "Sin etiquetas definidas. Añade tu primera etiqueta para organizar las funcionalidades.",
+    "add": "Añadir etiqueta",
+    "delete": "Eliminar etiqueta",
+    "placeholder": "Nombre de la nueva etiqueta",
+    "removeLabel": "Eliminar etiqueta {{name}}",
+    "validation": {
+      "required": "El nombre de la etiqueta no puede estar vacío.",
+      "serverError": "No se pudo guardar la etiqueta. Es posible que ya exista."
+    },
+    "dialog": {
+      "deleteTitle": "¿Eliminar esta etiqueta?",
+      "deleteDescription": "Esta etiqueta se eliminará de todas las funcionalidades de este proyecto. Esta acción no se puede deshacer.",
+      "cancel": "Cancelar"
+    }
+  },
+  "empty": {
+    "heading": "Configuración",
+    "description": "Configura las conexiones y preferencias de tu proyecto."
+  },
+  "loading": "Cargando configuración..."
+}

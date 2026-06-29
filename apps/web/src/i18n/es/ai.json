@@ -1,0 +1,36 @@
+{
+  "title": "Borrador de IA",
+  "suggest": {
+    "label": "Sugerir funcionalidad",
+    "loading": "Sugiriendo...",
+    "error": "No se pudo generar una sugerencia",
+    "applied": "Funcionalidad sugerida — revisa la asignación anterior"
+  },
+  "summary": {
+    "label": "Generar resumen",
+    "loading": "Generando...",
+    "streaming": "Escribiendo resumen…",
+    "error": "No se pudo generar el resumen",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "regenerate": "Regenerar",
+    "placeholder": "El resumen generado por IA aparecerá aquí. Ajusta el modelo y el tono, luego haz clic en Generar.",
+    "editPlaceholder": "Edita el resumen generado…",
+    "copied": "Copiado al portapapeles"
+  },
+  "model": {
+    "label": "Modelo",
+    "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+    "claude-opus-4-5": "Claude Opus 4.5",
+    "claude-sonnet-4-5": "Claude Sonnet 4.5"
+  },
+  "tone": {
+    "label": "Tono",
+    "concise": "Conciso",
+    "warm": "Cálido",
+    "formal": "Formal"
+  },
+  "copy": "Copiar",
+  "copyAriaLabel": "Copiar resumen al portapapeles"
+}

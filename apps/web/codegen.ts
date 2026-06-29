@@ -9,6 +9,9 @@ const config: CodegenConfig = {
       config: {
         enumsAsTypes: true,
         avoidOptionals: true,
+        scalars: {
+          DateTime: 'string',
+        },
       },
     },
   },

@@ -1,0 +1,36 @@
+{
+  "title": "AI draft",
+  "suggest": {
+    "label": "Suggest feature",
+    "loading": "Suggesting...",
+    "error": "Could not generate a suggestion",
+    "applied": "Feature suggested — review the assignment above"
+  },
+  "summary": {
+    "label": "Generate summary",
+    "loading": "Generating...",
+    "streaming": "Writing summary…",
+    "error": "Could not generate summary",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "regenerate": "Regenerate",
+    "placeholder": "The AI-drafted release summary will appear here. Adjust the model and tone, then click Generate.",
+    "editPlaceholder": "Edit the generated summary…",
+    "copied": "Copied to clipboard"
+  },
+  "model": {
+    "label": "Model",
+    "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+    "claude-opus-4-5": "Claude Opus 4.5",
+    "claude-sonnet-4-5": "Claude Sonnet 4.5"
+  },
+  "tone": {
+    "label": "Tone",
+    "concise": "Concise",
+    "warm": "Warm",
+    "formal": "Formal"
+  },
+  "copy": "Copy",
+  "copyAriaLabel": "Copy summary to clipboard"
+}

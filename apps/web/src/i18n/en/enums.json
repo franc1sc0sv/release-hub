@@ -1,0 +1,47 @@
+{
+  "featureState": {
+    "IN_PROGRESS": "In progress",
+    "SHIPPED_FLAG_OFF": "Shipped, flag off",
+    "LIVE_STAGING": "Live staging",
+    "LIVE_PROD": "Live prod",
+    "PARTIAL": "Partial",
+    "FULLY_RELEASED": "Fully released",
+    "FLAG_CLEANUP_PENDING": "Flag cleanup pending",
+    "BLOCKED": "Blocked"
+  },
+  "featureKind": {
+    "PRODUCT": "Product",
+    "DEFAULT": "Default"
+  },
+  "releaseType": {
+    "FEATURE": "Feature release",
+    "HOTFIX": "Hotfix"
+  },
+  "releaseStatus": {
+    "DRAFT": "Draft",
+    "PR_CREATED": "PR created",
+    "MERGED": "Merged",
+    "DEPLOYED": "Deployed"
+  },
+  "flagAction": {
+    "ADDED": "Added",
+    "MODIFIED": "Modified",
+    "REMOVED": "Removed",
+    "UNCHANGED": "Unchanged"
+  },
+  "ticketSource": {
+    "LINEAR": "Linear",
+    "JIRA": "Jira"
+  },
+  "projectRole": {
+    "OWNER": "Owner",
+    "MEMBER": "Member",
+    "VIEWER": "Viewer"
+  },
+  "invitationStatus": {
+    "PENDING": "Pending",
+    "ACCEPTED": "Accepted",
+    "EXPIRED": "Expired",
+    "REVOKED": "Revoked"
+  }
+}

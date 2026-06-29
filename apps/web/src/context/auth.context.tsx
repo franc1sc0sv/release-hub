@@ -1,11 +1,9 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
-import type { UserRole } from '@release-hub/shared'
 
 interface IAuthUser {
   id: string
   email: string
   name: string
-  role: UserRole
   avatarUrl: string | null
 }
 

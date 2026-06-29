@@ -1,0 +1,115 @@
+{
+  "title": "Funcionalidades",
+  "subtitle": "El registro permanente",
+  "new": "Nueva funcionalidad",
+  "count_one": "{{count}} funcionalidad",
+  "count_other": "{{count}} funcionalidades",
+  "state": {
+    "label": "Estado de la funcionalidad",
+    "none": "Sin lanzamiento aún"
+  },
+  "fields": {
+    "name": "Nombre",
+    "description": "Descripción",
+    "category": "Categoría",
+    "tags": "Etiquetas"
+  },
+  "tags": {
+    "add": "Agregar etiqueta",
+    "placeholder": "Nueva etiqueta",
+    "removeAria": "Eliminar etiqueta {{tag}}"
+  },
+  "clientAvailability": {
+    "in_development": "En desarrollo, planificado para un próximo lanzamiento",
+    "built_not_on": "Construido y listo; aún no activado",
+    "in_final_testing": "En pruebas finales; lanzándose pronto",
+    "available_now": "Disponible ahora",
+    "first_part_available": "Primera parte disponible ahora; el resto está en camino",
+    "delayed": "Con retraso",
+    "internal_only": "Solo interno",
+    "internal_only_badge": "Solo interno"
+  },
+  "empty": {
+    "heading": "Sin funcionalidades aún",
+    "description": "Las funcionalidades son el registro permanente — cada PR es trazable a una.",
+    "cta": "Crear funcionalidad"
+  },
+  "loading": "Cargando funcionalidades...",
+  "error": {
+    "heading": "Error al cargar funcionalidades",
+    "description": "Algo salió mal al cargar el registro de funcionalidades."
+  },
+  "back": "Volver a funcionalidades",
+  "tree": {
+    "releaseHeading": "{{name}}",
+    "prCount_one": "{{count}} pull request",
+    "prCount_other": "{{count}} pull requests",
+    "commits": "Confirmaciones",
+    "baseRef": "Base",
+    "compareRef": "Comparar"
+  },
+  "detail": {
+    "noReleases": "Esta funcionalidad aún no ha aparecido en ningún lanzamiento.",
+    "notFound": "Funcionalidad no encontrada",
+    "notFoundDescription": "Esta funcionalidad no existe o ha sido eliminada.",
+    "releasesHeading": "Lanzamientos",
+    "stateLabel": "Estado",
+    "kindLabel": "Tipo",
+    "tagsLabel": "Etiquetas",
+    "noDescription": "Sin descripción."
+  },
+  "builder": {
+    "refPickerTitle": "Detectar pull requests",
+    "detecting": "Detectando pull requests...",
+    "githubNotConnected": {
+      "heading": "GitHub no conectado",
+      "description": "Conecta un repositorio de GitHub para detectar pull requests de este proyecto.",
+      "cta": "Ir a configuración"
+    },
+    "error": {
+      "heading": "Falló la detección",
+      "description": "No pudimos detectar pull requests entre esas referencias."
+    }
+  },
+  "board": {
+    "unassigned": "Sin asignar",
+    "unassignedDescription": "Arrastra un PR a un carril de funcionalidad para asignarlo",
+    "defaultLanesLabel": "Funcionalidades del sistema",
+    "productLanesLabel": "Funcionalidades de producto",
+    "prCount_one": "{{count}} PR",
+    "prCount_other": "{{count}} PRs",
+    "dropHere": "Soltar aquí para asignar"
+  },
+  "prCard": {
+    "assignTo": "Asignar a funcionalidad",
+    "assignedTo": "Asignado a {{name}}",
+    "unassigned": "Sin asignar",
+    "moveFrom": "Mover de {{from}} a {{to}}",
+    "suggestAriaLabel": "IA sugiere funcionalidad para PR #{{number}}",
+    "suggestApplied": "Sugerido: {{name}} ({{confidence}}% de confianza)",
+    "suggestError": "No se pudo obtener una sugerencia"
+  },
+  "suggested": "Sugerida",
+  "dialog": {
+    "title": "Crear funcionalidad",
+    "description": "Agrega una nueva funcionalidad de producto al registro. Cada PR debe ser trazable a una.",
+    "namePlaceholder": "Ej. Flujo de incorporación de usuarios",
+    "descriptionPlaceholder": "Describe qué hace esta funcionalidad — esto alimenta la asignación de PRs por IA",
+    "tagPickerPlaceholder": "Seleccionar etiquetas...",
+    "tagPickerAria": "Abrir selector de etiquetas",
+    "tagSearch": "Buscar etiquetas",
+    "noTags": "No se encontraron etiquetas",
+    "submit": "Crear funcionalidad",
+    "submitting": "Creando..."
+  },
+  "toast": {
+    "assigned": "PR #{{number}} asignado a {{feature}}",
+    "assignError": "No se pudo asignar el PR — revertido",
+    "created": "Funcionalidad \"{{name}}\" creada",
+    "createError": "No se pudo crear la funcionalidad",
+    "stateChanged": "Estado de funcionalidad actualizado",
+    "stateError": "No se pudo actualizar el estado — revertido",
+    "tagsChanged": "Etiquetas actualizadas",
+    "tagsError": "No se pudieron actualizar las etiquetas — revertido"
+  }
+}

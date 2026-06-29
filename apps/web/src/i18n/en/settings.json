@@ -1,0 +1,89 @@
+{
+  "title": "Settings",
+  "subtitle": "Project configuration",
+  "sections": {
+    "connections": "Connections",
+    "tags": "Tag taxonomy",
+    "members": "Members",
+    "project": "Project"
+  },
+  "connections": {
+    "github": {
+      "label": "GitHub",
+      "description": "Required — repository access and branch diff",
+      "connected": "Connected",
+      "disconnected": "Not connected",
+      "connect": "Connect GitHub"
+    },
+    "flagsmith": {
+      "label": "Flagsmith",
+      "description": "Optional — feature flag matrix and parity",
+      "connected": "Connected",
+      "disconnected": "Not connected",
+      "connect": "Connect Flagsmith"
+    },
+    "linear": {
+      "label": "Linear",
+      "description": "Optional — ticket detection in PRs",
+      "connected": "Connected",
+      "disconnected": "Not connected",
+      "connect": "Connect Linear",
+      "oauth": {
+        "success": "Linear connected successfully.",
+        "error": "Linear connection failed. Please try again."
+      }
+    },
+    "disconnect": "Disconnect",
+    "reconnect": "Reconnect",
+    "readOnly": "Managed via GitHub App",
+    "dialog": {
+      "apiKey": "API key",
+      "apiKeyPlaceholder": "Paste your API key",
+      "apiKeyHint": "The key is stored securely and never displayed again.",
+      "apiKeyRequired": "API key is required.",
+      "flagsmithUrl": "Flagsmith API URL",
+      "flagsmithUrlPlaceholder": "https://flags.example.com",
+      "urlRequired": "Flagsmith API URL is required.",
+      "flagsmithProject": "Flagsmith project",
+      "flagsmithProjectPlaceholder": "Select a project",
+      "flagsmithProjectHint": "Pick the Flagsmith project whose flags this repository uses.",
+      "noProjects": "No projects found for this token.",
+      "loadProjectsError": "Couldn't load projects. Check the URL and API token.",
+      "projectRequired": "Select a project.",
+      "continue": "Continue",
+      "back": "Back",
+      "disconnectTitle": "Disconnect {{name}}?",
+      "disconnectDescription": "Disconnecting will remove the integration from this project. You can reconnect at any time.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "verify": {
+        "testConnection": "Test connection",
+        "verifying": "Verifying…",
+        "environments": "Environments",
+        "noEnvironments": "No environments found",
+        "failed": "Connection test failed."
+      }
+    }
+  },
+  "tags": {
+    "empty": "No tags defined. Add your first tag to start organizing features.",
+    "add": "Add tag",
+    "delete": "Remove tag",
+    "placeholder": "New tag name",
+    "removeLabel": "Remove tag {{name}}",
+    "validation": {
+      "required": "Tag name cannot be empty.",
+      "serverError": "Failed to save the tag. It may already exist."
+    },
+    "dialog": {
+      "deleteTitle": "Remove this tag?",
+      "deleteDescription": "This tag will be removed from all features in this project. This action cannot be undone.",
+      "cancel": "Cancel"
+    }
+  },
+  "empty": {
+    "heading": "Settings",
+    "description": "Configure your project connections and preferences."
+  },
+  "loading": "Loading settings..."
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { format, parseISO } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -14,6 +15,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ value, onChange, disabled, className }: DatePickerProps) {
+  const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const selected = value ? parseISO(value) : undefined
 
@@ -33,7 +35,7 @@ export function DatePicker({ value, onChange, disabled, className }: DatePickerP
         }
       >
         <CalendarIcon className="size-4 shrink-0" />
-        {selected ? format(selected, 'dd/MM/yyyy') : <span>Seleccionar fecha</span>}
+        {selected ? format(selected, 'dd/MM/yyyy') : <span>{t('common.selectDate')}</span>}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar

@@ -2,9 +2,295 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AcceptSuggestedFeatureInput {
+  description: String
+  featureId: ID!
+  name: String
+  tags: [String!]
+}
+
+enum AiDraftStatus {
+  FAILED
+  PENDING
+  READY
+  RUNNING
+}
+
+type AiSuggestionType {
+  confidence: Float!
+  featureId: ID!
+  rationale: String!
+}
+
+input AssignPrToFeatureInput {
+  featureId: ID!
+  prId: ID!
+}
+
 type AuthTokensType {
   accessToken: String!
   refreshToken: String!
+}
+
+type CommitType {
+  author: String!
+  date: DateTime!
+  message: String!
+  sha: String!
+}
+
+input ConfirmReleaseInput {
+  releaseId: ID!
+}
+
+type ConnectionHealthType {
+  flagsmith: IntegrationStatus!
+  github: IntegrationStatus!
+  linear: IntegrationStatus!
+}
+
+type ConnectionSettingsType {
+  flagsmithConnected: Boolean!
+  flagsmithProjectId: String
+  flagsmithUrl: String
+  githubConnected: Boolean!
+  linearConnected: Boolean!
+}
+
+type CoverageType {
+  assigned: Int!
+  ready: Boolean!
+  total: Int!
+}
+
+input CreateFeatureInput {
+  description: String!
+  name: String!
+  projectId: ID!
+  tags: [String!]
+}
+
+input CreateGithubBranchInput {
+  fromRef: String!
+  name: String!
+  projectId: ID!
+}
+
+input CreateProjectInput {
+  name: String!
+  repo: String!
+}
+
+input CreateProjectTagInput {
+  color: String
+  name: String!
+  projectId: ID!
+}
+
+input CreateReleaseInput {
+  baseRef: String!
+  compareRef: String!
+  projectId: ID!
+  tags: [String!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input DeleteProjectTagInput {
+  tagId: ID!
+}
+
+enum ExportFormat {
+  MD
+  PDF
+}
+
+type ExportResultType {
+  filename: String!
+  url: String!
+}
+
+input ExportSummaryInput {
+  format: ExportFormat!
+  releaseId: ID!
+}
+
+type FeatureDetailType {
+  feature: FeatureType!
+  prs: [PullRequestType!]!
+  releases: [ReleaseObjectType!]!
+}
+
+type FeatureInReleaseType {
+  clientAvailabilityKey: String!
+  featureId: ID!
+  flagState: FlagStateType
+  releaseId: ID!
+  state: FeatureState!
+  updatedAt: DateTime!
+}
+
+enum FeatureKind {
+  DEFAULT
+  PRODUCT
+}
+
+enum FeatureState {
+  BLOCKED
+  FLAG_CLEANUP_PENDING
+  FULLY_RELEASED
+  IN_PROGRESS
+  LIVE_PROD
+  LIVE_STAGING
+  PARTIAL
+  SHIPPED_FLAG_OFF
+}
+
+type FeatureType {
+  createdAt: DateTime!
+  currentState: FeatureState
+  description: String!
+  id: ID!
+  kind: FeatureKind!
+  name: String!
+  projectId: ID!
+  suggested: Boolean!
+  tags: [String!]!
+  updatedAt: DateTime!
+}
+
+type FlagComparisonResultType {
+  baselineEnvironments: [String!]!
+  comparedEnvironments: [String!]!
+  items: [FlagComparisonRowType!]!
+}
+
+type FlagComparisonRowType {
+  baseline: [FlagEnvironmentStateType!]!
+  baselineConflict: Boolean!
+  baselineEnabled: Boolean
+  createdAt: DateTime
+  divergences: [FlagEnvironmentStateType!]!
+  key: String!
+}
+
+type FlagEnvironmentStateType {
+  enabled: Boolean!
+  name: String!
+}
+
+type FlagRefType {
+  createdAt: DateTime
+  environments: [FlagEnvironmentStateType!]!
+  key: String!
+}
+
+enum FlagSortField {
+  CREATED
+  ENVIRONMENT
+  NAME
+}
+
+type FlagStateType {
+  production: Boolean!
+  staging: Boolean!
+}
+
+type FlagsResultType {
+  environments: [String!]!
+  items: [FlagRefType!]!
+  totalCount: Float!
+}
+
+type FlagsmithProjectType {
+  id: String!
+  name: String!
+}
+
+type FlagsmithVerifyResult {
+  environments: [String!]!
+  hasProduction: Boolean!
+  hasStaging: Boolean!
+  message: String
+  ok: Boolean!
+  projectName: String
+  warnings: [String!]!
+}
+
+input GenerateSummaryInput {
+  featureIds: [ID!]
+  model: String
+  releaseId: ID!
+  tone: String
+}
+
+input GetFlagsInput {
+  limit: Int = 100
+  offset: Int = 0
+  projectId: ID!
+  search: String
+  sortDirection: SortDirection = DESC
+  sortEnvironment: String
+  sortField: FlagSortField = CREATED
+}
+
+type GithubBranchType {
+  commitSha: String!
+  name: String!
+  protected: Boolean!
+}
+
+type GithubConnectionStatus {
+  connected: Boolean!
+  githubLogin: String
+}
+
+type GithubRepositoryType {
+  defaultBranch: String!
+  description: String
+  fullName: String!
+  htmlUrl: String!
+  name: String!
+  owner: String!
+  private: Boolean!
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  NOT_CONFIGURED
+}
+
+enum InvitationStatus {
+  ACCEPTED
+  EXPIRED
+  PENDING
+  REVOKED
+}
+
+type InvitationType {
+  createdAt: DateTime!
+  email: String!
+  expiresAt: DateTime!
+  id: ID!
+  invitedById: ID!
+  projectId: ID!
+  role: ProjectRole!
+  status: InvitationStatus!
+  updatedAt: DateTime!
+}
+
+input InviteMemberInput {
+  email: String!
+  projectId: ID!
+  role: ProjectRole!
+}
+
+type LinearConnectionStatus {
+  connected: Boolean!
+  linearUser: String
 }
 
 input LoginInput {
@@ -21,24 +307,281 @@ input LogoutInput {
   refreshToken: String!
 }
 
+type MemberType {
+  avatarUrl: String
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+  projectId: ID!
+  role: ProjectRole!
+  updatedAt: DateTime!
+  userId: ID!
+}
+
 type Mutation {
+  acceptInvitation(token: String!): MemberType!
+  acceptSuggestedFeature(input: AcceptSuggestedFeatureInput!): FeatureType!
+  assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
+  confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
+  createFeature(input: CreateFeatureInput!): FeatureType!
+  createGithubBranch(input: CreateGithubBranchInput!): GithubBranchType!
+  createProject(input: CreateProjectInput!): ProjectType!
+  createProjectTag(input: CreateProjectTagInput!): ProjectTagType!
+  createRelease(input: CreateReleaseInput!): ReleaseObjectType!
+  deleteProject(id: ID!): Boolean!
+  deleteProjectTag(input: DeleteProjectTagInput!): Boolean!
+  deleteRelease(releaseId: ID!): ReleaseObjectType!
+  disconnectGithub: Boolean!
+  disconnectLinear(projectId: ID!): Boolean!
+  generatePrSummary(prId: ID!): PullRequestType!
+  inviteMember(input: InviteMemberInput!): InvitationType!
   login(input: LoginInput!): AuthTokensType!
   loginWithCode(input: LoginWithCodeInput!): AuthTokensType!
   logout(input: LogoutInput!): Boolean!
+  reauthorizeGithub: Boolean!
   refreshToken(input: RefreshTokenInput!): AuthTokensType!
+  register(input: RegisterInput!): AuthTokensType!
+  rejectSuggestedFeature(input: RejectSuggestedFeatureInput!): Boolean!
+  removeMember(membershipId: ID!): Boolean!
   requestLoginCode(input: RequestLoginCodeInput!): Boolean!
+  revokeInvitation(invitationId: ID!): Boolean!
+  savePrSummary(input: SavePrSummaryInput!): PullRequestType!
+  saveReleaseSummary(input: SaveReleaseSummaryInput!): ReleaseObjectType!
+  setFeatureState(input: SetFeatureStateInput!): FeatureInReleaseType!
+  setFeatureTags(input: SetFeatureTagsInput!): FeatureType!
+  shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
+  updateConnectionSettings(input: UpdateConnectionSettingsInput!): ConnectionSettingsType!
+  updateMemberRole(input: UpdateMemberRoleInput!): MemberType!
+  updateProject(input: UpdateProjectInput!): ProjectType!
+  updateRelease(input: UpdateReleaseInput!): ReleaseObjectType!
+}
+
+input PrAssignmentInput {
+  featureId: ID
+  pullRequestId: ID!
+}
+
+type ProjectIntegrationsType {
+  flagsmith: Boolean!
+  github: Boolean!
+  linear: Boolean!
+}
+
+enum ProjectRole {
+  MEMBER
+  OWNER
+  VIEWER
+}
+
+type ProjectTagType {
+  color: String
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+}
+
+type ProjectType {
+  connectionHealth: ConnectionHealthType!
+  createdAt: DateTime!
+  id: ID!
+  integrations: ProjectIntegrationsType!
+  name: String!
+  ownerId: String!
+  repo: String!
+  updatedAt: DateTime!
+}
+
+type PullRequestType {
+  aiConfidence: Float
+  aiRationale: String
+  author: String!
+  body: String
+  commits: [CommitType!]!
+  featureId: ID
+  id: ID!
+  mergedAt: DateTime!
+  number: Int!
+  releaseId: ID
+  summary: String
+  summaryEditedAt: DateTime
+  tickets: [TicketLinkType!]!
+  title: String!
 }
 
 type Query {
+  compareFlags(baselineEnvironments: [String!]!, comparedEnvironments: [String!]!, projectId: ID!): FlagComparisonResultType!
+  compareRefs(baseRef: String!, compareRef: String!, projectId: ID!): RefComparisonType!
+  diffRefs(baseRef: String!, compareRef: String!, projectId: ID!): [PullRequestType!]!
+  exportSummary(input: ExportSummaryInput!): ExportResultType!
+  flagsmithProjects(apiKey: String!, projectId: ID!, url: String!): [FlagsmithProjectType!]!
+  getConnectionSettings(projectId: ID!): ConnectionSettingsType!
+  getCoverage(releaseId: ID!): CoverageType!
+  getFeature(id: ID!): FeatureDetailType!
+  getFlags(input: GetFlagsInput!): FlagsResultType!
+  getProject(id: ID!): ProjectType!
+  getRelease(id: ID!): ReleaseObjectType!
+  getReleaseTree(id: ID!): ReleaseTreeType!
+  getReleases(projectId: ID!): [ReleaseObjectType!]!
+  githubAuthorizeUrl: String!
+  githubBranches(projectId: ID!): [GithubBranchType!]!
+  githubConnection: GithubConnectionStatus!
+  githubRepositories: [GithubRepositoryType!]!
+  linearAuthorizeUrl(projectId: ID!): String!
+  linearConnection(projectId: ID!): LinearConnectionStatus!
+  listFeatures(projectId: ID!): [FeatureType!]!
+  listInvitations(projectId: ID!): [InvitationType!]!
+  listMembers(projectId: ID!): [MemberType!]!
+  listProjects: [ProjectType!]!
   me: UserProfileType!
+  projectTags(projectId: ID!): [ProjectTagType!]!
+  suggestFeatureForPr(prId: ID!): AiSuggestionType!
+  verifyFlagsmithConnection(apiKey: String!, flagsmithProjectId: String!, projectId: ID!, url: String!): FlagsmithVerifyResult!
+}
+
+type RefCommitType {
+  author: String!
+  committedAt: String!
+  message: String!
+  sha: String!
+}
+
+type RefComparisonType {
+  aheadBy: Int!
+  behindBy: Int!
+  commits: [RefCommitType!]!
+  totalCommits: Int!
 }
 
 input RefreshTokenInput {
   refreshToken: String!
 }
 
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+input RejectSuggestedFeatureInput {
+  featureId: ID!
+}
+
+type ReleaseFeatureNodeType {
+  clientAvailabilityKey: String!
+  feature: FeatureType!
+  flagState: FlagStateType
+  prs: [PullRequestType!]!
+  state: FeatureState!
+}
+
+type ReleaseObjectType {
+  aiDraftStatus: AiDraftStatus!
+  baseRef: String!
+  compareRef: String!
+  createdAt: DateTime!
+  id: ID!
+  name: String
+  prUrl: String
+  projectId: ID!
+  status: ReleaseStatus!
+  summary: String
+  summaryEditedAt: DateTime
+  tags: [String!]!
+  updatedAt: DateTime!
+}
+
+enum ReleaseStatus {
+  DEPLOYED
+  DRAFT
+  MERGED
+  PR_CREATED
+}
+
+type ReleaseTreeType {
+  features: [ReleaseFeatureNodeType!]!
+  release: ReleaseObjectType!
+}
+
 input RequestLoginCodeInput {
   email: String!
+}
+
+input SavePrSummaryInput {
+  prId: String!
+  summary: String!
+}
+
+input SaveReleaseSummaryInput {
+  releaseId: ID!
+  summary: String!
+}
+
+input SetFeatureStateInput {
+  featureId: ID!
+  releaseId: ID!
+  state: FeatureState!
+}
+
+input SetFeatureTagsInput {
+  featureId: ID!
+  tags: [String!]!
+}
+
+input ShipReleaseInput {
+  releaseId: ID!
+}
+
+enum SortDirection {
+  ASC
+  DESC
+}
+
+type Subscription {
+  generateSummary(input: GenerateSummaryInput!): SummaryChunkType!
+}
+
+type SummaryChunkType {
+  chunk: String!
+  done: Boolean!
+}
+
+type TicketLinkType {
+  confidence: Float!
+  description: String
+  issueId: String!
+  source: TicketSource!
+  title: String!
+  url: String!
+}
+
+enum TicketSource {
+  JIRA
+  LINEAR
+}
+
+input UpdateConnectionSettingsInput {
+  flagsmithApiKey: String
+  flagsmithProjectId: String
+  flagsmithUrl: String
+  projectId: ID!
+}
+
+input UpdateMemberRoleInput {
+  membershipId: ID!
+  role: ProjectRole!
+}
+
+input UpdateProjectInput {
+  id: ID!
+  name: String
+  repo: String
+}
+
+input UpdateReleaseInput {
+  prAssignments: [PrAssignmentInput!]
+  releaseId: ID!
+  tags: [String!]
 }
 
 type UserProfileType {
@@ -46,10 +589,4 @@ type UserProfileType {
   email: String!
   id: ID!
   name: String!
-  role: UserRole!
-}
-
-enum UserRole {
-  admin
-  user
 }

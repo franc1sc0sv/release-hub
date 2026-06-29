@@ -1,0 +1,62 @@
+{
+  "title": "Flags",
+  "subtitle": "Feature flag environments",
+  "empty": {
+    "heading": "No flags detected",
+    "description": "Connect Flagsmith to see feature flag state across environments."
+  },
+  "loading": "Loading flags...",
+  "error": {
+    "heading": "Could not load flags",
+    "description": "Flagsmith returned an error. Check your API token and URL in Settings.",
+    "retry": "Retry"
+  },
+  "notConnected": {
+    "heading": "Flagsmith not connected",
+    "description": "Configure your Flagsmith URL and API token in Settings to see flag states.",
+    "cta": "Go to Settings"
+  },
+  "matrix": {
+    "flag": "Flag",
+    "created": "Created",
+    "count_one": "{{count}} flag",
+    "count_other": "{{count}} flags"
+  },
+  "search": {
+    "placeholder": "Search flags..."
+  },
+  "columns": {
+    "label": "Environments",
+    "button": "Columns"
+  },
+  "state": {
+    "on": "On",
+    "off": "Off"
+  },
+  "stale": {
+    "badge": "Stale",
+    "tooltip": "This flag was created more than 60 days ago"
+  },
+  "compare": {
+    "button": "Compare",
+    "title": "Compare environments",
+    "baselineLabel": "Source of truth (production)",
+    "comparedAgainst": "Compared against {{envs}}",
+    "selectBaseline": "Select at least one production environment.",
+    "selectCompared": "Select at least one other environment to compare.",
+    "count_one": "{{count}} flag differs",
+    "count_other": "{{count}} flags differ",
+    "inSync": "All selected environments are in sync with production",
+    "loading": "Comparing environments...",
+    "reRun": "Re-run",
+    "group": {
+      "onInProd": "Enabled in production, disabled elsewhere",
+      "offInProd": "Disabled in production, enabled elsewhere"
+    }
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{total}}"
+  }
+}

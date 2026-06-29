@@ -1,0 +1,31 @@
+{
+  "toolbar": {
+    "label": "Formatting toolbar",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "bold": "Bold",
+    "italic": "Italic",
+    "bulletList": "Bullet list",
+    "orderedList": "Ordered list",
+    "blockquote": "Blockquote",
+    "link": "Insert link",
+    "textColor": "Text color",
+    "removeLink": "Remove link"
+  },
+  "color": {
+    "label": "Text color",
+    "default": "Default",
+    "indigo": "Indigo",
+    "violet": "Violet",
+    "magenta": "Magenta",
+    "muted": "Muted"
+  },
+  "link": {
+    "title": "Add link",
+    "urlLabel": "URL",
+    "placeholder": "https://example.com",
+    "save": "Apply",
+    "cancel": "Cancel"
+  }
+}

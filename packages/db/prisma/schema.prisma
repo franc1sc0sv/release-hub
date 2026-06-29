@@ -13,9 +13,82 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
-  admin
-  user
+enum FeatureKind {
+  product
+  default
+
+  @@map("feature_kind")
+}
+
+enum FeatureState {
+  in_progress
+  shipped_flag_off
+  live_staging
+  live_prod
+  partial
+  fully_released
+  flag_cleanup_pending
+  blocked
+
+  @@map("feature_state")
+}
+
+enum ReleaseType {
+  feature
+  hotfix
+
+  @@map("release_type")
+}
+
+enum AiDraftStatus {
+  pending
+  running
+  ready
+  failed
+
+  @@map("ai_draft_status")
+}
+
+enum ReleaseStatus {
+  draft
+  pr_created
+  merged
+  deployed
+
+  @@map("release_status")
+}
+
+enum FlagAction {
+  added
+  modified
+  removed
+  unchanged
+
+  @@map("flag_action")
+}
+
+enum TicketSource {
+  LINEAR
+  JIRA
+
+  @@map("ticket_source")
+}
+
+enum ProjectRole {
+  owner
+  member
+  viewer
+
+  @@map("project_role")
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  revoked
+  expired
+
+  @@map("invitation_status")
 }
 
 model User {
@@ -24,16 +97,52 @@ model User {
   email     String    @unique
   password  String
   avatarUrl String?   @map("avatar_url")
-  role      UserRole  @default(user)
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  loginCodes    LoginCode[]
-  refreshTokens RefreshToken[]
+  loginCodes        LoginCode[]
+  refreshTokens     RefreshToken[]
+  memberships       Membership[]
+  invitationsSent   Invitation[]       @relation("InvitedBy")
+  githubConnection  GithubConnection?
 
   @@index([deletedAt])
   @@map("users")
+}
+
+model GithubConnection {
+  id            String    @id @default(cuid())
+  userId        String    @unique @map("user_id")
+  accessToken   String    @map("access_token")
+  refreshToken  String?   @map("refresh_token")
+  expiresAt     DateTime? @map("expires_at")
+  githubUserId  String    @map("github_user_id")
+  githubLogin   String    @map("github_login")
+  scopes        String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("github_connections")
+}
+
+model ProjectLinearConnection {
+  id             String    @id @default(cuid())
+  projectId      String    @unique @map("project_id")
+  accessToken    String    @map("access_token")
+  refreshToken   String?   @map("refresh_token")
+  expiresAt      DateTime? @map("expires_at")
+  linearUserId   String    @map("linear_user_id")
+  linearUserName String    @map("linear_user_name")
+  scopes         String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_linear_connections")
 }
 
 model LoginCode {
@@ -64,4 +173,201 @@ model RefreshToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  repo        String
+  githubInstallationId String? @map("github_installation_id")
+  flagsmithEnabled Boolean @default(false) @map("flagsmith_enabled")
+  flagsmithUrl     String? @map("flagsmith_url")
+  flagsmithApiKey  String? @map("flagsmith_api_key")
+  flagsmithProjectId String? @map("flagsmith_project_id")
+  linearEnabled    Boolean @default(false) @map("linear_enabled")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  features    Feature[]
+  releases    Release[]
+  memberships Membership[]
+  invitations Invitation[]
+  projectTags ProjectTag[]
+  linearConnection ProjectLinearConnection?
+
+  @@index([deletedAt])
+  @@map("projects")
+}
+
+model Feature {
+  id          String      @id @default(cuid())
+  projectId   String      @map("project_id")
+  name        String
+  description String
+  kind        FeatureKind @default(product)
+  tags        String[]
+  suggested   Boolean     @default(false)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  deletedAt   DateTime?       @map("deleted_at")
+
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  pullRequests    PullRequest[]
+  featureInReleases FeatureInRelease[]
+
+  @@index([projectId, deletedAt])
+  @@map("features")
+}
+
+model Release {
+  id               String        @id @default(cuid())
+  projectId        String        @map("project_id")
+  name             String?
+  baseRef          String        @map("base_ref")
+  compareRef       String        @map("compare_ref")
+  status           ReleaseStatus @default(draft)
+  aiDraftStatus    AiDraftStatus @default(pending) @map("ai_draft_status")
+  prUrl            String?       @map("pr_url")
+  tags             String[]      @default([])
+  summary          String?
+  summaryEditedAt  DateTime?     @map("summary_edited_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  deletedAt        DateTime?     @map("deleted_at")
+
+  project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  pullRequests      PullRequest[]
+  featureInReleases FeatureInRelease[]
+
+  @@index([projectId, deletedAt])
+  @@map("releases")
+}
+
+model PullRequest {
+  id           String   @id @default(cuid())
+  number       Int
+  title        String
+  body         String?
+  author       String
+  mergedAt     DateTime @map("merged_at")
+  releaseId    String   @map("release_id")
+  featureId    String?  @map("feature_id")
+  aiConfidence Float?   @map("ai_confidence")
+  aiRationale  String?  @map("ai_rationale")
+  summary         String?   @map("summary")
+  summaryEditedAt DateTime? @map("summary_edited_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  release     Release      @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  feature     Feature?     @relation(fields: [featureId], references: [id], onDelete: SetNull)
+  commits     Commit[]
+  ticketLinks TicketLink[]
+
+  @@unique([releaseId, number])
+  @@index([releaseId])
+  @@index([featureId])
+  @@map("pull_requests")
+}
+
+model Commit {
+  id            String   @id @default(cuid())
+  pullRequestId String   @map("pull_request_id")
+  sha           String
+  message       String
+  author        String
+  committedAt   DateTime @map("committed_at")
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+
+  @@unique([pullRequestId, sha])
+  @@index([pullRequestId])
+  @@map("commits")
+}
+
+model FeatureInRelease {
+  id         String       @id @default(cuid())
+  featureId  String       @map("feature_id")
+  releaseId  String       @map("release_id")
+  state      FeatureState @default(in_progress)
+  flagStaging   Boolean?  @map("flag_staging")
+  flagProduction Boolean? @map("flag_production")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  feature Feature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  release Release @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@unique([featureId, releaseId])
+  @@index([releaseId])
+  @@map("feature_in_releases")
+}
+
+model TicketLink {
+  id            String       @id @default(cuid())
+  pullRequestId String       @map("pull_request_id")
+  issueId       String       @map("issue_id")
+  source        TicketSource
+  url           String
+  title         String
+  description   String?
+  confidence    Float
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+
+  @@index([pullRequestId])
+  @@map("ticket_links")
+}
+
+model ProjectTag {
+  id        String    @id @default(cuid())
+  projectId String    @map("project_id")
+  name      String
+  color     String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, name])
+  @@index([projectId, deletedAt])
+  @@map("project_tags")
+}
+
+model Membership {
+  id        String      @id @default(cuid())
+  userId    String      @map("user_id")
+  projectId String      @map("project_id")
+  role      ProjectRole @default(member)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+  @@map("memberships")
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  projectId   String           @map("project_id")
+  email       String
+  role        ProjectRole      @default(member)
+  token       String           @unique @default(cuid())
+  status      InvitationStatus @default(pending)
+  expiresAt   DateTime         @map("expires_at")
+  invitedById String           @map("invited_by_id")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invitedBy  User    @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([email])
+  @@index([token])
+  @@map("invitations")
 }

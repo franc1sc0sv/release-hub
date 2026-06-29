@@ -1,4 +1,15 @@
 export const ROUTES = {
   LOGIN: '/login',
-  DASHBOARD: '/dashboard',
+  REGISTER: '/register',
+  ONBOARDING: '/onboarding',
+  WORKSPACE: '/workspace',
+  RELEASES: '/releases',
+  RELEASE_BUILDER: '/releases/new',
+  RELEASE_DETAIL: '/releases/:releaseId',
+  FEATURES: '/features',
+  FEATURES_DETAIL: '/features/:id',
+  FLAGS: '/flags',
+  SETTINGS: '/settings',
+  INVITE: '/invite/:token',
+  PROJECT_CREATE: '/projects/new',
 } as const

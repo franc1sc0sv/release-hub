@@ -1,0 +1,276 @@
+{
+  "title": "Releases",
+  "subtitle": "Rastrea y lanza versiones",
+  "new": "Nuevo release",
+  "status": {
+    "draft": "Borrador",
+    "pr_created": "PR creado",
+    "merged": "Fusionado",
+    "deployed": "Desplegado"
+  },
+  "type": {
+    "feature": "Release de funcionalidad",
+    "hotfix": "Corrección urgente"
+  },
+  "fields": {
+    "name": "Nombre del release",
+    "namePlaceholder": "ej. v1.8.0",
+    "baseRef": "Rama base",
+    "baseRefPlaceholder": "ej. main",
+    "compareRef": "Rama de comparación",
+    "compareRefPlaceholder": "ej. develop",
+    "type": "Tipo"
+  },
+  "empty": {
+    "heading": "Sin releases aún",
+    "description": "Crea tu primer release seleccionando dos ramas.",
+    "cta": "Crear release"
+  },
+  "loading": "Cargando releases...",
+  "wizard": {
+    "subtitle": "Elige ramas, revisa el diff y crea tu release.",
+    "next": "Continuar",
+    "back": "Atrás",
+    "createLabel": "Crear release",
+    "creating": "Creando...",
+    "createError": "No se pudo crear el release. Inténtalo de nuevo.",
+    "stepper": {
+      "label": "Pasos para crear el release"
+    },
+    "steps": {
+      "branches": "Ramas y etiquetas",
+      "diff": "Diff de commits",
+      "create": "Crear"
+    },
+    "branches": {
+      "loading": "Cargando ramas…",
+      "base": "Rama base",
+      "basePlaceholder": "Selecciona la rama base",
+      "compare": "Rama de comparación",
+      "comparePlaceholder": "Selecciona la rama de comparación",
+      "searchPlaceholder": "Buscar ramas…",
+      "noResults": "No se encontraron ramas"
+    },
+    "createBranch": {
+      "triggerLabel": "Crear nueva rama",
+      "title": "Crear rama",
+      "description": "Crea una nueva rama de GitHub a partir de una ref existente.",
+      "fromRef": "Desde rama",
+      "fromRefPlaceholder": "Selecciona la rama origen",
+      "name": "Nombre de la nueva rama",
+      "namePlaceholder": "ej. feature/mi-rama",
+      "nameRequired": "El nombre de la rama es requerido",
+      "fromRefRequired": "La rama origen es requerida",
+      "create": "Crear rama",
+      "creating": "Creando…",
+      "error": "No se pudo crear la rama. Inténtalo de nuevo."
+    },
+    "diff": {
+      "title": "Diff de commits",
+      "comparing": "Comparando refs…",
+      "errorHeading": "Falló la comparación",
+      "errorDescription": "Algo salió mal al comparar estas ramas. Vuelve atrás e intenta de nuevo.",
+      "aheadBy": "Por delante",
+      "behindBy": "Por detrás",
+      "total": "Total de commits",
+      "gateMessage": "No hay commits por delante de la rama base. Selecciona una rama de comparación diferente con al menos un commit nuevo.",
+      "commitListLabel": "Commits en este release"
+    },
+    "create": {
+      "refsLabel": "Rango de ramas",
+      "tags": "Etiquetas",
+      "tagPlaceholder": "Agrega una etiqueta y presiona Enter",
+      "addTag": "Agregar etiqueta",
+      "removeTag": "Eliminar etiqueta {{tag}}",
+      "tagsLabel": "Etiquetas seleccionadas"
+    }
+  },
+  "builder": {
+    "title": "Nuevo release",
+    "subtitle": "Compara ramas para detectar pull requests fusionados",
+    "refPickerTitle": "Selector de refs",
+    "detect": "Detectar PRs fusionados",
+    "save": "Guardar como borrador",
+    "saving": "Guardando...",
+    "saveError": "No se pudo guardar el release",
+    "detecting": "Detectando...",
+    "githubNotConnected": {
+      "heading": "GitHub no conectado",
+      "description": "Conecta tu cuenta de GitHub en Configuración para detectar pull requests.",
+      "cta": "Ir a configuración"
+    },
+    "noPrs": {
+      "heading": "No se encontraron PRs fusionados",
+      "description": "No hay pull requests fusionados entre estas dos refs."
+    },
+    "error": {
+      "heading": "Falló la detección",
+      "description": "Algo salió mal al obtener los pull requests. Por favor intenta de nuevo."
+    },
+    "prList": {
+      "title": "Pull requests fusionados",
+      "count_one": "{{count}} pull request",
+      "count_other": "{{count}} pull requests"
+    },
+    "pr": {
+      "expandCommits": "Ver commits",
+      "collapseCommits": "Ocultar commits",
+      "commitsCount_one": "{{count}} commit",
+      "commitsCount_other": "{{count}} commits",
+      "mergedAt": "Fusionado",
+      "by": "por"
+    },
+    "commit": {
+      "sha": "SHA",
+      "author": "Autor",
+      "date": "Fecha"
+    }
+  },
+  "list": {
+    "viewRelease": "Ver release",
+    "error": {
+      "heading": "No se pudieron cargar los releases",
+      "description": "Algo salió mal al cargar tus releases. Inténtalo de nuevo."
+    }
+  },
+  "view": {
+    "subtitle": "Detalles del release",
+    "back": "Volver a releases",
+    "refs": "{{baseRef}} → {{compareRef}}",
+    "tag": "Etiqueta",
+    "tagsLabel": "Etiquetas del release",
+    "prUrl": "Pull request",
+    "prUrlAriaLabel": "Abrir pull request en GitHub",
+    "features": "Funcionalidades",
+    "loading": "Cargando release...",
+    "tabs": {
+      "label": "Secciones del release",
+      "overview": "Resumen",
+      "draft": "Borrador",
+      "summary": "Resumen cliente"
+    },
+    "error": {
+      "heading": "No se pudo cargar el release",
+      "description": "Algo salió mal al cargar este release. Por favor intenta de nuevo."
+    },
+    "empty": {
+      "heading": "Sin funcionalidades asignadas",
+      "description": "Este release aún no tiene pull requests asignados a funcionalidades.",
+      "prCount_one": "{{count}} PR",
+      "prCount_other": "{{count}} PRs"
+    },
+    "feature": {
+      "expandLabel": "Expandir funcionalidad {{name}}",
+      "collapseLabel": "Contraer funcionalidad {{name}}",
+      "prCount_one": "{{count}} pull request",
+      "prCount_other": "{{count}} pull requests",
+      "suggested": "Sugerida por IA",
+      "flagState": {
+        "staging": "Staging",
+        "production": "Producción",
+        "on": "Activo",
+        "off": "Inactivo"
+      },
+      "state": {
+        "IN_PROGRESS": "En progreso",
+        "LIVE_STAGING": "En staging",
+        "LIVE_PROD": "En producción",
+        "FULLY_RELEASED": "Completamente lanzado",
+        "PARTIAL": "Parcial",
+        "BLOCKED": "Bloqueado",
+        "SHIPPED_FLAG_OFF": "Enviado, flag apagado",
+        "FLAG_CLEANUP_PENDING": "Limpieza de flag pendiente"
+      }
+    }
+  },
+  "draft": {
+    "drafting": {
+      "heading": "Construyendo tu borrador…",
+      "description": "La IA está analizando los PRs fusionados y agrupándolos por funcionalidad. Esto toma un momento."
+    },
+    "suggested": {
+      "heading": "Funcionalidades sugeridas por IA",
+      "prCount_one": "{{count}} pull request",
+      "prCount_other": "{{count}} pull requests",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "acceptAriaLabel": "Aceptar funcionalidad sugerida {{name}}",
+      "rejectAriaLabel": "Rechazar funcionalidad sugerida {{name}}",
+      "acceptError": "No se pudo aceptar la funcionalidad",
+      "rejectError": "No se pudo rechazar la funcionalidad"
+    },
+    "prsByFeature": "Pull requests por funcionalidad",
+    "noFeatures": "No se encontraron funcionalidades para este release. Agrega pull requests fusionados primero.",
+    "defaultFeature": "Por defecto",
+    "assignTo": "Funcionalidad",
+    "selectFeature": "Seleccionar funcionalidad…",
+    "assignError": "No se pudo guardar la asignación",
+    "confirm": "Confirmar release",
+    "confirming": "Confirmando…",
+    "confirmed": "Release confirmado — PR de GitHub creado.",
+    "confirmError": "No se pudo confirmar el release",
+    "confidence": {
+      "high": "Alta confianza",
+      "medium": "Confianza media",
+      "low": "Baja confianza"
+    }
+  },
+  "summary": {
+    "generate": "Generar",
+    "editor": "Resumen para el cliente",
+    "editorPlaceholder": "Genera o escribe aquí el resumen para el cliente…",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Resumen guardado",
+    "saveError": "No se pudo guardar el resumen",
+    "lastSaved": "Guardado por última vez {{time}}",
+    "copyLink": "Copiar enlace",
+    "copyLinkAriaLabel": "Copiar enlace de la página al portapapeles",
+    "linkCopied": "¡Copiado!",
+    "featureSelection": {
+      "label": "Incluir en el resumen",
+      "hint": "Selecciona al menos una funcionalidad para generar el resumen"
+    }
+  },
+  "prSummary": {
+    "title": "Resumen IA",
+    "empty": "Sin resumen aún",
+    "generate": "Generar",
+    "regenerate": "Regenerar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "editedAt": "Editado {{time}}",
+    "generateError": "No se pudo generar el resumen",
+    "saveError": "No se pudo guardar el resumen"
+  },
+  "coverage": {
+    "title": "Cobertura",
+    "assignedOf": "{{assigned}} de {{total}} PRs asignados",
+    "incomplete": "Asigna todos los PRs a una funcionalidad antes de lanzar",
+    "ready": "Todos los PRs asignados — listo para producción",
+    "blockedTooltip": "Todos los PRs deben estar asignados a una funcionalidad antes de lanzar",
+    "flagBlockedTooltip": "Reconoce los problemas de paridad de flags antes de lanzar",
+    "ship": "Lanzar release",
+    "shipping": "Lanzando...",
+    "shipError": "Falló el lanzamiento"
+  },
+  "delete": {
+    "ariaLabel": "Eliminar release",
+    "label": "Eliminar release",
+    "dialogTitle": "¿Eliminar release?",
+    "dialogDescription": "\"{{releaseLabel}}\" será eliminado y dejará de aparecer en todas las vistas. Esta acción no se puede deshacer.",
+    "confirm": "Eliminar",
+    "cancel": "Cancelar",
+    "success": "Release eliminado",
+    "error": "No se pudo eliminar el release"
+  },
+  "export": {
+    "markdown": "Exportar Markdown",
+    "pdf": "Exportar PDF",
+    "exporting": "Exportando...",
+    "noSummary": "Genera el resumen primero antes de exportar",
+    "downloadFailed": "Descarga fallida"
+  }
+}

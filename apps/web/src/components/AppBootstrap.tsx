@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useApolloClient } from '@apollo/client/react'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import { Loader2, WifiOff } from 'lucide-react'
@@ -19,6 +20,7 @@ function isAuthError(error: unknown): boolean {
 }
 
 export function AppBootstrap({ children }: AppBootstrapProps) {
+  const { t } = useTranslation('common')
   const { setUser } = useAuth()
   const client = useApolloClient()
   const [ready, setReady] = useState(false)
@@ -62,13 +64,13 @@ export function AppBootstrap({ children }: AppBootstrapProps) {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4">
         <WifiOff className="size-10 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">No se pudo conectar al servidor</p>
+        <p className="text-sm text-muted-foreground">{t('common.connectionError')}</p>
         <button
           type="button"
           className="text-sm text-primary underline-offset-4 hover:underline"
           onClick={() => window.location.reload()}
         >
-          Reintentar
+          {t('common.retry')}
         </button>
       </div>
     )

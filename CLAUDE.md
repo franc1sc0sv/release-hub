@@ -27,6 +27,53 @@ Release Hub. Turbo + pnpm monorepo with a React frontend, a NestJS GraphQL API, 
 - Tokens, component recipes, motion/3D setup, and per-screen blueprints live in `.claude/skills/nebula-design/` (`SKILL.md` + `references/`).
 - Core rules: one `bg-nebula-gradient` CTA per view; magenta is the rare spark; pills for controls, glass slabs (`rounded-3xl`+) for containers; numbers in `font-mono`; **expressive frame / calm content**; WCAG AA contrast is a hard floor; animate via `lib/animations.ts` and respect `prefers-reduced-motion`.
 
+## Domain Model
+
+Release Hub turns a repository's history into a client-ready release. A **Project = one repository**. The permanent ledger is **Features**: every merged PR (and its commits) is traceable to a feature across every release it appears in.
+
+### Entities (Prisma models — snake_case `@map`/`@@map`, soft-delete where sensible)
+
+| Model | Purpose | Key relations |
+|---|---|---|
+| `Project` | One repository; owns features, releases, integration config | → `Feature[]`, `Release[]`, `Membership[]`, `Invitation[]` |
+| `Feature` | Permanent ledger unit; `name`/`description`/`category` (description feeds the AI matcher) | belongs to `Project`; ← `FeatureInRelease[]` |
+| `Release` | A branch diff (`baseRef` ↔ `compareRef`) shipped as PR + tag | belongs to `Project`; ← `PullRequest[]`, `FeatureInRelease[]` |
+| `PullRequest` | **The assignment unit** (1 PR = 1 feature); first-level unit shown | belongs to `Release`; optional `featureId`; ← `Commit[]`, optional `TicketLink` |
+| `Commit` | Read-only detail nested under its PR | belongs to `PullRequest` |
+| `FeatureInRelease` | Ledger join + per-release **state snapshot** (`state`, `flagState`) | links `Feature` ↔ `Release` |
+| `TicketLink` | Detected ticket ref (Linear/Jira) for a PR | belongs to `PullRequest` |
+| `Membership` | User ↔ Project with a per-project `ProjectRole` | links `User` ↔ `Project` |
+| `Invitation` | Email invite to a project (`token`, `status`, `expiresAt`, `invitedBy`) | belongs to `Project` |
+
+### Enums (`as const` / Prisma enums — never magic strings)
+
+- `FeatureKind` — `product` | `default` (default/system features absorb every non-product PR; never complete)
+- `FeatureCategory` — `Product` | `Infra Changes` | `Integration Tests` | `E2E Tests` | `Dev/Chore`
+- `FeatureState` — `in_progress` | `shipped_flag_off` | `live_staging` | `live_prod` | `partial` | `fully_released` | `flag_cleanup_pending` | `blocked`
+- `ReleaseType` — `feature` | `hotfix`
+- `ReleaseStatus` — `draft` | `pr_created` | `merged` | `deployed`
+- `FlagAction` — `added` | `modified` | `removed` | `unchanged`
+- `TicketSource` — `linear` | `jira`
+- `ProjectRole` — `owner` (members + settings) | `member` (full build access) | `viewer` (read-only)
+- `InvitationStatus` — `pending` | `accepted` | `expired` | `revoked`
+
+### Invariants (do not re-litigate)
+
+- **Hierarchy:** `Feature → Releases → PullRequests → Commits`. The PR is always the first-level unit; commits are read-only detail nested under their PR. A squash-merged PR shows its one commit — never bare/loose commits.
+- **Coverage:** every merged PR in a release is assigned to a feature (product or default). Default features absorb non-product PRs, so there is no "excluded" state. The **coverage gate blocks "ready for production" until coverage is 100%**.
+- **Two views, one tree:** Feature view (`Feature → Releases → PRs → commits`) and Release view (`Release → Features → PRs → commits`).
+- **Derived client language:** the summary's availability wording is **derived from `FeatureState` + `FlagState`**, never typed freehand — so we never report "available" when a flag is off. The enum→client-line mapping lives in the AI prompt (§B) and a shared enum→i18n-key map.
+- **Tags** group the one-summary-per-release into sections; tag taxonomy is **managed per project**.
+- **Release detection = branch diff:** merged PRs in `compareRef` not in `baseRef`. Merge-agnostic.
+
+### Integrations (all REAL — no mocks)
+
+- **GitHub (required)** — GitHub App; branch diff → merged PRs with nested commits.
+- **Flagsmith (optional, connection-gated)** — Admin API + Organisation API token; flag matrix (staging × prod), parity gate (blocks the "live in prod / off in staging" quadrant), orphan/ghost detection vs a static code scan. Off → no flag gate; states set manually.
+- **Linear (optional, connection-gated)** — read-only; detect PR issue refs → confirm via API → pull title/description for AI context. Behind a `TicketSource` interface so Jira can slot in later. Off → manual naming, thinner AI draft.
+
+Optional integrations degrade gracefully when disconnected — their UI hides and dependent gates relax.
+
 ## Architecture Rules
 
 ### CQRS (non-negotiable)
@@ -75,24 +122,32 @@ modules/[domain]/
 ### Authorization (CASL)
 
 `@release-hub/shared` is the single source of truth for all authorization. It exports:
-- `UserRole`, `Action`, `Subject` — `as const` enum objects (never use magic strings)
-- `defineAbilityFor(role: UserRole)` — builds a CASL `AppAbility` from a role
+- `Action`, `Subject`, `ProjectRole` — `as const` enum objects (never use magic strings)
+- `defineAbilityFor(memberships: IProjectMembership[])` — builds a project-scoped CASL `AppAbility` from the caller's memberships
+- `defineGateAbility()` — coarse route-level gate (no role); every authenticated user passes, handlers do the fine-grained per-project checks
+
+**There is no platform user role.** Authorization is purely **project-scoped**: a user's abilities come entirely from their `Membership` `ProjectRole` on each project. The domain subjects `PROJECT`, `RELEASE`, `FEATURE`, `PULL_REQUEST`, `MEMBERSHIP`, and `INVITATION` are granted via CASL `conditions` on `projectId`. Reuse the existing `READ`/`CREATE`/`UPDATE`/`DELETE`/`MANAGE` actions:
+- `owner` — manage members + settings + full build access (`MANAGE` on `MEMBERSHIP`/`INVITATION`/`PROJECT`)
+- `member` — full build access (`CREATE`/`UPDATE` on `RELEASE`/`FEATURE`/`PULL_REQUEST`), no member/settings management
+- `viewer` — read-only (`READ` on project-scoped subjects)
+
+Handlers resolve the caller's `Membership[]`, build `defineAbilityFor(memberships)`, then check `ability.can(Action.X, subject(Subject.Y, { projectId }))`. Non-members get `ForbiddenException`.
 
 **Backend enforcement (apps/api):**
-1. `PoliciesGuard` (route-level) — reads `user.role` from JWT, calls `defineAbilityFor(role)`, checks `@Can()` decorator
-2. Handler (resource-level) — calls `defineAbilityFor(role)`, checks `ability.can(Action.X, Subject.Y)`, throws `ForbiddenException`
-3. Both layers are mandatory — guard = coarse role gate, handler = fine-grained + future ownership checks
+1. `PoliciesGuard` (route-level) — calls `defineGateAbility()`, checks the `@Can()` decorator (coarse gate; every authenticated user passes)
+2. Handler (resource-level) — resolves the caller's `Membership[]`, calls `defineAbilityFor(memberships)`, checks `ability.can(Action.X, subject(Subject.Y, { projectId }))`, throws `ForbiddenException`
+3. Both layers are mandatory — guard = coarse gate, handler = fine-grained project-scoped check
 
 **Frontend rendering (apps/web):**
-1. `AbilityProvider` — calls `defineAbilityFor(role)` from JWT, pushes ability into React context
+1. `AbilityProvider` — calls `defineAbilityFor(memberships)` (from the `me` query + project memberships), pushes ability into React context
 2. `<Can I={Action.X} a={Subject.Y}>` — conditionally renders UI elements (nav items, buttons)
 3. `RequireAbility` — route-level guard, redirects to `/dashboard` if denied
 
 **Adding a new permission (checklist):**
-1. `packages/shared/src/casl.ts` — add enum value to `Action`/`Subject` if new, add `can()` rule to relevant roles
-2. `apps/api` — add `@Can(Action.X, Subject.Y)` on resolver + `ability.can()` check inside handler
+1. `packages/shared/src/casl.ts` — add enum value to `Action`/`Subject` if new, add `can()` rule to relevant roles (for project-scoped subjects, attach a `{ projectId }` condition keyed off `ProjectRole`)
+2. `apps/api` — add `@Can(Action.X, Subject.Y)` on resolver + `ability.can()` check inside handler (project-scoped: resolve the caller's `Membership` and check against `subject(Subject.Y, { projectId })`)
 3. `apps/web` — wrap UI element with `<Can I={Action.X} a={Subject.Y}>` or add `RequireAbility` route guard
-4. Always use enum values (`Action.CREATE`, `Subject.USER`) — never raw strings
+4. Always use enum values (`Action.CREATE`, `Subject.USER`, `ProjectRole.OWNER`) — never raw strings
 
 ### Domain Events
 
@@ -156,6 +211,33 @@ const { data } = useQuery(GET_WIDGETS, { variables: { filters } })
 - Manually type `useQuery<MyType>` generics — codegen provides exact types
 - Edit files in `apps/web/src/generated/` — they are auto-generated
 - Redeclare GraphQL enum types locally — import from `src/generated/graphql`
+
+## AI Provider (env-switched `IAiProvider`)
+
+AI is **real**, swapped by environment behind a single abstract DI token `IAiProvider`. The interface and prompts are identical across environments — only the transport differs, so swapping providers never touches handlers, resolvers, or the frontend.
+
+- **DEV (`NODE_ENV=development`)** — `ClaudeCliAiProvider`: spawns `claude -p "<prompt>" --output-format stream-json --model <model>` and relays stdout. In scope, mandatory.
+- **NON-DEV** — `AnthropicApiAiProvider`: a streaming Anthropic API session, a drop-in swap for the same `IAiProvider` contract. Architected now; full implementation is out of scope this pass.
+
+The module wires the provider by env: `{ provide: IAiProvider, useClass: NODE_ENV === 'development' ? ClaudeCliAiProvider : AnthropicApiAiProvider }`.
+
+### Shared prompts (A / B / C)
+
+Prompts live once and are reused across providers (`apps/api/src/modules/ai/prompts/`, eval fixtures under `prompts/fixtures/`):
+- **Prompt A — PR → feature suggestion** (`suggestFeatureForPr`): classify a merged PR into exactly one candidate feature; STRICT JSON `{ featureId, confidence, rationale }`; matches on each feature's **description**, never invents an id.
+- **Prompt B — release client summary** (`generateSummary`): one client-facing summary, grouped by feature **tag**; availability wording **derived strictly** from `FeatureState` + `FlagState` via the locked enum→client-line mapping — never "available" when a flag is off.
+- **Prompt C — tone variant**: rewrite a summary in a given tone, keeping every fact and availability wording identical.
+
+### Streaming
+
+`generateSummary` streams to the browser as a **GraphQL subscription over `graphql-ws`** — the provider yields an `AsyncIterable<string>` of tokens, the resolver maps it to a subscription, the frontend consumes it via Apollo's subscription link. Honor `prefers-reduced-motion` in the streaming UI. Non-streamed AI calls (`suggestFeatureForPr`) are plain queries/mutations. Model and tone are inputs (`{ model?, tone? }`) threaded through to `claude -p --model` (DEV) / the API session (non-DEV) and Prompt C.
+
+### Do NOT
+
+- Import a concrete AI provider in a handler — depend on `IAiProvider` only
+- Branch on `NODE_ENV` outside the AI module's provider wiring — handlers stay env-agnostic
+- Fork the prompts per environment — A/B/C are shared; only the transport differs
+- Hand-write the availability line — derive it from state via the §B mapping / shared enum→i18n-key map
 
 ## Agents
 
@@ -274,8 +356,7 @@ pnpm -r build                    # Build all packages
 - Import `PrismaClient` from `@prisma/client` — import from `./generated/client/client`
 - Use `Pool` with `PrismaPg` — pass connection string directly
 - Skip CASL checks in handlers — authorization is mandatory inside every handler
-- Use magic strings for CASL — always use `Action.X`, `Subject.Y`, `UserRole.X` enums from `@release-hub/shared`
-- Import `UserRole` from `@release-hub/db/enums` — import from `@release-hub/shared` (single source of truth)
+- Use magic strings for CASL — always use `Action.X`, `Subject.Y`, `ProjectRole.X` enums from `@release-hub/shared`
 - Add domain types to `packages/shared` — shared only contains CASL; frontend types come from GraphQL codegen
 - Put business logic in resolvers — resolvers only dispatch to buses
 - Use `any` type — define a proper interface or generic instead
