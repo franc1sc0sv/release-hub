@@ -1,0 +1,63 @@
+{
+  "overline": "Feature flag",
+  "breadcrumb": {
+    "flags": "Flags"
+  },
+  "actions": {
+    "snooze": "Posponer 7 días",
+    "dismiss": "Descartar",
+    "openInFlagsmith": "Abrir en Flagsmith",
+    "setIntendedEnableDate": "Definir fecha de activación",
+    "markAsIntentional": "Marcar como intencional"
+  },
+  "verdict": {
+    "subline": "Lanzado en Release {{version}}, en main hace {{days}} días, aún INACTIVO en Flagsmith, recordatorio pospuesto hasta {{snoozedUntil}}"
+  },
+  "currentStatus": {
+    "title": "Estado actual",
+    "badge": "derivado automáticamente",
+    "delivery": {
+      "label": "Entrega",
+      "shippedIn": "Lanzado en {{version}}",
+      "inMain": "en main · {{days}}d"
+    },
+    "rollout": {
+      "label": "Despliegue"
+    }
+  },
+  "history": {
+    "title": "Historial",
+    "count_one": "{{count}} evento",
+    "count_other": "{{count}} eventos",
+    "filterBadge": "todas las fuentes",
+    "sources": {
+      "release-hub": "release hub",
+      "code-github": "código · github",
+      "flagsmith-webhook": "webhook de flagsmith",
+      "release": "release"
+    }
+  },
+  "branches": {
+    "title": "Presente en ramas",
+    "since": "desde {{date}}"
+  },
+  "linkedFeature": {
+    "title": "Feature vinculado"
+  },
+  "releases": {
+    "title": "Aparece en releases",
+    "status": {
+      "deployed": "desplegado",
+      "merged": "fusionado"
+    },
+    "meta": "{{status}} · {{date}} · PR #{{prNumber}}"
+  },
+  "pullRequests": {
+    "title": "Modificado en PRs",
+    "meta": "{{author}} · {{date}} · {{file}}",
+    "changeType": {
+      "added": "agregado",
+      "modified": "modificado"
+    }
+  }
+}

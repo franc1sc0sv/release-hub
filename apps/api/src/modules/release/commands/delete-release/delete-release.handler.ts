@@ -5,7 +5,10 @@ import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { AppException } from '../../../../common/errors/app.exception'
+import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
+import { ReleaseStatus } from '../../../../common/types/release-status.enum'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { ReleaseObjectType } from '../../types/release.type'
@@ -42,6 +45,10 @@ export class DeleteReleaseHandler extends BaseCommandHandler<DeleteReleaseComman
       })
     ) {
       throw new ForbiddenException()
+    }
+
+    if (release.status === ReleaseStatus.DEPLOYED) {
+      throw new AppException('A deployed release cannot be deleted.', ErrorCode.CONFLICT)
     }
 
     const deleted = await this.releaseRepository.softDelete(command.releaseId, tx)

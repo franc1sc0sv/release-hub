@@ -19,7 +19,6 @@ export interface IPrAssignedToFeatureEvent extends IDomainEvent {
 export interface IFeatureStateChangedEvent extends IDomainEvent {
   readonly eventName: 'feature.state_changed'
   readonly featureId: string
-  readonly releaseId: string
   readonly state: FeatureState
   readonly occurredAt: Date
 }

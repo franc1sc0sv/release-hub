@@ -51,9 +51,10 @@ enum AiDraftStatus {
 
 enum ReleaseStatus {
   draft
-  pr_created
+  ready_to_release
   merged
   deployed
+  canceled
 
   @@map("release_status")
 }
@@ -208,6 +209,7 @@ model Feature {
   kind        FeatureKind @default(product)
   tags        String[]
   suggested   Boolean     @default(false)
+  state       FeatureState @default(in_progress) @map("state")
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
   deletedAt   DateTime?       @map("deleted_at")

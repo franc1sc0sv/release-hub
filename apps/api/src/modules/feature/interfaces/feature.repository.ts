@@ -14,7 +14,8 @@ export abstract class IFeatureRepository implements IBaseRepository<IFeature> {
   abstract findById: RepositoryMethod<[id: string], IFeature | null>
   abstract findAllByProject: RepositoryMethod<[projectId: string], IFeature[]>
   abstract findSuggestedByIds: RepositoryMethod<[ids: string[]], IFeature[]>
-  abstract findCurrentStatesByProject: RepositoryMethod<[projectId: string], Map<string, FeatureState>>
+  abstract findSuggestedByProject: RepositoryMethod<[projectId: string], IFeature[]>
+  abstract updateState: RepositoryMethod<[id: string, state: FeatureState], IFeature>
   abstract findReleasesForFeature: RepositoryMethod<[featureId: string], IRelease[]>
   abstract findPullRequestsForFeature: RepositoryMethod<[featureId: string], IFeaturePullRequest[]>
   abstract create: RepositoryMethod<[data: ICreateFeatureData], IFeature>

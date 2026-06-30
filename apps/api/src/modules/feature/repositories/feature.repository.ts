@@ -16,9 +16,10 @@ import { TicketSource } from '../../../common/types/ticket-source.enum'
 
 const prismaToAppReleaseStatus: Record<string, ReleaseStatus> = {
   [PrismaReleaseStatus.draft]: ReleaseStatus.DRAFT,
-  [PrismaReleaseStatus.pr_created]: ReleaseStatus.PR_CREATED,
+  [PrismaReleaseStatus.ready_to_release]: ReleaseStatus.READY_TO_RELEASE,
   [PrismaReleaseStatus.merged]: ReleaseStatus.MERGED,
   [PrismaReleaseStatus.deployed]: ReleaseStatus.DEPLOYED,
+  [PrismaReleaseStatus.canceled]: ReleaseStatus.CANCELED,
 }
 
 const prismaToAppAiDraftStatus: Record<string, AiDraftStatus> = {
@@ -57,23 +58,12 @@ export class FeatureRepository extends IFeatureRepository {
     return rows.map((row) => this.toIFeature(row))
   }
 
-  findCurrentStatesByProject = async (
-    projectId: string,
-    tx: TxClient,
-  ): Promise<Map<string, FeatureState>> => {
-    const rows = await tx.featureInRelease.findMany({
-      where: { feature: { projectId, deletedAt: null }, release: { deletedAt: null } },
-      orderBy: { updatedAt: 'desc' },
-      select: { featureId: true, state: true },
+  updateState = async (id: string, state: FeatureState, tx: TxClient): Promise<IFeature> => {
+    const row = await tx.feature.update({
+      where: { id },
+      data: { state },
     })
-
-    const states = new Map<string, FeatureState>()
-    for (const row of rows) {
-      if (!states.has(row.featureId)) {
-        states.set(row.featureId, prismaToAppState[row.state] ?? FeatureState.IN_PROGRESS)
-      }
-    }
-    return states
+    return this.toIFeature(row)
   }
 
   create = async (data: ICreateFeatureData, tx: TxClient): Promise<IFeature> => {
@@ -112,6 +102,13 @@ export class FeatureRepository extends IFeatureRepository {
   findSuggestedByIds = async (ids: string[], tx: TxClient): Promise<IFeature[]> => {
     const rows = await tx.feature.findMany({
       where: { id: { in: ids }, suggested: true, deletedAt: null },
+    })
+    return rows.map((row) => this.toIFeature(row))
+  }
+
+  findSuggestedByProject = async (projectId: string, tx: TxClient): Promise<IFeature[]> => {
+    const rows = await tx.feature.findMany({
+      where: { projectId, suggested: true, deletedAt: null },
     })
     return rows.map((row) => this.toIFeature(row))
   }
@@ -268,6 +265,7 @@ export class FeatureRepository extends IFeatureRepository {
     kind: string
     tags: string[]
     suggested: boolean
+    state: string
     createdAt: Date
     updatedAt: Date
   }): IFeature {
@@ -279,6 +277,7 @@ export class FeatureRepository extends IFeatureRepository {
       kind: row.kind as FeatureKind,
       tags: row.tags,
       suggested: row.suggested,
+      state: prismaToAppState[row.state] ?? FeatureState.IN_PROGRESS,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }

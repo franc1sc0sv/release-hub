@@ -1,17 +1,16 @@
 import type { IFeature, IFeatureDetail, IFeaturePullRequest, IFeatureCommit, IFeatureTicketLink, IFeatureInRelease } from '../interfaces/feature.interfaces'
 import { FeatureType } from './feature.type'
-import { FeatureDetailType } from './feature-detail.type'
+import { FeatureDetailType, FeatureReleaseSnapshotType } from './feature-detail.type'
 import { FeatureInReleaseType } from './feature-in-release.type'
 import { FlagStateType } from './flag-state.type'
 import { FeatureKind } from '../../../common/types/feature-kind.enum'
-import type { FeatureState } from '../../../common/types/feature-state.enum'
 import { PullRequestType } from '../../release/types/pull-request.type'
 import { CommitType } from '../../release/types/commit.type'
 import { TicketLinkType } from '../../release/types/ticket-link.type'
 import { toReleaseObjectType } from '../../release/types/release.mappers'
 import { deriveClientAvailability } from './client-availability.map'
 
-export function toFeatureType(feature: IFeature, currentState: FeatureState | null = null): FeatureType {
+export function toFeatureType(feature: IFeature): FeatureType {
   const type = new FeatureType()
   type.id = feature.id
   type.projectId = feature.projectId
@@ -20,7 +19,7 @@ export function toFeatureType(feature: IFeature, currentState: FeatureState | nu
   type.kind = feature.kind as FeatureKind
   type.tags = feature.tags
   type.suggested = feature.suggested
-  type.currentState = currentState
+  type.currentState = feature.state
   type.createdAt = feature.createdAt
   type.updatedAt = feature.updatedAt
   return type
@@ -62,11 +61,19 @@ function toFeaturePullRequestType(pr: IFeaturePullRequest): PullRequestType {
   return type
 }
 
+function toFeatureReleaseSnapshotType(fir: IFeatureInRelease): FeatureReleaseSnapshotType {
+  const type = new FeatureReleaseSnapshotType()
+  type.releaseId = fir.releaseId
+  type.state = fir.state
+  return type
+}
+
 export function toFeatureDetailType(detail: IFeatureDetail): FeatureDetailType {
   const type = new FeatureDetailType()
   type.feature = toFeatureType(detail.feature)
   type.releases = detail.releases.map(toReleaseObjectType)
   type.prs = detail.prs.map(toFeaturePullRequestType)
+  type.snapshots = detail.snapshots.map(toFeatureReleaseSnapshotType)
   return type
 }
 

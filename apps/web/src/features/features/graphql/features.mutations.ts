@@ -24,14 +24,8 @@ export const ASSIGN_PR_TO_FEATURE = graphql(`
 export const SET_FEATURE_STATE = graphql(`
   mutation SetFeatureState($input: SetFeatureStateInput!) {
     setFeatureState(input: $input) {
-      featureId
-      releaseId
-      state
-      clientAvailabilityKey
-      flagState {
-        staging
-        production
-      }
+      id
+      currentState
       updatedAt
     }
   }
@@ -49,5 +43,11 @@ export const SET_FEATURE_TAGS = graphql(`
       createdAt
       updatedAt
     }
+  }
+`)
+
+export const DELETE_FEATURE = graphql(`
+  mutation DeleteFeature($id: ID!) {
+    deleteFeature(id: $id)
   }
 `)

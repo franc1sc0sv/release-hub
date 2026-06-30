@@ -9,7 +9,6 @@ import { Action, Subject } from '@release-hub/shared'
 import type { IJwtUser } from '../../../common/types'
 import { FeatureType } from '../types/feature.type'
 import { FeatureDetailType } from '../types/feature-detail.type'
-import { FeatureInReleaseType } from '../types/feature-in-release.type'
 import { CreateFeatureInput } from '../types/create-feature.input'
 import { AssignPrToFeatureInput } from '../types/assign-pr-to-feature.input'
 import { SetFeatureStateInput } from '../commands/set-feature-state/set-feature-state.input'
@@ -24,6 +23,7 @@ import { AcceptSuggestedFeatureInput } from '../commands/accept-suggested-featur
 import { RejectSuggestedFeatureInput } from '../commands/reject-suggested-feature/reject-suggested-feature.input'
 import { AcceptSuggestedFeatureCommand } from '../commands/accept-suggested-feature/accept-suggested-feature.command'
 import { RejectSuggestedFeatureCommand } from '../commands/reject-suggested-feature/reject-suggested-feature.command'
+import { DeleteFeatureCommand } from '../commands/delete-feature/delete-feature.command'
 
 @Resolver(() => FeatureType)
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -73,14 +73,14 @@ export class FeatureResolver {
     )
   }
 
-  @Mutation(() => FeatureInReleaseType)
+  @Mutation(() => FeatureType)
   @Can(Action.UPDATE, Subject.FEATURE)
   setFeatureState(
     @Args('input', { type: () => SetFeatureStateInput }) input: SetFeatureStateInput,
     @CurrentUser() user: IJwtUser,
-  ): Promise<FeatureInReleaseType> {
+  ): Promise<FeatureType> {
     return this.commandBus.execute(
-      new SetFeatureStateCommand(input.featureId, input.releaseId, input.state, user.id),
+      new SetFeatureStateCommand(input.featureId, input.state, user.id),
     )
   }
 
@@ -121,5 +121,14 @@ export class FeatureResolver {
     return this.commandBus.execute(
       new RejectSuggestedFeatureCommand(input.featureId, user.id),
     )
+  }
+
+  @Mutation(() => Boolean)
+  @Can(Action.DELETE, Subject.FEATURE)
+  deleteFeature(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<boolean> {
+    return this.commandBus.execute(new DeleteFeatureCommand(id, user.id))
   }
 }

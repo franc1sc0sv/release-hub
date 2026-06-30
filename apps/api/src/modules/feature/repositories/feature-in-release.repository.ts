@@ -22,6 +22,13 @@ export class FeatureInReleaseRepository extends IFeatureInReleaseRepository {
     return this.toIFeatureInRelease(row)
   }
 
+  findByFeature = async (featureId: string, tx: TxClient): Promise<IFeatureInRelease[]> => {
+    const rows = await tx.featureInRelease.findMany({
+      where: { featureId, release: { deletedAt: null } },
+    })
+    return rows.map((row) => this.toIFeatureInRelease(row))
+  }
+
   upsertState = async (
     featureId: string,
     releaseId: string,

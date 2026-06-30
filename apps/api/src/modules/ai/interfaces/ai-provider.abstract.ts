@@ -1,5 +1,13 @@
 import type { SummaryChunkType } from '../types/summary-chunk.type'
 
+export interface IAiUsage {
+  inputTokens: number
+  outputTokens: number
+  cacheReadTokens: number
+  cacheCreationTokens: number
+  costUsd: number
+}
+
 export interface IAiSuggestInput {
   prTitle: string
   prBranch: string
@@ -20,6 +28,9 @@ export interface IAiSuggestResult {
   featureId: string
   confidence: number
   rationale: string
+  suggestedFeatureName?: string
+  suggestedFeatureDescription?: string
+  usage?: IAiUsage
 }
 
 export interface IAiPrSummaryInput {
@@ -31,6 +42,7 @@ export interface IAiPrSummaryInput {
 
 export interface IAiPrSummaryResult {
   summary: string
+  usage?: IAiUsage
 }
 
 export interface IAiStreamSummaryInput {

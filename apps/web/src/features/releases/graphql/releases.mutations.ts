@@ -120,3 +120,21 @@ export const DELETE_RELEASE = graphql(`
     }
   }
 `)
+
+export const REGENERATE_DRAFT = graphql(`
+  mutation RegenerateDraft($releaseId: ID!, $resume: Boolean!) {
+    regenerateDraft(releaseId: $releaseId, resume: $resume) {
+      id
+      aiDraftStatus
+    }
+  }
+`)
+
+export const SET_RELEASE_STATUS = graphql(`
+  mutation SetReleaseStatus($input: SetReleaseStatusInput!) {
+    setReleaseStatus(input: $input) {
+      id
+      status
+    }
+  }
+`)

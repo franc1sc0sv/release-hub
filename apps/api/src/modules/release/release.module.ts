@@ -31,6 +31,7 @@ import { ShipReleaseHandler } from './commands/ship-release/ship-release.handler
 import { SaveReleaseSummaryHandler } from './commands/save-release-summary/save-release-summary.handler'
 import { SavePrSummaryHandler } from './commands/save-pr-summary/save-pr-summary.handler'
 import { DeleteReleaseHandler } from './commands/delete-release/delete-release.handler'
+import { SetReleaseStatusHandler } from './commands/set-release-status/set-release-status.handler'
 
 @Module({
   imports: [CqrsModule, IntegrationModule, ProjectModule, GithubAuthModule, LinearAuthModule],
@@ -55,6 +56,7 @@ import { DeleteReleaseHandler } from './commands/delete-release/delete-release.h
     SaveReleaseSummaryHandler,
     SavePrSummaryHandler,
     DeleteReleaseHandler,
+    SetReleaseStatusHandler,
   ],
   exports: [IPullRequestRepository, IReleaseRepository],
 })

@@ -134,6 +134,7 @@ export function defineAbilityFor(memberships: IProjectMembership[] = []): AppAbi
       can(Action.CREATE, 'Feature', { projectId })
       can(Action.READ, 'Feature', { projectId })
       can(Action.UPDATE, 'Feature', { projectId })
+      can(Action.DELETE, 'Feature', { projectId })
       can(Action.READ, 'PullRequest', { projectId })
       can(Action.UPDATE, 'PullRequest', { projectId })
       can(Action.READ, 'Membership', { projectId })

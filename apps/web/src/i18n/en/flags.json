@@ -54,6 +54,32 @@
       "offInProd": "Disabled in production, enabled elsewhere"
     }
   },
+  "export": {
+    "button": "Export",
+    "title": "Export flag comparison",
+    "description": "Pick the environments to include and a main one, then export a PDF comparing it against the others.",
+    "includeLabel": "Include environments",
+    "mainLabel": "Main environment",
+    "needTwo": "Select at least two environments to compare.",
+    "loading": "Comparing environments...",
+    "cancel": "Cancel",
+    "download": "Export PDF",
+    "brand": "Release Hub · Flag Export",
+    "footer": "Generated from live Flagsmith data",
+    "generatedLabel": "Generated",
+    "comparison": {
+      "documentTitle": "{{project}} — flag comparison",
+      "reportTitle": "Environment comparison report",
+      "baselineLabel": "Main",
+      "comparedLabel": "Compared",
+      "totalLabel": "Flags differing",
+      "onInBaselineLabel": "On in main",
+      "offInBaselineLabel": "Off in main",
+      "onHeading": "Enabled in {{env}}, disabled elsewhere",
+      "offHeading": "Disabled in {{env}}, enabled elsewhere",
+      "inSync": "All selected environments are in sync with {{env}}."
+    }
+  },
   "pagination": {
     "previous": "Previous page",
     "next": "Next page",

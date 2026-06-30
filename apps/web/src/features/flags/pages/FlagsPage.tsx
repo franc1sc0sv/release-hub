@@ -6,6 +6,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  Download,
   Flag,
   GitCompare,
   Loader2,
@@ -35,6 +36,7 @@ import { useFlags } from '../hooks/use-flags'
 import { FlagMatrix } from '../components/FlagMatrix'
 import { ColumnVisibilityMenu } from '../components/ColumnVisibilityMenu'
 import { CompareFlagsDialog } from '../components/CompareFlagsDialog'
+import { ExportFlagsDialog } from '../components/ExportFlagsDialog'
 
 const PAGE_SIZE = 100
 
@@ -64,6 +66,9 @@ export default function FlagsPage() {
   const [activeSortEnv, setActiveSortEnv] = useState<string | undefined>(undefined)
   const [page, setPage] = useState(1)
   const [compareOpen, setCompareOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+
+  const projectName = activeProject?.name ?? ''
 
   const [hiddenEnvs, setHiddenEnvs] = useLocalStorage<string[]>(
     `release-hub:flags:columns:${projectId ?? 'none'}`,
@@ -180,6 +185,17 @@ export default function FlagsPage() {
               <GitCompare className="size-4" aria-hidden />
               {t('compare.button')}
             </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full gap-2"
+              disabled={environments.length < 2}
+              onClick={() => setExportOpen(true)}
+            >
+              <Download className="size-4" aria-hidden />
+              {t('export.button')}
+            </Button>
           </div>
 
           {loading && (
@@ -267,12 +283,21 @@ export default function FlagsPage() {
       </NebulaBackground>
 
       {projectId && (
-        <CompareFlagsDialog
-          open={compareOpen}
-          onOpenChange={setCompareOpen}
-          projectId={projectId}
-          visibleEnvironments={visibleEnvironments}
-        />
+        <>
+          <CompareFlagsDialog
+            open={compareOpen}
+            onOpenChange={setCompareOpen}
+            projectId={projectId}
+            visibleEnvironments={visibleEnvironments}
+          />
+          <ExportFlagsDialog
+            open={exportOpen}
+            onOpenChange={setExportOpen}
+            projectId={projectId}
+            projectName={projectName}
+            environments={environments}
+          />
+        </>
       )}
     </TooltipProvider>
   )

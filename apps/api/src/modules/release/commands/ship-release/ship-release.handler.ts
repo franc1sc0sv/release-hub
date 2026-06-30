@@ -124,7 +124,7 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
 
     const updated = await this.releaseRepository.updateStatus(
       command.releaseId,
-      ReleaseStatus.PR_CREATED,
+      ReleaseStatus.READY_TO_RELEASE,
       openedPr.url,
       tx,
     )

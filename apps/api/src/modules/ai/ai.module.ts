@@ -13,6 +13,9 @@ import { SuggestFeatureForPrHandler } from './queries/suggest-feature-for-pr/sug
 import { GenerateSummaryHandler } from './queries/generate-summary/generate-summary.handler'
 import { AiDraftReleaseCreatedHandler } from './events/release-created.handler'
 import { GeneratePrSummaryHandler } from './commands/generate-pr-summary/generate-pr-summary.handler'
+import { RegenerateDraftHandler } from './commands/regenerate-draft/regenerate-draft.handler'
+import { AiDraftRunner } from './services/ai-draft-runner.service'
+import { AiBootstrapService } from './services/ai-bootstrap.service'
 
 const AiProviderBinding = {
   provide: IAiProvider,
@@ -30,6 +33,9 @@ const AiProviderBinding = {
     GenerateSummaryHandler,
     AiDraftReleaseCreatedHandler,
     GeneratePrSummaryHandler,
+    RegenerateDraftHandler,
+    AiDraftRunner,
+    AiBootstrapService,
   ],
 })
 export class AiModule {}

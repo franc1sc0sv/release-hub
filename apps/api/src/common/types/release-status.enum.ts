@@ -2,9 +2,10 @@ import { registerEnumType } from '@nestjs/graphql'
 
 export const ReleaseStatus = {
   DRAFT: 'draft',
-  PR_CREATED: 'pr_created',
+  READY_TO_RELEASE: 'ready_to_release',
   MERGED: 'merged',
   DEPLOYED: 'deployed',
+  CANCELED: 'canceled',
 } as const
 
 export type ReleaseStatus = (typeof ReleaseStatus)[keyof typeof ReleaseStatus]

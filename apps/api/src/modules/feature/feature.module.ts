@@ -16,6 +16,7 @@ import { SetFeatureStateHandler } from './commands/set-feature-state/set-feature
 import { SetFeatureTagsHandler } from './commands/set-feature-tags/set-feature-tags.handler'
 import { AcceptSuggestedFeatureHandler } from './commands/accept-suggested-feature/accept-suggested-feature.handler'
 import { RejectSuggestedFeatureHandler } from './commands/reject-suggested-feature/reject-suggested-feature.handler'
+import { DeleteFeatureHandler } from './commands/delete-feature/delete-feature.handler'
 
 @Module({
   imports: [CqrsModule, ProjectModule, ReleaseModule, ProjectTagModule],
@@ -31,6 +32,7 @@ import { RejectSuggestedFeatureHandler } from './commands/reject-suggested-featu
     SetFeatureTagsHandler,
     AcceptSuggestedFeatureHandler,
     RejectSuggestedFeatureHandler,
+    DeleteFeatureHandler,
   ],
   exports: [IFeatureRepository],
 })

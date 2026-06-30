@@ -14,6 +14,8 @@ import { PullRequestType } from '../../release/types/pull-request.type'
 import { SuggestFeatureForPrQuery } from '../queries/suggest-feature-for-pr/suggest-feature-for-pr.query'
 import { GenerateSummaryQuery } from '../queries/generate-summary/generate-summary.query'
 import { GeneratePrSummaryCommand } from '../commands/generate-pr-summary/generate-pr-summary.command'
+import { RegenerateDraftCommand } from '../commands/regenerate-draft/regenerate-draft.command'
+import { ReleaseObjectType } from '../../release/types/release.type'
 
 @Resolver()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -22,6 +24,16 @@ export class AiResolver {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
   ) {}
+
+  @Mutation(() => ReleaseObjectType)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  regenerateDraft(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @Args('resume', { type: () => Boolean, defaultValue: true }) resume: boolean,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleaseObjectType> {
+    return this.commandBus.execute(new RegenerateDraftCommand(releaseId, user.id, resume))
+  }
 
   @Mutation(() => PullRequestType)
   @Can(Action.UPDATE, Subject.PULL_REQUEST)

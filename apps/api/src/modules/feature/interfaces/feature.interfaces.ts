@@ -11,6 +11,7 @@ export interface IFeature {
   kind: FeatureKind
   tags: string[]
   suggested: boolean
+  state: FeatureState
   createdAt: Date
   updatedAt: Date
 }
@@ -73,6 +74,7 @@ export interface IFeatureDetail {
   feature: IFeature
   releases: IRelease[]
   prs: IFeaturePullRequest[]
+  snapshots: IFeatureInRelease[]
 }
 
 export interface IMinimalPullRequest {

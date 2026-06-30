@@ -90,6 +90,16 @@
     "suggestError": "No se pudo obtener una sugerencia"
   },
   "suggested": "Sugerida",
+  "delete": {
+    "label": "Eliminar funcionalidad",
+    "ariaLabel": "Eliminar funcionalidad {{name}}",
+    "dialogTitle": "¿Eliminar esta funcionalidad?",
+    "dialogDescription": "\"{{name}}\" se eliminará del registro. Una funcionalidad solo se puede eliminar cuando ninguna release activa la usa — si aparece en una release, elimina esa release primero.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar funcionalidad",
+    "success": "Funcionalidad eliminada",
+    "error": "No se pudo eliminar la funcionalidad"
+  },
   "dialog": {
     "title": "Crear funcionalidad",
     "description": "Agrega una nueva funcionalidad de producto al registro. Cada PR debe ser trazable a una.",

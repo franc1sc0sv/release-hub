@@ -18,16 +18,10 @@ import { staggerContainer, slideUp } from '@/lib/animations'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { GET_RELEASES } from '../graphql/releases.queries'
 import { DeleteReleaseButton } from '../components/DeleteReleaseButton'
-import type { GetReleasesQuery, ReleaseStatus } from '@/generated/graphql'
+import { RELEASE_STATUS_BADGE_CLASS } from '../constants/release-enums'
+import type { GetReleasesQuery } from '@/generated/graphql'
 
 type ReleaseItem = GetReleasesQuery['getReleases'][number]
-
-const statusColorMap: Record<ReleaseStatus, string> = {
-  DRAFT: 'border-slate-500/40 bg-slate-500/10 text-slate-300',
-  PR_CREATED: 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300',
-  MERGED: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
-  DEPLOYED: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
-}
 
 interface ReleaseRowProps {
   release: ReleaseItem
@@ -39,7 +33,7 @@ function ReleaseRow({ release, projectId }: ReleaseRowProps) {
   const enumLabels = useEnumLabels()
   const detailPath = ROUTES.RELEASE_DETAIL.replace(':releaseId', release.id)
 
-  const statusClasses = statusColorMap[release.status]
+  const statusClasses = RELEASE_STATUS_BADGE_CLASS[release.status]
   const statusLabel = enumLabels.releaseStatus(release.status)
 
   const formattedDate = new Date(release.createdAt).toLocaleDateString(undefined, {
@@ -87,6 +81,7 @@ function ReleaseRow({ release, projectId }: ReleaseRowProps) {
           releaseId={release.id}
           projectId={projectId}
           releaseLabel={releaseLabel}
+          status={release.status}
           variant="icon"
         />
       </div>

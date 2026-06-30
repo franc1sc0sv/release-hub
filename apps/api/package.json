@@ -15,6 +15,7 @@
     "logs:clear": "rm -f logs/app.jsonl"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.196",
     "@apollo/server": "^4.0.0",
     "@casl/ability": "^6.0.0",
     "@nestjs/apollo": "^12.0.0",

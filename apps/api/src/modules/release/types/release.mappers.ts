@@ -25,7 +25,7 @@ function toTicketLinkType(ticket: ITicketLink): TicketLinkType {
   return type
 }
 
-export function toPullRequestType(pr: IPullRequest): PullRequestType {
+export function toPullRequestType(pr: IPullRequest, repo: string = ''): PullRequestType {
   const type = new PullRequestType()
   type.id = pr.id
   type.number = pr.number
@@ -41,6 +41,7 @@ export function toPullRequestType(pr: IPullRequest): PullRequestType {
   type.summaryEditedAt = pr.summaryEditedAt
   type.commits = pr.commits.map(toCommitType)
   type.tickets = pr.ticketLinks.map(toTicketLinkType)
+  type.url = repo ? `https://github.com/${repo}/pull/${pr.number}` : ''
   return type
 }
 
@@ -65,6 +66,7 @@ export function toReleaseObjectType(release: IRelease): ReleaseObjectType {
 export function githubPrToPullRequestType(
   pr: IGitHubMergedPr,
   tickets: TicketLinkType[] = [],
+  repo: string = '',
 ): PullRequestType {
   const type = new PullRequestType()
   type.id = ''
@@ -79,6 +81,7 @@ export function githubPrToPullRequestType(
   type.aiRationale = null
   type.summary = null
   type.summaryEditedAt = null
+  type.url = repo ? `https://github.com/${repo}/pull/${pr.number}` : ''
   type.tickets = tickets
   type.commits = pr.commits.map((c) => {
     const commit = new CommitType()

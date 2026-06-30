@@ -17,6 +17,7 @@ import { htmlToMarkdown } from '../../../../common/text/html-to-markdown'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { IFeatureRepository } from '../../../feature/interfaces/feature.repository'
+import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import type { IConfirmReleasePreparation } from '../../interfaces/release.interfaces'
 import { ReleaseObjectType } from '../../types/release.type'
 import { toReleaseObjectType } from '../../types/release.mappers'
@@ -31,6 +32,7 @@ interface IConfirmReleaseSource {
   prBody: string
   accessToken: string
   suggestedFeatureIds: string[]
+  assignedFeatureIds: string[]
 }
 
 @CommandHandler(ConfirmReleaseCommand)
@@ -46,6 +48,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly featureRepository: IFeatureRepository,
+    private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
     private readonly gitHubClient: IGitHubClient,
     private readonly githubConnectionRepository: IGithubConnectionRepository,
   ) {
@@ -69,6 +72,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
       releaseName: source.releaseName,
       prUrl: openedPr.url,
       suggestedFeatureIds: source.suggestedFeatureIds,
+      assignedFeatureIds: source.assignedFeatureIds,
     }
   }
 
@@ -82,9 +86,20 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
       await this.featureRepository.acceptSuggested(featureId, {}, tx)
     }
 
+    for (const featureId of prepared.assignedFeatureIds) {
+      const feature = await this.featureRepository.findById(featureId, tx)
+      if (!feature) continue
+      await this.featureInReleaseRepository.upsertState(
+        featureId,
+        command.releaseId,
+        feature.state,
+        tx,
+      )
+    }
+
     const updated = await this.releaseRepository.updateStatus(
       command.releaseId,
-      ReleaseStatus.PR_CREATED,
+      ReleaseStatus.READY_TO_RELEASE,
       prepared.prUrl,
       tx,
     )
@@ -150,6 +165,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
         prBody: release.summary ? htmlToMarkdown(release.summary) : '',
         accessToken,
         suggestedFeatureIds: suggestedFeatures.map((f) => f.id),
+        assignedFeatureIds,
       }
     })
   }

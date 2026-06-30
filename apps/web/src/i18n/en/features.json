@@ -90,6 +90,16 @@
     "suggestError": "Could not get a suggestion"
   },
   "suggested": "Suggested",
+  "delete": {
+    "label": "Delete feature",
+    "ariaLabel": "Delete feature {{name}}",
+    "dialogTitle": "Delete this feature?",
+    "dialogDescription": "\"{{name}}\" will be removed from the ledger. A feature can only be deleted when no active release uses it — if it appears in a release, delete that release first.",
+    "cancel": "Cancel",
+    "confirm": "Delete feature",
+    "success": "Feature deleted",
+    "error": "Could not delete feature"
+  },
   "dialog": {
     "title": "Create feature",
     "description": "Add a new product feature to the ledger. Every PR must trace to one.",

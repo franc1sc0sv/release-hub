@@ -1,8 +1,13 @@
 {
-  "enabledMcpjsonServers": ["linear", "shadcn", "playwright"],
+  "enabledMcpjsonServers": [
+    "linear",
+    "shadcn",
+    "playwright"
+  ],
   "enabledPlugins": {
     "apollo-skills@apollo-marketplace": true,
     "frontend-design@claude-plugins-official": true,
-    "pr-review-toolkit@claude-plugins-official": true
+    "pr-review-toolkit@claude-plugins-official": true,
+    "neon-postgres@neon": true
   }
 }

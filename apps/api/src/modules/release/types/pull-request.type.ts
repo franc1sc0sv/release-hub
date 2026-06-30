@@ -45,4 +45,7 @@ export class PullRequestType {
 
   @Field(() => [TicketLinkType])
   tickets: TicketLinkType[]
+
+  @Field(() => String)
+  url: string
 }

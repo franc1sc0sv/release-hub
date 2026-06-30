@@ -12,12 +12,14 @@ import {
 } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { GET_COVERAGE } from '../graphql/releases.queries'
+import { ReleaseStatusValue } from '../constants/release-enums'
 
 interface CoverageMeterProps {
   releaseId: string
+  releaseStatus: string
 }
 
-export function CoverageMeter({ releaseId }: CoverageMeterProps) {
+export function CoverageMeter({ releaseId, releaseStatus }: CoverageMeterProps) {
   const { t } = useTranslation('releases')
   const shouldReduceMotion = useReducedMotion()
 
@@ -36,9 +38,17 @@ export function CoverageMeter({ releaseId }: CoverageMeterProps) {
   const { total, assigned, ready } = coverage
   const percent = total === 0 ? 0 : Math.round((assigned / total) * 100)
 
-  const statusColor = ready
-    ? 'var(--status-live)'
-    : 'var(--status-mismatch)'
+  const isDraft = releaseStatus === ReleaseStatusValue.DRAFT
+  const isConfirmed =
+    releaseStatus === ReleaseStatusValue.READY_TO_RELEASE ||
+    releaseStatus === ReleaseStatusValue.MERGED ||
+    releaseStatus === ReleaseStatusValue.DEPLOYED
+
+  const statusColor = isDraft
+    ? 'var(--color-indigo-400)'
+    : ready && isConfirmed
+      ? 'var(--status-live)'
+      : 'var(--status-mismatch)'
 
   const transitionDuration = shouldReduceMotion ? 0 : 0.6
 
@@ -86,14 +96,19 @@ export function CoverageMeter({ releaseId }: CoverageMeterProps) {
           </motion.span>
 
           <motion.div
-            key={String(ready)}
+            key={`${String(isDraft)}-${String(ready)}`}
             initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
             className="flex items-center gap-1.5 text-xs font-medium"
             style={{ color: statusColor }}
           >
-            {ready ? (
+            {isDraft ? (
+              <>
+                <AlertCircle className="size-3.5" aria-hidden="true" />
+                {t('coverage.inReview')}
+              </>
+            ) : ready ? (
               <>
                 <CheckCircle2 className="size-3.5" aria-hidden="true" />
                 {t('coverage.ready')}

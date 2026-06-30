@@ -17,6 +17,7 @@ import { OverviewTab } from '../components/OverviewTab'
 import { DraftTab } from '../components/DraftTab'
 import { SummaryTab } from '../components/SummaryTab'
 import { DeleteReleaseButton } from '../components/DeleteReleaseButton'
+import { ReleaseStatusControl } from '../components/ReleaseStatusControl'
 
 const POLL_INTERVAL_MS = 3000
 const DRAFTING_STATUSES = new Set<string>([
@@ -114,12 +115,14 @@ export default function ReleaseViewPage() {
             <h1 className="font-display text-display-lg font-bold tracking-tight text-foreground">
               {release.name ?? `${release.baseRef} → ${release.compareRef}`}
             </h1>
+            <ReleaseStatusControl releaseId={release.id} currentStatus={release.status} />
           </div>
 
           <DeleteReleaseButton
             releaseId={release.id}
             projectId={projectId}
             releaseLabel={release.name ?? `${release.baseRef} → ${release.compareRef}`}
+            status={release.status}
             onDeleted={() => navigate(ROUTES.RELEASES)}
             variant="icon"
           />

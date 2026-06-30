@@ -9,13 +9,11 @@ import { Badge } from '@/components/ui/badge'
 import { ROUTES } from '@/lib/routes'
 import { slideUp, staggerContainer } from '@/lib/animations'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
-import {
-  FeatureKindValue,
-  FEATURE_STATE_BADGE_CLASS,
-} from '../constants/feature-enums'
+import { FeatureKindValue } from '../constants/feature-enums'
 import { useFeature } from '../hooks/useFeature'
 import { FeatureDetailTree } from '../components/FeatureDetailTree'
-import type { FeatureKind, FeatureState } from '@/generated/graphql'
+import { FeatureStateControl } from '../components/FeatureStateControl'
+import type { FeatureKind } from '@/generated/graphql'
 
 export default function FeatureDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -84,9 +82,8 @@ export default function FeatureDetailPage() {
     )
   }
 
-  const { feature, releases, prs } = detail
+  const { feature, releases, prs, snapshots } = detail
   const featureKind = feature.kind as FeatureKind
-  const featureState = feature.currentState as FeatureState | null
 
   return (
     <NebulaBackground className="p-6">
@@ -125,14 +122,7 @@ export default function FeatureDetailPage() {
                     >
                       {enumLabels.featureKind(featureKind)}
                     </Badge>
-                    {featureState && (
-                      <Badge
-                        variant="outline"
-                        className={`rounded-full border ${FEATURE_STATE_BADGE_CLASS[featureState]}`}
-                      >
-                        {enumLabels.featureState(featureState)}
-                      </Badge>
-                    )}
+                    <FeatureStateControl featureId={feature.id} currentState={feature.currentState} />
                     {feature.suggested && (
                       <Badge className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300">
                         {t('suggested')}
@@ -177,7 +167,7 @@ export default function FeatureDetailPage() {
           <h2 className="font-display text-lg font-semibold text-foreground">
             {t('detail.releasesHeading')}
           </h2>
-          <FeatureDetailTree releases={releases} prs={prs} />
+          <FeatureDetailTree releases={releases} prs={prs} snapshots={snapshots} />
         </motion.div>
       </motion.div>
     </NebulaBackground>

@@ -4,9 +4,10 @@
   "new": "Nuevo release",
   "status": {
     "draft": "Borrador",
-    "pr_created": "PR creado",
+    "ready_to_release": "Listo para lanzar",
     "merged": "Fusionado",
-    "deployed": "Desplegado"
+    "deployed": "Desplegado",
+    "canceled": "Cancelado"
   },
   "type": {
     "feature": "Release de funcionalidad",
@@ -118,7 +119,8 @@
       "commitsCount_one": "{{count}} commit",
       "commitsCount_other": "{{count}} commits",
       "mergedAt": "Fusionado",
-      "by": "por"
+      "by": "por",
+      "openGitHub": "Abrir #{{number}} {{title}} en GitHub"
     },
     "commit": {
       "sha": "SHA",
@@ -197,7 +199,11 @@
       "acceptAriaLabel": "Aceptar funcionalidad sugerida {{name}}",
       "rejectAriaLabel": "Rechazar funcionalidad sugerida {{name}}",
       "acceptError": "No se pudo aceptar la funcionalidad",
-      "rejectError": "No se pudo rechazar la funcionalidad"
+      "rejectError": "No se pudo rechazar la funcionalidad",
+      "nameLabel": "Nombre de la funcionalidad",
+      "namePlaceholder": "Nombre de la funcionalidad",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Describe qué hace esta funcionalidad…"
     },
     "prsByFeature": "Pull requests por funcionalidad",
     "noFeatures": "No se encontraron funcionalidades para este release. Agrega pull requests fusionados primero.",
@@ -213,7 +219,11 @@
       "high": "Alta confianza",
       "medium": "Confianza media",
       "low": "Baja confianza"
-    }
+    },
+    "regenerate": "Regenerar borrador",
+    "regenerateFromScratch": "Desde cero",
+    "regenerateResume": "Continuar desde donde se quedó",
+    "regenerateError": "No se pudo regenerar el borrador"
   },
   "summary": {
     "generate": "Generar",
@@ -250,6 +260,7 @@
     "assignedOf": "{{assigned}} de {{total}} PRs asignados",
     "incomplete": "Asigna todos los PRs a una funcionalidad antes de lanzar",
     "ready": "Todos los PRs asignados — listo para producción",
+    "inReview": "En revisión",
     "blockedTooltip": "Todos los PRs deben estar asignados a una funcionalidad antes de lanzar",
     "flagBlockedTooltip": "Reconoce los problemas de paridad de flags antes de lanzar",
     "ship": "Lanzar release",
@@ -272,5 +283,12 @@
     "exporting": "Exportando...",
     "noSummary": "Genera el resumen primero antes de exportar",
     "downloadFailed": "Descarga fallida"
+  },
+  "status": {
+    "label": "Estado del release"
+  },
+  "toast": {
+    "statusChanged": "Estado del release actualizado",
+    "statusError": "No se pudo actualizar el estado — revertido"
   }
 }

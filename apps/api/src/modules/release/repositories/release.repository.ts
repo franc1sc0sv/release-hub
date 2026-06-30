@@ -23,9 +23,10 @@ type ReleaseRow = {
 
 const STATUS_MAP: Record<string, ReleaseStatus> = {
   draft: ReleaseStatus.DRAFT,
-  pr_created: ReleaseStatus.PR_CREATED,
+  ready_to_release: ReleaseStatus.READY_TO_RELEASE,
   merged: ReleaseStatus.MERGED,
   deployed: ReleaseStatus.DEPLOYED,
+  canceled: ReleaseStatus.CANCELED,
 }
 
 const AI_STATUS_MAP: Record<string, AiDraftStatus> = {
@@ -89,12 +90,35 @@ export class ReleaseRepository extends IReleaseRepository {
     return this.toIRelease(row)
   }
 
+  setStatus = async (id: string, status: ReleaseStatus, tx: TxClient): Promise<IRelease> => {
+    const row = await tx.release.update({
+      where: { id },
+      data: { status },
+    })
+    return this.toIRelease(row)
+  }
+
   updateAiDraftStatus = async (id: string, status: AiDraftStatus, tx: TxClient): Promise<IRelease> => {
     const row = await tx.release.update({
       where: { id },
       data: { aiDraftStatus: status },
     })
     return this.toIRelease(row)
+  }
+
+  updateAiDraftStatusBulk = async (ids: string[], status: AiDraftStatus, tx: TxClient): Promise<void> => {
+    await tx.release.updateMany({
+      where: { id: { in: ids } },
+      data: { aiDraftStatus: status },
+    })
+  }
+
+  findIdsByAiDraftStatus = async (status: AiDraftStatus, tx: TxClient): Promise<string[]> => {
+    const rows = await tx.release.findMany({
+      where: { aiDraftStatus: status, deletedAt: null },
+      select: { id: true },
+    })
+    return rows.map((r) => r.id)
   }
 
   updateSummary = async (id: string, summary: string, tx: TxClient): Promise<IRelease> => {

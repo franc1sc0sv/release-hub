@@ -7,23 +7,19 @@ import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { ForbiddenException, NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
-import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
-import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
-import { FeatureInReleaseType } from '../../types/feature-in-release.type'
-import { toFeatureInReleaseType } from '../../types/feature.mappers'
+import { FeatureType } from '../../types/feature.type'
+import { toFeatureType } from '../../types/feature.mappers'
 import { FeatureStateChangedEvent } from '../../events/feature-state-changed.event'
 import { SetFeatureStateCommand } from './set-feature-state.command'
 
 @CommandHandler(SetFeatureStateCommand)
-export class SetFeatureStateHandler extends BaseCommandHandler<SetFeatureStateCommand, FeatureInReleaseType> {
+export class SetFeatureStateHandler extends BaseCommandHandler<SetFeatureStateCommand, FeatureType> {
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
     private readonly projectRepository: IProjectRepository,
-    private readonly releaseRepository: IReleaseRepository,
     private readonly featureRepository: IFeatureRepository,
-    private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -32,16 +28,9 @@ export class SetFeatureStateHandler extends BaseCommandHandler<SetFeatureStateCo
     command: SetFeatureStateCommand,
     tx: TxClient,
     events: IDomainEvent[],
-  ): Promise<FeatureInReleaseType> {
+  ): Promise<FeatureType> {
     const feature = await this.featureRepository.findById(command.featureId, tx)
     if (!feature) throw new NotFoundException('Feature')
-
-    const release = await this.releaseRepository.findById(command.releaseId, tx)
-    if (!release) throw new NotFoundException('Release')
-
-    if (feature.projectId !== release.projectId) {
-      throw new ForbiddenException()
-    }
 
     const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
     const ability = defineAbilityFor(memberships)
@@ -56,15 +45,10 @@ export class SetFeatureStateHandler extends BaseCommandHandler<SetFeatureStateCo
       throw new ForbiddenException()
     }
 
-    const updated = await this.featureInReleaseRepository.upsertState(
-      command.featureId,
-      command.releaseId,
-      command.state,
-      tx,
-    )
+    const updated = await this.featureRepository.updateState(command.featureId, command.state, tx)
 
-    events.push(new FeatureStateChangedEvent(command.featureId, command.releaseId, command.state))
+    events.push(new FeatureStateChangedEvent(command.featureId, command.state))
 
-    return toFeatureInReleaseType(updated)
+    return toFeatureType(updated)
   }
 }

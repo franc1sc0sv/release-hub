@@ -122,20 +122,17 @@ type FeatureDetailType {
   feature: FeatureType!
   prs: [PullRequestType!]!
   releases: [ReleaseObjectType!]!
-}
-
-type FeatureInReleaseType {
-  clientAvailabilityKey: String!
-  featureId: ID!
-  flagState: FlagStateType
-  releaseId: ID!
-  state: FeatureState!
-  updatedAt: DateTime!
+  snapshots: [FeatureReleaseSnapshotType!]!
 }
 
 enum FeatureKind {
   DEFAULT
   PRODUCT
+}
+
+type FeatureReleaseSnapshotType {
+  releaseId: ID!
+  state: FeatureState!
 }
 
 enum FeatureState {
@@ -151,7 +148,7 @@ enum FeatureState {
 
 type FeatureType {
   createdAt: DateTime!
-  currentState: FeatureState
+  currentState: FeatureState!
   description: String!
   id: ID!
   kind: FeatureKind!
@@ -329,6 +326,7 @@ type Mutation {
   createProject(input: CreateProjectInput!): ProjectType!
   createProjectTag(input: CreateProjectTagInput!): ProjectTagType!
   createRelease(input: CreateReleaseInput!): ReleaseObjectType!
+  deleteFeature(id: ID!): Boolean!
   deleteProject(id: ID!): Boolean!
   deleteProjectTag(input: DeleteProjectTagInput!): Boolean!
   deleteRelease(releaseId: ID!): ReleaseObjectType!
@@ -341,6 +339,7 @@ type Mutation {
   logout(input: LogoutInput!): Boolean!
   reauthorizeGithub: Boolean!
   refreshToken(input: RefreshTokenInput!): AuthTokensType!
+  regenerateDraft(releaseId: ID!, resume: Boolean! = true): ReleaseObjectType!
   register(input: RegisterInput!): AuthTokensType!
   rejectSuggestedFeature(input: RejectSuggestedFeatureInput!): Boolean!
   removeMember(membershipId: ID!): Boolean!
@@ -348,8 +347,9 @@ type Mutation {
   revokeInvitation(invitationId: ID!): Boolean!
   savePrSummary(input: SavePrSummaryInput!): PullRequestType!
   saveReleaseSummary(input: SaveReleaseSummaryInput!): ReleaseObjectType!
-  setFeatureState(input: SetFeatureStateInput!): FeatureInReleaseType!
+  setFeatureState(input: SetFeatureStateInput!): FeatureType!
   setFeatureTags(input: SetFeatureTagsInput!): FeatureType!
+  setReleaseStatus(input: SetReleaseStatusInput!): ReleaseObjectType!
   shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
   updateConnectionSettings(input: UpdateConnectionSettingsInput!): ConnectionSettingsType!
   updateMemberRole(input: UpdateMemberRoleInput!): MemberType!
@@ -407,6 +407,7 @@ type PullRequestType {
   summaryEditedAt: DateTime
   tickets: [TicketLinkType!]!
   title: String!
+  url: String!
 }
 
 type Query {
@@ -492,10 +493,11 @@ type ReleaseObjectType {
 }
 
 enum ReleaseStatus {
+  CANCELED
   DEPLOYED
   DRAFT
   MERGED
-  PR_CREATED
+  READY_TO_RELEASE
 }
 
 type ReleaseTreeType {
@@ -519,13 +521,17 @@ input SaveReleaseSummaryInput {
 
 input SetFeatureStateInput {
   featureId: ID!
-  releaseId: ID!
   state: FeatureState!
 }
 
 input SetFeatureTagsInput {
   featureId: ID!
   tags: [String!]!
+}
+
+input SetReleaseStatusInput {
+  releaseId: ID!
+  status: ReleaseStatus!
 }
 
 input ShipReleaseInput {

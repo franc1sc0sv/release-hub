@@ -13,25 +13,16 @@ import { ROUTES } from '@/lib/routes'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { CreateFeatureDialog } from './CreateFeatureDialog'
 import { TagChips } from './TagChips'
+import { FeatureStateControl } from './FeatureStateControl'
+import { DeleteFeatureButton } from './DeleteFeatureButton'
 import { useFeatures } from '../hooks/useFeatures'
 import { useState } from 'react'
 import type { FeatureItem } from '../hooks/useFeatures'
-import type { FeatureKind, FeatureState } from '@/generated/graphql'
+import type { FeatureKind } from '@/generated/graphql'
 
 const kindVariant: Record<FeatureKind, 'outline' | 'secondary'> = {
   PRODUCT: 'outline',
   DEFAULT: 'secondary',
-}
-
-const stateColorMap: Record<FeatureState, string> = {
-  IN_PROGRESS: 'border-indigo-400/40 text-indigo-300',
-  SHIPPED_FLAG_OFF: 'border-slate-400/40 text-slate-300',
-  LIVE_STAGING: 'border-amber-400/40 text-amber-300',
-  LIVE_PROD: 'border-emerald-400/40 text-emerald-300',
-  PARTIAL: 'border-violet-400/40 text-violet-300',
-  FULLY_RELEASED: 'border-emerald-300/40 text-emerald-200',
-  FLAG_CLEANUP_PENDING: 'border-orange-400/40 text-orange-300',
-  BLOCKED: 'border-rose-400/40 text-rose-300',
 }
 
 function FeatureRow({ feature }: { feature: FeatureItem }) {
@@ -42,45 +33,37 @@ function FeatureRow({ feature }: { feature: FeatureItem }) {
 
   return (
     <motion.li variants={reduceMotion ? undefined : slideUp}>
-      <Link
-        to={detailPath}
-        className="group block rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      >
-        <div className="flex items-start gap-4 px-5 py-4">
-          <div className="min-w-0 flex-1 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium text-foreground group-hover:text-white transition-colors">
-                {feature.name}
-              </span>
-              <Badge
-                variant={kindVariant[feature.kind as FeatureKind]}
-                className="rounded-full text-xs"
-              >
-                {enumLabels.featureKind(feature.kind as FeatureKind)}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`rounded-full text-xs ${feature.currentState ? stateColorMap[feature.currentState] : 'border-white/20 text-muted-foreground'}`}
-              >
-                {feature.currentState ? enumLabels.featureState(feature.currentState) : t('state.none')}
-              </Badge>
-              {feature.suggested && (
-                <Badge className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 text-xs text-fuchsia-300">
-                  {t('suggested')}
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-              <TagChips
-                featureId={feature.id}
-                projectId={feature.projectId}
-                tags={feature.tags}
-              />
-            </div>
-          </div>
+      <div className="group flex flex-wrap items-start gap-x-4 gap-y-3 rounded-[var(--radius-card)] border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <Link
+            to={detailPath}
+            className="rounded-[var(--radius-button)] font-medium text-foreground transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {feature.name}
+          </Link>
+          <Badge
+            variant={kindVariant[feature.kind as FeatureKind]}
+            className="rounded-full text-xs"
+          >
+            {enumLabels.featureKind(feature.kind as FeatureKind)}
+          </Badge>
+          <FeatureStateControl featureId={feature.id} currentState={feature.currentState} />
+          {feature.suggested && (
+            <Badge className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 text-xs text-fuchsia-300">
+              {t('suggested')}
+            </Badge>
+          )}
         </div>
-      </Link>
+
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+          <TagChips featureId={feature.id} projectId={feature.projectId} tags={feature.tags} />
+          <DeleteFeatureButton
+            featureId={feature.id}
+            projectId={feature.projectId}
+            featureName={feature.name}
+          />
+        </div>
+      </div>
     </motion.li>
   )
 }
@@ -88,8 +71,10 @@ function FeatureRow({ feature }: { feature: FeatureItem }) {
 export function FeatureLedger() {
   const { t } = useTranslation('features')
   const reduceMotion = useReducedMotion()
-  const { features, loading, error } = useFeatures()
+  const { features: allFeatures, loading, error } = useFeatures()
   const [dialogOpen, setDialogOpen] = useState(false)
+
+  const features = allFeatures.filter((f) => !f.suggested)
 
   if (loading) {
     return (

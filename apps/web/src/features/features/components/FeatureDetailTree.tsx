@@ -3,12 +3,17 @@ import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, GitBranch, GitMerge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { TicketChip } from '@/features/releases/components/TicketChip'
-import type { GetFeatureQuery } from '@/generated/graphql'
+import { FEATURE_STATE_BADGE_CLASS } from '../constants/feature-enums'
+import { ReleaseStatusValue } from '@/features/releases/constants/release-enums'
+import type { GetFeatureQuery, FeatureState } from '@/generated/graphql'
 
 type FeatureRelease = GetFeatureQuery['getFeature']['releases'][number]
 type FeaturePr = GetFeatureQuery['getFeature']['prs'][number]
 type FeatureCommit = FeaturePr['commits'][number]
+type FeatureSnapshot = GetFeatureQuery['getFeature']['snapshots'][number]
 
 interface DetailCommitRowProps {
   commit: FeatureCommit
@@ -127,10 +132,12 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
 interface ReleaseGroupProps {
   release: FeatureRelease
   prs: FeaturePr[]
+  snapshotState: FeatureState | null
 }
 
-function ReleaseGroup({ release, prs }: ReleaseGroupProps) {
+function ReleaseGroup({ release, prs, snapshotState }: ReleaseGroupProps) {
   const { t } = useTranslation('features')
+  const enumLabels = useEnumLabels()
   const [open, setOpen] = useState(true)
   const reduceMotion = useReducedMotion()
 
@@ -162,6 +169,14 @@ function ReleaseGroup({ release, prs }: ReleaseGroupProps) {
               {t('tree.releaseHeading', { name: release.name })}
             </span>
             <span className="text-xs text-muted-foreground">{prCountLabel}</span>
+            {snapshotState && (
+              <Badge
+                variant="outline"
+                className={`rounded-full border text-xs ${FEATURE_STATE_BADGE_CLASS[snapshotState]}`}
+              >
+                {enumLabels.featureState(snapshotState)}
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="font-mono">{release.baseRef}</span>
@@ -206,12 +221,19 @@ function ReleaseGroup({ release, prs }: ReleaseGroupProps) {
 interface FeatureDetailTreeProps {
   releases: FeatureRelease[]
   prs: FeaturePr[]
+  snapshots: FeatureSnapshot[]
 }
 
-export function FeatureDetailTree({ releases, prs }: FeatureDetailTreeProps) {
+export function FeatureDetailTree({ releases, prs, snapshots }: FeatureDetailTreeProps) {
   const { t } = useTranslation('features')
 
-  if (releases.length === 0) {
+  const deployedReleases = releases.filter((r) => r.status === ReleaseStatusValue.DEPLOYED)
+
+  const snapshotByReleaseId = new Map<string, FeatureState>(
+    snapshots.map((snapshot) => [snapshot.releaseId, snapshot.state]),
+  )
+
+  if (deployedReleases.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-[var(--radius-card)] border border-white/10 bg-white/4 px-6 py-12 text-center">
         <GitBranch className="size-8 text-muted-foreground/50" />
@@ -222,10 +244,15 @@ export function FeatureDetailTree({ releases, prs }: FeatureDetailTreeProps) {
 
   return (
     <div className="space-y-3">
-      {releases.map((release) => {
+      {deployedReleases.map((release) => {
         const releasePrs = prs.filter((pr) => pr.releaseId === release.id)
         return (
-          <ReleaseGroup key={release.id} release={release} prs={releasePrs} />
+          <ReleaseGroup
+            key={release.id}
+            release={release}
+            prs={releasePrs}
+            snapshotState={snapshotByReleaseId.get(release.id) ?? null}
+          />
         )
       })}
     </div>

@@ -19,7 +19,7 @@ interface ReleaseFeatureNodeProps {
 export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
 
   const { feature, state, clientAvailabilityKey, flagState, prs } = node

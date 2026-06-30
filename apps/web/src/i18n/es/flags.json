@@ -54,6 +54,32 @@
       "offInProd": "Inactivo en producción, activo en otros entornos"
     }
   },
+  "export": {
+    "button": "Exportar",
+    "title": "Exportar comparación de flags",
+    "description": "Elige los entornos a incluir y uno principal, luego exporta un PDF comparándolo con los demás.",
+    "includeLabel": "Incluir entornos",
+    "mainLabel": "Entorno principal",
+    "needTwo": "Selecciona al menos dos entornos para comparar.",
+    "loading": "Comparando entornos...",
+    "cancel": "Cancelar",
+    "download": "Exportar PDF",
+    "brand": "Release Hub · Exportación de flags",
+    "footer": "Generado a partir de datos en vivo de Flagsmith",
+    "generatedLabel": "Generado",
+    "comparison": {
+      "documentTitle": "{{project}} — comparación de flags",
+      "reportTitle": "Informe de comparación de entornos",
+      "baselineLabel": "Principal",
+      "comparedLabel": "Comparado",
+      "totalLabel": "Flags con diferencias",
+      "onInBaselineLabel": "Activo en principal",
+      "offInBaselineLabel": "Inactivo en principal",
+      "onHeading": "Activo en {{env}}, inactivo en otros entornos",
+      "offHeading": "Inactivo en {{env}}, activo en otros entornos",
+      "inSync": "Todos los entornos seleccionados están sincronizados con {{env}}."
+    }
+  },
   "pagination": {
     "previous": "Página anterior",
     "next": "Página siguiente",

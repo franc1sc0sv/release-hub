@@ -9,6 +9,7 @@ export const ROUTES = {
   FEATURES: '/features',
   FEATURES_DETAIL: '/features/:id',
   FLAGS: '/flags',
+  FLAG_DETAIL: '/flags/:flagKey',
   SETTINGS: '/settings',
   INVITE: '/invite/:token',
   PROJECT_CREATE: '/projects/new',

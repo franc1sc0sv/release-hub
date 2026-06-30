@@ -4,9 +4,10 @@
   "new": "New release",
   "status": {
     "draft": "Draft",
-    "pr_created": "PR created",
+    "ready_to_release": "Ready to release",
     "merged": "Merged",
-    "deployed": "Deployed"
+    "deployed": "Deployed",
+    "canceled": "Canceled"
   },
   "type": {
     "feature": "Feature release",
@@ -118,7 +119,8 @@
       "commitsCount_one": "{{count}} commit",
       "commitsCount_other": "{{count}} commits",
       "mergedAt": "Merged",
-      "by": "by"
+      "by": "by",
+      "openGitHub": "Open #{{number}} {{title}} on GitHub"
     },
     "commit": {
       "sha": "SHA",
@@ -197,7 +199,11 @@
       "acceptAriaLabel": "Accept suggested feature {{name}}",
       "rejectAriaLabel": "Reject suggested feature {{name}}",
       "acceptError": "Failed to accept feature",
-      "rejectError": "Failed to reject feature"
+      "rejectError": "Failed to reject feature",
+      "nameLabel": "Feature name",
+      "namePlaceholder": "Feature name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe what this feature does…"
     },
     "prsByFeature": "Pull requests by feature",
     "noFeatures": "No features found for this release. Add some merged pull requests first.",
@@ -213,7 +219,11 @@
       "high": "High confidence",
       "medium": "Medium confidence",
       "low": "Low confidence"
-    }
+    },
+    "regenerate": "Regenerate draft",
+    "regenerateFromScratch": "From scratch",
+    "regenerateResume": "Continue from where it left off",
+    "regenerateError": "Failed to regenerate draft"
   },
   "summary": {
     "generate": "Generate",
@@ -250,6 +260,7 @@
     "assignedOf": "{{assigned}} of {{total}} PRs assigned",
     "incomplete": "Assign every PR to a feature before shipping",
     "ready": "All PRs assigned — ready for production",
+    "inReview": "In review",
     "blockedTooltip": "All PRs must be assigned to a feature before you can ship",
     "flagBlockedTooltip": "Acknowledge flag parity issues before shipping",
     "ship": "Ship release",
@@ -272,5 +283,12 @@
     "exporting": "Exporting...",
     "noSummary": "Generate the summary first before exporting",
     "downloadFailed": "Download failed"
+  },
+  "status": {
+    "label": "Release status"
+  },
+  "toast": {
+    "statusChanged": "Release status updated",
+    "statusError": "Could not update status — reverted"
   }
 }

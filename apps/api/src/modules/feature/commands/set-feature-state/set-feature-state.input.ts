@@ -8,10 +8,6 @@ export class SetFeatureStateInput {
   @IsString()
   featureId: string
 
-  @Field(() => ID)
-  @IsString()
-  releaseId: string
-
   @Field(() => FeatureState)
   @IsEnum(FeatureState)
   state: FeatureState

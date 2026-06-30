@@ -56,6 +56,7 @@ export const GET_RELEASE_TREE = graphql(`
         feature {
           id
           name
+          description
           kind
           suggested
           currentState
@@ -71,6 +72,7 @@ export const GET_RELEASE_TREE = graphql(`
           id
           number
           title
+          url
           body
           author
           mergedAt

@@ -62,6 +62,10 @@ export const GET_FEATURE = graphql(`
           date
         }
       }
+      snapshots {
+        releaseId
+        state
+      }
     }
   }
 `)

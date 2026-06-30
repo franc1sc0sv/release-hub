@@ -4,7 +4,6 @@ import type { ITicketDetails } from '../interfaces/ticket-details.interfaces'
 import { TicketSource } from '../../../common/types/ticket-source.enum'
 
 const LINEAR_TICKET_REGEX = /\b([A-Z][A-Z0-9]+-\d+)\b/g
-const LINEAR_COMMIT_FEAT_REGEX = /\bfeat\(([A-Z0-9]+-\d+)\)/g
 const LINEAR_GRAPHQL_URL = 'https://api.linear.app/graphql' as const
 
 const ISSUE_QUERY = `
@@ -40,33 +39,15 @@ export class LinearTicketSource extends ITicketSource {
     const seen = new Set<string>()
     const results: IDetectedRef[] = []
 
-    const addIfNew = (issueId: string, confidenceSource: IDetectedRef['confidenceSource']): void => {
-      if (!seen.has(issueId)) {
-        seen.add(issueId)
-        results.push({ issueId, confidenceSource })
-      }
-    }
-
-    const branchMatches = pr.branchName.toUpperCase().matchAll(LINEAR_TICKET_REGEX)
-    for (const match of branchMatches) {
-      if (match[1]) addIfNew(match[1], 'branch')
-    }
-
-    const titleMatches = pr.title.toUpperCase().matchAll(LINEAR_TICKET_REGEX)
-    for (const match of titleMatches) {
-      if (match[1]) addIfNew(match[1], 'title')
-    }
-
-    const body = pr.body ?? ''
-    const bodyMatches = body.toUpperCase().matchAll(LINEAR_TICKET_REGEX)
-    for (const match of bodyMatches) {
-      if (match[1]) addIfNew(match[1], 'body')
-    }
-
-    for (const msg of pr.commitMessages) {
-      const commitMatches = msg.matchAll(LINEAR_COMMIT_FEAT_REGEX)
-      for (const match of commitMatches) {
-        if (match[1]) addIfNew(match[1].toUpperCase(), 'commit')
+    for (const message of pr.commitMessages) {
+      const subject = message.split(/\r?\n/, 1)[0] ?? ''
+      const matches = subject.toUpperCase().matchAll(LINEAR_TICKET_REGEX)
+      for (const match of matches) {
+        const issueId = match[1]
+        if (issueId && !seen.has(issueId)) {
+          seen.add(issueId)
+          results.push({ issueId, confidenceSource: 'commit' })
+        }
       }
     }
 

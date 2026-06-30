@@ -8,17 +8,11 @@ import { CardContent } from '@/components/ui/card'
 import { Rocket } from 'lucide-react'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { FEATURE_STATE_BADGE_CLASS } from '@/features/features/constants/feature-enums'
-import type { GetReleaseTreeQuery, ReleaseStatus } from '@/generated/graphql'
+import { RELEASE_STATUS_BADGE_CLASS, ReleaseStatusValue } from '../constants/release-enums'
+import type { GetReleaseTreeQuery } from '@/generated/graphql'
 
 type ReleaseNode = GetReleaseTreeQuery['getReleaseTree']['release']
 type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
-
-const STATUS_CLASS: Record<ReleaseStatus, string> = {
-  DRAFT: 'border-slate-500/40 bg-slate-500/10 text-slate-300',
-  PR_CREATED: 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300',
-  MERGED: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
-  DEPLOYED: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
-}
 
 interface OverviewTabProps {
   release: ReleaseNode
@@ -28,6 +22,9 @@ interface OverviewTabProps {
 export function OverviewTab({ release, features }: OverviewTabProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
+
+  const acceptedFeatures = features.filter((n) => !n.feature.suggested)
+  const isDraft = release.status === ReleaseStatusValue.DRAFT
 
   return (
     <div className="space-y-6">
@@ -46,7 +43,7 @@ export function OverviewTab({ release, features }: OverviewTabProps) {
         )}
 
         <Badge
-          className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_CLASS[release.status]}`}
+          className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${RELEASE_STATUS_BADGE_CLASS[release.status]}`}
         >
           {enumLabels.releaseStatus(release.status)}
         </Badge>
@@ -74,10 +71,11 @@ export function OverviewTab({ release, features }: OverviewTabProps) {
         )}
       </div>
 
-      <CoverageMeter releaseId={release.id} />
+      <CoverageMeter releaseId={release.id} releaseStatus={release.status} />
 
+      {!isDraft && (
       <section aria-label={t('view.features')}>
-        {features.length === 0 ? (
+        {acceptedFeatures.length === 0 ? (
           <GlassCard>
             <CardContent className="flex flex-col items-center gap-4 py-16">
               <div className="flex size-14 items-center justify-center rounded-full bg-indigo-500/20">
@@ -95,7 +93,7 @@ export function OverviewTab({ release, features }: OverviewTabProps) {
           </GlassCard>
         ) : (
           <div className="space-y-3">
-            {features.map((node) => {
+            {acceptedFeatures.map((node) => {
               const currentState = node.feature.currentState
               return (
                 <div key={node.feature.id} className="space-y-0">
@@ -121,6 +119,7 @@ export function OverviewTab({ release, features }: OverviewTabProps) {
           </div>
         )}
       </section>
+      )}
     </div>
   )
 }

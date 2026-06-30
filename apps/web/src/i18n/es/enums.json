@@ -19,9 +19,10 @@
   },
   "releaseStatus": {
     "DRAFT": "Borrador",
-    "PR_CREATED": "PR creado",
+    "READY_TO_RELEASE": "Listo para lanzar",
     "MERGED": "Fusionado",
-    "DEPLOYED": "Desplegado"
+    "DEPLOYED": "Desplegado",
+    "CANCELED": "Cancelado"
   },
   "flagAction": {
     "ADDED": "Añadido",

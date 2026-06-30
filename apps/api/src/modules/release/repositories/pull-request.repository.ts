@@ -128,6 +128,13 @@ export class PullRequestRepository extends IPullRequestRepository {
     })
   }
 
+  clearReleaseAssignments = async (releaseId: string, tx: TxClient): Promise<void> => {
+    await tx.pullRequest.updateMany({
+      where: { releaseId },
+      data: { featureId: null, aiConfidence: null, aiRationale: null },
+    })
+  }
+
   private toITicketLink(row: {
     id: string
     pullRequestId: string

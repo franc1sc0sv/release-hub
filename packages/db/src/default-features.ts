@@ -8,6 +8,12 @@ export interface IDefaultFeatureDefinition {
 
 export const DEFAULT_FEATURES: IDefaultFeatureDefinition[] = [
   {
+    name: 'Bugs',
+    description:
+      'All bug fixes and defect corrections — PRs whose primary purpose is fixing broken, incorrect, or unintended behavior. Includes regressions, crashes, data/display errors, "not working" issues, incorrect handling or calculations, and anything titled [Bug]/[BUG] or describing a defect. Choose this over a product feature whenever the PR\'s main intent is fixing a bug rather than building new functionality.',
+    kind: FeatureKind.default,
+  },
+  {
     name: 'Infra Changes',
     description: 'Infrastructure, DevOps, CI/CD, deployment configuration, and platform changes.',
     kind: FeatureKind.default,

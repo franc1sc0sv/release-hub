@@ -49,6 +49,8 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
       throw new ForbiddenException()
     }
 
+    const project = await this.projectRepository.findById(release.projectId, tx)
+
     const allPrs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
     const assignedPrs = allPrs.filter((pr) => pr.featureId !== null)
 
@@ -86,7 +88,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
         node.state = state
         node.clientAvailabilityKey = deriveClientAvailability(state, flagState)
         node.flagState = flagState
-        node.prs = (prsByFeatureId.get(feature.id) ?? []).map(toPullRequestType)
+        node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) => toPullRequestType(pr, project?.repo ?? ''))
         return node
       })
 

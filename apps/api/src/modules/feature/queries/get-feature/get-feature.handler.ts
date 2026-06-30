@@ -7,6 +7,7 @@ import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { ForbiddenException } from '../../../../common/errors'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
+import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import { FeatureDetailType } from '../../types/feature-detail.type'
 import { toFeatureDetailType } from '../../types/feature.mappers'
 import { GetFeatureQuery } from './get-feature.query'
@@ -17,6 +18,7 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
     protected readonly db: IDatabaseService,
     private readonly projectRepository: IProjectRepository,
     private readonly featureRepository: IFeatureRepository,
+    private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
   ) {
     super(db)
   }
@@ -41,11 +43,12 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
       throw new ForbiddenException()
     }
 
-    const [releases, prs] = await Promise.all([
+    const [releases, prs, snapshots] = await Promise.all([
       this.featureRepository.findReleasesForFeature(query.featureId, tx),
       this.featureRepository.findPullRequestsForFeature(query.featureId, tx),
+      this.featureInReleaseRepository.findByFeature(query.featureId, tx),
     ])
 
-    return toFeatureDetailType({ feature, releases, prs })
+    return toFeatureDetailType({ feature, releases, prs, snapshots })
   }
 }

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { format } from 'date-fns'
@@ -13,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/lib/routes'
 import { slideUp } from '@/lib/animations'
 import type { FlagSortField, SortDirection, GetFlagsQuery } from '@/generated/graphql'
 import { EnvStateCell } from './EnvStateCell'
@@ -92,7 +94,12 @@ function FlagRow({ flag, visibleEnvironments }: FlagRowProps) {
     >
       <TableCell className="pl-6">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-sm font-medium text-foreground">{flag.key}</span>
+          <Link
+            to={ROUTES.FLAG_DETAIL.replace(':flagKey', flag.key)}
+            className="font-mono text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {flag.key}
+          </Link>
           <FlagStaleBadge createdAt={flag.createdAt} />
         </div>
       </TableCell>

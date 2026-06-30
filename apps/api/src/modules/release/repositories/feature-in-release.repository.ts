@@ -13,6 +13,20 @@ export class FeatureInReleaseRepository extends IFeatureInReleaseRepository {
     return rows.map((row) => this.toIFeatureInRelease(row))
   }
 
+  upsertState = async (
+    featureId: string,
+    releaseId: string,
+    state: FeatureState,
+    tx: TxClient,
+  ): Promise<IFeatureInRelease> => {
+    const row = await tx.featureInRelease.upsert({
+      where: { featureId_releaseId: { featureId, releaseId } },
+      create: { featureId, releaseId, state },
+      update: { state },
+    })
+    return this.toIFeatureInRelease(row)
+  }
+
   private toIFeatureInRelease(row: {
     id: string
     featureId: string

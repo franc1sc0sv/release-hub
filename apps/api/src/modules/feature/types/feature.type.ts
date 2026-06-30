@@ -25,8 +25,8 @@ export class FeatureType {
   @Field(() => Boolean)
   suggested: boolean
 
-  @Field(() => FeatureState, { nullable: true })
-  currentState: FeatureState | null
+  @Field(() => FeatureState)
+  currentState: FeatureState
 
   @Field(() => Date)
   createdAt: Date

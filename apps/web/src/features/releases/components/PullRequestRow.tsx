@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
-import { ChevronDown, GitMerge } from 'lucide-react'
+import { ChevronDown, ExternalLink, GitMerge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CommitRow } from './CommitRow'
 import { TicketChip } from './TicketChip'
@@ -12,6 +12,7 @@ export interface PullRequestItem {
   id: string
   number: number
   title: string
+  url?: string | null
   author: string
   mergedAt: string
   body: string | null
@@ -51,10 +52,24 @@ export function PullRequestRow({ pr }: PullRequestRowProps) {
 
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-mono text-sm text-muted-foreground">
-              #{pr.number}
-            </span>
-            <p className="truncate font-medium text-foreground">{pr.title}</p>
+            {pr.url ? (
+              <a
+                href={pr.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('builder.pr.openGitHub', { number: pr.number, title: pr.title })}
+                className="flex items-center gap-1 text-foreground underline-offset-2 hover:underline hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="font-mono text-sm text-muted-foreground">#{pr.number}</span>
+                <span className="truncate font-medium">{pr.title}</span>
+                <ExternalLink className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+              </a>
+            ) : (
+              <>
+                <span className="font-mono text-sm text-muted-foreground">#{pr.number}</span>
+                <p className="truncate font-medium text-foreground">{pr.title}</p>
+              </>
+            )}
             {pr.tickets.map((ticket) => (
               <TicketChip key={ticket.issueId} ticket={ticket} />
             ))}

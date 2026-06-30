@@ -17,6 +17,8 @@ import {
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -30,6 +32,7 @@ import { CommitRow } from './CommitRow'
 import { TicketChip } from './TicketChip'
 import { CoverageMeter } from './CoverageMeter'
 import { PrSummaryPanel } from './PrSummaryPanel'
+import { RegenerateDraftButton } from './RegenerateDraftButton'
 import { slideUp, staggerContainer } from '@/lib/animations'
 import { LIST_FEATURES } from '@/features/features/graphql/features.queries'
 import {
@@ -96,8 +99,59 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
       animate="visible"
       className="space-y-8"
     >
+      <motion.div variants={slideUp} className="flex items-center justify-between gap-3">
+        <RegenerateDraftButton
+          releaseId={release.id}
+          aiDraftStatus={release.aiDraftStatus}
+        />
+        <Button
+          size="sm"
+          disabled={!coverageReady || confirming || Boolean(confirmData)}
+          onClick={handleConfirm}
+          className="bg-primary text-white shadow-glow-indigo hover:shadow-glow-lg disabled:opacity-50"
+        >
+          {confirming ? (
+            <>
+              <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
+              {t('draft.confirming')}
+            </>
+          ) : (
+            <>
+              <Rocket className="mr-1.5 size-3.5" aria-hidden />
+              {t('draft.confirm')}
+            </>
+          )}
+        </Button>
+      </motion.div>
+
+      {confirmData?.confirmRelease?.prUrl && (
+        <motion.div
+          variants={slideUp}
+          className="flex items-center gap-2 rounded-[var(--radius-card)] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3"
+          role="status"
+        >
+          <Check className="size-4 shrink-0 text-emerald-400" aria-hidden />
+          <span className="text-sm text-emerald-300">{t('draft.confirmed')}</span>
+          <a
+            href={confirmData.confirmRelease.prUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto flex items-center gap-1 text-xs text-emerald-300 underline underline-offset-2 hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {t('view.prUrl')}
+            <ExternalLink className="size-3" aria-hidden />
+          </a>
+        </motion.div>
+      )}
+
+      {confirmError && (
+        <p className="text-sm text-destructive" role="alert">
+          {t('draft.confirmError')}
+        </p>
+      )}
+
       <motion.div variants={slideUp}>
-        <CoverageMeter releaseId={release.id} />
+        <CoverageMeter releaseId={release.id} releaseStatus={release.status} />
       </motion.div>
 
       {suggestedFeatures.length > 0 && (
@@ -114,6 +168,7 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
                 key={node.feature.id}
                 node={node}
                 releaseId={release.id}
+                projectId={projectId}
               />
             ))}
           </div>
@@ -151,52 +206,6 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
         </GlassCard>
       )}
 
-      {confirmData?.confirmRelease?.prUrl && (
-        <motion.div
-          variants={slideUp}
-          className="flex items-center gap-2 rounded-[var(--radius-card)] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3"
-          role="status"
-        >
-          <Check className="size-4 shrink-0 text-emerald-400" aria-hidden />
-          <span className="text-sm text-emerald-300">{t('draft.confirmed')}</span>
-          <a
-            href={confirmData.confirmRelease.prUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto flex items-center gap-1 text-xs text-emerald-300 underline underline-offset-2 hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {t('view.prUrl')}
-            <ExternalLink className="size-3" aria-hidden />
-          </a>
-        </motion.div>
-      )}
-
-      {confirmError && (
-        <p className="text-sm text-destructive" role="alert">
-          {t('draft.confirmError')}
-        </p>
-      )}
-
-      <motion.div variants={slideUp} className="flex justify-end">
-        <Button
-          size="sm"
-          disabled={!coverageReady || confirming || Boolean(confirmData)}
-          onClick={handleConfirm}
-          className="bg-primary text-white shadow-glow-indigo hover:shadow-glow-lg disabled:opacity-50"
-        >
-          {confirming ? (
-            <>
-              <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
-              {t('draft.confirming')}
-            </>
-          ) : (
-            <>
-              <Rocket className="mr-1.5 size-3.5" aria-hidden />
-              {t('draft.confirm')}
-            </>
-          )}
-        </Button>
-      </motion.div>
     </motion.div>
   )
 }
@@ -231,12 +240,17 @@ function DraftingState({ reduceMotion }: { reduceMotion: boolean }) {
 interface SuggestedFeatureCardProps {
   node: FeatureNode
   releaseId: string
+  projectId: string
 }
 
-function SuggestedFeatureCard({ node, releaseId }: SuggestedFeatureCardProps) {
+function SuggestedFeatureCard({ node, releaseId, projectId }: SuggestedFeatureCardProps) {
   const { t } = useTranslation('releases')
+  const reduceMotion = useReducedMotion()
+  const [open, setOpen] = useState(true)
   const [accepted, setAccepted] = useState(false)
   const [rejected, setRejected] = useState(false)
+  const [editedName, setEditedName] = useState(node.feature.name)
+  const [editedDescription, setEditedDescription] = useState(node.feature.description ?? '')
 
   const [acceptFeature, { loading: accepting }] = useMutation(ACCEPT_SUGGESTED_FEATURE, {
     refetchQueries: [{ query: GET_RELEASE_TREE, variables: { id: releaseId } }],
@@ -252,8 +266,8 @@ function SuggestedFeatureCard({ node, releaseId }: SuggestedFeatureCardProps) {
         variables: {
           input: {
             featureId: node.feature.id,
-            name: undefined,
-            description: undefined,
+            name: editedName.trim() || node.feature.name,
+            description: editedDescription.trim() || undefined,
             tags: undefined,
           },
         },
@@ -262,7 +276,7 @@ function SuggestedFeatureCard({ node, releaseId }: SuggestedFeatureCardProps) {
     } catch {
       toast.error(t('draft.suggested.acceptError'))
     }
-  }, [acceptFeature, node.feature.id, t])
+  }, [acceptFeature, node.feature.id, editedName, editedDescription, t])
 
   const handleReject = useCallback(async () => {
     try {
@@ -274,6 +288,10 @@ function SuggestedFeatureCard({ node, releaseId }: SuggestedFeatureCardProps) {
   }, [rejectFeature, node.feature.id, t])
 
   if (accepted || rejected) return null
+
+  const toggleLabel = open
+    ? t('view.feature.collapseLabel', { name: node.feature.name })
+    : t('view.feature.expandLabel', { name: node.feature.name })
 
   return (
     <div className="rounded-[var(--radius-card)] border border-fuchsia-500/20 bg-fuchsia-500/5 backdrop-blur-sm">
@@ -320,8 +338,74 @@ function SuggestedFeatureCard({ node, releaseId }: SuggestedFeatureCardProps) {
             )}
             {t('draft.suggested.accept')}
           </Button>
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={toggleLabel}
+            onClick={() => setOpen((p) => !p)}
+            className="flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <motion.span
+              animate={{ rotate: open ? 180 : 0 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
+              className="flex items-center justify-center"
+            >
+              <ChevronDown className="size-4" aria-hidden />
+            </motion.span>
+          </button>
         </div>
       </div>
+
+      {open && (
+        <div className="border-t border-fuchsia-500/15 px-4 pb-4 pt-3 space-y-3">
+          <div className="space-y-2">
+            <label
+              htmlFor={`suggested-name-${node.feature.id}`}
+              className="text-xs font-medium text-muted-foreground"
+            >
+              {t('draft.suggested.nameLabel')}
+            </label>
+            <Input
+              id={`suggested-name-${node.feature.id}`}
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              maxLength={200}
+              placeholder={t('draft.suggested.namePlaceholder')}
+              className="h-8 bg-white/5 text-sm border-fuchsia-500/20 focus-visible:ring-fuchsia-500/40"
+            />
+          </div>
+          <div className="space-y-2">
+            <label
+              htmlFor={`suggested-description-${node.feature.id}`}
+              className="text-xs font-medium text-muted-foreground"
+            >
+              {t('draft.suggested.descriptionLabel')}
+            </label>
+            <Textarea
+              id={`suggested-description-${node.feature.id}`}
+              value={editedDescription}
+              onChange={(e) => setEditedDescription(e.target.value)}
+              maxLength={1000}
+              rows={3}
+              placeholder={t('draft.suggested.descriptionPlaceholder')}
+              className="bg-white/5 text-sm resize-none border-fuchsia-500/20 focus-visible:ring-fuchsia-500/40"
+            />
+          </div>
+          {node.prs.length > 0 && (
+            <div className="space-y-3 pt-1">
+              {node.prs.map((pr) => (
+                <DraftPrRow
+                  key={pr.id}
+                  pr={pr}
+                  featureName={editedName}
+                  releaseId={releaseId}
+                  projectId={projectId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -477,8 +561,24 @@ function DraftPrRow({ pr, featureName, releaseId, projectId }: DraftPrRowProps) 
 
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-mono text-xs text-muted-foreground">#{pr.number}</span>
-            <p className="truncate text-sm font-medium text-foreground">{pr.title}</p>
+            {pr.url ? (
+              <a
+                href={pr.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('builder.pr.openGitHub', { number: pr.number, title: pr.title })}
+                className="flex items-center gap-1 text-foreground underline-offset-2 hover:underline hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="font-mono text-xs text-muted-foreground">#{pr.number}</span>
+                <span className="truncate text-sm font-medium">{pr.title}</span>
+                <ExternalLink className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+              </a>
+            ) : (
+              <>
+                <span className="font-mono text-xs text-muted-foreground">#{pr.number}</span>
+                <p className="truncate text-sm font-medium text-foreground">{pr.title}</p>
+              </>
+            )}
             {pr.tickets.map((ticket) => (
               <TicketChip key={ticket.issueId} ticket={ticket} />
             ))}

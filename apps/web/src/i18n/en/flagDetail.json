@@ -1,0 +1,63 @@
+{
+  "overline": "Feature flag",
+  "breadcrumb": {
+    "flags": "Flags"
+  },
+  "actions": {
+    "snooze": "Snooze 7 days",
+    "dismiss": "Dismiss",
+    "openInFlagsmith": "Open in Flagsmith",
+    "setIntendedEnableDate": "Set intended enable date",
+    "markAsIntentional": "Mark as intentional"
+  },
+  "verdict": {
+    "subline": "Shipped in Release {{version}}, in main {{days}} days, still OFF in Flagsmith, reminder snoozed until {{snoozedUntil}}"
+  },
+  "currentStatus": {
+    "title": "Current status",
+    "badge": "auto-derived",
+    "delivery": {
+      "label": "Delivery",
+      "shippedIn": "Shipped in {{version}}",
+      "inMain": "in main · {{days}}d"
+    },
+    "rollout": {
+      "label": "Rollout"
+    }
+  },
+  "history": {
+    "title": "History",
+    "count_one": "{{count}} event",
+    "count_other": "{{count}} events",
+    "filterBadge": "all sources",
+    "sources": {
+      "release-hub": "release hub",
+      "code-github": "code · github",
+      "flagsmith-webhook": "flagsmith webhook",
+      "release": "release"
+    }
+  },
+  "branches": {
+    "title": "Present in branches",
+    "since": "since {{date}}"
+  },
+  "linkedFeature": {
+    "title": "Linked feature"
+  },
+  "releases": {
+    "title": "Appears in releases",
+    "status": {
+      "deployed": "deployed",
+      "merged": "merged"
+    },
+    "meta": "{{status}} · {{date}} · PR #{{prNumber}}"
+  },
+  "pullRequests": {
+    "title": "Changed in PRs",
+    "meta": "{{author}} · {{date}} · {{file}}",
+    "changeType": {
+      "added": "added",
+      "modified": "modified"
+    }
+  }
+}

@@ -7,7 +7,6 @@ export class FeatureStateChangedEvent implements IFeatureStateChangedEvent {
 
   constructor(
     readonly featureId: string,
-    readonly releaseId: string,
     readonly state: FeatureState,
   ) {
     this.occurredAt = new Date()

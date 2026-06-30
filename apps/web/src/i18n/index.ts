@@ -12,6 +12,8 @@ import esFeatures from './es/features.json'
 import enFeatures from './en/features.json'
 import esFlags from './es/flags.json'
 import enFlags from './en/flags.json'
+import esFlagDetail from './es/flagDetail.json'
+import enFlagDetail from './en/flagDetail.json'
 import esTickets from './es/tickets.json'
 import enTickets from './en/tickets.json'
 import esAi from './es/ai.json'
@@ -37,6 +39,7 @@ i18n.use(initReactI18next).init({
       releases: esReleases,
       features: esFeatures,
       flags: esFlags,
+      flagDetail: esFlagDetail,
       tickets: esTickets,
       ai: esAi,
       settings: esSettings,
@@ -51,6 +54,7 @@ i18n.use(initReactI18next).init({
       releases: enReleases,
       features: enFeatures,
       flags: enFlags,
+      flagDetail: enFlagDetail,
       tickets: enTickets,
       ai: enAi,
       settings: enSettings,

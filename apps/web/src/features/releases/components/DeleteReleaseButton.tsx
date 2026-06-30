@@ -19,11 +19,14 @@ import {
 } from '@/components/ui/alert-dialog'
 import { DELETE_RELEASE } from '../graphql/releases.mutations'
 import { GET_RELEASES } from '../graphql/releases.queries'
+import { ReleaseStatusValue } from '../constants/release-enums'
+import type { ReleaseStatus } from '@/generated/graphql'
 
 interface DeleteReleaseButtonProps {
   releaseId: string
   projectId: string
   releaseLabel: string
+  status: ReleaseStatus
   onDeleted?: () => void
   variant?: 'icon' | 'menuitem'
 }
@@ -32,6 +35,7 @@ export function DeleteReleaseButton({
   releaseId,
   projectId,
   releaseLabel,
+  status,
   onDeleted,
   variant = 'icon',
 }: DeleteReleaseButtonProps) {
@@ -53,6 +57,10 @@ export function DeleteReleaseButton({
 
   const handleConfirm = () => {
     deleteRelease({ variables: { releaseId } })
+  }
+
+  if (status === ReleaseStatusValue.DEPLOYED) {
+    return null
   }
 
   const triggerRender =

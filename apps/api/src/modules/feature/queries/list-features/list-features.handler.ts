@@ -34,11 +34,8 @@ export class ListFeaturesHandler extends BaseQueryHandler<ListFeaturesQuery, Fea
       throw new ForbiddenException()
     }
 
-    const [features, currentStates] = await Promise.all([
-      this.featureRepository.findAllByProject(query.projectId, tx),
-      this.featureRepository.findCurrentStatesByProject(query.projectId, tx),
-    ])
+    const features = await this.featureRepository.findAllByProject(query.projectId, tx)
 
-    return features.map((feature) => toFeatureType(feature, currentStates.get(feature.id) ?? null))
+    return features.map((feature) => toFeatureType(feature))
   }
 }

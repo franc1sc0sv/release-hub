@@ -32,6 +32,8 @@ import { ShipReleaseCommand } from '../commands/ship-release/ship-release.comman
 import { SaveReleaseSummaryCommand } from '../commands/save-release-summary/save-release-summary.command'
 import { SavePrSummaryCommand } from '../commands/save-pr-summary/save-pr-summary.command'
 import { DeleteReleaseCommand } from '../commands/delete-release/delete-release.command'
+import { SetReleaseStatusInput } from '../commands/set-release-status/set-release-status.input'
+import { SetReleaseStatusCommand } from '../commands/set-release-status/set-release-status.command'
 
 @Resolver(() => ReleaseObjectType)
 @UseGuards(JwtAuthGuard)
@@ -170,6 +172,16 @@ export class ReleaseResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ReleaseObjectType> {
     return this.commandBus.execute(new DeleteReleaseCommand(releaseId, user.id))
+  }
+
+  @Mutation(() => ReleaseObjectType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  setReleaseStatus(
+    @Args('input', { type: () => SetReleaseStatusInput }) input: SetReleaseStatusInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleaseObjectType> {
+    return this.commandBus.execute(new SetReleaseStatusCommand(user.id, input.releaseId, input.status))
   }
 
   @Mutation(() => PullRequestType)
