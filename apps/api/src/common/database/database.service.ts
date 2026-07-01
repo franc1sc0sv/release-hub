@@ -6,6 +6,6 @@ import { IDatabaseService } from './database.abstract'
 @Injectable()
 export class PrismaDatabaseService extends IDatabaseService {
   async $transaction<T>(fn: (tx: TxClient) => Promise<T>): Promise<T> {
-    return prisma.$transaction(fn)
+    return prisma.$transaction(fn, { maxWait: 15000, timeout: 30000 })
   }
 }

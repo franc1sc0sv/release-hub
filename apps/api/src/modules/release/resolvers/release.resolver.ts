@@ -12,6 +12,7 @@ import { ReleaseTreeType } from '../types/release-tree.type'
 import { CoverageType } from '../types/coverage.type'
 import { PullRequestType } from '../types/pull-request.type'
 import { ExportResultType } from '../types/export-result.type'
+import { ResyncReleaseSummaryType } from '../types/resync-release-summary.type'
 import { CreateReleaseInput } from '../types/create-release.input'
 import { ExportSummaryInput } from '../types/export-summary.input'
 import { UpdateReleaseInput } from '../commands/update-release/update-release.input'
@@ -34,6 +35,8 @@ import { SavePrSummaryCommand } from '../commands/save-pr-summary/save-pr-summar
 import { DeleteReleaseCommand } from '../commands/delete-release/delete-release.command'
 import { SetReleaseStatusInput } from '../commands/set-release-status/set-release-status.input'
 import { SetReleaseStatusCommand } from '../commands/set-release-status/set-release-status.command'
+import { ResyncReleasePullRequestsCommand } from '../commands/resync-release-pull-requests/resync-release-pull-requests.command'
+import { ConfirmReleaseAdditionsCommand } from '../commands/confirm-release-additions/confirm-release-additions.command'
 
 @Resolver(() => ReleaseObjectType)
 @UseGuards(JwtAuthGuard)
@@ -206,5 +209,25 @@ export class ReleaseResolver {
     return this.queryBus.execute(
       new ExportSummaryQuery(user.id, input.releaseId, input.format),
     )
+  }
+
+  @Mutation(() => ResyncReleaseSummaryType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  resyncReleasePullRequests(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ResyncReleaseSummaryType> {
+    return this.commandBus.execute(new ResyncReleasePullRequestsCommand(user.id, releaseId))
+  }
+
+  @Mutation(() => ReleaseObjectType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  confirmReleaseAdditions(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleaseObjectType> {
+    return this.commandBus.execute(new ConfirmReleaseAdditionsCommand(user.id, releaseId))
   }
 }

@@ -11,6 +11,8 @@ import {
   type IGithubRepository,
   type IGitHubBranch,
   type IGitHubRefComparison,
+  type IGitHubFileTree,
+  type IGitHubPullRequestFile,
 } from './interfaces/github-client.interface'
 
 @Injectable()
@@ -298,6 +300,115 @@ export class GitHubClient extends IGitHubClient {
         })),
       }
     } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  async getDefaultBranch(repo: string, accessToken: string): Promise<string> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const response = await octokit.repos.get({ owner, repo: repoName })
+      return response.data.default_branch
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  async getFileTree(repo: string, ref: string, accessToken: string): Promise<IGitHubFileTree> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    const headSha = await this.resolveHeadSha(octokit, owner, repoName, ref)
+
+    try {
+      const response = await octokit.git.getTree({
+        owner,
+        repo: repoName,
+        tree_sha: headSha,
+        recursive: 'true',
+      })
+      const paths = response.data.tree
+        .filter((entry) => entry.type === 'blob' && typeof entry.path === 'string')
+        .map((entry) => entry.path as string)
+      return { paths, truncated: response.data.truncated ?? false }
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  async getFileContent(
+    repo: string,
+    ref: string,
+    path: string,
+    accessToken: string,
+  ): Promise<string | null> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const response = await octokit.repos.getContent({ owner, repo: repoName, path, ref })
+      const data = response.data
+      if (Array.isArray(data) || data.type !== 'file' || typeof data.content !== 'string') {
+        return null
+      }
+      return Buffer.from(data.content, 'base64').toString('utf8')
+    } catch (error) {
+      const status = (error as { status?: number }).status
+      if (status === 404) return null
+      this.mapOctokitError(error)
+    }
+  }
+
+  async listPullRequestFiles(
+    repo: string,
+    prNumber: number,
+    accessToken: string,
+  ): Promise<IGitHubPullRequestFile[]> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const files = await octokit.paginate(
+        octokit.pulls.listFiles,
+        { owner, repo: repoName, pull_number: prNumber, per_page: 100 },
+        (response) => response.data,
+      )
+      return files.map((file) => ({
+        filename: file.filename,
+        status: file.status,
+        patch: file.patch ?? null,
+      }))
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  private async resolveHeadSha(
+    octokit: Octokit,
+    owner: string,
+    repoName: string,
+    ref: string,
+  ): Promise<string> {
+    try {
+      const response = await octokit.repos.getBranch({ owner, repo: repoName, branch: ref })
+      return response.data.commit.sha
+    } catch (error) {
+      const status = (error as { status?: number }).status
+      if (status === 404) return ref
       this.mapOctokitError(error)
     }
   }

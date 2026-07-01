@@ -151,6 +151,22 @@
       "draft": "Borrador",
       "summary": "Resumen cliente"
     },
+    "innerTabs": {
+      "label": "Secciones del resumen",
+      "flags": "Feature flags",
+      "features": "Funcionalidades",
+      "prs": "PRs"
+    },
+    "features": {
+      "searchPlaceholder": "Buscar funcionalidades…"
+    },
+    "prs": {
+      "searchPlaceholder": "Buscar pull requests…",
+      "empty": {
+        "heading": "No se encontraron pull requests",
+        "description": "Ningún pull request coincide con tu búsqueda, o este release aún no tiene pull requests."
+      }
+    },
     "error": {
       "heading": "No se pudo cargar el release",
       "description": "Algo salió mal al cargar este release. Por favor intenta de nuevo."
@@ -290,5 +306,45 @@
   "toast": {
     "statusChanged": "Estado del release actualizado",
     "statusError": "No se pudo actualizar el estado — revertido"
+  },
+  "resync": {
+    "syncButton": "Sincronizar nuevos PRs",
+    "syncing": "Sincronizando…",
+    "added_one": "Se agregó {{count}} PR nuevo",
+    "added_other": "Se agregaron {{count}} PRs nuevos",
+    "none": "No se encontraron PRs nuevos",
+    "error": "No se pudieron sincronizar los nuevos PRs",
+    "panelHeading": "PRs nuevos",
+    "confirmButton": "Confirmar adiciones",
+    "confirming": "Confirmando…",
+    "confirmSuccess": "Adiciones confirmadas",
+    "confirmError": "No se pudieron confirmar las adiciones"
+  },
+  "flags": {
+    "title": "Feature flags",
+    "loading": "Cargando flags...",
+    "error": "No se pudieron cargar los flags de este release.",
+    "empty": "Aún no se detectaron flags. Escanea los pull requests de este release para encontrar referencias a flags.",
+    "decisionLabel": "Decisión del flag",
+    "decisionPlaceholder": "Definir decisión",
+    "noDecision": "Sin decisión aún",
+    "removedNote": "Eliminado",
+    "searchPlaceholder": "Buscar flags…",
+    "subTabs": {
+      "label": "Cambios de flags",
+      "added": "Agregados",
+      "removed": "Eliminados",
+      "addedEmpty": "Ningún flag agregado coincide con tu búsqueda.",
+      "removedEmpty": "Ningún flag eliminado coincide con tu búsqueda."
+    },
+    "scan": {
+      "button": "Escanear PRs por flags",
+      "success": "Se escanearon {{prsScanned}} PRs — se encontraron {{flagsFound}} flags, se registraron {{changesRecorded}} cambios.",
+      "error": "Error al escanear los pull requests por flags"
+    },
+    "toast": {
+      "decisionSaved": "Decisión del flag guardada",
+      "decisionError": "No se pudo guardar la decisión — revertido"
+    }
   }
 }

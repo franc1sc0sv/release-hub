@@ -1,4 +1,9 @@
-import type { AiDraftStatus, ReleaseStatus } from '@/generated/graphql'
+import type {
+  AiDraftStatus,
+  FlagChangeAction,
+  ReleaseFlagDecisionType,
+  ReleaseStatus,
+} from '@/generated/graphql'
 
 export const ReleaseStatusValue = {
   DRAFT: 'DRAFT',
@@ -38,3 +43,20 @@ export const AiDraftStatusValue = {
   READY: 'READY',
   FAILED: 'FAILED',
 } as const satisfies Record<AiDraftStatus, AiDraftStatus>
+
+export const ReleaseFlagDecisionTypeValue = {
+  ENABLE_IN_RELEASE: 'ENABLE_IN_RELEASE',
+  SHIP_OFF: 'SHIP_OFF',
+} as const satisfies Record<ReleaseFlagDecisionType, ReleaseFlagDecisionType>
+
+export const RELEASE_FLAG_DECISION_OPTIONS: ReleaseFlagDecisionType[] = [
+  ReleaseFlagDecisionTypeValue.ENABLE_IN_RELEASE,
+  ReleaseFlagDecisionTypeValue.SHIP_OFF,
+]
+
+export const FlagChangeActionValue = {
+  added: 'added',
+  modified: 'modified',
+  removed: 'removed',
+  unchanged: 'unchanged',
+} as const satisfies Record<FlagChangeAction, FlagChangeAction>

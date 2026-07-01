@@ -6,6 +6,9 @@ import type {
   TicketSource,
   ProjectRole,
   InvitationStatus,
+  FlagChangeAction,
+  FlagReferenceKind,
+  ReleaseFlagDecisionType,
 } from '@/generated/graphql'
 
 export function useEnumLabels() {
@@ -18,5 +21,8 @@ export function useEnumLabels() {
     ticketSource: (v: TicketSource): string => t(`ticketSource.${v}`),
     projectRole: (v: ProjectRole): string => t(`projectRole.${v}`),
     invitationStatus: (v: InvitationStatus): string => t(`invitationStatus.${v}`),
+    flagAction: (v: FlagChangeAction): string => t(`flagAction.${v}`),
+    flagReferenceKind: (v: FlagReferenceKind): string => t(`flagReferenceKind.${v}`),
+    releaseFlagDecision: (v: ReleaseFlagDecisionType): string => t(`releaseFlagDecision.${v}`),
   }
 }

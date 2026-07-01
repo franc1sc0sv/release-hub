@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { IntegrationModule } from '../integration/integration.module'
 import { ProjectModule } from '../project/project.module'
 import { GithubAuthModule } from '../github-auth/github-auth.module'
 import { LinearAuthModule } from '../linear-auth/linear-auth.module'
+import { FlagTrackingModule } from '../flag-tracking/flag-tracking.module'
 
 import { ReleaseResolver } from './resolvers/release.resolver'
 import { IReleaseRepository } from './interfaces/release.repository'
@@ -32,9 +33,18 @@ import { SaveReleaseSummaryHandler } from './commands/save-release-summary/save-
 import { SavePrSummaryHandler } from './commands/save-pr-summary/save-pr-summary.handler'
 import { DeleteReleaseHandler } from './commands/delete-release/delete-release.handler'
 import { SetReleaseStatusHandler } from './commands/set-release-status/set-release-status.handler'
+import { ResyncReleasePullRequestsHandler } from './commands/resync-release-pull-requests/resync-release-pull-requests.handler'
+import { ConfirmReleaseAdditionsHandler } from './commands/confirm-release-additions/confirm-release-additions.handler'
 
 @Module({
-  imports: [CqrsModule, IntegrationModule, ProjectModule, GithubAuthModule, LinearAuthModule],
+  imports: [
+    CqrsModule,
+    IntegrationModule,
+    ProjectModule,
+    GithubAuthModule,
+    LinearAuthModule,
+    forwardRef(() => FlagTrackingModule),
+  ],
   providers: [
     ReleaseResolver,
     { provide: IReleaseRepository, useClass: ReleaseRepository },
@@ -57,6 +67,8 @@ import { SetReleaseStatusHandler } from './commands/set-release-status/set-relea
     SavePrSummaryHandler,
     DeleteReleaseHandler,
     SetReleaseStatusHandler,
+    ResyncReleasePullRequestsHandler,
+    ConfirmReleaseAdditionsHandler,
   ],
   exports: [IPullRequestRepository, IReleaseRepository],
 })

@@ -25,10 +25,18 @@
     "CANCELED": "Cancelado"
   },
   "flagAction": {
-    "ADDED": "Añadido",
-    "MODIFIED": "Modificado",
-    "REMOVED": "Eliminado",
-    "UNCHANGED": "Sin cambios"
+    "added": "Añadido",
+    "modified": "Modificado",
+    "removed": "Eliminado",
+    "unchanged": "Sin cambios"
+  },
+  "flagReferenceKind": {
+    "DEFINITION": "Definición",
+    "USAGE": "Uso"
+  },
+  "releaseFlagDecision": {
+    "ENABLE_IN_RELEASE": "Habilitar en release",
+    "SHIP_OFF": "Lanzar apagado"
   },
   "ticketSource": {
     "LINEAR": "Linear",

@@ -7,6 +7,9 @@ import type {
   IProjectMembershipRecord,
   IProjectConnectionCredentials,
   IProjectIntegrationSettings,
+  IFlagRegistryConfig,
+  IUpdateFlagRegistryData,
+  IFlagRegistryConfigResult,
 } from './project.interfaces'
 
 export abstract class IProjectRepository implements IBaseRepository<IProject> {
@@ -20,4 +23,6 @@ export abstract class IProjectRepository implements IBaseRepository<IProject> {
   abstract update: RepositoryMethod<[id: string, data: IUpdateProjectData], IProject>
   abstract updateIntegrationSettings: RepositoryMethod<[id: string, data: IProjectIntegrationSettings], IProject>
   abstract delete: RepositoryMethod<[id: string], void>
+  abstract findFlagRegistryConfig: RepositoryMethod<[id: string], IFlagRegistryConfig | null>
+  abstract updateFlagRegistry: RepositoryMethod<[id: string, data: IUpdateFlagRegistryData], IFlagRegistryConfigResult>
 }

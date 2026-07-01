@@ -3,61 +3,52 @@
   "breadcrumb": {
     "flags": "Flags"
   },
-  "actions": {
-    "snooze": "Snooze 7 days",
-    "dismiss": "Dismiss",
-    "openInFlagsmith": "Open in Flagsmith",
-    "setIntendedEnableDate": "Set intended enable date",
-    "markAsIntentional": "Mark as intentional"
+  "loading": "Loading flag...",
+  "error": {
+    "heading": "Failed to load flag",
+    "description": "Something went wrong while loading this flag. Please try again."
   },
-  "verdict": {
-    "subline": "Shipped in Release {{version}}, in main {{days}} days, still OFF in Flagsmith, reminder snoozed until {{snoozedUntil}}"
+  "notFound": {
+    "heading": "Flag not found",
+    "description": "This flag could not be found for the current project."
+  },
+  "coverage": {
+    "button": "Run coverage",
+    "success": "Coverage scan complete for this flag.",
+    "error": "Coverage scan failed. Make sure a flag registry is configured in Settings."
   },
   "currentStatus": {
     "title": "Current status",
-    "badge": "auto-derived",
+    "presentInCode": "present in code",
+    "notPresentInCode": "not present in code",
     "delivery": {
       "label": "Delivery",
       "shippedIn": "Shipped in {{version}}",
-      "inMain": "in main · {{days}}d"
-    },
-    "rollout": {
-      "label": "Rollout"
+      "inDefaultBranch": "in default branch",
+      "notShipped": "Not shipped yet"
     }
   },
   "history": {
     "title": "History",
     "count_one": "{{count}} event",
     "count_other": "{{count}} events",
-    "filterBadge": "all sources",
-    "sources": {
-      "release-hub": "release hub",
-      "code-github": "code · github",
-      "flagsmith-webhook": "flagsmith webhook",
-      "release": "release"
-    }
+    "empty": "No history events yet."
   },
   "branches": {
     "title": "Present in branches",
-    "since": "since {{date}}"
+    "since": "since {{date}}",
+    "empty": "Not detected in any branch yet."
   },
   "linkedFeature": {
-    "title": "Linked feature"
+    "title": "Linked feature",
+    "empty": "Not linked to a feature yet."
   },
   "releases": {
     "title": "Appears in releases",
-    "status": {
-      "deployed": "deployed",
-      "merged": "merged"
-    },
-    "meta": "{{status}} · {{date}} · PR #{{prNumber}}"
+    "empty": "Not part of any release yet."
   },
   "pullRequests": {
     "title": "Changed in PRs",
-    "meta": "{{author}} · {{date}} · {{file}}",
-    "changeType": {
-      "added": "added",
-      "modified": "modified"
-    }
+    "empty": "No pull request changes detected yet."
   }
 }

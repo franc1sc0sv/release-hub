@@ -33,3 +33,68 @@ export const COMPARE_FLAGS = graphql(`
     }
   }
 `)
+
+export const TRACKED_FLAGS = graphql(`
+  query TrackedFlags($projectId: ID!) {
+    trackedFlags(projectId: $projectId) {
+      id
+      key
+      presentInCode
+      addedInPullRequestNumber
+      branchesPresentCount
+      branchPresences {
+        branch
+        present
+      }
+      feature {
+        id
+        name
+      }
+    }
+  }
+`)
+
+export const TRACKED_FLAG = graphql(`
+  query TrackedFlag($projectId: ID!, $key: String!) {
+    trackedFlag(projectId: $projectId, key: $key) {
+      id
+      key
+      presentInCode
+      delivery {
+        inDefaultBranch
+        shippedReleaseVersions
+      }
+      feature {
+        id
+        name
+      }
+      branchPresences {
+        branch
+        present
+        firstSeenAt
+        lastConfirmedAt
+      }
+      releases {
+        releaseId
+        version
+        status
+        date
+        decision
+      }
+      pullRequestChanges {
+        prNumber
+        prTitle
+        prAuthor
+        prMergedAt
+        kind
+        action
+        detectedFile
+      }
+      events {
+        type
+        description
+        occurredAt
+      }
+    }
+  }
+`)

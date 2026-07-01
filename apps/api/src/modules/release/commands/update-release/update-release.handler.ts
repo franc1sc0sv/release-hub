@@ -49,7 +49,9 @@ export class UpdateReleaseHandler extends BaseCommandHandler<UpdateReleaseComman
       throw new ForbiddenException()
     }
 
-    if (release.status !== ReleaseStatus.DRAFT) {
+    const isDraft = release.status === ReleaseStatus.DRAFT
+
+    if (!isDraft && command.tags !== undefined) {
       throw new AppException('Only draft releases can be updated', ErrorCode.VALIDATION_ERROR)
     }
 
@@ -62,6 +64,17 @@ export class UpdateReleaseHandler extends BaseCommandHandler<UpdateReleaseComman
     if (command.prAssignments?.length) {
       for (const assignment of command.prAssignments) {
         if (!assignment.featureId) continue
+
+        if (!isDraft) {
+          const pr = await this.pullRequestRepository.findById(assignment.pullRequestId, tx)
+          if (!pr || !pr.pendingAddition) {
+            throw new AppException(
+              'Only pending-addition pull requests can be assigned on a non-draft release',
+              ErrorCode.VALIDATION_ERROR,
+            )
+          }
+        }
+
         await this.pullRequestRepository.assignToFeature(assignment.pullRequestId, assignment.featureId, tx)
       }
     }

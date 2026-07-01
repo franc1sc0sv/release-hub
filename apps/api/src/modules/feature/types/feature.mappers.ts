@@ -58,6 +58,7 @@ function toFeaturePullRequestType(pr: IFeaturePullRequest): PullRequestType {
   type.aiRationale = pr.aiRationale
   type.commits = pr.commits.map(toCommitType)
   type.tickets = pr.tickets.map(toTicketLinkType)
+  type.flagChanges = []
   return type
 }
 

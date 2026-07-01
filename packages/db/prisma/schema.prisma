@@ -68,6 +68,20 @@ enum FlagAction {
   @@map("flag_action")
 }
 
+enum FlagReferenceKind {
+  DEFINITION
+  USAGE
+
+  @@map("flag_reference_kind")
+}
+
+enum ReleaseFlagDecisionType {
+  ENABLE_IN_RELEASE
+  SHIP_OFF
+
+  @@map("release_flag_decision_type")
+}
+
 enum TicketSource {
   LINEAR
   JIRA
@@ -107,6 +121,7 @@ model User {
   memberships       Membership[]
   invitationsSent   Invitation[]       @relation("InvitedBy")
   githubConnection  GithubConnection?
+  flagDecisions     ReleaseFlagDecision[]
 
   @@index([deletedAt])
   @@map("users")
@@ -186,6 +201,8 @@ model Project {
   flagsmithApiKey  String? @map("flagsmith_api_key")
   flagsmithProjectId String? @map("flagsmith_project_id")
   linearEnabled    Boolean @default(false) @map("linear_enabled")
+  flagRegistryPath   String? @map("flag_registry_path")
+  flagRegistryBranch String? @map("flag_registry_branch")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
@@ -196,6 +213,7 @@ model Project {
   invitations Invitation[]
   projectTags ProjectTag[]
   linearConnection ProjectLinearConnection?
+  trackedFlags TrackedFlag[]
 
   @@index([deletedAt])
   @@map("projects")
@@ -217,6 +235,7 @@ model Feature {
   project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   pullRequests    PullRequest[]
   featureInReleases FeatureInRelease[]
+  trackedFlags    TrackedFlag[]
 
   @@index([projectId, deletedAt])
   @@map("features")
@@ -241,6 +260,7 @@ model Release {
   project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   pullRequests      PullRequest[]
   featureInReleases FeatureInRelease[]
+  flagDecisions     ReleaseFlagDecision[]
 
   @@index([projectId, deletedAt])
   @@map("releases")
@@ -259,6 +279,7 @@ model PullRequest {
   aiRationale  String?  @map("ai_rationale")
   summary         String?   @map("summary")
   summaryEditedAt DateTime? @map("summary_edited_at")
+  pendingAddition Boolean  @default(false) @map("pending_addition")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -266,6 +287,9 @@ model PullRequest {
   feature     Feature?     @relation(fields: [featureId], references: [id], onDelete: SetNull)
   commits     Commit[]
   ticketLinks TicketLink[]
+  flagChanges PullRequestFlagChange[]
+  flagsAdded   TrackedFlag[] @relation("FlagAddedIn")
+  flagsRemoved TrackedFlag[] @relation("FlagRemovedIn")
 
   @@unique([releaseId, number])
   @@index([releaseId])
@@ -319,6 +343,81 @@ model TicketLink {
 
   @@index([pullRequestId])
   @@map("ticket_links")
+}
+
+model TrackedFlag {
+  id                    String   @id @default(cuid())
+  projectId             String   @map("project_id")
+  key                   String
+  featureId             String?  @map("feature_id")
+  addedInPullRequestId  String?  @map("added_in_pull_request_id")
+  removedInPullRequestId String? @map("removed_in_pull_request_id")
+  presentInCode         Boolean  @default(true) @map("present_in_code")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  deletedAt             DateTime? @map("deleted_at")
+
+  project           Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  feature           Feature?             @relation(fields: [featureId], references: [id], onDelete: SetNull)
+  addedInPullRequest    PullRequest?     @relation("FlagAddedIn", fields: [addedInPullRequestId], references: [id], onDelete: SetNull)
+  removedInPullRequest  PullRequest?     @relation("FlagRemovedIn", fields: [removedInPullRequestId], references: [id], onDelete: SetNull)
+  branchPresence    FlagBranchPresence[]
+  pullRequestChanges PullRequestFlagChange[]
+  releaseDecisions  ReleaseFlagDecision[]
+
+  @@unique([projectId, key])
+  @@index([projectId, deletedAt])
+  @@map("tracked_flag")
+}
+
+model FlagBranchPresence {
+  id              String    @id @default(cuid())
+  trackedFlagId   String    @map("tracked_flag_id")
+  branch          String
+  present         Boolean   @default(true)
+  headSha         String?   @map("head_sha")
+  firstSeenAt     DateTime  @default(now()) @map("first_seen_at")
+  lastConfirmedAt DateTime  @default(now()) @map("last_confirmed_at")
+
+  trackedFlag TrackedFlag @relation(fields: [trackedFlagId], references: [id], onDelete: Cascade)
+
+  @@unique([trackedFlagId, branch])
+  @@map("flag_branch_presence")
+}
+
+model PullRequestFlagChange {
+  id            String            @id @default(cuid())
+  pullRequestId String            @map("pull_request_id")
+  trackedFlagId String            @map("tracked_flag_id")
+  action        FlagAction
+  kind          FlagReferenceKind @default(USAGE)
+  detectedFile  String?           @map("detected_file")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  trackedFlag TrackedFlag @relation(fields: [trackedFlagId], references: [id], onDelete: Cascade)
+
+  @@index([pullRequestId])
+  @@index([trackedFlagId])
+  @@map("pull_request_flag_change")
+}
+
+model ReleaseFlagDecision {
+  id            String                  @id @default(cuid())
+  releaseId     String                  @map("release_id")
+  trackedFlagId String                  @map("tracked_flag_id")
+  decision      ReleaseFlagDecisionType
+  decidedById   String?                 @map("decided_by_id")
+  decidedAt     DateTime?               @map("decided_at")
+  createdAt     DateTime                @default(now()) @map("created_at")
+  updatedAt     DateTime                @updatedAt @map("updated_at")
+
+  release     Release     @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  trackedFlag TrackedFlag @relation(fields: [trackedFlagId], references: [id], onDelete: Cascade)
+  decidedBy   User?       @relation(fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@unique([releaseId, trackedFlagId])
+  @@map("release_flag_decision")
 }
 
 model ProjectTag {

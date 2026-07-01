@@ -3,6 +3,7 @@
   "subtitle": "Configuración del proyecto",
   "sections": {
     "connections": "Conexiones",
+    "flagTracking": "Seguimiento de feature flags",
     "tags": "Taxonomía de etiquetas",
     "members": "Miembros",
     "project": "Proyecto"
@@ -63,6 +64,27 @@
         "noEnvironments": "No se encontraron entornos",
         "failed": "La prueba de conexión falló."
       }
+    }
+  },
+  "flagTracking": {
+    "title": "Seguimiento de feature flags",
+    "description": "Indica a Release Hub el archivo de tu repositorio donde se declaran los feature flags, para rastrear su uso entre ramas.",
+    "registry": {
+      "loading": "Cargando configuración guardada...",
+      "pathLabel": "Archivo de registro",
+      "searchPlaceholder": "Buscar archivos...",
+      "searching": "Buscando...",
+      "typeToSearch": "Escribe para buscar archivos en el repositorio.",
+      "noResults": "No se encontraron archivos coincidentes.",
+      "branchLabel": "Rama",
+      "branchPlaceholder": "Usa la rama predeterminada del repositorio",
+      "branchHint": "Déjalo vacío para usar la rama predeterminada del repositorio.",
+      "pathRequired": "Selecciona un archivo de registro antes de guardar.",
+      "save": "Guardar",
+      "saveSuccess": "Registro de flags guardado.",
+      "saveError": "No se pudo guardar el registro de flags. Inténtalo de nuevo.",
+      "current": "Rastreando actualmente {{path}} en {{branch}}",
+      "defaultBranch": "rama predeterminada"
     }
   },
   "tags": {

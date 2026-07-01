@@ -51,3 +51,20 @@ export interface IProjectMembershipRecord {
   projectId: string
   role: ProjectRole
 }
+
+export interface IFlagRegistryConfig {
+  repo: string
+  flagRegistryPath: string | null
+  flagRegistryBranch: string | null
+}
+
+export interface IUpdateFlagRegistryData {
+  flagRegistryPath: string
+  flagRegistryBranch: string | null
+}
+
+export interface IFlagRegistryConfigResult {
+  projectId: string
+  flagRegistryPath: string | null
+  flagRegistryBranch: string | null
+}

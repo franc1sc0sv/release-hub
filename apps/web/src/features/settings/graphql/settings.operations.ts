@@ -122,3 +122,29 @@ export const VERIFY_FLAGSMITH_CONNECTION = graphql(`
     }
   }
 `)
+
+export const REPO_FILE_SEARCH = graphql(`
+  query RepoFileSearch($input: RepoFileSearchInput!) {
+    repoFileSearch(input: $input)
+  }
+`)
+
+export const SET_FLAG_REGISTRY = graphql(`
+  mutation SetFlagRegistry($input: SetFlagRegistryInput!) {
+    setFlagRegistry(input: $input) {
+      projectId
+      flagRegistryPath
+      flagRegistryBranch
+    }
+  }
+`)
+
+export const FLAG_REGISTRY = graphql(`
+  query FlagRegistry($projectId: ID!) {
+    flagRegistry(projectId: $projectId) {
+      projectId
+      flagRegistryPath
+      flagRegistryBranch
+    }
+  }
+`)

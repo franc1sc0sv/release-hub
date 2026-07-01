@@ -1,6 +1,7 @@
 import type { IPullRequest, ICommit, IRelease, ITicketLink } from '../interfaces/release.interfaces'
 import type { IGitHubMergedPr } from '../../integration/interfaces/github-client.interface'
-import { PullRequestType } from './pull-request.type'
+import type { IPullRequestFlagChangeWithPullRequest } from '../../flag-tracking/interfaces/flag-tracking.interfaces'
+import { PullRequestType, ReleasePrFlagChangeType } from './pull-request.type'
 import { CommitType } from './commit.type'
 import { ReleaseObjectType } from './release.type'
 import { TicketLinkType } from './ticket-link.type'
@@ -25,7 +26,19 @@ function toTicketLinkType(ticket: ITicketLink): TicketLinkType {
   return type
 }
 
-export function toPullRequestType(pr: IPullRequest, repo: string = ''): PullRequestType {
+function toReleasePrFlagChangeType(change: IPullRequestFlagChangeWithPullRequest): ReleasePrFlagChangeType {
+  const type = new ReleasePrFlagChangeType()
+  type.flagKey = change.flagKey
+  type.action = change.action
+  type.kind = change.kind
+  return type
+}
+
+export function toPullRequestType(
+  pr: IPullRequest,
+  repo: string = '',
+  flagChanges: IPullRequestFlagChangeWithPullRequest[] = [],
+): PullRequestType {
   const type = new PullRequestType()
   type.id = pr.id
   type.number = pr.number
@@ -39,9 +52,11 @@ export function toPullRequestType(pr: IPullRequest, repo: string = ''): PullRequ
   type.aiRationale = pr.aiRationale
   type.summary = pr.summary
   type.summaryEditedAt = pr.summaryEditedAt
+  type.pendingAddition = pr.pendingAddition
   type.commits = pr.commits.map(toCommitType)
   type.tickets = pr.ticketLinks.map(toTicketLinkType)
   type.url = repo ? `https://github.com/${repo}/pull/${pr.number}` : ''
+  type.flagChanges = flagChanges.map(toReleasePrFlagChangeType)
   return type
 }
 
@@ -81,8 +96,10 @@ export function githubPrToPullRequestType(
   type.aiRationale = null
   type.summary = null
   type.summaryEditedAt = null
+  type.pendingAddition = false
   type.url = repo ? `https://github.com/${repo}/pull/${pr.number}` : ''
   type.tickets = tickets
+  type.flagChanges = []
   type.commits = pr.commits.map((c) => {
     const commit = new CommitType()
     commit.sha = c.sha

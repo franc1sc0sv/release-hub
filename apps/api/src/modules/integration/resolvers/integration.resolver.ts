@@ -13,11 +13,13 @@ import { FlagsmithProjectType } from '../types/flagsmith-project.type'
 import { FlagsmithVerifyResult } from '../types/flagsmith-verify-result.type'
 import { UpdateConnectionSettingsInput } from '../types/update-connection-settings.input'
 import { GetFlagsInput } from '../types/get-flags.input'
+import { RepoFileSearchInput } from '../queries/repo-file-search/repo-file-search.input'
 import { GetFlagsQuery } from '../queries/get-flags/get-flags.query'
 import { CompareFlagsQuery } from '../queries/compare-flags/compare-flags.query'
 import { GetConnectionSettingsQuery } from '../queries/get-connection-settings/get-connection-settings.query'
 import { GetFlagsmithProjectsQuery } from '../queries/get-flagsmith-projects/get-flagsmith-projects.query'
 import { VerifyFlagsmithConnectionQuery } from '../queries/verify-flagsmith-connection/verify-flagsmith-connection.query'
+import { RepoFileSearchQuery } from '../queries/repo-file-search/repo-file-search.query'
 import { UpdateConnectionSettingsCommand } from '../commands/update-connection-settings/update-connection-settings.command'
 import { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import { SortDirection } from '../../../common/types/sort-direction.enum'
@@ -96,6 +98,17 @@ export class IntegrationResolver {
   ): Promise<FlagsmithVerifyResult> {
     return this.queryBus.execute(
       new VerifyFlagsmithConnectionQuery(projectId, user.id, url, apiKey, flagsmithProjectId),
+    )
+  }
+
+  @Query(() => [String])
+  @Can(Action.READ, Subject.PROJECT)
+  repoFileSearch(
+    @Args('input', { type: () => RepoFileSearchInput }) input: RepoFileSearchInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<string[]> {
+    return this.queryBus.execute(
+      new RepoFileSearchQuery(input.projectId, user.id, input.query, input.branch, input.limit ?? 50),
     )
   }
 

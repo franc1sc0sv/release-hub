@@ -149,7 +149,7 @@ export default function ReleaseViewPage() {
             </TabsList>
 
             <TabsContent value="overview">
-              <OverviewTab release={release} features={features} />
+              <OverviewTab release={release} features={features} projectId={projectId} />
             </TabsContent>
 
             {isDraftStatus && (

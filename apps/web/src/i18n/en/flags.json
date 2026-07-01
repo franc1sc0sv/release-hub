@@ -84,5 +84,10 @@
     "previous": "Previous page",
     "next": "Next page",
     "pageOf": "Page {{page}} of {{total}}"
+  },
+  "coverage": {
+    "button": "Run coverage",
+    "success": "Coverage scan complete — {{flagsTracked}} flags tracked, {{branchesScanned}} branches scanned, {{prChangesDetected}} PR changes detected.",
+    "error": "Coverage scan failed. Make sure a flag registry is configured in Settings."
   }
 }

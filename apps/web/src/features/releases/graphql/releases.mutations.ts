@@ -138,3 +138,43 @@ export const SET_RELEASE_STATUS = graphql(`
     }
   }
 `)
+
+export const SCAN_RELEASE_PULL_REQUESTS = graphql(`
+  mutation ScanReleasePullRequests($releaseId: ID!) {
+    scanReleasePullRequests(releaseId: $releaseId) {
+      prsScanned
+      flagsFound
+      changesRecorded
+    }
+  }
+`)
+
+export const RESYNC_RELEASE_PULL_REQUESTS = graphql(`
+  mutation ResyncReleasePullRequests($releaseId: ID!) {
+    resyncReleasePullRequests(releaseId: $releaseId) {
+      newPrsAdded
+    }
+  }
+`)
+
+export const CONFIRM_RELEASE_ADDITIONS = graphql(`
+  mutation ConfirmReleaseAdditions($releaseId: ID!) {
+    confirmReleaseAdditions(releaseId: $releaseId) {
+      id
+      status
+    }
+  }
+`)
+
+export const SET_RELEASE_FLAG_DECISION = graphql(`
+  mutation SetReleaseFlagDecision($input: SetReleaseFlagDecisionInput!) {
+    setReleaseFlagDecision(input: $input) {
+      id
+      releaseId
+      trackedFlagId
+      decision
+      decidedAt
+      decidedById
+    }
+  }
+`)

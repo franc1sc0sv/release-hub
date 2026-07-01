@@ -7,6 +7,7 @@ import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { MembersSection } from '@/features/collaboration/components/members-section'
 import { ConnectionsSection } from '../components/connections-section'
 import { TagsSection } from '../components/tags-section'
+import { FlagTrackingSection } from '../components/flag-tracking-section'
 
 export default function SettingsPage() {
   const { t } = useTranslation('settings')
@@ -54,6 +55,16 @@ export default function SettingsPage() {
                 {t('sections.connections')}
               </h2>
               <ConnectionsSection projectId={activeProject.id} />
+            </section>
+
+            <section aria-labelledby="flag-tracking-heading">
+              <h2
+                id="flag-tracking-heading"
+                className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground"
+              >
+                {t('sections.flagTracking')}
+              </h2>
+              <FlagTrackingSection projectId={activeProject.id} />
             </section>
 
             <section aria-labelledby="tags-heading">

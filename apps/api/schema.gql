@@ -159,6 +159,26 @@ type FeatureType {
   updatedAt: DateTime!
 }
 
+type FlagBranchPresenceDetailType {
+  branch: String!
+  firstSeenAt: DateTime!
+  lastConfirmedAt: DateTime!
+  present: Boolean!
+}
+
+type FlagBranchPresenceType {
+  branch: String!
+  lastConfirmedAt: DateTime!
+  present: Boolean!
+}
+
+enum FlagChangeAction {
+  added
+  modified
+  removed
+  unchanged
+}
+
 type FlagComparisonResultType {
   baselineEnvironments: [String!]!
   comparedEnvironments: [String!]!
@@ -174,6 +194,12 @@ type FlagComparisonRowType {
   key: String!
 }
 
+type FlagCoverageSummaryType {
+  branchesScanned: Int!
+  flagsTracked: Int!
+  prChangesDetected: Int!
+}
+
 type FlagEnvironmentStateType {
   enabled: Boolean!
   name: String!
@@ -183,6 +209,17 @@ type FlagRefType {
   createdAt: DateTime
   environments: [FlagEnvironmentStateType!]!
   key: String!
+}
+
+enum FlagReferenceKind {
+  DEFINITION
+  USAGE
+}
+
+type FlagRegistryConfigType {
+  flagRegistryBranch: String
+  flagRegistryPath: String
+  projectId: ID!
 }
 
 enum FlagSortField {
@@ -321,6 +358,7 @@ type Mutation {
   acceptSuggestedFeature(input: AcceptSuggestedFeatureInput!): FeatureType!
   assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
   confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
+  confirmReleaseAdditions(releaseId: ID!): ReleaseObjectType!
   createFeature(input: CreateFeatureInput!): FeatureType!
   createGithubBranch(input: CreateGithubBranchInput!): GithubBranchType!
   createProject(input: CreateProjectInput!): ProjectType!
@@ -344,11 +382,17 @@ type Mutation {
   rejectSuggestedFeature(input: RejectSuggestedFeatureInput!): Boolean!
   removeMember(membershipId: ID!): Boolean!
   requestLoginCode(input: RequestLoginCodeInput!): Boolean!
+  resyncReleasePullRequests(releaseId: ID!): ResyncReleaseSummaryType!
   revokeInvitation(invitationId: ID!): Boolean!
+  runFlagCoverage(projectId: ID!): FlagCoverageSummaryType!
+  runFlagCoverageForFlag(key: String!, projectId: ID!): TrackedFlagDetailType!
   savePrSummary(input: SavePrSummaryInput!): PullRequestType!
   saveReleaseSummary(input: SaveReleaseSummaryInput!): ReleaseObjectType!
+  scanReleasePullRequests(releaseId: ID!): ScanReleasePullRequestsSummaryType!
   setFeatureState(input: SetFeatureStateInput!): FeatureType!
   setFeatureTags(input: SetFeatureTagsInput!): FeatureType!
+  setFlagRegistry(input: SetFlagRegistryInput!): FlagRegistryConfigType!
+  setReleaseFlagDecision(input: SetReleaseFlagDecisionInput!): ReleaseFlagDecisionResultType!
   setReleaseStatus(input: SetReleaseStatusInput!): ReleaseObjectType!
   shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
   updateConnectionSettings(input: UpdateConnectionSettingsInput!): ConnectionSettingsType!
@@ -399,9 +443,11 @@ type PullRequestType {
   body: String
   commits: [CommitType!]!
   featureId: ID
+  flagChanges: [ReleasePrFlagChangeType!]!
   id: ID!
   mergedAt: DateTime!
   number: Int!
+  pendingAddition: Boolean!
   releaseId: ID
   summary: String
   summaryEditedAt: DateTime
@@ -415,6 +461,7 @@ type Query {
   compareRefs(baseRef: String!, compareRef: String!, projectId: ID!): RefComparisonType!
   diffRefs(baseRef: String!, compareRef: String!, projectId: ID!): [PullRequestType!]!
   exportSummary(input: ExportSummaryInput!): ExportResultType!
+  flagRegistry(projectId: ID!): FlagRegistryConfigType!
   flagsmithProjects(apiKey: String!, projectId: ID!, url: String!): [FlagsmithProjectType!]!
   getConnectionSettings(projectId: ID!): ConnectionSettingsType!
   getCoverage(releaseId: ID!): CoverageType!
@@ -436,7 +483,11 @@ type Query {
   listProjects: [ProjectType!]!
   me: UserProfileType!
   projectTags(projectId: ID!): [ProjectTagType!]!
+  releaseFlags(releaseId: ID!): [ReleaseFlagType!]!
+  repoFileSearch(input: RepoFileSearchInput!): [String!]!
   suggestFeatureForPr(prId: ID!): AiSuggestionType!
+  trackedFlag(key: String!, projectId: ID!): TrackedFlagDetailType
+  trackedFlags(projectId: ID!): [TrackedFlagType!]!
   verifyFlagsmithConnection(apiKey: String!, flagsmithProjectId: String!, projectId: ID!, url: String!): FlagsmithVerifyResult!
 }
 
@@ -476,6 +527,38 @@ type ReleaseFeatureNodeType {
   state: FeatureState!
 }
 
+type ReleaseFlagChangeType {
+  action: FlagChangeAction!
+  detectedFile: String
+  kind: FlagReferenceKind!
+  prNumber: Int!
+  prTitle: String!
+  prUrl: String!
+}
+
+type ReleaseFlagDecisionResultType {
+  decidedAt: DateTime
+  decidedById: ID
+  decision: ReleaseFlagDecisionType!
+  id: ID!
+  releaseId: ID!
+  trackedFlagId: ID!
+}
+
+enum ReleaseFlagDecisionType {
+  ENABLE_IN_RELEASE
+  SHIP_OFF
+}
+
+type ReleaseFlagType {
+  changes: [ReleaseFlagChangeType!]!
+  decidedAt: DateTime
+  decision: ReleaseFlagDecisionType
+  feature: TrackedFlagFeatureType
+  id: ID!
+  key: String!
+}
+
 type ReleaseObjectType {
   aiDraftStatus: AiDraftStatus!
   baseRef: String!
@@ -492,6 +575,12 @@ type ReleaseObjectType {
   updatedAt: DateTime!
 }
 
+type ReleasePrFlagChangeType {
+  action: FlagChangeAction!
+  flagKey: String!
+  kind: FlagReferenceKind!
+}
+
 enum ReleaseStatus {
   CANCELED
   DEPLOYED
@@ -505,8 +594,19 @@ type ReleaseTreeType {
   release: ReleaseObjectType!
 }
 
+input RepoFileSearchInput {
+  branch: String
+  limit: Int = 50
+  projectId: ID!
+  query: String!
+}
+
 input RequestLoginCodeInput {
   email: String!
+}
+
+type ResyncReleaseSummaryType {
+  newPrsAdded: Int!
 }
 
 input SavePrSummaryInput {
@@ -519,6 +619,12 @@ input SaveReleaseSummaryInput {
   summary: String!
 }
 
+type ScanReleasePullRequestsSummaryType {
+  changesRecorded: Int!
+  flagsFound: Int!
+  prsScanned: Int!
+}
+
 input SetFeatureStateInput {
   featureId: ID!
   state: FeatureState!
@@ -527,6 +633,18 @@ input SetFeatureStateInput {
 input SetFeatureTagsInput {
   featureId: ID!
   tags: [String!]!
+}
+
+input SetFlagRegistryInput {
+  branch: String
+  path: String!
+  projectId: ID!
+}
+
+input SetReleaseFlagDecisionInput {
+  decision: ReleaseFlagDecisionType!
+  releaseId: ID!
+  trackedFlagId: ID!
 }
 
 input SetReleaseStatusInput {
@@ -564,6 +682,62 @@ type TicketLinkType {
 enum TicketSource {
   JIRA
   LINEAR
+}
+
+type TrackedFlagDeliveryType {
+  inDefaultBranch: Boolean!
+  shippedReleaseVersions: [String!]!
+}
+
+type TrackedFlagDetailType {
+  branchPresences: [FlagBranchPresenceDetailType!]!
+  delivery: TrackedFlagDeliveryType!
+  events: [TrackedFlagEventType!]!
+  feature: TrackedFlagFeatureType
+  id: ID!
+  key: String!
+  presentInCode: Boolean!
+  pullRequestChanges: [TrackedFlagPullRequestChangeType!]!
+  releases: [TrackedFlagReleaseType!]!
+}
+
+type TrackedFlagEventType {
+  description: String!
+  occurredAt: DateTime!
+  type: String!
+}
+
+type TrackedFlagFeatureType {
+  id: ID!
+  name: String!
+}
+
+type TrackedFlagPullRequestChangeType {
+  action: FlagChangeAction!
+  detectedFile: String
+  kind: FlagReferenceKind!
+  prAuthor: String!
+  prMergedAt: DateTime!
+  prNumber: Int!
+  prTitle: String!
+}
+
+type TrackedFlagReleaseType {
+  date: DateTime!
+  decision: ReleaseFlagDecisionType
+  releaseId: ID!
+  status: ReleaseStatus!
+  version: String!
+}
+
+type TrackedFlagType {
+  addedInPullRequestNumber: Int
+  branchPresences: [FlagBranchPresenceType!]!
+  branchesPresentCount: Int!
+  feature: TrackedFlagFeatureType
+  id: ID!
+  key: String!
+  presentInCode: Boolean!
 }
 
 input UpdateConnectionSettingsInput {

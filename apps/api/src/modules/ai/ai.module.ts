@@ -12,6 +12,7 @@ import { AiRepository } from './repositories/ai.repository'
 import { SuggestFeatureForPrHandler } from './queries/suggest-feature-for-pr/suggest-feature-for-pr.handler'
 import { GenerateSummaryHandler } from './queries/generate-summary/generate-summary.handler'
 import { AiDraftReleaseCreatedHandler } from './events/release-created.handler'
+import { AiDraftReleaseResyncedHandler } from './events/release-resynced.handler'
 import { GeneratePrSummaryHandler } from './commands/generate-pr-summary/generate-pr-summary.handler'
 import { RegenerateDraftHandler } from './commands/regenerate-draft/regenerate-draft.handler'
 import { AiDraftRunner } from './services/ai-draft-runner.service'
@@ -32,6 +33,7 @@ const AiProviderBinding = {
     SuggestFeatureForPrHandler,
     GenerateSummaryHandler,
     AiDraftReleaseCreatedHandler,
+    AiDraftReleaseResyncedHandler,
     GeneratePrSummaryHandler,
     RegenerateDraftHandler,
     AiDraftRunner,

@@ -15,3 +15,11 @@ export interface IReleaseShippedEvent extends IDomainEvent {
   readonly tag: string
   readonly occurredAt: Date
 }
+
+export interface IReleaseResyncedEvent extends IDomainEvent {
+  readonly eventName: 'release.resynced'
+  readonly releaseId: string
+  readonly projectId: string
+  readonly newPrCount: number
+  readonly occurredAt: Date
+}

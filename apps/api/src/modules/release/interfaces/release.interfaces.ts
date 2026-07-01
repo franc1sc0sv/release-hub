@@ -36,6 +36,7 @@ export interface IPullRequest {
   aiRationale: string | null
   summary: string | null
   summaryEditedAt: Date | null
+  pendingAddition: boolean
   commits: ICommit[]
   ticketLinks: ITicketLink[]
 }
@@ -47,6 +48,7 @@ export interface ICreatePullRequestData {
   author: string
   mergedAt: Date
   releaseId: string
+  pendingAddition?: boolean
 }
 
 export interface ICreateCommitData {
@@ -120,4 +122,9 @@ export interface IConfirmReleasePreparation {
   prUrl: string
   suggestedFeatureIds: string[]
   assignedFeatureIds: string[]
+}
+
+export interface IResyncReleasePreparation {
+  projectId: string
+  newPullRequests: IPreparedPullRequest[]
 }

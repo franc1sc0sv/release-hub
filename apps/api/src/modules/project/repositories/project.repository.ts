@@ -10,6 +10,9 @@ import type {
   IProjectMembershipRecord,
   IProjectConnectionCredentials,
   IProjectIntegrationSettings,
+  IFlagRegistryConfig,
+  IUpdateFlagRegistryData,
+  IFlagRegistryConfigResult,
 } from '../interfaces/project.interfaces'
 
 @Injectable()
@@ -174,6 +177,27 @@ export class ProjectRepository extends IProjectRepository {
       where: { id },
       data: { deletedAt: new Date() },
     })
+  }
+
+  findFlagRegistryConfig = async (id: string, tx: TxClient): Promise<IFlagRegistryConfig | null> => {
+    const row = await tx.project.findFirst({
+      where: { id, deletedAt: null },
+      select: { repo: true, flagRegistryPath: true, flagRegistryBranch: true },
+    })
+    if (!row) return null
+    return { repo: row.repo, flagRegistryPath: row.flagRegistryPath, flagRegistryBranch: row.flagRegistryBranch }
+  }
+
+  updateFlagRegistry = async (
+    id: string,
+    data: IUpdateFlagRegistryData,
+    tx: TxClient,
+  ): Promise<IFlagRegistryConfigResult> => {
+    const row = await tx.project.update({
+      where: { id },
+      data: { flagRegistryPath: data.flagRegistryPath, flagRegistryBranch: data.flagRegistryBranch },
+    })
+    return { projectId: row.id, flagRegistryPath: row.flagRegistryPath, flagRegistryBranch: row.flagRegistryBranch }
   }
 
   private toIProject(

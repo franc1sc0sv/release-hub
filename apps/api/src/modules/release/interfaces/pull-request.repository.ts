@@ -16,4 +16,6 @@ export abstract class IPullRequestRepository implements IBaseRepository<IPullReq
   abstract updateSummary: RepositoryMethod<[prId: string, summary: string, summaryEditedAt: Date | null], IPullRequest>
   abstract clearFeatureAssignment: RepositoryMethod<[featureId: string], void>
   abstract clearReleaseAssignments: RepositoryMethod<[releaseId: string], void>
+  abstract findPendingAdditionsByRelease: RepositoryMethod<[releaseId: string], IPullRequest[]>
+  abstract clearPendingAddition: RepositoryMethod<[prId: string], IPullRequest>
 }

@@ -84,5 +84,10 @@
     "previous": "Página anterior",
     "next": "Página siguiente",
     "pageOf": "Página {{page}} de {{total}}"
+  },
+  "coverage": {
+    "button": "Ejecutar cobertura",
+    "success": "Escaneo de cobertura completo — {{flagsTracked}} flags rastreados, {{branchesScanned}} ramas escaneadas, {{prChangesDetected}} cambios de PR detectados.",
+    "error": "El escaneo de cobertura falló. Verifica que haya un registro de flags configurado en Configuración."
   }
 }

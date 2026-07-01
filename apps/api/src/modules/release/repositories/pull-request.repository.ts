@@ -18,6 +18,7 @@ type PrRow = {
   aiRationale: string | null
   summary: string | null
   summaryEditedAt: Date | null
+  pendingAddition: boolean
   commits: Array<{
     id: string
     pullRequestId: string
@@ -88,6 +89,7 @@ export class PullRequestRepository extends IPullRequestRepository {
         author: data.author,
         mergedAt: data.mergedAt,
         releaseId: data.releaseId,
+        pendingAddition: data.pendingAddition ?? false,
       },
       include: { commits: true, ticketLinks: true },
     })
@@ -135,6 +137,24 @@ export class PullRequestRepository extends IPullRequestRepository {
     })
   }
 
+  findPendingAdditionsByRelease = async (releaseId: string, tx: TxClient): Promise<IPullRequest[]> => {
+    const rows = await tx.pullRequest.findMany({
+      where: { releaseId, pendingAddition: true, release: { deletedAt: null } },
+      include: { commits: true, ticketLinks: true },
+      orderBy: { number: 'asc' },
+    })
+    return rows.map((row) => this.toIPullRequest(row))
+  }
+
+  clearPendingAddition = async (prId: string, tx: TxClient): Promise<IPullRequest> => {
+    const row = await tx.pullRequest.update({
+      where: { id: prId },
+      data: { pendingAddition: false },
+      include: { commits: true, ticketLinks: true },
+    })
+    return this.toIPullRequest(row)
+  }
+
   private toITicketLink(row: {
     id: string
     pullRequestId: string
@@ -171,6 +191,7 @@ export class PullRequestRepository extends IPullRequestRepository {
       aiRationale: row.aiRationale,
       summary: row.summary,
       summaryEditedAt: row.summaryEditedAt,
+      pendingAddition: row.pendingAddition,
       commits: row.commits.map((c) => ({
         id: c.id,
         pullRequestId: c.pullRequestId,

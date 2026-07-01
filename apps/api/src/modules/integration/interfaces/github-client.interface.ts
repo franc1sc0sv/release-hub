@@ -53,6 +53,17 @@ export interface IGitHubRefComparison {
   commits: IGitHubRefCommit[]
 }
 
+export interface IGitHubFileTree {
+  paths: string[]
+  truncated: boolean
+}
+
+export interface IGitHubPullRequestFile {
+  filename: string
+  status: string
+  patch: string | null
+}
+
 export abstract class IGitHubClient {
   abstract compareMergedPullRequests(
     repo: string,
@@ -96,6 +107,23 @@ export abstract class IGitHubClient {
     compareRef: string,
     accessToken: string,
   ): Promise<IGitHubRefComparison>
+
+  abstract getDefaultBranch(repo: string, accessToken: string): Promise<string>
+
+  abstract getFileTree(repo: string, ref: string, accessToken: string): Promise<IGitHubFileTree>
+
+  abstract getFileContent(
+    repo: string,
+    ref: string,
+    path: string,
+    accessToken: string,
+  ): Promise<string | null>
+
+  abstract listPullRequestFiles(
+    repo: string,
+    prNumber: number,
+    accessToken: string,
+  ): Promise<IGitHubPullRequestFile[]>
 
   abstract revokeAuthorization(accessToken: string): Promise<void>
 }

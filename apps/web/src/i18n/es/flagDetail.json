@@ -3,61 +3,52 @@
   "breadcrumb": {
     "flags": "Flags"
   },
-  "actions": {
-    "snooze": "Posponer 7 días",
-    "dismiss": "Descartar",
-    "openInFlagsmith": "Abrir en Flagsmith",
-    "setIntendedEnableDate": "Definir fecha de activación",
-    "markAsIntentional": "Marcar como intencional"
+  "loading": "Cargando flag...",
+  "error": {
+    "heading": "Error al cargar el flag",
+    "description": "Algo salió mal al cargar este flag. Inténtalo de nuevo."
   },
-  "verdict": {
-    "subline": "Lanzado en Release {{version}}, en main hace {{days}} días, aún INACTIVO en Flagsmith, recordatorio pospuesto hasta {{snoozedUntil}}"
+  "notFound": {
+    "heading": "Flag no encontrado",
+    "description": "No se pudo encontrar este flag para el proyecto actual."
+  },
+  "coverage": {
+    "button": "Ejecutar cobertura",
+    "success": "Escaneo de cobertura completo para este flag.",
+    "error": "El escaneo de cobertura falló. Verifica que haya un registro de flags configurado en Ajustes."
   },
   "currentStatus": {
     "title": "Estado actual",
-    "badge": "derivado automáticamente",
+    "presentInCode": "presente en el código",
+    "notPresentInCode": "no presente en el código",
     "delivery": {
       "label": "Entrega",
       "shippedIn": "Lanzado en {{version}}",
-      "inMain": "en main · {{days}}d"
-    },
-    "rollout": {
-      "label": "Despliegue"
+      "inDefaultBranch": "en la rama por defecto",
+      "notShipped": "Aún no lanzado"
     }
   },
   "history": {
     "title": "Historial",
     "count_one": "{{count}} evento",
     "count_other": "{{count}} eventos",
-    "filterBadge": "todas las fuentes",
-    "sources": {
-      "release-hub": "release hub",
-      "code-github": "código · github",
-      "flagsmith-webhook": "webhook de flagsmith",
-      "release": "release"
-    }
+    "empty": "Aún no hay eventos en el historial."
   },
   "branches": {
     "title": "Presente en ramas",
-    "since": "desde {{date}}"
+    "since": "desde {{date}}",
+    "empty": "Aún no detectado en ninguna rama."
   },
   "linkedFeature": {
-    "title": "Feature vinculado"
+    "title": "Feature vinculado",
+    "empty": "Aún no vinculado a un feature."
   },
   "releases": {
     "title": "Aparece en releases",
-    "status": {
-      "deployed": "desplegado",
-      "merged": "fusionado"
-    },
-    "meta": "{{status}} · {{date}} · PR #{{prNumber}}"
+    "empty": "Aún no forma parte de ningún release."
   },
   "pullRequests": {
     "title": "Modificado en PRs",
-    "meta": "{{author}} · {{date}} · {{file}}",
-    "changeType": {
-      "added": "agregado",
-      "modified": "modificado"
-    }
+    "empty": "Aún no se detectaron cambios en pull requests."
   }
 }

@@ -3,6 +3,7 @@
   "subtitle": "Project configuration",
   "sections": {
     "connections": "Connections",
+    "flagTracking": "Feature flag tracking",
     "tags": "Tag taxonomy",
     "members": "Members",
     "project": "Project"
@@ -63,6 +64,27 @@
         "noEnvironments": "No environments found",
         "failed": "Connection test failed."
       }
+    }
+  },
+  "flagTracking": {
+    "title": "Feature flag tracking",
+    "description": "Point Release Hub at the file in your repository where feature flags are declared, so it can track flag usage across branches.",
+    "registry": {
+      "loading": "Loading saved configuration...",
+      "pathLabel": "Registry file",
+      "searchPlaceholder": "Search files...",
+      "searching": "Searching...",
+      "typeToSearch": "Type to search files in the repository.",
+      "noResults": "No matching files found.",
+      "branchLabel": "Branch",
+      "branchPlaceholder": "Defaults to the repository's default branch",
+      "branchHint": "Leave empty to use the repository's default branch.",
+      "pathRequired": "Select a registry file before saving.",
+      "save": "Save",
+      "saveSuccess": "Flag registry saved.",
+      "saveError": "Couldn't save the flag registry. Please try again.",
+      "current": "Currently tracking {{path}} on {{branch}}",
+      "defaultBranch": "default branch"
     }
   },
   "tags": {

@@ -78,6 +78,7 @@ export const GET_RELEASE_TREE = graphql(`
           mergedAt
           releaseId
           featureId
+          pendingAddition
           aiConfidence
           aiRationale
           summary
@@ -95,6 +96,11 @@ export const GET_RELEASE_TREE = graphql(`
             message
             author
             date
+          }
+          flagChanges {
+            flagKey
+            action
+            kind
           }
         }
       }
@@ -163,6 +169,29 @@ export const COMPARE_REFS = graphql(`
         message
         author
         committedAt
+      }
+    }
+  }
+`)
+
+export const RELEASE_FLAGS = graphql(`
+  query ReleaseFlags($releaseId: ID!) {
+    releaseFlags(releaseId: $releaseId) {
+      id
+      key
+      decision
+      decidedAt
+      feature {
+        id
+        name
+      }
+      changes {
+        kind
+        action
+        detectedFile
+        prNumber
+        prTitle
+        prUrl
       }
     }
   }

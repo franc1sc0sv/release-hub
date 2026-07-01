@@ -10,9 +10,11 @@ import {
   Flag,
   GitCompare,
   Loader2,
+  RadarIcon,
   Search,
   ShieldOff,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { EmptyState } from '@/components/nebula/EmptyState'
@@ -30,9 +32,12 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { useProject } from '@/context/project.context'
 import { ROUTES } from '@/lib/routes'
 import { slideUp } from '@/lib/animations'
+import { Can } from '@/context/ability.context'
+import { Action, Subject } from '@release-hub/shared'
 import type { FlagSortField, SortDirection } from '@/generated/graphql'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { useFlags } from '../hooks/use-flags'
+import { useRunFlagCoverage } from '../hooks/use-run-flag-coverage'
 import { FlagMatrix } from '../components/FlagMatrix'
 import { ColumnVisibilityMenu } from '../components/ColumnVisibilityMenu'
 import { CompareFlagsDialog } from '../components/CompareFlagsDialog'
@@ -76,6 +81,26 @@ export default function FlagsPage() {
   )
 
   const debouncedSearch = useDebounced(searchInput, 300)
+
+  const { run: runCoverage, loading: runningCoverage } = useRunFlagCoverage(projectId ?? '')
+
+  async function handleRunCoverage(): Promise<void> {
+    try {
+      const result = await runCoverage()
+      const summary = result.data?.runFlagCoverage
+      if (summary) {
+        toast.success(
+          t('coverage.success', {
+            flagsTracked: summary.flagsTracked,
+            branchesScanned: summary.branchesScanned,
+            prChangesDetected: summary.prChangesDetected,
+          }),
+        )
+      }
+    } catch {
+      toast.error(t('coverage.error'))
+    }
+  }
 
   const { environments, items, totalCount, loading, error, refetch } = useFlags({
     projectId: flagsmithEnabled ? projectId : null,
@@ -196,6 +221,23 @@ export default function FlagsPage() {
               <Download className="size-4" aria-hidden />
               {t('export.button')}
             </Button>
+
+            <Can I={Action.UPDATE} a={Subject.PROJECT}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full gap-2"
+                disabled={!projectId || runningCoverage}
+                onClick={() => void handleRunCoverage()}
+              >
+                {runningCoverage ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <RadarIcon className="size-4" aria-hidden />
+                )}
+                {t('coverage.button')}
+              </Button>
+            </Can>
           </div>
 
           {loading && (

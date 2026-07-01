@@ -1,6 +1,20 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
 import { CommitType } from './commit.type'
 import { TicketLinkType } from './ticket-link.type'
+import { FlagChangeAction } from '../../../common/types/flag-change-action.enum'
+import { FlagReferenceKind } from '../../../common/types/flag-reference-kind.enum'
+
+@ObjectType()
+export class ReleasePrFlagChangeType {
+  @Field(() => String)
+  flagKey: string
+
+  @Field(() => FlagChangeAction)
+  action: FlagChangeAction
+
+  @Field(() => FlagReferenceKind)
+  kind: FlagReferenceKind
+}
 
 @ObjectType()
 export class PullRequestType {
@@ -40,6 +54,9 @@ export class PullRequestType {
   @Field(() => Date, { nullable: true })
   summaryEditedAt: Date | null
 
+  @Field(() => Boolean)
+  pendingAddition: boolean
+
   @Field(() => [CommitType])
   commits: CommitType[]
 
@@ -48,4 +65,7 @@ export class PullRequestType {
 
   @Field(() => String)
   url: string
+
+  @Field(() => [ReleasePrFlagChangeType])
+  flagChanges: ReleasePrFlagChangeType[]
 }

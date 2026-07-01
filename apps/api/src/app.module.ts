@@ -21,6 +21,7 @@ import { IntegrationModule } from './modules/integration/integration.module'
 import { ProjectTagModule } from './modules/project-tag/project-tag.module'
 import { GithubAuthModule } from './modules/github-auth/github-auth.module'
 import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
+import { FlagTrackingModule } from './modules/flag-tracking/flag-tracking.module'
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
     ProjectTagModule,
     GithubAuthModule,
     LinearAuthModule,
+    FlagTrackingModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: GqlThrottlerGuard },

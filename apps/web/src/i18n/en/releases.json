@@ -151,6 +151,22 @@
       "draft": "Draft",
       "summary": "Summary"
     },
+    "innerTabs": {
+      "label": "Overview sections",
+      "flags": "Feature flags",
+      "features": "Features",
+      "prs": "PRs"
+    },
+    "features": {
+      "searchPlaceholder": "Search features…"
+    },
+    "prs": {
+      "searchPlaceholder": "Search pull requests…",
+      "empty": {
+        "heading": "No pull requests found",
+        "description": "No pull requests match your search, or this release has no pull requests yet."
+      }
+    },
     "error": {
       "heading": "Failed to load release",
       "description": "Something went wrong while loading this release. Please try again."
@@ -290,5 +306,45 @@
   "toast": {
     "statusChanged": "Release status updated",
     "statusError": "Could not update status — reverted"
+  },
+  "resync": {
+    "syncButton": "Sync new PRs",
+    "syncing": "Syncing…",
+    "added_one": "Added {{count}} new PR",
+    "added_other": "Added {{count}} new PRs",
+    "none": "No new PRs found",
+    "error": "Failed to sync new PRs",
+    "panelHeading": "New PRs",
+    "confirmButton": "Confirm additions",
+    "confirming": "Confirming…",
+    "confirmSuccess": "Additions confirmed",
+    "confirmError": "Failed to confirm additions"
+  },
+  "flags": {
+    "title": "Feature flags",
+    "loading": "Loading flags...",
+    "error": "Could not load flags for this release.",
+    "empty": "No flags detected yet. Scan this release's pull requests to find flag references.",
+    "decisionLabel": "Flag decision",
+    "decisionPlaceholder": "Set decision",
+    "noDecision": "No decision yet",
+    "removedNote": "Removed",
+    "searchPlaceholder": "Search flags…",
+    "subTabs": {
+      "label": "Flag changes",
+      "added": "Added",
+      "removed": "Removed",
+      "addedEmpty": "No added flags match your search.",
+      "removedEmpty": "No removed flags match your search."
+    },
+    "scan": {
+      "button": "Scan PRs for flags",
+      "success": "Scanned {{prsScanned}} PRs — found {{flagsFound}} flags, recorded {{changesRecorded}} changes.",
+      "error": "Failed to scan pull requests for flags"
+    },
+    "toast": {
+      "decisionSaved": "Flag decision saved",
+      "decisionError": "Could not save decision — reverted"
+    }
   }
 }

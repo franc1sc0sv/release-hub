@@ -9,6 +9,7 @@ import { IFeatureRepository } from '../../../feature/interfaces/feature.reposito
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
+import { IPullRequestFlagChangeRepository } from '../../../flag-tracking/interfaces/pull-request-flag-change.repository'
 import { ReleaseTreeType, ReleaseFeatureNodeType } from '../../types/release-tree.type'
 import { FeatureState } from '../../../../common/types/feature-state.enum'
 import { FlagStateType } from '../../../feature/types/flag-state.type'
@@ -17,6 +18,7 @@ import { toFeatureType } from '../../../feature/types/feature.mappers'
 import { deriveClientAvailability } from '../../../feature/types/client-availability.map'
 import type { IFeatureInRelease } from '../../../feature/interfaces/feature.interfaces'
 import type { IPullRequest } from '../../interfaces/release.interfaces'
+import type { IPullRequestFlagChangeWithPullRequest } from '../../../flag-tracking/interfaces/flag-tracking.interfaces'
 import { GetReleaseTreeQuery } from './get-release-tree.query'
 
 @QueryHandler(GetReleaseTreeQuery)
@@ -28,6 +30,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
     private readonly featureRepository: IFeatureRepository,
+    private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
   ) {
     super(db)
   }
@@ -53,6 +56,20 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
 
     const allPrs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
     const assignedPrs = allPrs.filter((pr) => pr.featureId !== null)
+
+    const flagChanges = await this.pullRequestFlagChangeRepository.findAllForPullRequestIds(
+      assignedPrs.map((pr) => pr.id),
+      tx,
+    )
+    const flagChangesByPullRequestId = flagChanges.reduce<Map<string, IPullRequestFlagChangeWithPullRequest[]>>(
+      (acc, change) => {
+        const existing = acc.get(change.pullRequestId) ?? []
+        existing.push(change)
+        acc.set(change.pullRequestId, existing)
+        return acc
+      },
+      new Map(),
+    )
 
     const ledgerEntries = await this.featureInReleaseRepository.findByRelease(query.releaseId, tx)
     const ledgerByFeatureId = new Map<string, IFeatureInRelease>(
@@ -88,7 +105,9 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
         node.state = state
         node.clientAvailabilityKey = deriveClientAvailability(state, flagState)
         node.flagState = flagState
-        node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) => toPullRequestType(pr, project?.repo ?? ''))
+        node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) =>
+          toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? []),
+        )
         return node
       })
 
