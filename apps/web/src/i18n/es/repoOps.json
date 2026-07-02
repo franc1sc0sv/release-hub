@@ -2,10 +2,6 @@
   "title": "Operaciones de repo",
   "subtitle": "Operaciones del repositorio",
   "description": "Encuentra ramas obsoletas y fusionadas, bloquea las que quieras conservar y limpia el resto con una eliminación revisada y confirmada.",
-  "hero": {
-    "eyebrow": "Higiene de ramas",
-    "body": "Release Hub analiza tu repositorio en busca de ramas fusionadas, obsoletas o que ya no están referenciadas por ningún release, y las marca para revisión. Nada se elimina automáticamente."
-  },
   "loading": "Cargando ramas...",
   "error": {
     "heading": "No se pudieron cargar las ramas",

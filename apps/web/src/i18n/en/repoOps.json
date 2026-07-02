@@ -2,10 +2,6 @@
   "title": "Repo Ops",
   "subtitle": "Repository operations",
   "description": "Find stale and merged branches, block the ones you want to keep, and clean up the rest with a reviewed, confirmed delete.",
-  "hero": {
-    "eyebrow": "Branch hygiene",
-    "body": "Release Hub scans your repository for branches that are merged, stale, or no longer referenced by any release, then flags them for review. Nothing is deleted automatically."
-  },
   "loading": "Loading branches...",
   "error": {
     "heading": "Could not load branches",

@@ -8,8 +8,6 @@ import { SearchField } from '@/components/nebula/SearchField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Scene3D } from '@/components/three/Scene3D'
-import { SceneKeyValue } from '@/components/three/scenes/registry'
 import { useProject } from '@/context/project.context'
 import { useBranchCleanupCandidates } from '../hooks/use-branch-cleanup-candidates'
 import { useBlockedBranches } from '../hooks/use-blocked-branches'
@@ -49,12 +47,6 @@ export default function RepoOpsPage() {
     if (!query) return candidates
     return candidates.filter((candidate) => candidate.name.toLowerCase().includes(query))
   }, [candidates, search])
-
-  const staleCount = useMemo(
-    () => candidates.filter((candidate) => candidate.signals.stale).length,
-    [candidates],
-  )
-  const aliveCount = candidates.length - staleCount
 
   function handleToggle(branchName: string) {
     setSelected((prev) => {
@@ -143,23 +135,6 @@ export default function RepoOpsPage() {
   return (
     <PageShell eyebrow={t('subtitle')} title={t('title')} description={t('description')}>
       <div className="space-y-8">
-        <GlassCard glow="indigo" className="overflow-hidden">
-          <CardContent className="flex flex-col items-center gap-6 py-10 sm:flex-row sm:justify-between">
-            <div className="max-w-xl space-y-2">
-              <p className="text-overline uppercase text-brand-magenta">{t('hero.eyebrow')}</p>
-              <p className="text-base text-foreground">{t('hero.body')}</p>
-            </div>
-            <div className="aspect-square w-40 shrink-0 sm:w-48">
-              <Scene3D
-                scene={SceneKeyValue.BRANCH_CONSTELLATION}
-                sceneProps={
-                  candidatesLoading ? undefined : { aliveCount, staleCount }
-                }
-              />
-            </div>
-          </CardContent>
-        </GlassCard>
-
         {body}
 
         {!blockedLoading && !blockedError && projectId && (
