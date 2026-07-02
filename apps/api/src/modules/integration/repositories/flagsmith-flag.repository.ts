@@ -92,6 +92,85 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     }
   }
 
+  reconcileFlags = async (
+    projectId: string,
+    flags: IUpsertFlagsmithFlagData[],
+    tx: TxClient,
+  ): Promise<void> => {
+    const syncedAt = new Date()
+    const incomingKeys = flags.map((flag) => flag.key)
+
+    const environments = await tx.flagsmithEnvironment.findMany({
+      where: { projectId },
+      select: { id: true, name: true },
+    })
+    const environmentIdByName = new Map(environments.map((env) => [env.name, env.id]))
+
+    const existing = await tx.flagsmithFlag.findMany({
+      where: { projectId },
+      select: { id: true, key: true, flagCreatedAt: true },
+    })
+    const existingByKey = new Map(existing.map((flag) => [flag.key, flag]))
+
+    const toCreate = flags.filter((flag) => !existingByKey.has(flag.key))
+    if (toCreate.length > 0) {
+      await tx.flagsmithFlag.createMany({
+        data: toCreate.map((flag) => ({
+          projectId,
+          key: flag.key,
+          flagCreatedAt: flag.createdAt,
+          lastSyncedAt: syncedAt,
+        })),
+      })
+    }
+
+    const existingIncomingKeys = incomingKeys.filter((key) => existingByKey.has(key))
+    if (existingIncomingKeys.length > 0) {
+      await tx.flagsmithFlag.updateMany({
+        where: { projectId, key: { in: existingIncomingKeys } },
+        data: { lastSyncedAt: syncedAt, deletedAt: null },
+      })
+    }
+
+    const createdAtCorrections = flags.filter((flag) => {
+      const current = existingByKey.get(flag.key)
+      return (
+        current !== undefined &&
+        flag.createdAt !== null &&
+        current.flagCreatedAt?.getTime() !== flag.createdAt.getTime()
+      )
+    })
+    for (const flag of createdAtCorrections) {
+      await tx.flagsmithFlag.updateMany({
+        where: { projectId, key: flag.key },
+        data: { flagCreatedAt: flag.createdAt },
+      })
+    }
+
+    const rows = await tx.flagsmithFlag.findMany({
+      where: { projectId, key: { in: incomingKeys } },
+      select: { id: true, key: true },
+    })
+    const flagIdByKey = new Map(rows.map((row) => [row.key, row.id]))
+
+    await tx.flagsmithFlagState.deleteMany({
+      where: { flagId: { in: rows.map((row) => row.id) } },
+    })
+
+    const stateRows = flags.flatMap((flag) => {
+      const flagId = flagIdByKey.get(flag.key)
+      if (!flagId) return []
+      return flag.states.flatMap((state) => {
+        const environmentId = environmentIdByName.get(state.environmentName)
+        if (!environmentId) return []
+        return [{ flagId, environmentId, enabled: state.enabled }]
+      })
+    })
+    if (stateRows.length > 0) {
+      await tx.flagsmithFlagState.createMany({ data: stateRows })
+    }
+  }
+
   softDeleteFlagsNotInKeys = async (projectId: string, keys: string[], tx: TxClient): Promise<void> => {
     await tx.flagsmithFlag.updateMany({
       where: { projectId, deletedAt: null, key: { notIn: keys } },

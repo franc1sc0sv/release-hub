@@ -111,17 +111,16 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
       )
     }
 
-    for (const flag of flags) {
-      await this.flagsmithFlagRepository.upsertFlagWithStates(
-        {
-          projectId: command.projectId,
-          key: flag.key,
-          createdAt: flag.createdAt ? new Date(flag.createdAt) : null,
-          states: environments.map((name) => ({ environmentName: name, enabled: flag.states[name] ?? false })),
-        },
-        tx,
-      )
-    }
+    await this.flagsmithFlagRepository.reconcileFlags(
+      command.projectId,
+      flags.map((flag) => ({
+        projectId: command.projectId,
+        key: flag.key,
+        createdAt: flag.createdAt ? new Date(flag.createdAt) : null,
+        states: environments.map((name) => ({ environmentName: name, enabled: flag.states[name] ?? false })),
+      })),
+      tx,
+    )
 
     await this.flagsmithFlagRepository.softDeleteFlagsNotInKeys(
       command.projectId,

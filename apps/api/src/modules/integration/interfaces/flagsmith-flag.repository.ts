@@ -13,6 +13,7 @@ import type {
 export abstract class IFlagsmithFlagRepository {
   abstract upsertEnvironment: RepositoryMethod<[data: IUpsertFlagsmithEnvironmentData], { id: string; name: string }>
   abstract upsertFlagWithStates: RepositoryMethod<[data: IUpsertFlagsmithFlagData], void>
+  abstract reconcileFlags: RepositoryMethod<[projectId: string, flags: IUpsertFlagsmithFlagData[]], void>
   abstract softDeleteFlagsNotInKeys: RepositoryMethod<[projectId: string, keys: string[]], void>
   abstract softDeleteFlagByKey: RepositoryMethod<[projectId: string, key: string], void>
   abstract findFlagMatrix: RepositoryMethod<[filters: IFlagsmithFlagMatrixFilters], IFlagsmithFlagMatrixResult>
