@@ -2,7 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useMutation, useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
   Mail,
   Lock,
@@ -13,6 +13,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
+import { fadeIn } from '@/lib/animations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -78,6 +79,7 @@ export function LoginPage() {
   const [searchParams] = useSearchParams()
   const { setUser } = useAuth()
   const client = useApolloClient()
+  const reduceMotion = useReducedMotion()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -297,9 +299,9 @@ export function LoginPage() {
 
                     {passwordError && (
                       <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.15 }}
+                        variants={reduceMotion ? undefined : fadeIn}
+                        initial={reduceMotion ? undefined : 'hidden'}
+                        animate={reduceMotion ? undefined : 'visible'}
                       >
                         <Alert variant="destructive">
                           <AlertCircle className="size-4" />
@@ -345,9 +347,9 @@ export function LoginPage() {
 
                       {otpError && (
                         <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.15 }}
+                          variants={reduceMotion ? undefined : fadeIn}
+                          initial={reduceMotion ? undefined : 'hidden'}
+                          animate={reduceMotion ? undefined : 'visible'}
                         >
                           <Alert variant="destructive">
                             <AlertCircle className="size-4" />
@@ -410,9 +412,9 @@ export function LoginPage() {
 
                       {otpError && (
                         <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.15 }}
+                          variants={reduceMotion ? undefined : fadeIn}
+                          initial={reduceMotion ? undefined : 'hidden'}
+                          animate={reduceMotion ? undefined : 'visible'}
                         >
                           <Alert variant="destructive">
                             <AlertCircle className="size-4" />

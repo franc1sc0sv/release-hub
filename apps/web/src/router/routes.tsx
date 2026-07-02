@@ -2,14 +2,14 @@ import React from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
-import { LoginPage } from '@/features/auth/LoginPage'
-import { RegisterPage } from '@/features/auth/RegisterPage'
 import { ProtectedLayout } from '@/router/ProtectedLayout'
 import { RequireAbility } from '@/router/RequireAbility'
 import { AcceptInvitationPage } from '@/features/collaboration/pages/AcceptInvitationPage'
 import { AuthedOnboardingLayout } from '@/router/AuthedOnboardingLayout'
 import { Action, Subject } from '@release-hub/shared'
 
+const LoginPage = React.lazy(() => import('@/features/auth/LoginPage').then((m) => ({ default: m.LoginPage })))
+const RegisterPage = React.lazy(() => import('@/features/auth/RegisterPage').then((m) => ({ default: m.RegisterPage })))
 const OnboardingPage = React.lazy(
   () => import('@/features/onboarding/pages/OnboardingPage'),
 )
@@ -44,11 +44,11 @@ function withSuspense(node: React.ReactNode) {
 export const router = createBrowserRouter([
   {
     path: ROUTES.LOGIN,
-    Component: LoginPage,
+    element: withSuspense(<LoginPage />),
   },
   {
     path: ROUTES.REGISTER,
-    Component: RegisterPage,
+    element: withSuspense(<RegisterPage />),
   },
   {
     path: ROUTES.INVITE,

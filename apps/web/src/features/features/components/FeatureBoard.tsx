@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
 import { toast } from 'sonner'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Loader2, LayoutGrid } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent } from '@/components/ui/card'
@@ -41,6 +41,7 @@ export function FeatureBoard({ prs, releaseId }: FeatureBoardProps) {
   const { t } = useTranslation('features')
   const { activeProject } = useProject()
   const { features, loading, error } = useFeatures()
+  const reduceMotion = useReducedMotion()
 
   const ability = useAbility()
   const canAssign = ability.can(Action.UPDATE, Subject.PULL_REQUEST)
@@ -217,13 +218,13 @@ export function FeatureBoard({ prs, releaseId }: FeatureBoardProps) {
       </div>
 
       <motion.div
-        variants={staggerContainer}
+        variants={reduceMotion ? undefined : staggerContainer}
         initial="hidden"
         animate="visible"
         className="flex gap-4 overflow-x-auto pb-4"
         style={{ scrollbarWidth: 'thin' }}
       >
-        <motion.div variants={slideUp}>
+        <motion.div variants={reduceMotion ? undefined : slideUp}>
           <FeatureLane
             feature={null}
             prs={unassignedPrs}
@@ -240,7 +241,7 @@ export function FeatureBoard({ prs, releaseId }: FeatureBoardProps) {
         </motion.div>
 
         {defaultFeatures.map((f) => (
-          <motion.div key={f.id} variants={slideUp}>
+          <motion.div key={f.id} variants={reduceMotion ? undefined : slideUp}>
             <FeatureLane
               feature={f}
               prs={getPrsForFeature(f)}
@@ -258,7 +259,7 @@ export function FeatureBoard({ prs, releaseId }: FeatureBoardProps) {
         ))}
 
         {productFeatures.map((f) => (
-          <motion.div key={f.id} variants={slideUp}>
+          <motion.div key={f.id} variants={reduceMotion ? undefined : slideUp}>
             <FeatureLane
               feature={f}
               prs={getPrsForFeature(f)}

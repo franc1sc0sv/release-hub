@@ -65,5 +65,8 @@
     "sidebar": "Barra lateral",
     "sidebarDescription": "Muestra la barra lateral móvil.",
     "breadcrumb": "ruta de navegación"
+  },
+  "three": {
+    "decorativeScene": "Escena 3D decorativa"
   }
 }

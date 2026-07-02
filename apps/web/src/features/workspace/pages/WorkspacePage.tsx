@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FolderOpen, Github, Plus, Sparkles, Wifi } from 'lucide-react'
+import { FolderOpen, Github, Plus, Wifi } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client/react'
@@ -10,12 +10,13 @@ import { GradientButton } from '@/components/nebula/GradientButton'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import { SearchField } from '@/components/nebula/SearchField'
 import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
+import { Scene3D } from '@/components/three/Scene3D'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProject } from '@/context/project.context'
 import { ConnectionHealthIndicator } from '@/features/workspace/components/ConnectionHealthIndicator'
 import { GITHUB_CONNECTION, LINEAR_CONNECTION } from '@/features/settings/graphql/settings.operations'
-import { staggerContainer, slideUp, float } from '@/lib/animations'
+import { staggerContainer, slideUp } from '@/lib/animations'
 import { ROUTES } from '@/lib/routes'
 import type { IntegrationStatus, ListProjectsQuery } from '@/generated/graphql'
 
@@ -24,24 +25,11 @@ const NOT_CONFIGURED: IntegrationStatus = 'NOT_CONFIGURED'
 
 type ProjectItem = ListProjectsQuery['listProjects'][number]
 
-interface HeroVisualSlotProps {
-  reducedMotion: boolean
-}
-
-function HeroVisualSlot({ reducedMotion }: HeroVisualSlotProps) {
+function HeroVisualSlot() {
   return (
-    <motion.div
-      variants={reducedMotion ? undefined : float}
-      animate={reducedMotion ? undefined : 'animate'}
-      className="relative mx-auto aspect-square w-full max-w-56 shrink-0"
-      role="presentation"
-      aria-hidden
-    >
-      <div className="absolute inset-0 rounded-[var(--radius-card)] bg-brand-indigo-bright/10 shadow-glow-indigo" />
-      <div className="absolute inset-6 flex items-center justify-center rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm">
-        <Sparkles className="size-10 text-brand-indigo-bright" />
-      </div>
-    </motion.div>
+    <div className="relative mx-auto aspect-square w-full max-w-56 shrink-0">
+      <Scene3D scene="releaseCapsule" className="rounded-[var(--radius-card)]" />
+    </div>
   )
 }
 
@@ -156,7 +144,7 @@ export default function WorkspacePage() {
                   {t('newProject')}
                 </GradientButton>
               </div>
-              <HeroVisualSlot reducedMotion={reducedMotion} />
+              <HeroVisualSlot />
             </CardContent>
           </GlassCard>
         </motion.div>

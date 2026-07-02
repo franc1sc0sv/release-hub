@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { Sparkles } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { fadeIn, float, slideUp } from '@/lib/animations'
+import { Scene3D } from '@/components/three/Scene3D'
+import { fadeIn, slideUp } from '@/lib/animations'
 import { cn } from '@/lib/utils'
 
 interface AuthLayoutProps {
@@ -29,15 +29,9 @@ export function AuthLayout({ eyebrow, headline, supportingText, children }: Auth
             variants={reduceMotion ? undefined : fadeIn}
             initial={reduceMotion ? undefined : 'hidden'}
             animate={reduceMotion ? undefined : 'visible'}
-            className="flex aspect-square w-full max-w-sm items-center justify-center self-center rounded-[var(--radius-card)] border border-border/50 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--brand-indigo)_55%,transparent),color-mix(in_oklab,var(--brand-magenta)_35%,transparent))] shadow-glow-indigo"
+            className="aspect-square w-full max-w-sm self-center rounded-[var(--radius-card)] border border-border/50 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--brand-indigo)_55%,transparent),color-mix(in_oklab,var(--brand-magenta)_35%,transparent))] shadow-glow-indigo"
           >
-            <motion.div
-              variants={reduceMotion ? undefined : float}
-              animate={reduceMotion ? undefined : 'animate'}
-              className="flex size-24 items-center justify-center rounded-[var(--radius-card)] bg-background/20 backdrop-blur-sm"
-            >
-              <Sparkles className="size-12 text-white" aria-hidden="true" />
-            </motion.div>
+            <Scene3D scene="releaseCapsule" className="rounded-[var(--radius-card)]" />
           </motion.div>
 
           <motion.div

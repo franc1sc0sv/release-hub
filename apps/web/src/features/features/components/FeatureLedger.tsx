@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'motion/react'
-import { AlertCircle, BookOpen, Layers, Loader2 } from 'lucide-react'
+import { AlertCircle, Layers, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { EmptyState } from '@/components/nebula/EmptyState'
@@ -9,6 +9,7 @@ import { SearchField } from '@/components/nebula/SearchField'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { TagChip } from '@/components/nebula/TagChip'
 import { GradientButton } from '@/components/nebula/GradientButton'
+import { Scene3D } from '@/components/three/Scene3D'
 import { CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Can } from '@/context/ability.context'
@@ -120,7 +121,7 @@ export function FeatureLedger() {
       {!loadingInitial && !error && visibleFeatures.length === 0 && (
         <>
           <EmptyState
-            visual={<BookOpen className="size-16 text-brand-indigo-bright/60" aria-hidden />}
+            visual={<Scene3D scene="featureConstellation" />}
             icon={<Layers className="size-7 text-brand-indigo-bright" aria-hidden />}
             heading={search ? t('emptySearch.heading') : t('empty.heading')}
             description={search ? t('emptySearch.description') : t('empty.description')}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, GitBranch, Sparkles } from 'lucide-react'
+import { AlertCircle, GitBranch } from 'lucide-react'
 import { PageShell } from '@/components/nebula/PageShell'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { EmptyState } from '@/components/nebula/EmptyState'
@@ -8,6 +8,8 @@ import { SearchField } from '@/components/nebula/SearchField'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Scene3D } from '@/components/three/Scene3D'
+import { SceneKeyValue } from '@/components/three/scenes/registry'
 import { useProject } from '@/context/project.context'
 import { useBranchCleanupCandidates } from '../hooks/use-branch-cleanup-candidates'
 import { useBlockedBranches } from '../hooks/use-blocked-branches'
@@ -47,6 +49,12 @@ export default function RepoOpsPage() {
     if (!query) return candidates
     return candidates.filter((candidate) => candidate.name.toLowerCase().includes(query))
   }, [candidates, search])
+
+  const staleCount = useMemo(
+    () => candidates.filter((candidate) => candidate.signals.stale).length,
+    [candidates],
+  )
+  const aliveCount = candidates.length - staleCount
 
   function handleToggle(branchName: string) {
     setSelected((prev) => {
@@ -141,11 +149,13 @@ export default function RepoOpsPage() {
               <p className="text-overline uppercase text-brand-magenta">{t('hero.eyebrow')}</p>
               <p className="text-base text-foreground">{t('hero.body')}</p>
             </div>
-            <div
-              className="flex aspect-square w-32 shrink-0 items-center justify-center rounded-[var(--radius-card)] bg-brand-indigo-bright/10"
-              aria-hidden
-            >
-              <Sparkles className="size-10 text-brand-indigo-bright" />
+            <div className="aspect-square w-40 shrink-0 sm:w-48">
+              <Scene3D
+                scene={SceneKeyValue.BRANCH_CONSTELLATION}
+                sceneProps={
+                  candidatesLoading ? undefined : { aliveCount, staleCount }
+                }
+              />
             </div>
           </CardContent>
         </GlassCard>
