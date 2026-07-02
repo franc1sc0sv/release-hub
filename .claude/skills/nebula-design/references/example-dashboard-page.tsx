@@ -52,7 +52,7 @@ export default function DashboardPage() {
   const item = reduceMotion ? undefined : slideUp
 
   return (
-    <NebulaBackground className="rounded-3xl">
+    <NebulaBackground>
       <motion.div
         variants={container}
         initial="hidden"

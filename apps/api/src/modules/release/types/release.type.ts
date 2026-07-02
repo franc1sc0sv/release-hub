@@ -37,6 +37,12 @@ export class ReleaseObjectType {
   @Field(() => Date, { nullable: true })
   summaryEditedAt: Date | null
 
+  @Field(() => Date, { nullable: true })
+  deployedAt: Date | null
+
+  @Field(() => String, { nullable: true })
+  githubDeploymentId: string | null
+
   @Field(() => Date)
   createdAt: Date
 

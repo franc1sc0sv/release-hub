@@ -71,6 +71,8 @@ export interface IRelease {
   tags: string[]
   summary: string | null
   summaryEditedAt: Date | null
+  deployedAt: Date | null
+  githubDeploymentId: string | null
   createdAt: Date
   updatedAt: Date
 }

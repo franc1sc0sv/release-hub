@@ -4,6 +4,8 @@ import type {
   ReleaseFlagDecisionType,
   ReleaseStatus,
 } from '@/generated/graphql'
+import type { StatusBadgeToneValue } from '@/components/nebula/StatusBadge'
+import { StatusBadgeTone } from '@/components/nebula/StatusBadge'
 
 export const ReleaseStatusValue = {
   DRAFT: 'DRAFT',
@@ -35,6 +37,18 @@ export const RELEASE_STATUS_BADGE_CLASS: Record<ReleaseStatus, string> = {
   MERGED: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
   DEPLOYED: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
   CANCELED: 'border-rose-500/40 bg-rose-500/10 text-rose-300',
+}
+
+const RELEASE_STATUS_TONE: Record<ReleaseStatus, StatusBadgeToneValue> = {
+  DRAFT: StatusBadgeTone.SLATE,
+  READY_TO_RELEASE: StatusBadgeTone.INDIGO,
+  MERGED: StatusBadgeTone.VIOLET,
+  DEPLOYED: StatusBadgeTone.EMERALD,
+  CANCELED: StatusBadgeTone.ROSE,
+}
+
+export function releaseStatusTone(status: ReleaseStatus): StatusBadgeToneValue {
+  return RELEASE_STATUS_TONE[status]
 }
 
 export const AiDraftStatusValue = {

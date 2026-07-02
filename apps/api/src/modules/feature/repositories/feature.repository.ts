@@ -170,6 +170,8 @@ export class FeatureRepository extends IFeatureRepository {
     tags: string[]
     summary: string | null
     summaryEditedAt: Date | null
+    deployedAt: Date | null
+    githubDeploymentId: string | null
     createdAt: Date
     updatedAt: Date
   }): IRelease {
@@ -185,6 +187,8 @@ export class FeatureRepository extends IFeatureRepository {
       tags: row.tags,
       summary: row.summary,
       summaryEditedAt: row.summaryEditedAt,
+      deployedAt: row.deployedAt,
+      githubDeploymentId: row.githubDeploymentId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }

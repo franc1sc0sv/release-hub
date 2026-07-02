@@ -547,6 +547,7 @@ type ReleaseFlagDecisionResultType {
 
 enum ReleaseFlagDecisionType {
   ENABLE_IN_RELEASE
+  IN_PROGRESS
   SHIP_OFF
 }
 
@@ -564,6 +565,8 @@ type ReleaseObjectType {
   baseRef: String!
   compareRef: String!
   createdAt: DateTime!
+  deployedAt: DateTime
+  githubDeploymentId: String
   id: ID!
   name: String
   prUrl: String

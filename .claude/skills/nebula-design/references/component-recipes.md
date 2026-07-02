@@ -67,7 +67,7 @@ export function GlassCard({ glow = 'none', className, ...props }: GlassCardProps
   return (
     <Card
       className={cn(
-        'glass rounded-3xl border-border/60',
+        'glass rounded-[var(--radius-card)] border-border/60',
         'transition-shadow duration-300',
         glowMap[glow],
         className,
@@ -108,7 +108,7 @@ export function GradientButton({ className, children, ...props }: GradientButton
     >
       <Button
         className={cn(
-          'bg-nebula-gradient rounded-full border-0 px-6 font-medium text-white',
+          'bg-nebula-gradient border-0 px-6 font-medium text-white',
           'shadow-glow-indigo transition-shadow duration-300 hover:shadow-glow-lg',
           className,
         )}
@@ -132,29 +132,29 @@ Usage (caller supplies text + the arrow motif):
 
 ---
 
-## 4. Floating pill nav item
+## 4. Floating nav item
 
-Turns shadcn sidebar/nav buttons into Nebula pills with a gradient active state.
-For the existing `AppShell` sidebar, style `SidebarMenuButton` with this pattern;
-for a top floating nav, wrap a row of these in a `glass rounded-full` bar.
+Turns shadcn sidebar/nav buttons into Nebula nav controls with a gradient active
+state. For the existing `AppShell` sidebar, style `SidebarMenuButton` with this
+pattern; for a top floating nav, wrap a row of these in a `glass` bar.
 
 ```tsx
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
-interface NavPillProps {
+interface NavItemProps {
   to: string
   icon: ReactNode
   label: string
 }
 
-export function NavPill({ to, icon, label }: NavPillProps) {
+export function NavItem({ to, icon, label }: NavItemProps) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all',
+          'flex items-center gap-2 rounded-[var(--radius-button)] px-4 py-2 text-sm font-medium transition-all',
           isActive
             ? 'bg-nebula-gradient text-white shadow-glow-sm'
             : 'text-muted-foreground hover:bg-accent hover:text-foreground',
@@ -171,9 +171,9 @@ export function NavPill({ to, icon, label }: NavPillProps) {
 Floating bar shell:
 
 ```tsx
-<nav className="glass mx-auto flex w-fit items-center gap-1 rounded-full p-1.5">
+<nav className="glass mx-auto flex w-fit items-center gap-1 rounded-[var(--radius-card)] p-1.5">
   {items.map((item) => (
-    <NavPill key={item.to} to={item.to} icon={item.icon} label={item.label} />
+    <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
   ))}
 </nav>
 ```
@@ -382,21 +382,21 @@ For a hero with a gradient word, wrap the emphasized span in `text-nebula-gradie
 
 ---
 
-## 9. Pill input + gradient focus glow
+## 9. Emphasized input + gradient focus glow
 
-Compose shadcn `Input` / `Field`. Pill shape, indigo focus glow. For the "register
-your store" style inline-CTA input (etail), pair a pill input with a circular
-`GradientButton`.
+Compose shadcn `Input` / `Field`. 8px radius, indigo focus glow. For the
+"register your store" style inline-CTA input (etail), pair an emphasized input
+with a `GradientButton`.
 
 ```tsx
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
-export function PillInput({ className, ...props }: ComponentProps<typeof Input>) {
+export function EmphasizedInput({ className, ...props }: ComponentProps<typeof Input>) {
   return (
     <Input
       className={cn(
-        'h-12 rounded-full border-border/60 bg-input/60 px-5',
+        'h-12 border-border/60 bg-input/60 px-5',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:shadow-glow-sm',
         className,
       )}
@@ -406,13 +406,13 @@ export function PillInput({ className, ...props }: ComponentProps<typeof Input>)
 }
 ```
 
-Inline-CTA composition (icon · input · circular gradient submit):
+Inline-CTA composition (icon · input · gradient submit):
 
 ```tsx
-<form className="glass flex items-center gap-2 rounded-full p-2" onSubmit={onSubmit}>
+<form className="glass flex items-center gap-2 rounded-[var(--radius-card)] p-2" onSubmit={onSubmit}>
   <Store className="ml-3 size-5 text-brand-magenta" />
   <Input className="border-0 bg-transparent shadow-none focus-visible:ring-0" placeholder={t('field.storeName')} />
-  <GradientButton type="submit" size="icon" className="size-10 shrink-0 rounded-full p-0">
+  <GradientButton type="submit" size="icon" className="size-10 shrink-0 p-0">
     <ArrowRight className="size-5" />
   </GradientButton>
 </form>
@@ -424,7 +424,10 @@ Inline-CTA composition (icon · input · circular gradient submit):
 
 - **shadcn first, always.** Need something new (command palette, etc.)? Install it
   (`pnpm dlx shadcn@latest add command`) — don't hand-roll.
-- **Pills for controls, glass slabs for containers.** No in-between radii.
+- **8px for controls and surfaces.** `rounded-[var(--radius-button)]` on every
+  button/input/select/textarea/dropdown trigger,
+  `rounded-[var(--radius-card)]` on every card/panel/modal/popover/sheet.
+  `rounded-full` only on badges, tags, chips, avatars, icon-circles.
 - **One `bg-nebula-gradient` action per view.** One `glow="magenta"` element per
   view. Discipline is the whole aesthetic.
 - **Numbers in `font-mono tabular-nums`.** Calms dense data inside the loud shell.

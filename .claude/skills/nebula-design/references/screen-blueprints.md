@@ -46,14 +46,14 @@ See `references/example-dashboard-page.tsx` for the full build.
 
 Structure:
 1. **Page header row** — `SectionHeading` (eyebrow + `text-display-md` title) on
-   the left; on the right a pill `Input` (search) + filter `Select` (pill) + one
+   the left; on the right a search `Input` (8px) + filter `Select` (8px) + one
    `GradientButton` ("New …") gated by `<Can>`.
-2. **Toolbar** (optional) — pill `Tabs` for status filters; active tab uses the
+2. **Toolbar** (optional) — `Tabs` for status filters; active tab uses the
    gradient/indigo.
 3. **`NebulaTable`** — glass frame, `text-overline` uppercase headers,
    `StatusBadge` pills, `font-mono tabular-nums` numeric cells, row hover glow.
-   Row actions via shadcn `DropdownMenu` (pill trigger).
-4. **Pagination / footer** — pill buttons, muted text, mono counts.
+   Row actions via shadcn `DropdownMenu` (8px trigger).
+4. **Pagination / footer** — 8px buttons, muted text, mono counts.
 
 States: `PageLoader` skeleton rows inside the glass frame; `ErrorState` inside the
 frame; `EmptyState` (see below) replacing the table.
@@ -70,7 +70,7 @@ Structure:
    action(s) — one `GradientButton`, secondary as standard `Button` variants.
 2. **Body** — `grid lg:grid-cols-[2fr_1fr] gap-6`: main content in plain
    `GlassCard`s with normal type; sidebar with metadata/related `GlassCard`s.
-3. Use shadcn `Tabs` (pill) for sub-sections (Overview / History / Settings).
+3. Use shadcn `Tabs` for sub-sections (Overview / History / Settings).
 4. Keep body text high-contrast and undecorated — the header is the loud part.
 
 ---
@@ -83,7 +83,7 @@ Structure:
 1. Narrow container (`max-w-2xl mx-auto`).
 2. `SectionHeading` (eyebrow + title + one supporting line).
 3. **One `GlassCard` slab** holding the form. Compose shadcn `Field` / `Label` /
-   `Input` (pill via `PillInput`) / `Select` / `Textarea` / `Checkbox`.
+   `Input` (8px via `EmphasizedInput`) / `Select` / `Textarea` / `Checkbox`.
 4. **Footer:** right-aligned — secondary `Button variant="ghost"` (cancel) + one
    `GradientButton` (submit). Submit shows pending state (spinner + disabled).
 5. **Focus glow** is the only per-field decoration (indigo ring). No rainbow
@@ -102,9 +102,9 @@ Structure (split layout `lg:grid-cols-2`):
 1. **Left (or right) panel** — full `bg-nebula-aurora` over void with a large
    `Scene3D` focal object, the product `text-display-xl` line, and an eyebrow.
    Hidden on small screens (`hidden lg:block`).
-2. **Form panel** — centered `GlassCard glow="indigo"`, `rounded-4xl`: logo,
-   `text-display-md` heading, pill inputs, one `GradientButton` submit, muted
-   helper links (pill ghost buttons / underlined links).
+2. **Form panel** — centered `GlassCard glow="indigo"` (8px): logo,
+   `text-display-md` heading, 8px inputs, one `GradientButton` submit, muted
+   helper links (ghost buttons / underlined links).
 3. Background aurora bleeds behind both panels for cohesion.
 
 Matches the existing `auth/common.json` namespace.
@@ -132,7 +132,7 @@ title, description, action as props).
 **Goal:** a glass slab floating over a dimmed, blurred void.
 
 - shadcn `Dialog` with overlay `bg-background/70 backdrop-blur-sm`.
-- `DialogContent` → `glass rounded-3xl shadow-glow-indigo`.
+- `DialogContent` → `glass rounded-[var(--radius-card)] shadow-glow-indigo`.
 - Title in `font-display`, one `GradientButton` confirm + ghost cancel.
 - Destructive confirmations: `AlertDialog`, confirm button uses `--destructive`
   (rose), not the gradient (reserve the gradient for positive primary actions).
@@ -144,7 +144,8 @@ title, description, action as props).
 - [ ] Wrapped in `NebulaBackground`; aurora subtle, doesn't hurt contrast.
 - [ ] Exactly one `bg-nebula-gradient` CTA; at most one `glow="magenta"`.
 - [ ] Headline is the loudest object (`text-display-*`, `font-display`).
-- [ ] Pills for controls, glass slabs for containers; no stray sharp corners.
+- [ ] 8px on every control (`--radius-button`) and surface (`--radius-card`);
+      `rounded-full` only on badges/tags/chips/avatars/icon-circles.
 - [ ] Numbers `font-mono tabular-nums`.
 - [ ] Entrance stagger + reduced-motion fallback.
 - [ ] All four data states handled and styled.

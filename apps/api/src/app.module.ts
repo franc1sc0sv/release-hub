@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { CqrsModule } from '@nestjs/cqrs'
 import { ThrottlerModule } from '@nestjs/throttler'
+import { ScheduleModule } from '@nestjs/schedule'
 import { join } from 'path'
 import { LoggingModule } from './common/logging/logging.module'
 import { LoggingInterceptor } from './common/logging/logging.interceptor'
@@ -22,6 +23,10 @@ import { ProjectTagModule } from './modules/project-tag/project-tag.module'
 import { GithubAuthModule } from './modules/github-auth/github-auth.module'
 import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
 import { FlagTrackingModule } from './modules/flag-tracking/flag-tracking.module'
+import { WebhooksModule } from './modules/webhooks/webhooks.module'
+import { SlackAuthModule } from './modules/slack-auth/slack-auth.module'
+import { NotificationsModule } from './modules/notifications/notifications.module'
+import { RepoOpsModule } from './modules/repo-ops/repo-ops.module'
 
 @Module({
   imports: [
@@ -54,6 +59,7 @@ import { FlagTrackingModule } from './modules/flag-tracking/flag-tracking.module
       },
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
+    ScheduleModule.forRoot(),
     CqrsModule.forRoot(),
     DatabaseModule,
     EventModule,
@@ -69,6 +75,10 @@ import { FlagTrackingModule } from './modules/flag-tracking/flag-tracking.module
     GithubAuthModule,
     LinearAuthModule,
     FlagTrackingModule,
+    WebhooksModule,
+    SlackAuthModule,
+    NotificationsModule,
+    RepoOpsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: GqlThrottlerGuard },

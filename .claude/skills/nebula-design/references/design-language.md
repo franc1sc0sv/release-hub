@@ -78,19 +78,27 @@ repurposed as a section label.
 table figures, timestamps, and IDs in `font-mono` with tabular spacing. It makes
 dense data legible *and* reads as precise/technical, which fits the temperature.
 
-## 3. Geometry — everything is a pill or a soft slab
+## 3. Geometry — 8px everywhere, pills only for the small stuff
 
-Two shapes only:
+The reference heroes leaned on pill geometry; the locked Release Hub standard is
+stricter and calmer: **every control and every surface uses the same 8px radius.**
+Two tokens, two jobs:
 
-- **Pills** (`rounded-full`): buttons, nav bars, inputs, badges, chips, avatars,
-  toggle groups, the play/control buttons. This is the single most unifying signal
-  in the reference set — copy it relentlessly.
-- **Soft slabs** (`rounded-3xl` / `rounded-4xl`): cards, panels, modals, the app
-  shell regions. Large radii, never sharp.
+- **`--radius-button` (8px, `rounded-[var(--radius-button)]`)** — every control:
+  buttons, inputs, selects, textareas, search fields, dropdown triggers. A control
+  is anything a user directly operates to trigger an action or enter a value.
+- **`--radius-card` (8px, `rounded-[var(--radius-card)]`)** — every surface: cards,
+  panels, modals, popovers, sheets. A surface is a container that holds content or
+  floats above the canvas.
 
-The radius scale already present in the app (`--radius: 0.75rem` with sm→4xl
-multipliers) supports both. Nebula lives at the extremes: `rounded-full` for
-controls, `rounded-3xl`+ for containers, and rarely anything in between.
+`rounded-full` is not gone — it is **reserved for a narrow, specific set**: badges,
+tags, chips, avatars, and icon-circles. These are small, self-contained status or
+identity markers, never something a user clicks to submit or navigate. If it is a
+`<button>`, an `<input>`, a `<select>`, a `<textarea>`, or a floating card/modal/
+popover/sheet, it is 8px — never `rounded-full`, never `rounded-3xl`/`rounded-4xl`.
+
+Nebula's electricity comes from color, glow, type, and motion — not from shape
+extremity. Discipline the radius so the *rest* of the grammar can be loud.
 
 ## 4. Depth — glass, glow, and real 3D
 
@@ -153,7 +161,8 @@ license unreadable UI. Hard floors:
   with an icon, label, or weight — magenta-only meaning fails for color-blind
   users and in glow-heavy contexts.
 - **Focus is always visible.** The indigo `--ring` glow is the focus indicator;
-  never remove it. Pills must show a clear focus ring.
+  never remove it. Every control must show a clear focus ring, 8px radius
+  included.
 - **Motion respects `prefers-reduced-motion`** at all times.
 - **Glass over busy backgrounds** can drop contrast — increase the card's opacity
   (`--card` mix %) behind dense text rather than thinning it for looks.
@@ -166,7 +175,8 @@ The discipline: **expressive *frame*, calm *content*.**
   full Nebula glass + accent. Table *cells* (the data) stay high-contrast, mono
   for numbers, no per-cell decoration.
 - Form *container* is a glass slab with a bold heading and one gradient submit;
-  *fields* are clean pills with a single indigo focus glow — not rainbow borders.
+  *fields* are clean 8px inputs with a single indigo focus glow — not rainbow
+  borders.
 - Dashboards earn the most expression (hero banner + 3D + glowing key metric +
   gradient chart fills) because they are glanceable, not read line-by-line.
 

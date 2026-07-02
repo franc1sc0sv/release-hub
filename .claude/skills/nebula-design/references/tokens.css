@@ -48,6 +48,8 @@
   --sidebar-ring: #6366f1;
 
   --radius: 0.75rem;
+  --radius-button: 0.5rem;
+  --radius-card: 0.5rem;
 }
 
 .dark {

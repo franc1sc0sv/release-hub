@@ -3,12 +3,12 @@ name: nebula-design
 description: >-
   Nebula is the Release Hub visual design language (apps/web) — a dark, electric,
   3D-forward system: deep-navy void, indigo→magenta glow, glass surfaces, bold
-  display type, pill geometry, and tactile depth via Spline / React Three Fiber.
-  Use this skill when designing or building ANY new screen, page, component,
-  dashboard, table, form, empty state, modal, or auth view in apps/web; when
-  restyling existing UI; or when the user asks to "make it look good",
-  "make it on-brand", "apply the design system", "design a screen", or "nebula".
-  Composes shadcn/ui + Tailwind v4 tokens + Framer Motion + Spline/R3F.
+  display type, 8px control/surface geometry, and tactile depth via Spline /
+  React Three Fiber. Use this skill when designing or building ANY new screen,
+  page, component, dashboard, table, form, empty state, modal, or auth view in
+  apps/web; when restyling existing UI; or when the user asks to "make it look
+  good", "make it on-brand", "apply the design system", "design a screen", or
+  "nebula". Composes shadcn/ui + Tailwind v4 tokens + Framer Motion + Spline/R3F.
 ---
 
 # Nebula — Release Hub Design Language
@@ -16,23 +16,26 @@ description: >-
 Nebula turns marketing-grade hero energy into a working product UI. The reference
 screenshots are landing pages; Release Hub is an app (dashboards, tables, forms,
 role-gated screens). **The job of this skill is to keep the hero energy — bold
-type, pill geometry, accent discipline, tactile depth — while it survives a data
-table.**
+type, accent discipline, tactile depth — while it survives a data table.**
 
 ## The one-sentence identity
 
 > A deep-navy void, lit from within by an indigo→magenta gradient, where glass
 > surfaces and tactile 3D objects float in generous space, anchored by oversized
-> grotesque type and fully-pill geometry.
+> grotesque type and disciplined 8px geometry.
 
 ## The five-part grammar (every Nebula screen obeys all five)
 
 1. **Oversized confident type.** Heavy geometric-grotesque display, *tight*
    leading, big sizes. The headline is the loudest object on the screen. Use the
    `text-display-*` scale.
-2. **Pill geometry.** Buttons, nav, inputs, badges, chips → `rounded-full`.
-   Containers → large radius glass cards (`rounded-3xl`/`rounded-4xl`). No sharp
-   corners.
+2. **8px control/surface geometry.** Every control (buttons, inputs, selects,
+   textareas, search fields, dropdown triggers) uses `rounded-[var(--radius-button)]`
+   (8px). Every surface (cards, panels, modals, popovers, sheets) uses
+   `rounded-[var(--radius-card)]` (8px). `rounded-full` is reserved **only** for
+   badges, tags, chips, avatars, and icon-circles — never for a control or a
+   container. No sharp corners, no pill buttons, no `rounded-3xl`/`rounded-4xl`
+   cards.
 3. **Tactile depth.** Every screen has a depth ladder: void → aurora glow → glass
    surface → content → glowing accent. Hero moments get real 3D (Spline / R3F);
    every other surface gets CSS depth (glass, glow, soft shadow).
@@ -83,9 +86,11 @@ When asked to design/build a new screen:
 3. **Set the hero.** One `text-display-*` headline as the loudest object + one
    focal visual (3D scene for landing/empty/auth/dashboard banner; a glass
    stat/illustration elsewhere). Add an eyebrow/overline above it.
-4. **Build with glass + pills.** Containers = `GlassCard`. Actions/inputs/badges =
-   pill. Compose from shadcn primitives; apply Nebula recipes from
-   `references/component-recipes.md`.
+4. **Build with glass + 8px controls.** Containers = `GlassCard`
+   (`rounded-[var(--radius-card)]`). Buttons/inputs/selects/textareas/dropdown
+   triggers = `rounded-[var(--radius-button)]`. Badges/tags/chips/avatars stay
+   pill (`rounded-full`). Compose from shadcn primitives; apply Nebula recipes
+   from `references/component-recipes.md`.
 5. **Spend the accent once.** Exactly one `bg-nebula-gradient` primary CTA. Magenta
    only on the single key highlight (active state, key metric, the spark).
 6. **Wire depth.** Glow on the focal/active elements (`shadow-glow-*`), glass on
@@ -96,7 +101,8 @@ When asked to design/build a new screen:
 8. **Handle the four states** with the shared feedback components, each styled
    Nebula (empty state gets a 3D object + bold line + accent CTA).
 9. **Audit.** shadcn-first ✓, typed ✓, no comments ✓, i18n ✓, enums not strings ✓,
-   CASL ✓, AA contrast ✓, one gradient CTA ✓, reduced-motion ✓.
+   CASL ✓, AA contrast ✓, one gradient CTA ✓, reduced-motion ✓, controls/surfaces
+   at 8px ✓, `rounded-full` only on badges/tags/chips/avatars ✓.
 
 ## Token quick reference (available after one-time setup)
 
@@ -105,7 +111,9 @@ Colors: `bg-background` `text-foreground` `bg-card` `text-muted-foreground`
 `bg-brand-indigo-bright` · `bg-nebula-gradient` (the signature CTA/headline fill).
 Glow: `shadow-glow-indigo` `shadow-glow-magenta` `shadow-glow-sm|md|lg` ·
 `shadow-glass`. Type: `text-display-2xl|xl|lg|md` · `font-display` `font-mono`.
-Radius: `rounded-full` (pills) · `rounded-3xl`/`rounded-4xl` (cards).
+Radius: `rounded-[var(--radius-button)]` (8px, all controls) ·
+`rounded-[var(--radius-card)]` (8px, all surfaces) · `rounded-full` (badges, tags,
+chips, avatars, icon-circles only).
 
 Full list and values: `references/tokens.css`.
 
@@ -113,7 +121,7 @@ Full list and values: `references/tokens.css`.
 
 1. **Tokens:** merge `references/tokens.css` into `apps/web/src/index.css`
    (recolors shadcn semantic vars to the dark canvas + adds brand/glow/gradient/
-   display-type tokens). Keeps shadcn semantics intact.
+   display-type/radius tokens). Keeps shadcn semantics intact.
 2. **3D deps:**
    `pnpm --filter @release-hub/web add @splinetool/react-spline @splinetool/runtime`
    and (for custom R3F scenes)

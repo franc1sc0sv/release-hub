@@ -78,6 +78,7 @@ enum FlagReferenceKind {
 enum ReleaseFlagDecisionType {
   ENABLE_IN_RELEASE
   SHIP_OFF
+  in_progress
 
   @@map("release_flag_decision_type")
 }
@@ -122,6 +123,8 @@ model User {
   invitationsSent   Invitation[]       @relation("InvitedBy")
   githubConnection  GithubConnection?
   flagDecisions     ReleaseFlagDecision[]
+  notificationPreferences UserNotificationPreference[]
+  createdBlockedBranches  BlockedBranch[]
 
   @@index([deletedAt])
   @@map("users")
@@ -200,6 +203,10 @@ model Project {
   flagsmithUrl     String? @map("flagsmith_url")
   flagsmithApiKey  String? @map("flagsmith_api_key")
   flagsmithProjectId String? @map("flagsmith_project_id")
+  flagsmithWebhookSecret String? @map("flagsmith_webhook_secret")
+  githubWebhookSecret    String? @map("github_webhook_secret")
+  slackEnabled     Boolean @default(false) @map("slack_enabled")
+  flagStaleDays    Int     @default(14) @map("flag_stale_days")
   linearEnabled    Boolean @default(false) @map("linear_enabled")
   flagRegistryPath   String? @map("flag_registry_path")
   flagRegistryBranch String? @map("flag_registry_branch")
@@ -214,6 +221,12 @@ model Project {
   projectTags ProjectTag[]
   linearConnection ProjectLinearConnection?
   trackedFlags TrackedFlag[]
+  flagsmithEnvironments FlagsmithEnvironment[]
+  flagsmithFlags        FlagsmithFlag[]
+  flagsmithSyncRuns     FlagsmithSyncRun[]
+  slackConnection       ProjectSlackConnection?
+  notificationPreferences UserNotificationPreference[]
+  blockedBranches       BlockedBranch[]
 
   @@index([deletedAt])
   @@map("projects")
@@ -253,6 +266,8 @@ model Release {
   tags             String[]      @default([])
   summary          String?
   summaryEditedAt  DateTime?     @map("summary_edited_at")
+  deployedAt         DateTime? @map("deployed_at")
+  githubDeploymentId String?   @map("github_deployment_id")
   createdAt        DateTime      @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
   deletedAt        DateTime?     @map("deleted_at")
@@ -353,6 +368,7 @@ model TrackedFlag {
   addedInPullRequestId  String?  @map("added_in_pull_request_id")
   removedInPullRequestId String? @map("removed_in_pull_request_id")
   presentInCode         Boolean  @default(true) @map("present_in_code")
+  lastRemindedAt        DateTime? @map("last_reminded_at")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
   deletedAt             DateTime? @map("deleted_at")
@@ -364,6 +380,7 @@ model TrackedFlag {
   branchPresence    FlagBranchPresence[]
   pullRequestChanges PullRequestFlagChange[]
   releaseDecisions  ReleaseFlagDecision[]
+  flagsmithFlags    FlagsmithFlag[]
 
   @@unique([projectId, key])
   @@index([projectId, deletedAt])
@@ -471,4 +488,163 @@ model Invitation {
   @@index([email])
   @@index([token])
   @@map("invitations")
+}
+
+enum FlagsmithSyncSource {
+  initial
+  manual
+  webhook
+
+  @@map("flagsmith_sync_source")
+}
+
+enum FlagsmithSyncStatus {
+  running
+  completed
+  failed
+
+  @@map("flagsmith_sync_status")
+}
+
+enum NotificationChannel {
+  email
+  slack_dm
+
+  @@map("notification_channel")
+}
+
+enum NotificationType {
+  release_created
+  release_shipped
+  release_deployed
+  flag_in_progress_reminder
+  flag_staleness_alert
+  flag_digest
+
+  @@map("notification_type")
+}
+
+enum DigestFrequency {
+  daily
+  weekly
+
+  @@map("digest_frequency")
+}
+
+model FlagsmithEnvironment {
+  id              String   @id @default(cuid())
+  projectId       String   @map("project_id")
+  name            String
+  flagsmithApiKey String   @map("flagsmith_api_key")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  project Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  states  FlagsmithFlagState[]
+
+  @@unique([projectId, name])
+  @@map("flagsmith_environments")
+}
+
+model FlagsmithFlag {
+  id                 String    @id @default(cuid())
+  projectId          String    @map("project_id")
+  key                String
+  flagsmithFeatureId String?   @map("flagsmith_feature_id")
+  trackedFlagId      String?   @map("tracked_flag_id")
+  flagCreatedAt      DateTime? @map("flag_created_at")
+  lastSyncedAt       DateTime? @map("last_synced_at")
+  deletedAt          DateTime? @map("deleted_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trackedFlag TrackedFlag?         @relation(fields: [trackedFlagId], references: [id], onDelete: SetNull)
+  states      FlagsmithFlagState[]
+
+  @@unique([projectId, key])
+  @@index([projectId, deletedAt])
+  @@map("flagsmith_flags")
+}
+
+model FlagsmithFlagState {
+  id            String   @id @default(cuid())
+  flagId        String   @map("flag_id")
+  environmentId String   @map("environment_id")
+  enabled       Boolean
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  flag        FlagsmithFlag        @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  environment FlagsmithEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  @@unique([flagId, environmentId])
+  @@map("flagsmith_flag_states")
+}
+
+model FlagsmithSyncRun {
+  id         String              @id @default(cuid())
+  projectId  String              @map("project_id")
+  source     FlagsmithSyncSource
+  status     FlagsmithSyncStatus
+  flagCount  Int                 @default(0) @map("flag_count")
+  startedAt  DateTime            @default(now()) @map("started_at")
+  finishedAt DateTime?           @map("finished_at")
+  error      String?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("flagsmith_sync_runs")
+}
+
+model ProjectSlackConnection {
+  id              String   @id @default(cuid())
+  projectId       String   @unique @map("project_id")
+  accessToken     String   @map("access_token")
+  slackTeamId     String   @map("slack_team_id")
+  slackTeamName   String   @map("slack_team_name")
+  channelId       String?  @map("channel_id")
+  channelName     String?  @map("channel_name")
+  notifyOnCreated  Boolean @default(true) @map("notify_on_created")
+  notifyOnShipped  Boolean @default(true) @map("notify_on_shipped")
+  notifyOnDeployed Boolean @default(true) @map("notify_on_deployed")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_slack_connections")
+}
+
+model UserNotificationPreference {
+  id               String              @id @default(cuid())
+  userId           String              @map("user_id")
+  projectId        String              @map("project_id")
+  notificationType NotificationType    @map("notification_type")
+  channel          NotificationChannel
+  enabled          Boolean             @default(true)
+  digestFrequency  DigestFrequency?    @map("digest_frequency")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId, notificationType, channel])
+  @@map("user_notification_preferences")
+}
+
+model BlockedBranch {
+  id          String   @id @default(cuid())
+  projectId   String   @map("project_id")
+  branchName  String   @map("branch_name")
+  reason      String?
+  createdById String   @map("created_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, branchName])
+  @@map("blocked_branches")
 }

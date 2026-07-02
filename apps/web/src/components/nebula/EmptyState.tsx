@@ -7,12 +7,16 @@ interface EmptyStateProps {
   heading: string
   description: string
   action?: ReactNode
+  visual?: ReactNode
 }
 
-export function EmptyState({ icon, heading, description, action }: EmptyStateProps) {
+export function EmptyState({ icon, heading, description, action, visual }: EmptyStateProps) {
   return (
     <GlassCard glow="indigo">
       <CardContent className="flex flex-col items-center gap-4 py-16">
+        {visual && (
+          <div className="flex size-32 items-center justify-center">{visual}</div>
+        )}
         <div className="flex size-14 items-center justify-center rounded-full bg-brand-indigo-bright/20">
           {icon}
         </div>

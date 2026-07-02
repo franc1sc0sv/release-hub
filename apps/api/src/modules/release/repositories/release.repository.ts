@@ -17,6 +17,8 @@ type ReleaseRow = {
   tags: string[]
   summary: string | null
   summaryEditedAt: Date | null
+  deployedAt: Date | null
+  githubDeploymentId: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -98,6 +100,24 @@ export class ReleaseRepository extends IReleaseRepository {
     return this.toIRelease(row)
   }
 
+  setDeployedStatus = async (
+    id: string,
+    status: ReleaseStatus,
+    deployedAt: Date,
+    githubDeploymentId: string | null,
+    tx: TxClient,
+  ): Promise<IRelease> => {
+    const row = await tx.release.update({
+      where: { id },
+      data: {
+        status,
+        deployedAt,
+        ...(githubDeploymentId !== null && { githubDeploymentId }),
+      },
+    })
+    return this.toIRelease(row)
+  }
+
   updateAiDraftStatus = async (id: string, status: AiDraftStatus, tx: TxClient): Promise<IRelease> => {
     const row = await tx.release.update({
       where: { id },
@@ -150,6 +170,8 @@ export class ReleaseRepository extends IReleaseRepository {
       tags: row.tags,
       summary: row.summary,
       summaryEditedAt: row.summaryEditedAt,
+      deployedAt: row.deployedAt,
+      githubDeploymentId: row.githubDeploymentId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }

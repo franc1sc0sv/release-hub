@@ -33,6 +33,7 @@ import { SaveReleaseSummaryHandler } from './commands/save-release-summary/save-
 import { SavePrSummaryHandler } from './commands/save-pr-summary/save-pr-summary.handler'
 import { DeleteReleaseHandler } from './commands/delete-release/delete-release.handler'
 import { SetReleaseStatusHandler } from './commands/set-release-status/set-release-status.handler'
+import { SystemSetReleaseStatusHandler } from './commands/system-set-release-status/system-set-release-status.handler'
 import { ResyncReleasePullRequestsHandler } from './commands/resync-release-pull-requests/resync-release-pull-requests.handler'
 import { ConfirmReleaseAdditionsHandler } from './commands/confirm-release-additions/confirm-release-additions.handler'
 
@@ -67,6 +68,7 @@ import { ConfirmReleaseAdditionsHandler } from './commands/confirm-release-addit
     SavePrSummaryHandler,
     DeleteReleaseHandler,
     SetReleaseStatusHandler,
+    SystemSetReleaseStatusHandler,
     ResyncReleasePullRequestsHandler,
     ConfirmReleaseAdditionsHandler,
   ],

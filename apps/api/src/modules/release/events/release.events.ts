@@ -23,3 +23,10 @@ export interface IReleaseResyncedEvent extends IDomainEvent {
   readonly newPrCount: number
   readonly occurredAt: Date
 }
+
+export interface IReleaseDeployedEvent extends IDomainEvent {
+  readonly eventName: 'release.deployed'
+  readonly releaseId: string
+  readonly projectId: string
+  readonly occurredAt: Date
+}

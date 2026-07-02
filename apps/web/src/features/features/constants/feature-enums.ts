@@ -1,4 +1,6 @@
 import type { FeatureKind, FeatureState } from '@/generated/graphql'
+import type { StatusBadgeToneValue } from '@/components/nebula/StatusBadge'
+import { StatusBadgeTone } from '@/components/nebula/StatusBadge'
 
 export const FeatureKindValue = {
   DEFAULT: 'DEFAULT',
@@ -48,3 +50,18 @@ export const FEATURE_STATE_BADGE_CLASS = {
   SHIPPED_FLAG_OFF: 'border-slate-500/40 bg-slate-500/10 text-slate-300',
   FLAG_CLEANUP_PENDING: 'border-orange-500/40 bg-orange-500/10 text-orange-300',
 } as const satisfies Record<FeatureState, string>
+
+const FEATURE_STATE_TONE = {
+  IN_PROGRESS: StatusBadgeTone.INDIGO,
+  LIVE_STAGING: StatusBadgeTone.AMBER,
+  LIVE_PROD: StatusBadgeTone.EMERALD,
+  FULLY_RELEASED: StatusBadgeTone.EMERALD_SOFT,
+  PARTIAL: StatusBadgeTone.VIOLET,
+  BLOCKED: StatusBadgeTone.ROSE,
+  SHIPPED_FLAG_OFF: StatusBadgeTone.SLATE,
+  FLAG_CLEANUP_PENDING: StatusBadgeTone.ORANGE,
+} as const satisfies Record<FeatureState, StatusBadgeToneValue>
+
+export function featureStateTone(state: FeatureState): StatusBadgeToneValue {
+  return FEATURE_STATE_TONE[state]
+}

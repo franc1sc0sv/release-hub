@@ -2,7 +2,14 @@ import 'reflect-metadata'
 import { config } from 'dotenv'
 import { resolve } from 'path'
 import { Logger } from '@nestjs/common'
+import type { IRawBodyRequest } from './modules/webhooks/interfaces/raw-body-request.interface'
 config({ path: resolve(__dirname, '../../../.env') })
+
+function captureRawBodyForWebhooks(req: IRawBodyRequest, _res: unknown, buffer: Buffer): void {
+  if (req.originalUrl.startsWith('/webhooks/')) {
+    req.rawBody = Buffer.from(buffer)
+  }
+}
 
 async function bootstrap() {
   const { NestFactory } = await import('@nestjs/core')
@@ -17,8 +24,8 @@ async function bootstrap() {
   })
   const { Logger: NestPinoLogger } = await import('nestjs-pino')
   app.useLogger(app.get(NestPinoLogger))
-  app.use(json({ limit: '10mb' }))
-  app.use(urlencoded({ limit: '10mb', extended: true }))
+  app.use(json({ limit: '10mb', verify: captureRawBodyForWebhooks }))
+  app.use(urlencoded({ limit: '10mb', extended: true, verify: captureRawBodyForWebhooks }))
   app.use(cookieParser())
   app.useGlobalPipes(
     new ValidationPipe({

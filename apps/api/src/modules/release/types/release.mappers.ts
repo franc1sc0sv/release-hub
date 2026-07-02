@@ -73,6 +73,8 @@ export function toReleaseObjectType(release: IRelease): ReleaseObjectType {
   type.tags = release.tags
   type.summary = release.summary
   type.summaryEditedAt = release.summaryEditedAt
+  type.deployedAt = release.deployedAt
+  type.githubDeploymentId = release.githubDeploymentId
   type.createdAt = release.createdAt
   type.updatedAt = release.updatedAt
   return type
