@@ -65,8 +65,5 @@
     "sidebar": "Sidebar",
     "sidebarDescription": "Displays the mobile sidebar.",
     "breadcrumb": "breadcrumb"
-  },
-  "three": {
-    "decorativeScene": "Decorative 3D scene"
   }
 }

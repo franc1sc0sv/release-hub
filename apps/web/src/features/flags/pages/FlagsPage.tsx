@@ -20,7 +20,6 @@ import { PageShell } from '@/components/nebula/PageShell'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import { SearchField } from '@/components/nebula/SearchField'
-import { Scene3D } from '@/components/three/Scene3D'
 import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -202,7 +201,6 @@ export default function FlagsPage() {
         <div className="space-y-8">
           {neverSynced ? (
             <EmptyState
-              visual={<Scene3D scene="flagBeacon" />}
               icon={<RefreshCw className="size-7 text-brand-indigo-bright" aria-hidden />}
               heading={t('neverSynced.heading')}
               description={t('neverSynced.description')}
@@ -306,7 +304,6 @@ export default function FlagsPage() {
 
               {!loading && !error && items.length === 0 && (
                 <EmptyState
-                  visual={<Scene3D scene="flagBeacon" />}
                   icon={<Flag className="size-7 text-brand-indigo-bright" aria-hidden />}
                   heading={t('empty.heading')}
                   description={t('empty.description')}

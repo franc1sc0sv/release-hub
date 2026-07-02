@@ -9,7 +9,6 @@ import { SearchField } from '@/components/nebula/SearchField'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { TagChip } from '@/components/nebula/TagChip'
 import { GradientButton } from '@/components/nebula/GradientButton'
-import { Scene3D } from '@/components/three/Scene3D'
 import { CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Can } from '@/context/ability.context'
@@ -117,7 +116,6 @@ export function FeatureLedger() {
       {!loadingInitial && !error && visibleFeatures.length === 0 && (
         <>
           <EmptyState
-            visual={<Scene3D scene="featureConstellation" />}
             icon={<Layers className="size-7 text-brand-indigo-bright" aria-hidden />}
             heading={search ? t('emptySearch.heading') : t('empty.heading')}
             description={search ? t('emptySearch.description') : t('empty.description')}

@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Scene3D } from '@/components/three/Scene3D'
-import { fadeIn, slideUp } from '@/lib/animations'
+import { slideUp } from '@/lib/animations'
 import { cn } from '@/lib/utils'
 
 interface AuthLayoutProps {
@@ -25,15 +24,6 @@ export function AuthLayout({ eyebrow, headline, supportingText, children }: Auth
 
       <div className="relative z-10 grid min-h-svh lg:grid-cols-2">
         <div className="hidden flex-col justify-center gap-8 border-r border-border/40 px-16 lg:flex">
-          <motion.div
-            variants={reduceMotion ? undefined : fadeIn}
-            initial={reduceMotion ? undefined : 'hidden'}
-            animate={reduceMotion ? undefined : 'visible'}
-            className="aspect-square w-full max-w-sm self-center rounded-[var(--radius-card)] border border-border/50 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--brand-indigo)_55%,transparent),color-mix(in_oklab,var(--brand-magenta)_35%,transparent))] shadow-glow-indigo"
-          >
-            <Scene3D scene="releaseCapsule" className="rounded-[var(--radius-card)]" />
-          </motion.div>
-
           <motion.div
             variants={reduceMotion ? undefined : slideUp}
             initial={reduceMotion ? undefined : 'hidden'}

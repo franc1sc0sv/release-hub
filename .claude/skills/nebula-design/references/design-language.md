@@ -111,12 +111,12 @@ Depth is *felt*, not drawn. Three tools, in order of cost:
 2. **Glow** (`shadow-glow-*`): a colored, blurred shadow on focal/active elements.
    Indigo glow by default; magenta glow on the spark. Glow is how Nebula says
    "this is alive / interactive / important". Hover should *intensify* glow.
-3. **Real 3D** (Spline / React Three Fiber): one tactile object per hero moment —
-   dashboard welcome banner, auth screen, empty state, landing. Glassy/glossy
-   materials, soft env lighting, gentle infinite float, subtle pointer parallax.
-   3D is expensive; budget one scene per screen, lazy-load it, and fall back to a
-   static poster under `prefers-reduced-motion` or when offscreen. See
-   `motion-and-3d.md`.
+3. **No 3D figures.** The app ships without 3D objects — the user removed them
+   deliberately. Hero and empty-state focal points are typographic, glass stat
+   cards, or lucide icon treatments. Two hard rules: do not reintroduce 3D
+   scenes or their dependencies without an explicit request, and never simulate
+   a 3D object with CSS — if a 3D figure is ever requested again it must be
+   built with a real 3D library (React Three Fiber / Spline), nothing faked.
 
 The **aurora** (`bg-nebula-aurora`) is the connective tissue: 2–3 large, blurred,
 low-opacity radial gradients (indigo top-left, magenta top-right, violet

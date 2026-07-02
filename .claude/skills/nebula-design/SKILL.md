@@ -1,14 +1,16 @@
 ---
 name: nebula-design
 description: >-
-  Nebula is the Release Hub visual design language (apps/web) — a dark, electric,
-  3D-forward system: deep-navy void, indigo→magenta glow, glass surfaces, bold
-  display type, 8px control/surface geometry, and tactile depth via Spline /
-  React Three Fiber. Use this skill when designing or building ANY new screen,
-  page, component, dashboard, table, form, empty state, modal, or auth view in
-  apps/web; when restyling existing UI; or when the user asks to "make it look
-  good", "make it on-brand", "apply the design system", "design a screen", or
-  "nebula". Composes shadcn/ui + Tailwind v4 tokens + Framer Motion + Spline/R3F.
+  Nebula is the Release Hub visual design language (apps/web) — a dark, electric
+  system: deep-navy void, indigo→magenta glow, glass surfaces, bold display
+  type, 8px control/surface geometry, flat depth styling via glass + glow. NO 3D
+  figures anywhere (user removed them); never simulate 3D with CSS — real 3D
+  library or nothing. Use this skill when
+  designing or building ANY new screen, page, component, dashboard, table, form,
+  empty state, modal, or auth view in apps/web; when restyling existing UI; or
+  when the user asks to "make it look good", "make it on-brand", "apply the
+  design system", "design a screen", or "nebula". Composes shadcn/ui +
+  Tailwind v4 tokens + Framer Motion.
 ---
 
 # Nebula — Release Hub Design Language
@@ -21,8 +23,8 @@ type, accent discipline, tactile depth — while it survives a data table.**
 ## The one-sentence identity
 
 > A deep-navy void, lit from within by an indigo→magenta gradient, where glass
-> surfaces and tactile 3D objects float in generous space, anchored by oversized
-> grotesque type and disciplined 8px geometry.
+> surfaces float in generous space, anchored by oversized grotesque type and
+> disciplined 8px geometry.
 
 ## The five-part grammar (every Nebula screen obeys all five)
 
@@ -36,9 +38,13 @@ type, accent discipline, tactile depth — while it survives a data table.**
    badges, tags, chips, avatars, and icon-circles — never for a control or a
    container. No sharp corners, no pill buttons, no `rounded-3xl`/`rounded-4xl`
    cards.
-3. **Tactile depth.** Every screen has a depth ladder: void → aurora glow → glass
-   surface → content → glowing accent. Hero moments get real 3D (Spline / R3F);
-   every other surface gets CSS depth (glass, glow, soft shadow).
+3. **Tactile depth — flat styling, no 3D figures.** Every screen has a depth
+   ladder: void → aurora glow → glass surface → content → glowing accent, built
+   from glass, glow, and soft shadow. **This app has NO 3D figures — the user
+   removed all of them; do not reintroduce scenes or their dependencies without
+   an explicit request. And never simulate a 3D object with CSS: if a 3D figure
+   is ever explicitly requested again, build it with a real 3D library
+   (React Three Fiber / Spline) — CSS-faked 3D is forbidden in all cases.**
 4. **Accent discipline.** A calm dark canvas carries **one** primary action in the
    `bg-nebula-gradient` (indigo→magenta) per view. Magenta is the *spark* — used
    only for the single most important highlight. Everything else is neutral.
@@ -84,8 +90,8 @@ When asked to design/build a new screen:
 2. **Lay the canvas.** Wrap the screen in `<NebulaBackground>` (void + 1–2 aurora
    blobs). Establish the spacing rhythm and a max-width container.
 3. **Set the hero.** One `text-display-*` headline as the loudest object + one
-   focal visual (3D scene for landing/empty/auth/dashboard banner; a glass
-   stat/illustration elsewhere). Add an eyebrow/overline above it.
+   focal visual (a glass stat card, key metric, or lucide icon treatment — no 3D
+   figures, no CSS-faked 3D). Add an eyebrow/overline above it.
 4. **Build with glass + 8px controls.** Containers = `GlassCard`
    (`rounded-[var(--radius-card)]`). Buttons/inputs/selects/textareas/dropdown
    triggers = `rounded-[var(--radius-button)]`. Badges/tags/chips/avatars stay
@@ -99,7 +105,7 @@ When asked to design/build a new screen:
 7. **Add motion.** Entrance stagger (`stagger` + `slideUp`), hover lift+glow, tap
    spring. Reduced-motion → static. See `references/motion-and-3d.md`.
 8. **Handle the four states** with the shared feedback components, each styled
-   Nebula (empty state gets a 3D object + bold line + accent CTA).
+   Nebula (empty state gets an icon treatment + bold line + accent CTA).
 9. **Audit.** shadcn-first ✓, typed ✓, no comments ✓, i18n ✓, enums not strings ✓,
    CASL ✓, AA contrast ✓, one gradient CTA ✓, reduced-motion ✓, controls/surfaces
    at 8px ✓, `rounded-full` only on badges/tags/chips/avatars ✓.
@@ -122,14 +128,11 @@ Full list and values: `references/tokens.css`.
 1. **Tokens:** merge `references/tokens.css` into `apps/web/src/index.css`
    (recolors shadcn semantic vars to the dark canvas + adds brand/glow/gradient/
    display-type/radius tokens). Keeps shadcn semantics intact.
-2. **3D deps:**
-   `pnpm --filter @release-hub/web add @splinetool/react-spline @splinetool/runtime`
-   and (for custom R3F scenes)
-   `pnpm --filter @release-hub/web add three @react-three/fiber @react-three/drei`.
-3. **Animation presets:** add `apps/web/src/lib/animations.ts` from
-   `references/motion-and-3d.md` (Framer presets, reduced-motion aware).
-4. **Shared Nebula components:** add `NebulaBackground`, `GlassCard`,
-   `Scene3D`, `GradientButton` etc. from `references/component-recipes.md` into
+2. **Animation presets:** add `apps/web/src/lib/animations.ts` from
+   `references/motion-and-3d.md` (Framer presets, reduced-motion aware; ignore
+   the retired 3D sections of that file).
+3. **Shared Nebula components:** add `NebulaBackground`, `GlassCard`,
+   `GradientButton` etc. from `references/component-recipes.md` into
    `apps/web/src/components/nebula/`.
 
 ## Reference files (load on demand — don't read all up front)

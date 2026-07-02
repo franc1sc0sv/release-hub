@@ -10,7 +10,6 @@ import { GradientButton } from '@/components/nebula/GradientButton'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import { SearchField } from '@/components/nebula/SearchField'
 import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
-import { Scene3D } from '@/components/three/Scene3D'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProject } from '@/context/project.context'
@@ -24,14 +23,6 @@ const CONNECTED: IntegrationStatus = 'CONNECTED'
 const NOT_CONFIGURED: IntegrationStatus = 'NOT_CONFIGURED'
 
 type ProjectItem = ListProjectsQuery['listProjects'][number]
-
-function HeroVisualSlot() {
-  return (
-    <div className="relative mx-auto aspect-square w-full max-w-56 shrink-0">
-      <Scene3D scene="releaseCapsule" className="rounded-[var(--radius-card)]" />
-    </div>
-  )
-}
 
 interface ProjectCardProps {
   project: ProjectItem
@@ -125,26 +116,23 @@ export default function WorkspacePage() {
       >
         <motion.div variants={itemVariants}>
           <GlassCard glow="indigo">
-            <CardContent className="flex flex-col items-center gap-8 py-10 sm:flex-row sm:justify-between">
-              <div className="min-w-0 space-y-4 text-center sm:text-left">
-                <p className="text-overline uppercase tracking-widest text-muted-foreground">
-                  {t('subtitle')}
-                </p>
-                <h1 className="font-display text-display-lg font-bold tracking-tight text-foreground">
-                  {activeProject
-                    ? t('hero.greetingWithProject', { name: activeProject.name })
-                    : t('hero.greeting')}
-                </h1>
-                <p className="max-w-md text-sm text-muted-foreground">{t('hero.description')}</p>
-                <GradientButton
-                  onClick={() => navigate(ROUTES.PROJECT_CREATE)}
-                  aria-label={t('newProject')}
-                >
-                  <Plus className="size-4" aria-hidden />
-                  {t('newProject')}
-                </GradientButton>
-              </div>
-              <HeroVisualSlot />
+            <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
+              <p className="text-overline uppercase tracking-widest text-muted-foreground">
+                {t('subtitle')}
+              </p>
+              <h1 className="font-display text-display-lg font-bold tracking-tight text-foreground">
+                {activeProject
+                  ? t('hero.greetingWithProject', { name: activeProject.name })
+                  : t('hero.greeting')}
+              </h1>
+              <p className="max-w-md text-sm text-muted-foreground">{t('hero.description')}</p>
+              <GradientButton
+                onClick={() => navigate(ROUTES.PROJECT_CREATE)}
+                aria-label={t('newProject')}
+              >
+                <Plus className="size-4" aria-hidden />
+                {t('newProject')}
+              </GradientButton>
             </CardContent>
           </GlassCard>
         </motion.div>

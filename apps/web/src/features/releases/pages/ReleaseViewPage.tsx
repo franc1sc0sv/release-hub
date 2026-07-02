@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@apollo/client/react'
 import { motion, useReducedMotion } from 'motion/react'
-import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
+import { AlertCircle, ArrowLeft, ExternalLink, GitBranch, Loader2 } from 'lucide-react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent } from '@/components/ui/card'
@@ -18,6 +18,7 @@ import { DraftTab } from '../components/DraftTab'
 import { SummaryTab } from '../components/SummaryTab'
 import { DeleteReleaseButton } from '../components/DeleteReleaseButton'
 import { ReleaseStatusControl } from '../components/ReleaseStatusControl'
+import { SyncNewPrsButton } from '../components/SyncNewPrsButton'
 
 const POLL_INTERVAL_MS = 3000
 const DRAFTING_STATUSES = new Set<string>([
@@ -115,17 +116,60 @@ export default function ReleaseViewPage() {
             <h1 className="font-display text-display-lg font-bold tracking-tight text-foreground">
               {release.name ?? `${release.baseRef} → ${release.compareRef}`}
             </h1>
-            <ReleaseStatusControl releaseId={release.id} currentStatus={release.status} />
+            <div className="flex flex-wrap items-center gap-3">
+              <ReleaseStatusControl releaseId={release.id} currentStatus={release.status} />
+              {release.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5" aria-label={t('view.tagsLabel')}>
+                  {release.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-white/15 bg-white/5 px-3 py-0.5 text-xs font-medium text-foreground/70"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <GitBranch className="size-3.5 shrink-0" aria-hidden />
+                <span className="font-mono text-foreground/70">{release.baseRef}</span>
+                <span aria-hidden>→</span>
+                <span className="font-mono text-foreground/70">{release.compareRef}</span>
+              </span>
+
+              {release.prUrl && (
+                <a
+                  href={release.prUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t('view.prUrlAriaLabel')}
+                  className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs text-foreground/70 transition-colors hover:bg-white/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {t('view.prUrl')}
+                  <ExternalLink className="size-3" aria-hidden />
+                </a>
+              )}
+            </div>
           </div>
 
-          <DeleteReleaseButton
-            releaseId={release.id}
-            projectId={projectId}
-            releaseLabel={release.name ?? `${release.baseRef} → ${release.compareRef}`}
-            status={release.status}
-            onDeleted={() => navigate(ROUTES.RELEASES)}
-            variant="icon"
-          />
+          <div className="flex items-center gap-2">
+            {(release.status === ReleaseStatusValue.DRAFT ||
+              release.status === ReleaseStatusValue.READY_TO_RELEASE) && (
+              <SyncNewPrsButton releaseId={release.id} />
+            )}
+
+            <DeleteReleaseButton
+              releaseId={release.id}
+              projectId={projectId}
+              releaseLabel={release.name ?? `${release.baseRef} → ${release.compareRef}`}
+              status={release.status}
+              onDeleted={() => navigate(ROUTES.RELEASES)}
+              variant="icon"
+            />
+          </div>
         </motion.div>
 
         <motion.div variants={slideUp}>
