@@ -51,7 +51,10 @@ export function OverviewTab({ release, features, projectId }: OverviewTabProps) 
           </Badge>
         </div>
 
-        <SyncNewPrsButton releaseId={release.id} />
+        {(release.status === ReleaseStatusValue.DRAFT ||
+          release.status === ReleaseStatusValue.READY_TO_RELEASE) && (
+          <SyncNewPrsButton releaseId={release.id} />
+        )}
       </div>
 
       <NewPrsReviewPanel release={release} features={features} projectId={projectId} />

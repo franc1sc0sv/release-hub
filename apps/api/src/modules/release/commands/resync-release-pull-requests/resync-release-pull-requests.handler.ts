@@ -9,6 +9,7 @@ import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { AiDraftStatus } from '../../../../common/types/ai-draft-status.enum'
+import { ReleaseStatus } from '../../../../common/types/release-status.enum'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import type { IProject } from '../../../project/interfaces/project.interfaces'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
@@ -178,6 +179,17 @@ export class ResyncReleasePullRequestsHandler extends PreparedCommandHandler<
         })
       ) {
         throw new ForbiddenException()
+      }
+
+      if (
+        release.status === ReleaseStatus.MERGED ||
+        release.status === ReleaseStatus.DEPLOYED ||
+        release.status === ReleaseStatus.CANCELED
+      ) {
+        throw new AppException(
+          'Pull requests cannot be resynced once a release is merged, deployed, or canceled',
+          ErrorCode.VALIDATION_ERROR,
+        )
       }
 
       const project = await this.projectRepository.findById(release.projectId, tx)
