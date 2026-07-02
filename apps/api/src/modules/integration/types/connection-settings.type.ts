@@ -16,4 +16,10 @@ export class ConnectionSettingsType {
 
   @Field(() => String, { nullable: true })
   flagsmithProjectId: string | null
+
+  @Field(() => Boolean)
+  flagsmithWebhookSecretSet: boolean
+
+  @Field(() => String)
+  flagsmithWebhookPath: string
 }

@@ -124,6 +124,7 @@ export class FlagsmithClient extends IFlagsmithClient {
     }
 
     const envNames = envList.map((e) => e.name)
+    const environmentDetails = envList.map((e) => ({ name: e.name, apiKey: e.api_key }))
     const flagMap = new Map<string, IAllEnvironmentFlag>()
 
     for (let i = 0; i < envList.length; i++) {
@@ -153,7 +154,7 @@ export class FlagsmithClient extends IFlagsmithClient {
       return { key: flag.key, createdAt: flag.createdAt, states }
     })
 
-    return { ok: true, data: { environments: envNames, flags } }
+    return { ok: true, data: { environments: envNames, environmentDetails, flags } }
   }
 
   async listEnvironmentNames(

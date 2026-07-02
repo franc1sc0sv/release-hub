@@ -32,6 +32,9 @@ export class FlagsResultType {
 
   @Field(() => [FlagRefType])
   items!: FlagRefType[]
+
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  lastSyncedAt!: Date | null
 }
 
 @ObjectType()

@@ -1,4 +1,4 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard'
@@ -21,8 +21,11 @@ import { GetFlagsmithProjectsQuery } from '../queries/get-flagsmith-projects/get
 import { VerifyFlagsmithConnectionQuery } from '../queries/verify-flagsmith-connection/verify-flagsmith-connection.query'
 import { RepoFileSearchQuery } from '../queries/repo-file-search/repo-file-search.query'
 import { UpdateConnectionSettingsCommand } from '../commands/update-connection-settings/update-connection-settings.command'
+import { SyncFlagsmithFlagsCommand } from '../commands/sync-flagsmith-flags/sync-flagsmith-flags.command'
+import { RotateFlagsmithWebhookSecretCommand } from '../commands/rotate-flagsmith-webhook-secret/rotate-flagsmith-webhook-secret.command'
 import { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import { SortDirection } from '../../../common/types/sort-direction.enum'
+import { FlagsmithSyncSource } from '@release-hub/db'
 
 @Resolver()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -127,5 +130,25 @@ export class IntegrationResolver {
         input.flagsmithProjectId,
       ),
     )
+  }
+
+  @Mutation(() => Int)
+  @Can(Action.UPDATE, Subject.PROJECT)
+  syncFlagsmithFlags(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<number> {
+    return this.commandBus.execute(
+      new SyncFlagsmithFlagsCommand(projectId, user.id, FlagsmithSyncSource.manual),
+    )
+  }
+
+  @Mutation(() => ConnectionSettingsType)
+  @Can(Action.UPDATE, Subject.PROJECT)
+  rotateFlagsmithWebhookSecret(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ConnectionSettingsType> {
+    return this.commandBus.execute(new RotateFlagsmithWebhookSecretCommand(projectId, user.id))
   }
 }

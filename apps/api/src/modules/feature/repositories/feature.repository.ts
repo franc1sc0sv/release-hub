@@ -6,7 +6,7 @@ import {
 } from '@release-hub/db'
 import { IFeatureRepository } from '../interfaces/feature.repository'
 import type { ICreateSuggestedFeatureData } from '../interfaces/feature.repository'
-import type { IFeature, ICreateFeatureData, IFeaturePullRequest, IFeatureCommit, IFeatureTicketLink } from '../interfaces/feature.interfaces'
+import type { IFeature, ICreateFeatureData, IFeaturePullRequest, IFeatureCommit, IFeatureTicketLink, IFeaturesPageFilters, IFeaturesPage } from '../interfaces/feature.interfaces'
 import type { IRelease } from '../../release/interfaces/release.interfaces'
 import { FeatureKind } from '../../../common/types/feature-kind.enum'
 import { FeatureState } from '../../../common/types/feature-state.enum'
@@ -56,6 +56,32 @@ export class FeatureRepository extends IFeatureRepository {
       orderBy: [{ kind: 'desc' }, { createdAt: 'asc' }],
     })
     return rows.map((row) => this.toIFeature(row))
+  }
+
+  findPage = async (filters: IFeaturesPageFilters, tx: TxClient): Promise<IFeaturesPage> => {
+    const where = {
+      projectId: filters.projectId,
+      deletedAt: null,
+      ...(filters.search
+        ? { name: { contains: filters.search, mode: 'insensitive' as const } }
+        : {}),
+    }
+
+    const [rows, totalCount] = await Promise.all([
+      tx.feature.findMany({
+        where,
+        orderBy: [{ kind: 'desc' }, { createdAt: 'asc' }],
+        take: filters.limit,
+        skip: filters.offset,
+      }),
+      tx.feature.count({ where }),
+    ])
+
+    return {
+      items: rows.map((row) => this.toIFeature(row)),
+      totalCount,
+      hasMore: filters.offset + rows.length < totalCount,
+    }
   }
 
   updateState = async (id: string, state: FeatureState, tx: TxClient): Promise<IFeature> => {

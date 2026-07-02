@@ -15,8 +15,14 @@ export interface IAllEnvironmentFlag {
   states: Record<string, boolean>
 }
 
+export interface IAllEnvironmentFlagsEnvironment {
+  name: string
+  apiKey: string
+}
+
 export interface IAllEnvironmentFlagsData {
   environments: string[]
+  environmentDetails: IAllEnvironmentFlagsEnvironment[]
   flags: IAllEnvironmentFlag[]
 }
 

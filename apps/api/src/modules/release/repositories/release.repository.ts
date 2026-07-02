@@ -1,9 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
+import { kysely } from '@release-hub/db'
+import { sql } from 'kysely'
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
 import { AiDraftStatus } from '../../../common/types/ai-draft-status.enum'
 import { IReleaseRepository } from '../interfaces/release.repository'
-import type { IRelease, ICreateReleaseData, IUpdateReleaseData } from '../interfaces/release.interfaces'
+import type {
+  IRelease,
+  ICreateReleaseData,
+  IUpdateReleaseData,
+  IReleasesPageFilters,
+  IReleasesPage,
+} from '../interfaces/release.interfaces'
+
+const MAX_RELEASES_PAGE_LIMIT = 50
 
 type ReleaseRow = {
   id: string
@@ -52,6 +62,60 @@ export class ReleaseRepository extends IReleaseRepository {
       orderBy: { createdAt: 'desc' },
     })
     return rows.map((row) => this.toIRelease(row))
+  }
+
+  findPageByProject = async (filters: IReleasesPageFilters, tx: TxClient): Promise<IReleasesPage> => {
+    const limit = Math.min(filters.limit, MAX_RELEASES_PAGE_LIMIT)
+    const search = filters.search?.trim() ?? ''
+
+    let countQuery = kysely
+      .selectFrom('releases')
+      .select(({ fn }) => fn.countAll<string>().as('total'))
+      .where('project_id', '=', filters.projectId)
+      .where('deleted_at', 'is', null)
+
+    let idsQuery = kysely
+      .selectFrom('releases')
+      .select('id')
+      .where('project_id', '=', filters.projectId)
+      .where('deleted_at', 'is', null)
+
+    if (search) {
+      const pattern = `%${search}%`
+      const searchCondition = sql<boolean>`(name ilike ${pattern} or exists (
+        select 1 from unnest(tags) as tag where tag ilike ${pattern}
+      ))`
+      countQuery = countQuery.where(searchCondition)
+      idsQuery = idsQuery.where(searchCondition)
+    }
+
+    const compiledCount = countQuery.compile()
+    const countRows = await tx.$queryRawUnsafe<{ total: string }[]>(
+      compiledCount.sql,
+      ...compiledCount.parameters,
+    )
+    const totalCount = Number(countRows[0]?.total ?? 0)
+
+    const compiledIds = idsQuery
+      .orderBy('created_at', 'desc')
+      .limit(limit)
+      .offset(filters.offset)
+      .compile()
+    const idRows = await tx.$queryRawUnsafe<{ id: string }[]>(compiledIds.sql, ...compiledIds.parameters)
+    const orderedIds = idRows.map((row) => row.id)
+
+    if (orderedIds.length === 0) {
+      return { items: [], totalCount, hasMore: false }
+    }
+
+    const rows = await tx.release.findMany({ where: { id: { in: orderedIds } } })
+    const rowsById = new Map(rows.map((row) => [row.id, row]))
+    const items = orderedIds
+      .map((id) => rowsById.get(id))
+      .filter((row): row is NonNullable<typeof row> => row !== undefined)
+      .map((row) => this.toIRelease(row))
+
+    return { items, totalCount, hasMore: filters.offset + items.length < totalCount }
   }
 
   create = async (data: ICreateReleaseData, tx: TxClient): Promise<IRelease> => {

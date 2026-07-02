@@ -130,3 +130,29 @@ export interface IResyncReleasePreparation {
   projectId: string
   newPullRequests: IPreparedPullRequest[]
 }
+
+export interface IReleasesPageFilters {
+  projectId: string
+  limit: number
+  offset: number
+  search: string | null
+}
+
+export interface IReleasesPage {
+  items: IRelease[]
+  totalCount: number
+  hasMore: boolean
+}
+
+export interface IReleasePullRequestsPageFilters {
+  releaseId: string
+  limit: number
+  offset: number
+  search: string | null
+}
+
+export interface IPullRequestsPage {
+  items: IPullRequest[]
+  totalCount: number
+  hasMore: boolean
+}

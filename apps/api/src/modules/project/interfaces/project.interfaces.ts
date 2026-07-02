@@ -47,6 +47,10 @@ export interface IProjectConnectionCredentials {
   flagsmithProjectId: string | null
 }
 
+export interface IProjectWebhookSecretStatus {
+  flagsmithWebhookSecretSet: boolean
+}
+
 export interface IProjectMembershipRecord {
   projectId: string
   role: ProjectRole

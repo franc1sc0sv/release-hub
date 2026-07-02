@@ -5,7 +5,7 @@ import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { ForbiddenException, NotFoundException } from '../../../../common/errors'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
-import { IFlagsmithClient } from '../../interfaces/flagsmith-client.abstract'
+import { IFlagsmithFlagRepository } from '../../interfaces/flagsmith-flag.repository'
 import { FlagEnvironmentStateType, FlagComparisonRowType, FlagComparisonResultType } from '../../types/flag-ref.type'
 import { CompareFlagsQuery } from './compare-flags.query'
 
@@ -14,7 +14,7 @@ export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, Fla
   constructor(
     protected readonly db: IDatabaseService,
     private readonly projectRepository: IProjectRepository,
-    private readonly flagsmithClient: IFlagsmithClient,
+    private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
   ) {
     super(db)
   }
@@ -34,20 +34,10 @@ export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, Fla
 
     if (!project.flagsmithEnabled) return empty
 
-    const credentials = await this.projectRepository.findCredentials(query.projectId, tx)
-    if (!credentials?.flagsmithUrl || !credentials.flagsmithApiKey || !credentials.flagsmithProjectId) {
-      return empty
-    }
-
-    const result = await this.flagsmithClient.fetchAllEnvironmentFlags(
-      credentials.flagsmithUrl,
-      credentials.flagsmithApiKey,
-      credentials.flagsmithProjectId,
+    const { environments: allEnvironments, flags } = await this.flagsmithFlagRepository.findAllFlagsForProject(
+      query.projectId,
+      tx,
     )
-
-    if (!result.ok) return empty
-
-    const { environments: allEnvironments, flags } = result.data
 
     const baselineEnvNames = query.baselineEnvironments.filter((name) => allEnvironments.includes(name))
     const comparedEnvNames = query.comparedEnvironments
@@ -57,8 +47,10 @@ export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, Fla
     const items: FlagComparisonRowType[] = []
 
     for (const flag of flags) {
+      const stateByEnv = new Map(flag.states.map((state) => [state.environmentName, state.enabled]))
+
       const baseline = baselineEnvNames.map((name): FlagEnvironmentStateType =>
-        Object.assign(new FlagEnvironmentStateType(), { name, enabled: flag.states[name] ?? false }),
+        Object.assign(new FlagEnvironmentStateType(), { name, enabled: stateByEnv.get(name) ?? false }),
       )
 
       const firstValue = baseline[0]?.enabled ?? false
@@ -69,7 +61,7 @@ export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, Fla
         ? []
         : comparedEnvNames
             .map((name): FlagEnvironmentStateType =>
-              Object.assign(new FlagEnvironmentStateType(), { name, enabled: flag.states[name] ?? false }),
+              Object.assign(new FlagEnvironmentStateType(), { name, enabled: stateByEnv.get(name) ?? false }),
             )
             .filter((e) => e.enabled !== baselineEnabled)
 
@@ -78,7 +70,7 @@ export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, Fla
       items.push(
         Object.assign(new FlagComparisonRowType(), {
           key: flag.key,
-          createdAt: flag.createdAt ? new Date(flag.createdAt) : null,
+          createdAt: flag.createdAt,
           baselineEnabled,
           baselineConflict,
           baseline,

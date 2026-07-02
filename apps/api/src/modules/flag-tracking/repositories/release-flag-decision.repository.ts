@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import type { ReleaseFlagDecisionType } from '@release-hub/db'
+import { ReleaseFlagDecisionType } from '@release-hub/db'
 import {
   IReleaseFlagDecisionRepository,
 } from '../interfaces/release-flag-decision.repository'
-import type { ICreateReleaseFlagDecisionData, IReleaseFlagDecision } from '../interfaces/flag-tracking.interfaces'
+import type {
+  ICreateReleaseFlagDecisionData,
+  IReleaseFlagDecision,
+  ILatestInProgressFlagDecision,
+} from '../interfaces/flag-tracking.interfaces'
 
 interface IReleaseFlagDecisionRow {
   id: string
@@ -69,5 +73,47 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
       },
     })
     return toIReleaseFlagDecision(row)
+  }
+
+  findLatestInProgressForProject = async (
+    projectId: string,
+    excludeReleaseId: string | null,
+    tx: TxClient,
+  ): Promise<ILatestInProgressFlagDecision[]> => {
+    const decisions = await tx.releaseFlagDecision.findMany({
+      where: { trackedFlag: { projectId, deletedAt: null, presentInCode: true } },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        releaseId: true,
+        decision: true,
+        decidedAt: true,
+        trackedFlag: { select: { id: true, key: true, featureId: true } },
+      },
+    })
+
+    const excludedFlagIds = new Set(
+      excludeReleaseId === null
+        ? []
+        : decisions.filter((decision) => decision.releaseId === excludeReleaseId).map((d) => d.trackedFlag.id),
+    )
+
+    const seenFlagIds = new Set<string>()
+    const latestByFlag = new Map<string, ILatestInProgressFlagDecision>()
+    for (const decision of decisions) {
+      if (excludedFlagIds.has(decision.trackedFlag.id)) continue
+      if (seenFlagIds.has(decision.trackedFlag.id)) continue
+      seenFlagIds.add(decision.trackedFlag.id)
+      if (decision.decision !== ReleaseFlagDecisionType.in_progress) continue
+
+      latestByFlag.set(decision.trackedFlag.id, {
+        trackedFlagId: decision.trackedFlag.id,
+        key: decision.trackedFlag.key,
+        featureId: decision.trackedFlag.featureId,
+        releaseId: decision.releaseId,
+        decidedAt: decision.decidedAt,
+      })
+    }
+
+    return [...latestByFlag.values()]
   }
 }

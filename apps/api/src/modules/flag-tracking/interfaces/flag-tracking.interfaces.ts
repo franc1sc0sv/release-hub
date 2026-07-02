@@ -116,3 +116,11 @@ export interface IPerFlagCoveragePreparation {
     detectedFile: string | null
   }[]
 }
+
+export interface ILatestInProgressFlagDecision {
+  trackedFlagId: string
+  key: string
+  featureId: string | null
+  releaseId: string
+  decidedAt: Date | null
+}

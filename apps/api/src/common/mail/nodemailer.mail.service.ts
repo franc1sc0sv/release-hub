@@ -117,4 +117,37 @@ export class NodemailerMailService extends IMailService {
       html,
     })
   }
+
+  async sendNotification(
+    to: string,
+    subject: string,
+    title: string,
+    bodyLines: string[],
+    url: string | null,
+  ): Promise<void> {
+    const escapedSubject = escapeHtml(subject)
+    const escapedTitle = escapeHtml(title)
+    const escapedBodyLines = bodyLines.map(escapeHtml)
+    const validatedUrl = url ? validateHttpUrl(url) : null
+
+    const text = [escapedTitle, '', ...escapedBodyLines, ...(validatedUrl ? ['', validatedUrl] : [])].join(
+      '\n',
+    )
+
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<body style="font-family:sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;padding:24px">
+  <p><strong>${escapedTitle}</strong></p>
+  ${escapedBodyLines.map((line) => `<p>${line}</p>`).join('\n  ')}
+  ${
+    validatedUrl
+      ? `<div style="text-align:center;margin:24px 0"><a href="${validatedUrl}" style="display:inline-block;padding:12px 24px;background:#2A2483;color:#fff;border-radius:9999px;text-decoration:none;font-weight:bold">Ver detalles</a></div>`
+      : ''
+  }
+</body>
+</html>`
+
+    await this.transporter.sendMail({ from: this.from, to, subject: escapedSubject, text, html })
+  }
 }

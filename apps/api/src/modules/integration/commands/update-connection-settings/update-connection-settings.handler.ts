@@ -7,6 +7,7 @@ import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { ForbiddenException, NotFoundException } from '../../../../common/errors'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { ConnectionSettingsType } from '../../types/connection-settings.type'
+import { FlagsmithConnectedEvent } from '../../events/flagsmith-connected.event'
 import { UpdateConnectionSettingsCommand } from './update-connection-settings.command'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 
@@ -26,7 +27,7 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
   protected async handle(
     command: UpdateConnectionSettingsCommand,
     tx: TxClient,
-    _events: IDomainEvent[],
+    events: IDomainEvent[],
   ): Promise<ConnectionSettingsType> {
     const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
     const ability = defineAbilityFor(memberships)
@@ -61,6 +62,22 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
     const credentials = await this.projectRepository.findCredentials(command.projectId, tx)
     settings.flagsmithUrl = credentials?.flagsmithUrl ?? null
     settings.flagsmithProjectId = credentials?.flagsmithProjectId ?? null
+
+    const webhookSecretStatus = await this.projectRepository.findWebhookSecretStatus(command.projectId, tx)
+    settings.flagsmithWebhookSecretSet = webhookSecretStatus?.flagsmithWebhookSecretSet ?? false
+    settings.flagsmithWebhookPath = `/webhooks/flagsmith/${command.projectId}`
+
+    const flagsmithJustConnected =
+      !existing.flagsmithEnabled &&
+      updated.flagsmithEnabled &&
+      command.flagsmithApiKey !== undefined &&
+      command.flagsmithUrl !== undefined &&
+      command.flagsmithProjectId !== undefined
+
+    if (flagsmithJustConnected) {
+      events.push(new FlagsmithConnectedEvent(command.projectId))
+    }
+
     return settings
   }
 }

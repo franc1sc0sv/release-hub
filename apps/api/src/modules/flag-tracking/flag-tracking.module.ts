@@ -44,6 +44,6 @@ import { GetFlagRegistryHandler } from './queries/get-flag-registry/get-flag-reg
     GetReleaseFlagsHandler,
     GetFlagRegistryHandler,
   ],
-  exports: [IPullRequestFlagChangeRepository],
+  exports: [IPullRequestFlagChangeRepository, ITrackedFlagRepository, IReleaseFlagDecisionRepository],
 })
 export class FlagTrackingModule {}

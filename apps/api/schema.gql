@@ -32,6 +32,38 @@ type AuthTokensType {
   refreshToken: String!
 }
 
+input BlockBranchInput {
+  branchName: String!
+  projectId: ID!
+  reason: String
+}
+
+type BlockedBranchType {
+  branchName: String!
+  createdAt: DateTime!
+  createdById: ID!
+  id: ID!
+  projectId: ID!
+  reason: String
+}
+
+type BranchCleanupCandidateType {
+  lastCommitDate: DateTime
+  name: String!
+  protected: Boolean!
+  signals: BranchCleanupSignalsType!
+  suggested: Boolean!
+}
+
+type BranchCleanupSignalsType {
+  blocked: Boolean!
+  isDefault: Boolean!
+  mergedViaPr: Boolean!
+  noOpenPr: Boolean!
+  stale: Boolean!
+  unreferencedByReleases: Boolean!
+}
+
 type CommitType {
   author: String!
   date: DateTime!
@@ -53,6 +85,8 @@ type ConnectionSettingsType {
   flagsmithConnected: Boolean!
   flagsmithProjectId: String
   flagsmithUrl: String
+  flagsmithWebhookPath: String!
+  flagsmithWebhookSecretSet: Boolean!
   githubConnected: Boolean!
   linearConnected: Boolean!
 }
@@ -99,8 +133,24 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DeleteBranchOutcomeType {
+  branchName: String!
+  deleted: Boolean!
+  reason: String
+}
+
+input DeleteGithubBranchesInput {
+  branchNames: [String!]!
+  projectId: ID!
+}
+
 input DeleteProjectTagInput {
   tagId: ID!
+}
+
+enum DigestFrequency {
+  DAILY
+  WEEKLY
 }
 
 enum ExportFormat {
@@ -128,6 +178,12 @@ type FeatureDetailType {
 enum FeatureKind {
   DEFAULT
   PRODUCT
+}
+
+type FeaturePageType {
+  hasMore: Boolean!
+  items: [FeatureType!]!
+  totalCount: Int!
 }
 
 type FeatureReleaseSnapshotType {
@@ -236,6 +292,7 @@ type FlagStateType {
 type FlagsResultType {
   environments: [String!]!
   items: [FlagRefType!]!
+  lastSyncedAt: DateTime
   totalCount: Float!
 }
 
@@ -271,6 +328,16 @@ input GetFlagsInput {
   sortField: FlagSortField = CREATED
 }
 
+type GithubBranchSearchItemType {
+  name: String!
+  protected: Boolean!
+}
+
+type GithubBranchSearchResultType {
+  hasMore: Boolean!
+  items: [GithubBranchSearchItemType!]!
+}
+
 type GithubBranchType {
   commitSha: String!
   name: String!
@@ -290,6 +357,15 @@ type GithubRepositoryType {
   name: String!
   owner: String!
   private: Boolean!
+}
+
+type InProgressFlagReminderType {
+  decidedAt: DateTime
+  featureId: ID
+  key: String!
+  releaseId: ID!
+  releaseVersion: String!
+  trackedFlagId: ID!
 }
 
 enum IntegrationStatus {
@@ -327,6 +403,13 @@ type LinearConnectionStatus {
   linearUser: String
 }
 
+input ListFeaturesPageInput {
+  limit: Int = 20
+  offset: Int = 0
+  projectId: ID!
+  search: String
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -357,6 +440,7 @@ type Mutation {
   acceptInvitation(token: String!): MemberType!
   acceptSuggestedFeature(input: AcceptSuggestedFeatureInput!): FeatureType!
   assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
+  blockBranch(input: BlockBranchInput!): BlockedBranchType!
   confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
   confirmReleaseAdditions(releaseId: ID!): ReleaseObjectType!
   createFeature(input: CreateFeatureInput!): FeatureType!
@@ -365,11 +449,13 @@ type Mutation {
   createProjectTag(input: CreateProjectTagInput!): ProjectTagType!
   createRelease(input: CreateReleaseInput!): ReleaseObjectType!
   deleteFeature(id: ID!): Boolean!
+  deleteGithubBranches(input: DeleteGithubBranchesInput!): [DeleteBranchOutcomeType!]!
   deleteProject(id: ID!): Boolean!
   deleteProjectTag(input: DeleteProjectTagInput!): Boolean!
   deleteRelease(releaseId: ID!): ReleaseObjectType!
   disconnectGithub: Boolean!
   disconnectLinear(projectId: ID!): Boolean!
+  disconnectSlack(projectId: ID!): Boolean!
   generatePrSummary(prId: ID!): PullRequestType!
   inviteMember(input: InviteMemberInput!): InvitationType!
   login(input: LoginInput!): AuthTokensType!
@@ -384,21 +470,51 @@ type Mutation {
   requestLoginCode(input: RequestLoginCodeInput!): Boolean!
   resyncReleasePullRequests(releaseId: ID!): ResyncReleaseSummaryType!
   revokeInvitation(invitationId: ID!): Boolean!
+  rotateFlagsmithWebhookSecret(projectId: ID!): ConnectionSettingsType!
   runFlagCoverage(projectId: ID!): FlagCoverageSummaryType!
   runFlagCoverageForFlag(key: String!, projectId: ID!): TrackedFlagDetailType!
   savePrSummary(input: SavePrSummaryInput!): PullRequestType!
   saveReleaseSummary(input: SaveReleaseSummaryInput!): ReleaseObjectType!
   scanReleasePullRequests(releaseId: ID!): ScanReleasePullRequestsSummaryType!
+  sendSlackTestMessage(projectId: ID!): SlackTestMessageResult!
   setFeatureState(input: SetFeatureStateInput!): FeatureType!
   setFeatureTags(input: SetFeatureTagsInput!): FeatureType!
   setFlagRegistry(input: SetFlagRegistryInput!): FlagRegistryConfigType!
   setReleaseFlagDecision(input: SetReleaseFlagDecisionInput!): ReleaseFlagDecisionResultType!
   setReleaseStatus(input: SetReleaseStatusInput!): ReleaseObjectType!
+  setSlackChannel(channelId: String!, channelName: String!, projectId: ID!): SlackConnectionStatus!
   shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
+  syncFlagsmithFlags(projectId: ID!): Int!
+  syncGithubDeployments(releaseId: ID!): SyncGithubDeploymentsResultType!
+  triggerFlagDigest(projectId: ID!): Boolean!
+  unblockBranch(input: UnblockBranchInput!): Boolean!
   updateConnectionSettings(input: UpdateConnectionSettingsInput!): ConnectionSettingsType!
   updateMemberRole(input: UpdateMemberRoleInput!): MemberType!
+  updateNotificationPreference(input: UpdateNotificationPreferenceInput!): NotificationPreferenceEntryType!
   updateProject(input: UpdateProjectInput!): ProjectType!
   updateRelease(input: UpdateReleaseInput!): ReleaseObjectType!
+  updateSlackNotificationSettings(notifyOnCreated: Boolean!, notifyOnDeployed: Boolean!, notifyOnShipped: Boolean!, projectId: ID!): SlackConnectionStatus!
+}
+
+enum NotificationChannel {
+  EMAIL
+  SLACK_DM
+}
+
+type NotificationPreferenceEntryType {
+  channel: NotificationChannel!
+  digestFrequency: DigestFrequency!
+  enabled: Boolean!
+  notificationType: NotificationType!
+}
+
+enum NotificationType {
+  FLAG_DIGEST
+  FLAG_IN_PROGRESS_REMINDER
+  FLAG_STALENESS_ALERT
+  RELEASE_CREATED
+  RELEASE_DEPLOYED
+  RELEASE_SHIPPED
 }
 
 input PrAssignmentInput {
@@ -457,6 +573,8 @@ type PullRequestType {
 }
 
 type Query {
+  blockedBranches(projectId: ID!): [BlockedBranchType!]!
+  branchCleanupCandidates(projectId: ID!): [BranchCleanupCandidateType!]!
   compareFlags(baselineEnvironments: [String!]!, comparedEnvironments: [String!]!, projectId: ID!): FlagComparisonResultType!
   compareRefs(baseRef: String!, compareRef: String!, projectId: ID!): RefComparisonType!
   diffRefs(baseRef: String!, compareRef: String!, projectId: ID!): [PullRequestType!]!
@@ -471,20 +589,29 @@ type Query {
   getRelease(id: ID!): ReleaseObjectType!
   getReleaseTree(id: ID!): ReleaseTreeType!
   getReleases(projectId: ID!): [ReleaseObjectType!]!
+  getReleasesPage(limit: Float! = 20, offset: Float! = 0, projectId: ID!, search: String): ReleasesPageType!
   githubAuthorizeUrl: String!
   githubBranches(projectId: ID!): [GithubBranchType!]!
   githubConnection: GithubConnectionStatus!
   githubRepositories: [GithubRepositoryType!]!
+  inProgressFlagReminders(excludeReleaseId: ID, projectId: ID!): [InProgressFlagReminderType!]!
   linearAuthorizeUrl(projectId: ID!): String!
   linearConnection(projectId: ID!): LinearConnectionStatus!
   listFeatures(projectId: ID!): [FeatureType!]!
+  listFeaturesPage(input: ListFeaturesPageInput!): FeaturePageType!
   listInvitations(projectId: ID!): [InvitationType!]!
   listMembers(projectId: ID!): [MemberType!]!
   listProjects: [ProjectType!]!
   me: UserProfileType!
+  notificationPreferences(projectId: ID!): [NotificationPreferenceEntryType!]!
   projectTags(projectId: ID!): [ProjectTagType!]!
   releaseFlags(releaseId: ID!): [ReleaseFlagType!]!
+  releasePullRequestsPage(limit: Float! = 20, offset: Float! = 0, releaseId: ID!, search: String): ReleasePullRequestsPageType!
   repoFileSearch(input: RepoFileSearchInput!): [String!]!
+  searchGithubBranches(limit: Float! = 50, projectId: ID!, search: String): GithubBranchSearchResultType!
+  slackAuthorizeUrl(projectId: ID!): String!
+  slackChannels(projectId: ID!): [SlackChannel!]!
+  slackConnection(projectId: ID!): SlackConnectionStatus!
   suggestFeatureForPr(prId: ID!): AiSuggestionType!
   trackedFlag(key: String!, projectId: ID!): TrackedFlagDetailType
   trackedFlags(projectId: ID!): [TrackedFlagType!]!
@@ -584,6 +711,12 @@ type ReleasePrFlagChangeType {
   kind: FlagReferenceKind!
 }
 
+type ReleasePullRequestsPageType {
+  hasMore: Boolean!
+  items: [PullRequestType!]!
+  totalCount: Int!
+}
+
 enum ReleaseStatus {
   CANCELED
   DEPLOYED
@@ -595,6 +728,12 @@ enum ReleaseStatus {
 type ReleaseTreeType {
   features: [ReleaseFeatureNodeType!]!
   release: ReleaseObjectType!
+}
+
+type ReleasesPageType {
+  hasMore: Boolean!
+  items: [ReleaseObjectType!]!
+  totalCount: Int!
 }
 
 input RepoFileSearchInput {
@@ -659,6 +798,26 @@ input ShipReleaseInput {
   releaseId: ID!
 }
 
+type SlackChannel {
+  id: ID!
+  name: String!
+}
+
+type SlackConnectionStatus {
+  channelId: String
+  channelName: String
+  connected: Boolean!
+  notifyOnCreated: Boolean!
+  notifyOnDeployed: Boolean!
+  notifyOnShipped: Boolean!
+  teamName: String
+}
+
+type SlackTestMessageResult {
+  error: String
+  ok: Boolean!
+}
+
 enum SortDirection {
   ASC
   DESC
@@ -671,6 +830,12 @@ type Subscription {
 type SummaryChunkType {
   chunk: String!
   done: Boolean!
+}
+
+type SyncGithubDeploymentsResultType {
+  environment: String
+  githubDeploymentId: ID
+  matched: Boolean!
 }
 
 type TicketLinkType {
@@ -743,6 +908,11 @@ type TrackedFlagType {
   presentInCode: Boolean!
 }
 
+input UnblockBranchInput {
+  branchName: String!
+  projectId: ID!
+}
+
 input UpdateConnectionSettingsInput {
   flagsmithApiKey: String
   flagsmithProjectId: String
@@ -753,6 +923,14 @@ input UpdateConnectionSettingsInput {
 input UpdateMemberRoleInput {
   membershipId: ID!
   role: ProjectRole!
+}
+
+input UpdateNotificationPreferenceInput {
+  channel: NotificationChannel!
+  digestFrequency: DigestFrequency
+  enabled: Boolean!
+  notificationType: NotificationType!
+  projectId: ID!
 }
 
 input UpdateProjectInput {

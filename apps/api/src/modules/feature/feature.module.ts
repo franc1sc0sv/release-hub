@@ -9,6 +9,7 @@ import { FeatureRepository } from './repositories/feature.repository'
 import { IFeatureInReleaseRepository } from './interfaces/feature-in-release.repository'
 import { FeatureInReleaseRepository } from './repositories/feature-in-release.repository'
 import { ListFeaturesHandler } from './queries/list-features/list-features.handler'
+import { ListFeaturesPageHandler } from './queries/list-features-page/list-features-page.handler'
 import { GetFeatureHandler } from './queries/get-feature/get-feature.handler'
 import { CreateFeatureHandler } from './commands/create-feature/create-feature.handler'
 import { AssignPrToFeatureHandler } from './commands/assign-pr-to-feature/assign-pr-to-feature.handler'
@@ -25,6 +26,7 @@ import { DeleteFeatureHandler } from './commands/delete-feature/delete-feature.h
     { provide: IFeatureRepository, useClass: FeatureRepository },
     { provide: IFeatureInReleaseRepository, useClass: FeatureInReleaseRepository },
     ListFeaturesHandler,
+    ListFeaturesPageHandler,
     GetFeatureHandler,
     CreateFeatureHandler,
     AssignPrToFeatureHandler,

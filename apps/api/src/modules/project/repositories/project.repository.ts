@@ -13,6 +13,7 @@ import type {
   IFlagRegistryConfig,
   IUpdateFlagRegistryData,
   IFlagRegistryConfigResult,
+  IProjectWebhookSecretStatus,
 } from '../interfaces/project.interfaces'
 
 @Injectable()
@@ -198,6 +199,22 @@ export class ProjectRepository extends IProjectRepository {
       data: { flagRegistryPath: data.flagRegistryPath, flagRegistryBranch: data.flagRegistryBranch },
     })
     return { projectId: row.id, flagRegistryPath: row.flagRegistryPath, flagRegistryBranch: row.flagRegistryBranch }
+  }
+
+  findWebhookSecretStatus = async (id: string, tx: TxClient): Promise<IProjectWebhookSecretStatus | null> => {
+    const row = await tx.project.findFirst({
+      where: { id, deletedAt: null },
+      select: { flagsmithWebhookSecret: true },
+    })
+    if (!row) return null
+    return { flagsmithWebhookSecretSet: row.flagsmithWebhookSecret !== null }
+  }
+
+  regenerateFlagsmithWebhookSecret = async (id: string, secret: string, tx: TxClient): Promise<void> => {
+    await tx.project.update({
+      where: { id },
+      data: { flagsmithWebhookSecret: secret },
+    })
   }
 
   private toIProject(

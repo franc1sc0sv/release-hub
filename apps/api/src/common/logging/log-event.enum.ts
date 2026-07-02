@@ -9,6 +9,7 @@ export const LogEvent = {
   AI_DRAFT_FAILED: 'ai.draft.failed',
   AI_DRAFT_ORPHAN_SWEEP: 'ai.draft.orphan.sweep',
   AI_DRAFT_REGENERATE: 'ai.draft.regenerate',
+  FLAGSMITH_SYNC_FAILED: 'flagsmith.sync.failed',
 } as const
 
 export type LogEvent = (typeof LogEvent)[keyof typeof LogEvent]

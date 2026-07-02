@@ -9,11 +9,14 @@ import { Action, Subject } from '@release-hub/shared'
 import type { IJwtUser } from '../../../common/types'
 import { FeatureType } from '../types/feature.type'
 import { FeatureDetailType } from '../types/feature-detail.type'
+import { FeaturePageType } from '../types/feature-page.type'
+import { ListFeaturesPageInput } from '../types/list-features-page.input'
 import { CreateFeatureInput } from '../types/create-feature.input'
 import { AssignPrToFeatureInput } from '../types/assign-pr-to-feature.input'
 import { SetFeatureStateInput } from '../commands/set-feature-state/set-feature-state.input'
 import { SetFeatureTagsInput } from '../commands/set-feature-tags/set-feature-tags.input'
 import { ListFeaturesQuery } from '../queries/list-features/list-features.query'
+import { ListFeaturesPageQuery } from '../queries/list-features-page/list-features-page.query'
 import { GetFeatureQuery } from '../queries/get-feature/get-feature.query'
 import { CreateFeatureCommand } from '../commands/create-feature/create-feature.command'
 import { AssignPrToFeatureCommand } from '../commands/assign-pr-to-feature/assign-pr-to-feature.command'
@@ -40,6 +43,23 @@ export class FeatureResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<FeatureType[]> {
     return this.queryBus.execute(new ListFeaturesQuery(projectId, user.id))
+  }
+
+  @Query(() => FeaturePageType)
+  @Can(Action.READ, Subject.FEATURE)
+  listFeaturesPage(
+    @Args('input', { type: () => ListFeaturesPageInput }) input: ListFeaturesPageInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<FeaturePageType> {
+    return this.queryBus.execute(
+      new ListFeaturesPageQuery(
+        input.projectId,
+        user.id,
+        input.limit ?? 20,
+        input.offset ?? 0,
+        input.search,
+      ),
+    )
   }
 
   @Query(() => FeatureDetailType)

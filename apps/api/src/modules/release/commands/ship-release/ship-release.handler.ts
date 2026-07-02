@@ -11,7 +11,7 @@ import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { ReleaseStatus } from '../../../../common/types/release-status.enum'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
-import { IFlagsmithClient } from '../../../integration/interfaces/flagsmith-client.abstract'
+import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
 import { decryptToken } from '../../../../common/crypto/token-cipher'
 import { IReleaseRepository } from '../../interfaces/release.repository'
@@ -20,6 +20,9 @@ import { ReleaseObjectType } from '../../types/release.type'
 import { toReleaseObjectType } from '../../types/release.mappers'
 import { ReleaseShippedEvent } from '../../events/release-shipped.event'
 import { ShipReleaseCommand } from './ship-release.command'
+
+const STAGING_ENVIRONMENT_NAME_REGEX = /staging/i
+const PRODUCTION_ENVIRONMENT_NAME_REGEX = /prod(uction)?/i
 
 @CommandHandler(ShipReleaseCommand)
 export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, ReleaseObjectType> {
@@ -30,7 +33,7 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly gitHubClient: IGitHubClient,
-    private readonly flagsmithClient: IFlagsmithClient,
+    private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
     private readonly githubConnectionRepository: IGithubConnectionRepository,
   ) {
     super(db, eventEmitter)
@@ -82,24 +85,26 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
     }
 
     if (project.flagsmithEnabled) {
-      const credentials = await this.projectRepository.findCredentials(release.projectId, tx)
-      if (credentials?.flagsmithUrl && credentials.flagsmithApiKey && credentials.flagsmithProjectId) {
-        const result = await this.flagsmithClient.fetchFlags(
-          credentials.flagsmithUrl,
-          credentials.flagsmithApiKey,
-          credentials.flagsmithProjectId,
-        )
-        if (result.ok) {
-          const stagingMap = new Map(result.data.staging.map((f) => [f.key, f.enabled]))
-          const hasDangerousParity = result.data.production.some(
-            (f) => f.enabled && stagingMap.get(f.key) === false,
+      const { environments, flags } = await this.flagsmithFlagRepository.findAllFlagsForProject(
+        release.projectId,
+        tx,
+      )
+      const stagingEnvironment = environments.find((name) => STAGING_ENVIRONMENT_NAME_REGEX.test(name))
+      const productionEnvironment = environments.find((name) => PRODUCTION_ENVIRONMENT_NAME_REGEX.test(name))
+
+      if (stagingEnvironment && productionEnvironment) {
+        const hasDangerousParity = flags.some((flag) => {
+          const stateByEnv = new Map(flag.states.map((state) => [state.environmentName, state.enabled]))
+          const productionEnabled = stateByEnv.get(productionEnvironment) ?? false
+          const stagingEnabled = stateByEnv.get(stagingEnvironment) ?? false
+          return productionEnabled && !stagingEnabled
+        })
+
+        if (hasDangerousParity) {
+          throw new AppException(
+            'Flag parity check failed: one or more flags are enabled in production but disabled in staging',
+            ErrorCode.VALIDATION_ERROR,
           )
-          if (hasDangerousParity) {
-            throw new AppException(
-              'Flag parity check failed: one or more flags are enabled in production but disabled in staging',
-              ErrorCode.VALIDATION_ERROR,
-            )
-          }
         }
       }
     }

@@ -36,7 +36,8 @@
   },
   "releaseFlagDecision": {
     "ENABLE_IN_RELEASE": "Enable in release",
-    "SHIP_OFF": "Ship off"
+    "SHIP_OFF": "Ship off",
+    "IN_PROGRESS": "In progress"
   },
   "ticketSource": {
     "LINEAR": "Linear",

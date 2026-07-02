@@ -86,3 +86,16 @@ export interface IMinimalPullRequest {
   releaseId: string
   featureId: string | null
 }
+
+export interface IFeaturesPageFilters {
+  projectId: string
+  limit: number
+  offset: number
+  search?: string
+}
+
+export interface IFeaturesPage {
+  items: IFeature[]
+  totalCount: number
+  hasMore: boolean
+}

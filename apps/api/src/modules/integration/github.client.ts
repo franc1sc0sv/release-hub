@@ -13,6 +13,13 @@ import {
   type IGitHubRefComparison,
   type IGitHubFileTree,
   type IGitHubPullRequestFile,
+  type IGitHubBranchSearchResult,
+  type IGitHubBranchSearchItem,
+  type IGitHubMergedPullRequestHead,
+  type IGitHubOpenPullRequestHead,
+  type IGitHubDeleteBranchResult,
+  type IGitHubDeployment,
+  type IGitHubDeploymentStatus,
 } from './interfaces/github-client.interface'
 
 @Injectable()
@@ -222,6 +229,200 @@ export class GitHubClient extends IGitHubClient {
         commitSha: branch.commit.sha,
       }))
     } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  async searchBranches(
+    repo: string,
+    search: string | null,
+    limit: number,
+    accessToken: string,
+  ): Promise<IGitHubBranchSearchResult> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    const needle = search?.toLowerCase() ?? null
+    const items: IGitHubBranchSearchItem[] = []
+    let hasMore = false
+
+    try {
+      for await (const response of octokit.paginate.iterator(octokit.repos.listBranches, {
+        owner,
+        repo: repoName,
+        per_page: 100,
+      })) {
+        for (const branch of response.data) {
+          if (needle !== null && !branch.name.toLowerCase().includes(needle)) continue
+
+          if (items.length >= limit) {
+            hasMore = true
+            break
+          }
+
+          items.push({
+            name: branch.name,
+            protected: branch.protected,
+            lastCommitSha: branch.commit.sha,
+          })
+        }
+
+        if (items.length >= limit) break
+      }
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+
+    return { items, hasMore }
+  }
+
+  async listMergedPullRequestHeads(
+    repo: string,
+    accessToken: string,
+  ): Promise<IGitHubMergedPullRequestHead[]> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    const maxResults = 500
+    const heads: IGitHubMergedPullRequestHead[] = []
+
+    try {
+      for await (const response of octokit.paginate.iterator(octokit.pulls.list, {
+        owner,
+        repo: repoName,
+        state: 'closed',
+        sort: 'updated',
+        direction: 'desc',
+        per_page: 100,
+      })) {
+        for (const pr of response.data) {
+          if (pr.merged_at === null) continue
+          heads.push({ headRef: pr.head.ref, mergedAt: pr.merged_at, prNumber: pr.number })
+          if (heads.length >= maxResults) break
+        }
+        if (heads.length >= maxResults) break
+      }
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+
+    return heads
+  }
+
+  async listOpenPullRequestHeads(
+    repo: string,
+    accessToken: string,
+  ): Promise<IGitHubOpenPullRequestHead[]> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const prs = await octokit.paginate(
+        octokit.pulls.list,
+        { owner, repo: repoName, state: 'open', per_page: 100 },
+        (response) => response.data,
+      )
+      return prs.map((pr) => ({ headRef: pr.head.ref, prNumber: pr.number }))
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  async deleteBranch(
+    repo: string,
+    branchName: string,
+    accessToken: string,
+  ): Promise<IGitHubDeleteBranchResult> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      await octokit.git.deleteRef({ owner, repo: repoName, ref: `heads/${branchName}` })
+      return { deleted: true }
+    } catch (error) {
+      const status = (error as { status?: number }).status
+      if (status === 404) {
+        return { deleted: false, reason: 'Branch not found' }
+      }
+      if (status === 422) {
+        return { deleted: false, reason: 'Branch is protected or the reference could not be deleted' }
+      }
+      if (status === 403) {
+        return { deleted: false, reason: 'Insufficient permissions to delete this branch' }
+      }
+      return { deleted: false, reason: (error as { message?: string }).message ?? 'Unknown error' }
+    }
+  }
+
+  async listDeployments(
+    repo: string,
+    accessToken: string,
+    ref?: string,
+  ): Promise<IGitHubDeployment[]> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const deployments = await octokit.paginate(
+        octokit.repos.listDeployments,
+        { owner, repo: repoName, ref, per_page: 100 },
+        (response) => response.data,
+      )
+      return deployments.map((deployment) => ({
+        id: deployment.id,
+        ref: deployment.ref,
+        sha: deployment.sha,
+        environment: deployment.environment,
+        createdAt: deployment.created_at,
+      }))
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
+  async getLatestDeploymentStatus(
+    repo: string,
+    deploymentId: number,
+    accessToken: string,
+  ): Promise<IGitHubDeploymentStatus | null> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const response = await octokit.repos.listDeploymentStatuses({
+        owner,
+        repo: repoName,
+        deployment_id: deploymentId,
+        per_page: 1,
+      })
+      const latest = response.data[0]
+      if (!latest) return null
+      return {
+        state: latest.state,
+        environment: latest.environment,
+        createdAt: latest.created_at,
+      }
+    } catch (error) {
+      const status = (error as { status?: number }).status
+      if (status === 404) return null
       this.mapOctokitError(error)
     }
   }

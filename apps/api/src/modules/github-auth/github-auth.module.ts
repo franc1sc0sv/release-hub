@@ -14,6 +14,7 @@ import { CreateGithubBranchHandler } from './commands/create-github-branch/creat
 import { GetGithubConnectionHandler } from './queries/get-github-connection/get-github-connection.handler'
 import { ListGithubRepositoriesHandler } from './queries/list-github-repositories/list-github-repositories.handler'
 import { ListGithubBranchesHandler } from './queries/list-github-branches/list-github-branches.handler'
+import { SearchGithubBranchesHandler } from './queries/search-github-branches/search-github-branches.handler'
 import { CompareRefsHandler } from './queries/compare-refs/compare-refs.handler'
 
 @Module({
@@ -36,6 +37,7 @@ import { CompareRefsHandler } from './queries/compare-refs/compare-refs.handler'
     GetGithubConnectionHandler,
     ListGithubRepositoriesHandler,
     ListGithubBranchesHandler,
+    SearchGithubBranchesHandler,
     CompareRefsHandler,
   ],
   exports: [IGithubConnectionRepository],

@@ -40,6 +40,7 @@ export class GetConnectionSettingsHandler extends BaseQueryHandler<
     if (!project) throw new NotFoundException('Project')
 
     const credentials = await this.projectRepository.findCredentials(query.projectId, tx)
+    const webhookSecretStatus = await this.projectRepository.findWebhookSecretStatus(query.projectId, tx)
 
     const settings = new ConnectionSettingsType()
     settings.githubConnected = project.githubInstallationId !== null
@@ -47,6 +48,8 @@ export class GetConnectionSettingsHandler extends BaseQueryHandler<
     settings.flagsmithConnected = project.flagsmithEnabled
     settings.flagsmithUrl = credentials?.flagsmithUrl ?? null
     settings.flagsmithProjectId = credentials?.flagsmithProjectId ?? null
+    settings.flagsmithWebhookSecretSet = webhookSecretStatus?.flagsmithWebhookSecretSet ?? false
+    settings.flagsmithWebhookPath = `/webhooks/flagsmith/${query.projectId}`
     return settings
   }
 }

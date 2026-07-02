@@ -61,11 +61,13 @@ export const AiDraftStatusValue = {
 export const ReleaseFlagDecisionTypeValue = {
   ENABLE_IN_RELEASE: 'ENABLE_IN_RELEASE',
   SHIP_OFF: 'SHIP_OFF',
+  IN_PROGRESS: 'IN_PROGRESS',
 } as const satisfies Record<ReleaseFlagDecisionType, ReleaseFlagDecisionType>
 
 export const RELEASE_FLAG_DECISION_OPTIONS: ReleaseFlagDecisionType[] = [
   ReleaseFlagDecisionTypeValue.ENABLE_IN_RELEASE,
   ReleaseFlagDecisionTypeValue.SHIP_OFF,
+  ReleaseFlagDecisionTypeValue.IN_PROGRESS,
 ]
 
 export const FlagChangeActionValue = {

@@ -36,7 +36,8 @@
   },
   "releaseFlagDecision": {
     "ENABLE_IN_RELEASE": "Habilitar en release",
-    "SHIP_OFF": "Lanzar apagado"
+    "SHIP_OFF": "Lanzar apagado",
+    "IN_PROGRESS": "En progreso"
   },
   "ticketSource": {
     "LINEAR": "Linear",

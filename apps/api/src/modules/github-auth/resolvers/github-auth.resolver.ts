@@ -13,10 +13,12 @@ import type { IJwtUser } from '../../../common/types'
 import { GithubConnectionStatus } from '../types/github-connection-status.type'
 import { GithubRepositoryType } from '../types/github-repository.type'
 import { GithubBranchType } from '../types/github-branch.type'
+import { GithubBranchSearchResultType } from '../types/github-branch-search-result.type'
 import { RefComparisonType } from '../types/ref-comparison.type'
 import { GetGithubConnectionQuery } from '../queries/get-github-connection/get-github-connection.query'
 import { ListGithubRepositoriesQuery } from '../queries/list-github-repositories/list-github-repositories.query'
 import { ListGithubBranchesQuery } from '../queries/list-github-branches/list-github-branches.query'
+import { SearchGithubBranchesQuery } from '../queries/search-github-branches/search-github-branches.query'
 import { CompareRefsQuery } from '../queries/compare-refs/compare-refs.query'
 import { DisconnectGithubCommand } from '../commands/disconnect-github/disconnect-github.command'
 import { ReauthorizeGithubCommand } from '../commands/reauthorize-github/reauthorize-github.command'
@@ -89,6 +91,21 @@ export class GithubAuthResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<GithubBranchType[]> {
     return this.queryBus.execute(new ListGithubBranchesQuery(user.id, projectId))
+  }
+
+  @Query(() => GithubBranchSearchResultType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.READ, Subject.PROJECT)
+  searchGithubBranches(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('search', { type: () => String, nullable: true }) search: string | null | undefined,
+    @Args('limit', { type: () => Number, defaultValue: 50 }) limit: number,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<GithubBranchSearchResultType> {
+    const cappedLimit = Math.min(Math.max(limit, 1), 100)
+    return this.queryBus.execute(
+      new SearchGithubBranchesQuery(user.id, projectId, search ?? null, cappedLimit),
+    )
   }
 
   @Query(() => RefComparisonType)

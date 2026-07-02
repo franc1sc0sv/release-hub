@@ -64,6 +64,48 @@ export interface IGitHubPullRequestFile {
   patch: string | null
 }
 
+export interface IGitHubBranchSearchItem {
+  name: string
+  protected: boolean
+  lastCommitSha: string
+  lastCommitDate?: string
+}
+
+export interface IGitHubBranchSearchResult {
+  items: IGitHubBranchSearchItem[]
+  hasMore: boolean
+}
+
+export interface IGitHubMergedPullRequestHead {
+  headRef: string
+  mergedAt: string
+  prNumber: number
+}
+
+export interface IGitHubOpenPullRequestHead {
+  headRef: string
+  prNumber: number
+}
+
+export interface IGitHubDeleteBranchResult {
+  deleted: boolean
+  reason?: string
+}
+
+export interface IGitHubDeployment {
+  id: number
+  ref: string
+  sha: string
+  environment: string
+  createdAt: string
+}
+
+export interface IGitHubDeploymentStatus {
+  state: string
+  environment?: string
+  createdAt: string
+}
+
 export abstract class IGitHubClient {
   abstract compareMergedPullRequests(
     repo: string,
@@ -126,4 +168,39 @@ export abstract class IGitHubClient {
   ): Promise<IGitHubPullRequestFile[]>
 
   abstract revokeAuthorization(accessToken: string): Promise<void>
+
+  abstract searchBranches(
+    repo: string,
+    search: string | null,
+    limit: number,
+    accessToken: string,
+  ): Promise<IGitHubBranchSearchResult>
+
+  abstract listMergedPullRequestHeads(
+    repo: string,
+    accessToken: string,
+  ): Promise<IGitHubMergedPullRequestHead[]>
+
+  abstract listOpenPullRequestHeads(
+    repo: string,
+    accessToken: string,
+  ): Promise<IGitHubOpenPullRequestHead[]>
+
+  abstract deleteBranch(
+    repo: string,
+    branchName: string,
+    accessToken: string,
+  ): Promise<IGitHubDeleteBranchResult>
+
+  abstract listDeployments(
+    repo: string,
+    accessToken: string,
+    ref?: string,
+  ): Promise<IGitHubDeployment[]>
+
+  abstract getLatestDeploymentStatus(
+    repo: string,
+    deploymentId: number,
+    accessToken: string,
+  ): Promise<IGitHubDeploymentStatus | null>
 }

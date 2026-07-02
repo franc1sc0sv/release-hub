@@ -49,6 +49,41 @@ export type AuthTokensType = {
   refreshToken: Scalars['String']['output'];
 };
 
+export type BlockBranchInput = {
+  branchName: Scalars['String']['input'];
+  projectId: Scalars['ID']['input'];
+  reason: InputMaybe<Scalars['String']['input']>;
+};
+
+export type BlockedBranchType = {
+  __typename?: 'BlockedBranchType';
+  branchName: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdById: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  projectId: Scalars['ID']['output'];
+  reason: Maybe<Scalars['String']['output']>;
+};
+
+export type BranchCleanupCandidateType = {
+  __typename?: 'BranchCleanupCandidateType';
+  lastCommitDate: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  protected: Scalars['Boolean']['output'];
+  signals: BranchCleanupSignalsType;
+  suggested: Scalars['Boolean']['output'];
+};
+
+export type BranchCleanupSignalsType = {
+  __typename?: 'BranchCleanupSignalsType';
+  blocked: Scalars['Boolean']['output'];
+  isDefault: Scalars['Boolean']['output'];
+  mergedViaPr: Scalars['Boolean']['output'];
+  noOpenPr: Scalars['Boolean']['output'];
+  stale: Scalars['Boolean']['output'];
+  unreferencedByReleases: Scalars['Boolean']['output'];
+};
+
 export type CommitType = {
   __typename?: 'CommitType';
   author: Scalars['String']['output'];
@@ -73,6 +108,8 @@ export type ConnectionSettingsType = {
   flagsmithConnected: Scalars['Boolean']['output'];
   flagsmithProjectId: Maybe<Scalars['String']['output']>;
   flagsmithUrl: Maybe<Scalars['String']['output']>;
+  flagsmithWebhookPath: Scalars['String']['output'];
+  flagsmithWebhookSecretSet: Scalars['Boolean']['output'];
   githubConnected: Scalars['Boolean']['output'];
   linearConnected: Scalars['Boolean']['output'];
 };
@@ -115,9 +152,25 @@ export type CreateReleaseInput = {
   tags: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type DeleteBranchOutcomeType = {
+  __typename?: 'DeleteBranchOutcomeType';
+  branchName: Scalars['String']['output'];
+  deleted: Scalars['Boolean']['output'];
+  reason: Maybe<Scalars['String']['output']>;
+};
+
+export type DeleteGithubBranchesInput = {
+  branchNames: Array<Scalars['String']['input']>;
+  projectId: Scalars['ID']['input'];
+};
+
 export type DeleteProjectTagInput = {
   tagId: Scalars['ID']['input'];
 };
+
+export type DigestFrequency =
+  | 'DAILY'
+  | 'WEEKLY';
 
 export type ExportFormat =
   | 'MD'
@@ -145,6 +198,13 @@ export type FeatureDetailType = {
 export type FeatureKind =
   | 'DEFAULT'
   | 'PRODUCT';
+
+export type FeaturePageType = {
+  __typename?: 'FeaturePageType';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<FeatureType>;
+  totalCount: Scalars['Int']['output'];
+};
 
 export type FeatureReleaseSnapshotType = {
   __typename?: 'FeatureReleaseSnapshotType';
@@ -260,6 +320,7 @@ export type FlagsResultType = {
   __typename?: 'FlagsResultType';
   environments: Array<Scalars['String']['output']>;
   items: Array<FlagRefType>;
+  lastSyncedAt: Maybe<Scalars['DateTime']['output']>;
   totalCount: Scalars['Float']['output'];
 };
 
@@ -297,6 +358,18 @@ export type GetFlagsInput = {
   sortField: InputMaybe<FlagSortField>;
 };
 
+export type GithubBranchSearchItemType = {
+  __typename?: 'GithubBranchSearchItemType';
+  name: Scalars['String']['output'];
+  protected: Scalars['Boolean']['output'];
+};
+
+export type GithubBranchSearchResultType = {
+  __typename?: 'GithubBranchSearchResultType';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<GithubBranchSearchItemType>;
+};
+
 export type GithubBranchType = {
   __typename?: 'GithubBranchType';
   commitSha: Scalars['String']['output'];
@@ -319,6 +392,16 @@ export type GithubRepositoryType = {
   name: Scalars['String']['output'];
   owner: Scalars['String']['output'];
   private: Scalars['Boolean']['output'];
+};
+
+export type InProgressFlagReminderType = {
+  __typename?: 'InProgressFlagReminderType';
+  decidedAt: Maybe<Scalars['DateTime']['output']>;
+  featureId: Maybe<Scalars['ID']['output']>;
+  key: Scalars['String']['output'];
+  releaseId: Scalars['ID']['output'];
+  releaseVersion: Scalars['String']['output'];
+  trackedFlagId: Scalars['ID']['output'];
 };
 
 export type IntegrationStatus =
@@ -356,6 +439,13 @@ export type LinearConnectionStatus = {
   linearUser: Maybe<Scalars['String']['output']>;
 };
 
+export type ListFeaturesPageInput = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  projectId: Scalars['ID']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -388,6 +478,7 @@ export type Mutation = {
   acceptInvitation: MemberType;
   acceptSuggestedFeature: FeatureType;
   assignPrToFeature: Scalars['Boolean']['output'];
+  blockBranch: BlockedBranchType;
   confirmRelease: ReleaseObjectType;
   confirmReleaseAdditions: ReleaseObjectType;
   createFeature: FeatureType;
@@ -396,11 +487,13 @@ export type Mutation = {
   createProjectTag: ProjectTagType;
   createRelease: ReleaseObjectType;
   deleteFeature: Scalars['Boolean']['output'];
+  deleteGithubBranches: Array<DeleteBranchOutcomeType>;
   deleteProject: Scalars['Boolean']['output'];
   deleteProjectTag: Scalars['Boolean']['output'];
   deleteRelease: ReleaseObjectType;
   disconnectGithub: Scalars['Boolean']['output'];
   disconnectLinear: Scalars['Boolean']['output'];
+  disconnectSlack: Scalars['Boolean']['output'];
   generatePrSummary: PullRequestType;
   inviteMember: InvitationType;
   login: AuthTokensType;
@@ -415,21 +508,30 @@ export type Mutation = {
   requestLoginCode: Scalars['Boolean']['output'];
   resyncReleasePullRequests: ResyncReleaseSummaryType;
   revokeInvitation: Scalars['Boolean']['output'];
+  rotateFlagsmithWebhookSecret: ConnectionSettingsType;
   runFlagCoverage: FlagCoverageSummaryType;
   runFlagCoverageForFlag: TrackedFlagDetailType;
   savePrSummary: PullRequestType;
   saveReleaseSummary: ReleaseObjectType;
   scanReleasePullRequests: ScanReleasePullRequestsSummaryType;
+  sendSlackTestMessage: SlackTestMessageResult;
   setFeatureState: FeatureType;
   setFeatureTags: FeatureType;
   setFlagRegistry: FlagRegistryConfigType;
   setReleaseFlagDecision: ReleaseFlagDecisionResultType;
   setReleaseStatus: ReleaseObjectType;
+  setSlackChannel: SlackConnectionStatus;
   shipRelease: ReleaseObjectType;
+  syncFlagsmithFlags: Scalars['Int']['output'];
+  syncGithubDeployments: SyncGithubDeploymentsResultType;
+  triggerFlagDigest: Scalars['Boolean']['output'];
+  unblockBranch: Scalars['Boolean']['output'];
   updateConnectionSettings: ConnectionSettingsType;
   updateMemberRole: MemberType;
+  updateNotificationPreference: NotificationPreferenceEntryType;
   updateProject: ProjectType;
   updateRelease: ReleaseObjectType;
+  updateSlackNotificationSettings: SlackConnectionStatus;
 };
 
 
@@ -445,6 +547,11 @@ export type MutationAcceptSuggestedFeatureArgs = {
 
 export type MutationAssignPrToFeatureArgs = {
   input: AssignPrToFeatureInput;
+};
+
+
+export type MutationBlockBranchArgs = {
+  input: BlockBranchInput;
 };
 
 
@@ -488,6 +595,11 @@ export type MutationDeleteFeatureArgs = {
 };
 
 
+export type MutationDeleteGithubBranchesArgs = {
+  input: DeleteGithubBranchesInput;
+};
+
+
 export type MutationDeleteProjectArgs = {
   id: Scalars['ID']['input'];
 };
@@ -504,6 +616,11 @@ export type MutationDeleteReleaseArgs = {
 
 
 export type MutationDisconnectLinearArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type MutationDisconnectSlackArgs = {
   projectId: Scalars['ID']['input'];
 };
 
@@ -574,6 +691,11 @@ export type MutationRevokeInvitationArgs = {
 };
 
 
+export type MutationRotateFlagsmithWebhookSecretArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
 export type MutationRunFlagCoverageArgs = {
   projectId: Scalars['ID']['input'];
 };
@@ -597,6 +719,11 @@ export type MutationSaveReleaseSummaryArgs = {
 
 export type MutationScanReleasePullRequestsArgs = {
   releaseId: Scalars['ID']['input'];
+};
+
+
+export type MutationSendSlackTestMessageArgs = {
+  projectId: Scalars['ID']['input'];
 };
 
 
@@ -625,8 +752,35 @@ export type MutationSetReleaseStatusArgs = {
 };
 
 
+export type MutationSetSlackChannelArgs = {
+  channelId: Scalars['String']['input'];
+  channelName: Scalars['String']['input'];
+  projectId: Scalars['ID']['input'];
+};
+
+
 export type MutationShipReleaseArgs = {
   input: ShipReleaseInput;
+};
+
+
+export type MutationSyncFlagsmithFlagsArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type MutationSyncGithubDeploymentsArgs = {
+  releaseId: Scalars['ID']['input'];
+};
+
+
+export type MutationTriggerFlagDigestArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type MutationUnblockBranchArgs = {
+  input: UnblockBranchInput;
 };
 
 
@@ -640,6 +794,11 @@ export type MutationUpdateMemberRoleArgs = {
 };
 
 
+export type MutationUpdateNotificationPreferenceArgs = {
+  input: UpdateNotificationPreferenceInput;
+};
+
+
 export type MutationUpdateProjectArgs = {
   input: UpdateProjectInput;
 };
@@ -648,6 +807,34 @@ export type MutationUpdateProjectArgs = {
 export type MutationUpdateReleaseArgs = {
   input: UpdateReleaseInput;
 };
+
+
+export type MutationUpdateSlackNotificationSettingsArgs = {
+  notifyOnCreated: Scalars['Boolean']['input'];
+  notifyOnDeployed: Scalars['Boolean']['input'];
+  notifyOnShipped: Scalars['Boolean']['input'];
+  projectId: Scalars['ID']['input'];
+};
+
+export type NotificationChannel =
+  | 'EMAIL'
+  | 'SLACK_DM';
+
+export type NotificationPreferenceEntryType = {
+  __typename?: 'NotificationPreferenceEntryType';
+  channel: NotificationChannel;
+  digestFrequency: DigestFrequency;
+  enabled: Scalars['Boolean']['output'];
+  notificationType: NotificationType;
+};
+
+export type NotificationType =
+  | 'FLAG_DIGEST'
+  | 'FLAG_IN_PROGRESS_REMINDER'
+  | 'FLAG_STALENESS_ALERT'
+  | 'RELEASE_CREATED'
+  | 'RELEASE_DEPLOYED'
+  | 'RELEASE_SHIPPED';
 
 export type PrAssignmentInput = {
   featureId: InputMaybe<Scalars['ID']['input']>;
@@ -709,6 +896,8 @@ export type PullRequestType = {
 
 export type Query = {
   __typename?: 'Query';
+  blockedBranches: Array<BlockedBranchType>;
+  branchCleanupCandidates: Array<BranchCleanupCandidateType>;
   compareFlags: FlagComparisonResultType;
   compareRefs: RefComparisonType;
   diffRefs: Array<PullRequestType>;
@@ -723,24 +912,43 @@ export type Query = {
   getRelease: ReleaseObjectType;
   getReleaseTree: ReleaseTreeType;
   getReleases: Array<ReleaseObjectType>;
+  getReleasesPage: ReleasesPageType;
   githubAuthorizeUrl: Scalars['String']['output'];
   githubBranches: Array<GithubBranchType>;
   githubConnection: GithubConnectionStatus;
   githubRepositories: Array<GithubRepositoryType>;
+  inProgressFlagReminders: Array<InProgressFlagReminderType>;
   linearAuthorizeUrl: Scalars['String']['output'];
   linearConnection: LinearConnectionStatus;
   listFeatures: Array<FeatureType>;
+  listFeaturesPage: FeaturePageType;
   listInvitations: Array<InvitationType>;
   listMembers: Array<MemberType>;
   listProjects: Array<ProjectType>;
   me: UserProfileType;
+  notificationPreferences: Array<NotificationPreferenceEntryType>;
   projectTags: Array<ProjectTagType>;
   releaseFlags: Array<ReleaseFlagType>;
+  releasePullRequestsPage: ReleasePullRequestsPageType;
   repoFileSearch: Array<Scalars['String']['output']>;
+  searchGithubBranches: GithubBranchSearchResultType;
+  slackAuthorizeUrl: Scalars['String']['output'];
+  slackChannels: Array<SlackChannel>;
+  slackConnection: SlackConnectionStatus;
   suggestFeatureForPr: AiSuggestionType;
   trackedFlag: Maybe<TrackedFlagDetailType>;
   trackedFlags: Array<TrackedFlagType>;
   verifyFlagsmithConnection: FlagsmithVerifyResult;
+};
+
+
+export type QueryBlockedBranchesArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryBranchCleanupCandidatesArgs = {
+  projectId: Scalars['ID']['input'];
 };
 
 
@@ -822,7 +1030,21 @@ export type QueryGetReleasesArgs = {
 };
 
 
+export type QueryGetReleasesPageArgs = {
+  limit?: Scalars['Float']['input'];
+  offset?: Scalars['Float']['input'];
+  projectId: Scalars['ID']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryGithubBranchesArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryInProgressFlagRemindersArgs = {
+  excludeReleaseId: InputMaybe<Scalars['ID']['input']>;
   projectId: Scalars['ID']['input'];
 };
 
@@ -842,12 +1064,22 @@ export type QueryListFeaturesArgs = {
 };
 
 
+export type QueryListFeaturesPageArgs = {
+  input: ListFeaturesPageInput;
+};
+
+
 export type QueryListInvitationsArgs = {
   projectId: Scalars['ID']['input'];
 };
 
 
 export type QueryListMembersArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryNotificationPreferencesArgs = {
   projectId: Scalars['ID']['input'];
 };
 
@@ -862,8 +1094,38 @@ export type QueryReleaseFlagsArgs = {
 };
 
 
+export type QueryReleasePullRequestsPageArgs = {
+  limit?: Scalars['Float']['input'];
+  offset?: Scalars['Float']['input'];
+  releaseId: Scalars['ID']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryRepoFileSearchArgs = {
   input: RepoFileSearchInput;
+};
+
+
+export type QuerySearchGithubBranchesArgs = {
+  limit?: Scalars['Float']['input'];
+  projectId: Scalars['ID']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySlackAuthorizeUrlArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QuerySlackChannelsArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QuerySlackConnectionArgs = {
+  projectId: Scalars['ID']['input'];
 };
 
 
@@ -951,6 +1213,7 @@ export type ReleaseFlagDecisionResultType = {
 
 export type ReleaseFlagDecisionType =
   | 'ENABLE_IN_RELEASE'
+  | 'IN_PROGRESS'
   | 'SHIP_OFF';
 
 export type ReleaseFlagType = {
@@ -969,6 +1232,8 @@ export type ReleaseObjectType = {
   baseRef: Scalars['String']['output'];
   compareRef: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
+  deployedAt: Maybe<Scalars['DateTime']['output']>;
+  githubDeploymentId: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Maybe<Scalars['String']['output']>;
   prUrl: Maybe<Scalars['String']['output']>;
@@ -987,6 +1252,13 @@ export type ReleasePrFlagChangeType = {
   kind: FlagReferenceKind;
 };
 
+export type ReleasePullRequestsPageType = {
+  __typename?: 'ReleasePullRequestsPageType';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<PullRequestType>;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type ReleaseStatus =
   | 'CANCELED'
   | 'DEPLOYED'
@@ -998,6 +1270,13 @@ export type ReleaseTreeType = {
   __typename?: 'ReleaseTreeType';
   features: Array<ReleaseFeatureNodeType>;
   release: ReleaseObjectType;
+};
+
+export type ReleasesPageType = {
+  __typename?: 'ReleasesPageType';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<ReleaseObjectType>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type RepoFileSearchInput = {
@@ -1064,6 +1343,29 @@ export type ShipReleaseInput = {
   releaseId: Scalars['ID']['input'];
 };
 
+export type SlackChannel = {
+  __typename?: 'SlackChannel';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type SlackConnectionStatus = {
+  __typename?: 'SlackConnectionStatus';
+  channelId: Maybe<Scalars['String']['output']>;
+  channelName: Maybe<Scalars['String']['output']>;
+  connected: Scalars['Boolean']['output'];
+  notifyOnCreated: Scalars['Boolean']['output'];
+  notifyOnDeployed: Scalars['Boolean']['output'];
+  notifyOnShipped: Scalars['Boolean']['output'];
+  teamName: Maybe<Scalars['String']['output']>;
+};
+
+export type SlackTestMessageResult = {
+  __typename?: 'SlackTestMessageResult';
+  error: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+};
+
 export type SortDirection =
   | 'ASC'
   | 'DESC';
@@ -1082,6 +1384,13 @@ export type SummaryChunkType = {
   __typename?: 'SummaryChunkType';
   chunk: Scalars['String']['output'];
   done: Scalars['Boolean']['output'];
+};
+
+export type SyncGithubDeploymentsResultType = {
+  __typename?: 'SyncGithubDeploymentsResultType';
+  environment: Maybe<Scalars['String']['output']>;
+  githubDeploymentId: Maybe<Scalars['ID']['output']>;
+  matched: Scalars['Boolean']['output'];
 };
 
 export type TicketLinkType = {
@@ -1161,6 +1470,11 @@ export type TrackedFlagType = {
   presentInCode: Scalars['Boolean']['output'];
 };
 
+export type UnblockBranchInput = {
+  branchName: Scalars['String']['input'];
+  projectId: Scalars['ID']['input'];
+};
+
 export type UpdateConnectionSettingsInput = {
   flagsmithApiKey: InputMaybe<Scalars['String']['input']>;
   flagsmithProjectId: InputMaybe<Scalars['String']['input']>;
@@ -1171,6 +1485,14 @@ export type UpdateConnectionSettingsInput = {
 export type UpdateMemberRoleInput = {
   membershipId: Scalars['ID']['input'];
   role: ProjectRole;
+};
+
+export type UpdateNotificationPreferenceInput = {
+  channel: NotificationChannel;
+  digestFrequency: InputMaybe<DigestFrequency>;
+  enabled: Scalars['Boolean']['input'];
+  notificationType: NotificationType;
+  projectId: Scalars['ID']['input'];
 };
 
 export type UpdateProjectInput = {

@@ -2,8 +2,16 @@ import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
 import { IPullRequestRepository } from '../interfaces/pull-request.repository'
 import type { IUpdatePrAiFields } from '../interfaces/pull-request.repository'
-import type { IPullRequest, ICreatePullRequestData, ITicketLink } from '../interfaces/release.interfaces'
+import type {
+  IPullRequest,
+  ICreatePullRequestData,
+  ITicketLink,
+  IReleasePullRequestsPageFilters,
+  IPullRequestsPage,
+} from '../interfaces/release.interfaces'
 import type { TicketSource } from '../../../common/types/ticket-source.enum'
+
+const MAX_RELEASE_PULL_REQUESTS_PAGE_LIMIT = 50
 
 type PrRow = {
   id: string
@@ -57,6 +65,41 @@ export class PullRequestRepository extends IPullRequestRepository {
       orderBy: { number: 'asc' },
     })
     return rows.map((row) => this.toIPullRequest(row))
+  }
+
+  findPageByRelease = async (
+    filters: IReleasePullRequestsPageFilters,
+    tx: TxClient,
+  ): Promise<IPullRequestsPage> => {
+    const limit = Math.min(filters.limit, MAX_RELEASE_PULL_REQUESTS_PAGE_LIMIT)
+    const search = filters.search?.trim() ?? ''
+    const searchedNumber = search && /^\d+$/.test(search) ? Number.parseInt(search, 10) : null
+
+    const where = {
+      releaseId: filters.releaseId,
+      release: { deletedAt: null },
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' as const } },
+          ...(searchedNumber !== null ? [{ number: searchedNumber }] : []),
+        ],
+      }),
+    }
+
+    const [totalCount, rows] = await Promise.all([
+      tx.pullRequest.count({ where }),
+      tx.pullRequest.findMany({
+        where,
+        include: { commits: true, ticketLinks: true },
+        orderBy: { number: 'asc' },
+        take: limit,
+        skip: filters.offset,
+      }),
+    ])
+
+    const items = rows.map((row) => this.toIPullRequest(row))
+
+    return { items, totalCount, hasMore: filters.offset + items.length < totalCount }
   }
 
   assignToFeature = async (prId: string, featureId: string, tx: TxClient): Promise<IPullRequest> => {

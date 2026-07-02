@@ -13,6 +13,10 @@ import { CoverageType } from '../types/coverage.type'
 import { PullRequestType } from '../types/pull-request.type'
 import { ExportResultType } from '../types/export-result.type'
 import { ResyncReleaseSummaryType } from '../types/resync-release-summary.type'
+import { ReleasesPageType } from '../types/releases-page.type'
+import { ReleasePullRequestsPageType } from '../types/release-pull-requests-page.type'
+import { InProgressFlagReminderType } from '../types/in-progress-flag-reminder.type'
+import { SyncGithubDeploymentsResultType } from '../types/sync-github-deployments-result.type'
 import { CreateReleaseInput } from '../types/create-release.input'
 import { ExportSummaryInput } from '../types/export-summary.input'
 import { UpdateReleaseInput } from '../commands/update-release/update-release.input'
@@ -22,10 +26,13 @@ import { SaveReleaseSummaryInput } from '../commands/save-release-summary/save-r
 import { SavePrSummaryInput } from '../commands/save-pr-summary/save-pr-summary.input'
 import { DiffRefsQuery } from '../queries/diff-refs/diff-refs.query'
 import { GetReleasesQuery } from '../queries/get-releases/get-releases.query'
+import { GetReleasesPageQuery } from '../queries/get-releases-page/get-releases-page.query'
 import { GetReleaseQuery } from '../queries/get-release/get-release.query'
 import { GetReleaseTreeQuery } from '../queries/get-release-tree/get-release-tree.query'
 import { GetCoverageQuery } from '../queries/get-coverage/get-coverage.query'
 import { ExportSummaryQuery } from '../queries/export-summary/export-summary.query'
+import { GetInProgressFlagRemindersQuery } from '../queries/get-in-progress-flag-reminders/get-in-progress-flag-reminders.query'
+import { GetReleasePullRequestsPageQuery } from '../queries/get-release-pull-requests-page/get-release-pull-requests-page.query'
 import { CreateReleaseCommand } from '../commands/create-release/create-release.command'
 import { UpdateReleaseCommand } from '../commands/update-release/update-release.command'
 import { ConfirmReleaseCommand } from '../commands/confirm-release/confirm-release.command'
@@ -37,6 +44,7 @@ import { SetReleaseStatusInput } from '../commands/set-release-status/set-releas
 import { SetReleaseStatusCommand } from '../commands/set-release-status/set-release-status.command'
 import { ResyncReleasePullRequestsCommand } from '../commands/resync-release-pull-requests/resync-release-pull-requests.command'
 import { ConfirmReleaseAdditionsCommand } from '../commands/confirm-release-additions/confirm-release-additions.command'
+import { SyncGithubDeploymentsCommand } from '../commands/sync-github-deployments/sync-github-deployments.command'
 
 @Resolver(() => ReleaseObjectType)
 @UseGuards(JwtAuthGuard)
@@ -229,5 +237,60 @@ export class ReleaseResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ReleaseObjectType> {
     return this.commandBus.execute(new ConfirmReleaseAdditionsCommand(user.id, releaseId))
+  }
+
+  @Mutation(() => SyncGithubDeploymentsResultType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  syncGithubDeployments(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<SyncGithubDeploymentsResultType> {
+    return this.commandBus.execute(new SyncGithubDeploymentsCommand(user.id, releaseId))
+  }
+
+  @Query(() => ReleasesPageType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.READ, Subject.RELEASE)
+  getReleasesPage(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('limit', { type: () => Number, defaultValue: 20 }) limit: number,
+    @Args('offset', { type: () => Number, defaultValue: 0 }) offset: number,
+    @Args('search', { type: () => String, nullable: true }) search: string | null | undefined,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleasesPageType> {
+    const cappedLimit = Math.min(Math.max(limit, 1), 50)
+    return this.queryBus.execute(
+      new GetReleasesPageQuery(user.id, projectId, cappedLimit, Math.max(offset, 0), search ?? null),
+    )
+  }
+
+  @Query(() => ReleasePullRequestsPageType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.READ, Subject.PULL_REQUEST)
+  releasePullRequestsPage(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @Args('limit', { type: () => Number, defaultValue: 20 }) limit: number,
+    @Args('offset', { type: () => Number, defaultValue: 0 }) offset: number,
+    @Args('search', { type: () => String, nullable: true }) search: string | null | undefined,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleasePullRequestsPageType> {
+    const cappedLimit = Math.min(Math.max(limit, 1), 50)
+    return this.queryBus.execute(
+      new GetReleasePullRequestsPageQuery(user.id, releaseId, cappedLimit, Math.max(offset, 0), search ?? null),
+    )
+  }
+
+  @Query(() => [InProgressFlagReminderType])
+  @UseGuards(PoliciesGuard)
+  @Can(Action.READ, Subject.PROJECT)
+  inProgressFlagReminders(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('excludeReleaseId', { type: () => ID, nullable: true }) excludeReleaseId: string | null | undefined,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<InProgressFlagReminderType[]> {
+    return this.queryBus.execute(
+      new GetInProgressFlagRemindersQuery(user.id, projectId, excludeReleaseId ?? null),
+    )
   }
 }

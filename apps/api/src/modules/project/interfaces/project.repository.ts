@@ -10,6 +10,7 @@ import type {
   IFlagRegistryConfig,
   IUpdateFlagRegistryData,
   IFlagRegistryConfigResult,
+  IProjectWebhookSecretStatus,
 } from './project.interfaces'
 
 export abstract class IProjectRepository implements IBaseRepository<IProject> {
@@ -25,4 +26,6 @@ export abstract class IProjectRepository implements IBaseRepository<IProject> {
   abstract delete: RepositoryMethod<[id: string], void>
   abstract findFlagRegistryConfig: RepositoryMethod<[id: string], IFlagRegistryConfig | null>
   abstract updateFlagRegistry: RepositoryMethod<[id: string, data: IUpdateFlagRegistryData], IFlagRegistryConfigResult>
+  abstract findWebhookSecretStatus: RepositoryMethod<[id: string], IProjectWebhookSecretStatus | null>
+  abstract regenerateFlagsmithWebhookSecret: RepositoryMethod<[id: string, secret: string], void>
 }
