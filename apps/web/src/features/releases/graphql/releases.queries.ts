@@ -17,6 +17,27 @@ export const GET_RELEASES = graphql(`
   }
 `)
 
+export const GET_RELEASES_PAGE = graphql(`
+  query GetReleasesPage($projectId: ID!, $limit: Float!, $offset: Float!, $search: String) {
+    getReleasesPage(projectId: $projectId, limit: $limit, offset: $offset, search: $search) {
+      totalCount
+      hasMore
+      items {
+        id
+        name
+        baseRef
+        compareRef
+        status
+        tags
+        prUrl
+        projectId
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`)
+
 export const GET_RELEASE = graphql(`
   query GetRelease($id: ID!) {
     getRelease(id: $id) {
@@ -148,12 +169,14 @@ export const GENERATE_SUMMARY = graphql(`
 
 
 
-export const GITHUB_BRANCHES = graphql(`
-  query GithubBranches($projectId: ID!) {
-    githubBranches(projectId: $projectId) {
-      name
-      protected
-      commitSha
+export const SEARCH_GITHUB_BRANCHES = graphql(`
+  query SearchGithubBranches($projectId: ID!, $search: String, $limit: Float!) {
+    searchGithubBranches(projectId: $projectId, search: $search, limit: $limit) {
+      hasMore
+      items {
+        name
+        protected
+      }
     }
   }
 `)
@@ -193,6 +216,19 @@ export const RELEASE_FLAGS = graphql(`
         prTitle
         prUrl
       }
+    }
+  }
+`)
+
+export const IN_PROGRESS_FLAG_REMINDERS = graphql(`
+  query InProgressFlagReminders($projectId: ID!, $excludeReleaseId: ID) {
+    inProgressFlagReminders(projectId: $projectId, excludeReleaseId: $excludeReleaseId) {
+      trackedFlagId
+      key
+      releaseId
+      releaseVersion
+      decidedAt
+      featureId
     }
   }
 `)

@@ -22,7 +22,7 @@ export function ConnectGithubStage() {
           <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
             <Github className="size-7 text-primary" aria-hidden="true" />
           </div>
-          <CardTitle className="text-xl font-display">
+          <CardTitle className="font-display text-display-md">
             {t('connectGithub.title')}
           </CardTitle>
           <CardDescription className="text-balance">

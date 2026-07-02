@@ -27,7 +27,7 @@ export function ColumnVisibilityMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={buttonVariants({ variant: 'outline', size: 'sm' }) + ' rounded-full gap-2'}
+        className={buttonVariants({ variant: 'outline', size: 'sm' }) + ' gap-2'}
       >
         <Columns3 className="size-4" aria-hidden />
         {t('columns.button')}

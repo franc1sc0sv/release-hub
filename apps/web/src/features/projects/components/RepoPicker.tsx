@@ -90,7 +90,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
     >
       <GlassCard glow="indigo">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl font-display">
+          <CardTitle className="font-display text-display-md">
             {t('selectRepo.title')}
           </CardTitle>
           <CardDescription className="text-balance">
@@ -117,7 +117,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
           ) : (
             <FieldGroup>
             <Field>
-              <div className="rounded-xl border border-border/60 bg-background/50">
+              <div className="rounded-[var(--radius-card)] border border-border/60 bg-background/50">
                 {reposLoading && repos.length === 0 ? (
                   <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
                     <Loader2 className="size-4 animate-spin" aria-hidden="true" />

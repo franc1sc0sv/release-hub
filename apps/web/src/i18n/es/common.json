@@ -4,6 +4,7 @@
     "releases": "Releases",
     "features": "Funcionalidades",
     "flags": "Flags",
+    "repoOps": "Operaciones de repo",
     "settings": "Configuración"
   },
   "auth": {
@@ -34,7 +35,12 @@
     "signIn": "Inicia sesión",
     "noAccount": "¿No tienes cuenta?",
     "registerError": "No se pudo crear la cuenta",
-    "emailAlreadyExists": "Ya existe una cuenta con este correo electrónico"
+    "emailAlreadyExists": "Ya existe una cuenta con este correo electrónico",
+    "heroEyebrow": "Release Hub",
+    "heroHeadline": "Cada release, trazado hasta su funcionalidad.",
+    "heroSupporting": "Inicia sesión para rastrear pull requests fusionados, estados de flags y resúmenes listos para el cliente en cada release.",
+    "heroHeadlineRegister": "Convierte tu historial de commits en la historia del release.",
+    "heroSupportingRegister": "Crea una cuenta para conectar un repositorio y empezar a construir releases trazables y listos para el cliente."
   },
   "common": {
     "appName": "Release Hub",

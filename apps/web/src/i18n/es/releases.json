@@ -50,7 +50,8 @@
       "compare": "Rama de comparación",
       "comparePlaceholder": "Selecciona la rama de comparación",
       "searchPlaceholder": "Buscar ramas…",
-      "noResults": "No se encontraron ramas"
+      "noResults": "No se encontraron ramas",
+      "refineHint": "Se encontraron 50+ ramas — refina tu búsqueda para ver más"
     },
     "createBranch": {
       "triggerLabel": "Crear nueva rama",
@@ -130,9 +131,14 @@
   },
   "list": {
     "viewRelease": "Ver release",
+    "searchPlaceholder": "Buscar releases…",
     "error": {
       "heading": "No se pudieron cargar los releases",
       "description": "Algo salió mal al cargar tus releases. Inténtalo de nuevo."
+    },
+    "noResults": {
+      "heading": "No se encontraron releases",
+      "description": "Ningún release coincide con tu búsqueda. Prueba con otro término."
     }
   },
   "view": {

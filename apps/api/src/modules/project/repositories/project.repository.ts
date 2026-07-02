@@ -204,16 +204,26 @@ export class ProjectRepository extends IProjectRepository {
   findWebhookSecretStatus = async (id: string, tx: TxClient): Promise<IProjectWebhookSecretStatus | null> => {
     const row = await tx.project.findFirst({
       where: { id, deletedAt: null },
-      select: { flagsmithWebhookSecret: true },
+      select: { flagsmithWebhookSecret: true, githubWebhookSecret: true },
     })
     if (!row) return null
-    return { flagsmithWebhookSecretSet: row.flagsmithWebhookSecret !== null }
+    return {
+      flagsmithWebhookSecretSet: row.flagsmithWebhookSecret !== null,
+      githubWebhookSecretSet: row.githubWebhookSecret !== null,
+    }
   }
 
   regenerateFlagsmithWebhookSecret = async (id: string, secret: string, tx: TxClient): Promise<void> => {
     await tx.project.update({
       where: { id },
       data: { flagsmithWebhookSecret: secret },
+    })
+  }
+
+  regenerateGithubWebhookSecret = async (id: string, secret: string, tx: TxClient): Promise<void> => {
+    await tx.project.update({
+      where: { id },
+      data: { githubWebhookSecret: secret },
     })
   }
 

@@ -1,0 +1,16 @@
+{
+  "title": "Notification preferences",
+  "columns": {
+    "notification": "Notification",
+    "email": "Email",
+    "slack": "Slack",
+    "digestFrequency": "Digest frequency"
+  },
+  "toggleAriaLabel": "Toggle {{type}} via {{channel}}",
+  "digest": {
+    "frequencyLabel": "Digest frequency",
+    "sendTest": "Send test digest",
+    "testSent": "Test digest sent.",
+    "testFailed": "Couldn't send the test digest. Please try again."
+  }
+}

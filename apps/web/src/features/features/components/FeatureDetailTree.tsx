@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { format } from 'date-fns'
 import { ChevronDown, GitBranch, GitMerge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
+import { EmptyState } from '@/components/nebula/EmptyState'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { TicketChip } from '@/features/releases/components/TicketChip'
-import { FEATURE_STATE_BADGE_CLASS } from '../constants/feature-enums'
+import { featureStateTone } from '../constants/feature-enums'
 import { ReleaseStatusValue } from '@/features/releases/constants/release-enums'
+import { ROUTES } from '@/lib/routes'
 import type { GetFeatureQuery, FeatureState } from '@/generated/graphql'
 
 type FeatureRelease = GetFeatureQuery['getFeature']['releases'][number]
@@ -21,11 +25,7 @@ interface DetailCommitRowProps {
 
 function DetailCommitRow({ commit }: DetailCommitRowProps) {
   const shortSha = commit.sha.slice(0, 7)
-  const formattedDate = new Date(commit.date).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const formattedDate = format(new Date(commit.date), 'MMM d, yyyy')
 
   return (
     <div className="flex items-start gap-3 rounded-[var(--radius-card)] border border-white/5 bg-white/3 px-4 py-3">
@@ -35,7 +35,9 @@ function DetailCommitRow({ commit }: DetailCommitRowProps) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
           <span className="font-mono">{shortSha}</span>
           <span className="text-foreground/70">{commit.author}</span>
-          <time dateTime={commit.date}>{formattedDate}</time>
+          <time className="font-mono" dateTime={commit.date}>
+            {formattedDate}
+          </time>
         </div>
       </div>
     </div>
@@ -51,11 +53,7 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
 
-  const formattedDate = new Date(pr.mergedAt).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const formattedDate = format(new Date(pr.mergedAt), 'MMM d, yyyy')
 
   const commitCount = pr.commits.length
   const commitLabel = t('builder.pr.commitsCount', { count: commitCount })
@@ -63,17 +61,30 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
     ? t('builder.pr.collapseCommits')
     : t('builder.pr.expandCommits')
 
+  const prLink = pr.releaseId
+    ? `${ROUTES.RELEASE_DETAIL.replace(':releaseId', pr.releaseId)}?section=prs`
+    : null
+
   return (
     <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm">
       <div className="flex items-start gap-4 px-5 py-4">
         <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20">
-          <GitMerge className="size-4 text-indigo-400" />
+          <GitMerge className="size-4 text-indigo-400" aria-hidden />
         </div>
 
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="font-mono text-sm text-muted-foreground">#{pr.number}</span>
-            <p className="truncate font-medium text-foreground">{pr.title}</p>
+            {prLink ? (
+              <Link
+                to={prLink}
+                className="truncate font-medium text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[var(--radius-button)]"
+              >
+                {pr.title}
+              </Link>
+            ) : (
+              <p className="truncate font-medium text-foreground">{pr.title}</p>
+            )}
             {pr.tickets[0] && <TicketChip ticket={pr.tickets[0]} />}
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
@@ -83,7 +94,9 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
             </span>
             <span>
               {t('builder.pr.mergedAt')}{' '}
-              <time dateTime={pr.mergedAt}>{formattedDate}</time>
+              <time className="font-mono" dateTime={pr.mergedAt}>
+                {formattedDate}
+              </time>
             </span>
             <span>{commitLabel}</span>
           </div>
@@ -102,7 +115,7 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
-            <ChevronDown className="size-4" />
+            <ChevronDown className="size-4" aria-hidden />
           </motion.span>
         </Button>
       </div>
@@ -129,53 +142,65 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
   )
 }
 
+interface FlagStatePillsProps {
+  flagState: NonNullable<FeatureSnapshot['flagState']>
+}
+
+function FlagStatePills({ flagState }: FlagStatePillsProps) {
+  const { t } = useTranslation('releases')
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <StatusBadge tone={flagState.staging ? StatusBadgeTone.EMERALD : StatusBadgeTone.SLATE}>
+        {t('view.feature.flagState.staging')}:{' '}
+        {flagState.staging ? t('view.feature.flagState.on') : t('view.feature.flagState.off')}
+      </StatusBadge>
+      <StatusBadge tone={flagState.production ? StatusBadgeTone.EMERALD : StatusBadgeTone.SLATE}>
+        {t('view.feature.flagState.production')}:{' '}
+        {flagState.production ? t('view.feature.flagState.on') : t('view.feature.flagState.off')}
+      </StatusBadge>
+    </div>
+  )
+}
+
 interface ReleaseGroupProps {
   release: FeatureRelease
   prs: FeaturePr[]
   snapshotState: FeatureState | null
+  snapshotFlagState: FeatureSnapshot['flagState'] | null
 }
 
-function ReleaseGroup({ release, prs, snapshotState }: ReleaseGroupProps) {
+function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: ReleaseGroupProps) {
   const { t } = useTranslation('features')
   const enumLabels = useEnumLabels()
   const [open, setOpen] = useState(true)
   const reduceMotion = useReducedMotion()
 
-  const formattedDate = new Date(release.createdAt).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const formattedDate = format(new Date(release.createdAt), 'MMM d, yyyy')
 
   const prCountLabel = t('tree.prCount', { count: prs.length })
   const toggleLabel = open ? t('tree.prCount', { count: prs.length }) : prCountLabel
 
   return (
     <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4 backdrop-blur-sm">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-label={toggleLabel}
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center gap-3 px-5 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded-[var(--radius-card)]"
-      >
+      <div className="flex items-start gap-3 px-5 py-4">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 border border-indigo-500/30">
-          <GitBranch className="size-4 text-indigo-400" />
+          <GitBranch className="size-4 text-indigo-400" aria-hidden />
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-display font-semibold text-foreground">
+            <Link
+              to={ROUTES.RELEASE_DETAIL.replace(':releaseId', release.id)}
+              className="font-display font-semibold text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[var(--radius-button)]"
+            >
               {t('tree.releaseHeading', { name: release.name })}
-            </span>
+            </Link>
             <span className="text-xs text-muted-foreground">{prCountLabel}</span>
             {snapshotState && (
-              <Badge
-                variant="outline"
-                className={`rounded-full border text-xs ${FEATURE_STATE_BADGE_CLASS[snapshotState]}`}
-              >
+              <StatusBadge tone={featureStateTone(snapshotState)}>
                 {enumLabels.featureState(snapshotState)}
-              </Badge>
+              </StatusBadge>
             )}
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -183,18 +208,29 @@ function ReleaseGroup({ release, prs, snapshotState }: ReleaseGroupProps) {
             <span>→</span>
             <span className="font-mono">{release.compareRef}</span>
             <span>·</span>
-            <time dateTime={release.createdAt}>{formattedDate}</time>
+            <time className="font-mono" dateTime={release.createdAt}>
+              {formattedDate}
+            </time>
           </div>
+          {snapshotFlagState && <FlagStatePills flagState={snapshotFlagState} />}
         </div>
 
-        <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
-          className="flex shrink-0 items-center justify-center text-muted-foreground"
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={toggleLabel}
+          onClick={() => setOpen((prev) => !prev)}
+          className="mt-1 flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <ChevronDown className="size-4" />
-        </motion.span>
-      </button>
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
+            className="flex items-center justify-center"
+          >
+            <ChevronDown className="size-4" aria-hidden />
+          </motion.span>
+        </button>
+      </div>
 
       <AnimatePresence initial={false}>
         {open && prs.length > 0 && (
@@ -229,16 +265,17 @@ export function FeatureDetailTree({ releases, prs, snapshots }: FeatureDetailTre
 
   const deployedReleases = releases.filter((r) => r.status === ReleaseStatusValue.DEPLOYED)
 
-  const snapshotByReleaseId = new Map<string, FeatureState>(
-    snapshots.map((snapshot) => [snapshot.releaseId, snapshot.state]),
+  const snapshotByReleaseId = new Map<string, FeatureSnapshot>(
+    snapshots.map((snapshot) => [snapshot.releaseId, snapshot]),
   )
 
   if (deployedReleases.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[var(--radius-card)] border border-white/10 bg-white/4 px-6 py-12 text-center">
-        <GitBranch className="size-8 text-muted-foreground/50" />
-        <p className="text-sm text-muted-foreground">{t('detail.noReleases')}</p>
-      </div>
+      <EmptyState
+        icon={<GitBranch className="size-7 text-muted-foreground" aria-hidden />}
+        heading={t('detail.noReleasesHeading')}
+        description={t('detail.noReleases')}
+      />
     )
   }
 
@@ -246,12 +283,14 @@ export function FeatureDetailTree({ releases, prs, snapshots }: FeatureDetailTre
     <div className="space-y-3">
       {deployedReleases.map((release) => {
         const releasePrs = prs.filter((pr) => pr.releaseId === release.id)
+        const snapshot = snapshotByReleaseId.get(release.id) ?? null
         return (
           <ReleaseGroup
             key={release.id}
             release={release}
             prs={releasePrs}
-            snapshotState={snapshotByReleaseId.get(release.id) ?? null}
+            snapshotState={snapshot?.state ?? null}
+            snapshotFlagState={snapshot?.flagState ?? null}
           />
         )
       })}

@@ -2,12 +2,15 @@ import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { Settings } from 'lucide-react'
 import { useProject } from '@/context/project.context'
-import { NebulaBackground } from '@/components/nebula/NebulaBackground'
+import { PageShell } from '@/components/nebula/PageShell'
+import { EmptyState } from '@/components/nebula/EmptyState'
 import { MembersSection } from '@/features/collaboration/components/members-section'
 import { ConnectionsSection } from '../components/connections-section'
 import { TagsSection } from '../components/tags-section'
 import { FlagTrackingSection } from '../components/flag-tracking-section'
+import { NotificationPreferencesSection } from '../components/notification-preferences-section'
 
 export default function SettingsPage() {
   const { t } = useTranslation('settings')
@@ -34,16 +37,15 @@ export default function SettingsPage() {
   }, [])
 
   return (
-    <NebulaBackground className="p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <div>
-          <p className="text-overline uppercase tracking-widest text-muted-foreground">
-            {t('subtitle')}
-          </p>
-          <h1 className="font-display text-display-lg font-bold tracking-tight text-foreground">
-            {t('title')}
-          </h1>
-        </div>
+    <PageShell eyebrow={t('subtitle')} title={t('title')}>
+      <div className="space-y-8">
+        {!activeProject && (
+          <EmptyState
+            icon={<Settings className="size-6 text-brand-indigo-bright" />}
+            heading={t('empty.heading')}
+            description={t('empty.description')}
+          />
+        )}
 
         {activeProject && (
           <>
@@ -55,6 +57,16 @@ export default function SettingsPage() {
                 {t('sections.connections')}
               </h2>
               <ConnectionsSection projectId={activeProject.id} />
+            </section>
+
+            <section aria-labelledby="notifications-heading">
+              <h2
+                id="notifications-heading"
+                className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground"
+              >
+                {t('sections.notifications')}
+              </h2>
+              <NotificationPreferencesSection projectId={activeProject.id} />
             </section>
 
             <section aria-labelledby="flag-tracking-heading">
@@ -89,6 +101,6 @@ export default function SettingsPage() {
           </>
         )}
       </div>
-    </NebulaBackground>
+    </PageShell>
   )
 }

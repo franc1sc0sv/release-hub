@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -81,13 +81,14 @@ interface FlagRowProps {
 }
 
 function FlagRow({ flag, visibleEnvironments }: FlagRowProps) {
+  const reduceMotion = useReducedMotion()
   const formattedDate = flag.createdAt
     ? format(new Date(flag.createdAt), 'MMM d, yyyy')
     : null
 
   return (
     <motion.tr
-      variants={slideUp}
+      variants={reduceMotion ? undefined : slideUp}
       initial="hidden"
       animate="visible"
       className="border-b transition-colors hover:bg-muted/50"

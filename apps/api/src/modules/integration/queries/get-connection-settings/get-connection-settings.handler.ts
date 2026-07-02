@@ -50,6 +50,8 @@ export class GetConnectionSettingsHandler extends BaseQueryHandler<
     settings.flagsmithProjectId = credentials?.flagsmithProjectId ?? null
     settings.flagsmithWebhookSecretSet = webhookSecretStatus?.flagsmithWebhookSecretSet ?? false
     settings.flagsmithWebhookPath = `/webhooks/flagsmith/${query.projectId}`
+    settings.githubWebhookSecretSet = webhookSecretStatus?.githubWebhookSecretSet ?? false
+    settings.githubWebhookPath = `/webhooks/github/${query.projectId}`
     return settings
   }
 }

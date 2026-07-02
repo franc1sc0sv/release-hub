@@ -1,0 +1,79 @@
+{
+  "title": "Operaciones de repo",
+  "subtitle": "Operaciones del repositorio",
+  "description": "Encuentra ramas obsoletas y fusionadas, bloquea las que quieras conservar y limpia el resto con una eliminación revisada y confirmada.",
+  "hero": {
+    "eyebrow": "Higiene de ramas",
+    "body": "Release Hub analiza tu repositorio en busca de ramas fusionadas, obsoletas o que ya no están referenciadas por ningún release, y las marca para revisión. Nada se elimina automáticamente."
+  },
+  "loading": "Cargando ramas...",
+  "error": {
+    "heading": "No se pudieron cargar las ramas",
+    "description": "GitHub devolvió un error al analizar las ramas. Revisa tu conexión en Configuración.",
+    "retry": "Reintentar"
+  },
+  "empty": {
+    "heading": "No hay ramas para revisar",
+    "description": "Todas las ramas de este repositorio están activas, protegidas o ya bloqueadas."
+  },
+  "search": {
+    "placeholder": "Buscar ramas..."
+  },
+  "table": {
+    "columns": {
+      "branch": "Rama",
+      "lastActivity": "Última actividad",
+      "signals": "Señales",
+      "actions": "Acciones"
+    },
+    "selectBranch": "Seleccionar rama {{branchName}}",
+    "suggested": "Sugerida para eliminar",
+    "lockedBlocked": "Bloqueada",
+    "lockedDefault": "Rama predeterminada",
+    "lockedProtected": "Protegida",
+    "unknownActivity": "Desconocida",
+    "signals": {
+      "none": "Sin señales",
+      "mergedViaPr": "Fusionada",
+      "stale": "Obsoleta",
+      "unreferencedByReleases": "Sin referencias",
+      "noOpenPr": "Sin PR abierto"
+    },
+    "selectionCount_one": "{{count}} rama seleccionada",
+    "selectionCount_other": "{{count}} ramas seleccionadas",
+    "clearSelection": "Limpiar",
+    "deleteSelected": "Eliminar"
+  },
+  "block": {
+    "trigger": "Bloquear rama {{branchName}}",
+    "dialogTitle": "Bloquear esta rama de la limpieza",
+    "dialogDescription": "\"{{branchName}}\" quedará excluida de las sugerencias de limpieza y de la eliminación hasta que la desbloquees.",
+    "reasonLabel": "Motivo (opcional)",
+    "reasonPlaceholder": "p. ej. se conserva como referencia para un hotfix",
+    "cancel": "Cancelar",
+    "confirm": "Bloquear rama",
+    "success": "Se bloqueó \"{{branchName}}\"",
+    "error": "No se pudo bloquear esta rama. Inténtalo de nuevo."
+  },
+  "blockedList": {
+    "title": "Ramas bloqueadas",
+    "empty": "No hay ramas bloqueadas actualmente.",
+    "reasonWithDate": "{{reason}} · Bloqueada el {{date}}",
+    "dateOnly": "Bloqueada el {{date}}",
+    "unblock": "Desbloquear",
+    "unblockSuccess": "Se desbloqueó \"{{branchName}}\"",
+    "unblockError": "No se pudo desbloquear esta rama. Inténtalo de nuevo."
+  },
+  "delete": {
+    "dialogTitle": "Eliminar ramas",
+    "dialogDescription_one": "Estás a punto de eliminar permanentemente {{count}} rama de GitHub. Esta acción no se puede deshacer.",
+    "dialogDescription_other": "Estás a punto de eliminar permanentemente {{count}} ramas de GitHub. Esta acción no se puede deshacer.",
+    "confirmationLabel_one": "Escribe {{count}} para confirmar",
+    "confirmationLabel_other": "Escribe {{count}} para confirmar",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar ramas",
+    "close": "Cerrar",
+    "outcomeDeleted": "Eliminada",
+    "outcomeRefused": "No se pudo eliminar"
+  }
+}

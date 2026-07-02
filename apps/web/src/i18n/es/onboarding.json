@@ -1,4 +1,8 @@
 {
+  "progress": {
+    "connectGithub": "Conectar GitHub",
+    "selectRepo": "Seleccionar repositorio"
+  },
   "connectGithub": {
     "title": "Conectar GitHub",
     "description": "Release Hub necesita acceso a tu cuenta de GitHub para detectar pull requests fusionados y construir releases. Esta conexión es obligatoria para continuar.",

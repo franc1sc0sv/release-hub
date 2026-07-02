@@ -1,5 +1,3 @@
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
 import type { FlagComparisonRowType } from '@/generated/graphql'
 
 export interface FlagComparisonExportLabels {
@@ -255,6 +253,11 @@ export async function exportFlagComparisonPdf(
   args: ExportFlagComparisonArgs,
   filename: string,
 ): Promise<void> {
+  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ])
+
   const container = document.createElement('div')
   container.className = 'rh-export'
   container.style.position = 'fixed'

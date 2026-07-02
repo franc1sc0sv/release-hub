@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronsUpDown, GitBranch } from 'lucide-react'
+import { useQuery } from '@apollo/client/react'
+import { ChevronsUpDown, GitBranch, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -12,10 +13,13 @@ import {
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import type { GithubBranchType } from '@/generated/graphql'
+import { SEARCH_GITHUB_BRANCHES } from '../graphql/releases.queries'
+
+const SEARCH_DEBOUNCE_MS = 250
+const SEARCH_LIMIT = 50
 
 interface BranchComboboxProps {
-  branches: GithubBranchType[]
+  projectId: string
   value: string
   onChange: (value: string) => void
   placeholder?: string
@@ -24,7 +28,7 @@ interface BranchComboboxProps {
 }
 
 export function BranchCombobox({
-  branches,
+  projectId,
   value,
   onChange,
   placeholder,
@@ -33,8 +37,29 @@ export function BranchCombobox({
 }: BranchComboboxProps) {
   const { t } = useTranslation('releases')
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  const selected = branches.find((b) => b.name === value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
+    if (!open) {
+      setSearch('')
+      setDebouncedSearch('')
+    }
+  }, [open])
+
+  const { data, loading } = useQuery(SEARCH_GITHUB_BRANCHES, {
+    variables: { projectId, search: debouncedSearch || undefined, limit: SEARCH_LIMIT },
+    skip: !projectId || !open,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const items = data?.searchGithubBranches.items ?? []
+  const hasMore = data?.searchGithubBranches.hasMore ?? false
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,33 +77,51 @@ export function BranchCombobox({
       >
         <span className="flex min-w-0 items-center gap-2 truncate">
           <GitBranch className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-          <span className={cn('truncate', !selected && 'text-muted-foreground')}>
-            {selected ? selected.name : (placeholder ?? t('wizard.branches.searchPlaceholder'))}
+          <span className={cn('truncate', !value && 'text-muted-foreground')}>
+            {value || (placeholder ?? t('wizard.branches.searchPlaceholder'))}
           </span>
         </span>
         <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" aria-hidden />
       </PopoverTrigger>
       <PopoverContent className="w-[--trigger-width] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={t('wizard.branches.searchPlaceholder')} />
+        <Command shouldFilter={false}>
+          <CommandInput
+            value={search}
+            onValueChange={setSearch}
+            placeholder={t('wizard.branches.searchPlaceholder')}
+          />
           <CommandList>
-            <CommandEmpty>{t('wizard.branches.noResults')}</CommandEmpty>
-            <CommandGroup>
-              {branches.map((branch) => (
-                <CommandItem
-                  key={branch.name}
-                  value={branch.name}
-                  onSelect={(v) => {
-                    onChange(v)
-                    setOpen(false)
-                  }}
-                  data-checked={branch.name === value}
-                >
-                  <GitBranch className="size-3.5 text-muted-foreground" aria-hidden />
-                  <span className="truncate">{branch.name}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                {t('wizard.branches.loading')}
+              </div>
+            ) : (
+              <>
+                <CommandEmpty>{t('wizard.branches.noResults')}</CommandEmpty>
+                <CommandGroup>
+                  {items.map((branch) => (
+                    <CommandItem
+                      key={branch.name}
+                      value={branch.name}
+                      onSelect={(v) => {
+                        onChange(v)
+                        setOpen(false)
+                      }}
+                      data-checked={branch.name === value}
+                    >
+                      <GitBranch className="size-3.5 text-muted-foreground" aria-hidden />
+                      <span className="truncate">{branch.name}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                {hasMore && (
+                  <p className="border-t border-border/60 px-3 py-2 text-xs text-muted-foreground">
+                    {t('wizard.branches.refineHint')}
+                  </p>
+                )}
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

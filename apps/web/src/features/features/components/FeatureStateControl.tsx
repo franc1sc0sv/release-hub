@@ -10,14 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { SET_FEATURE_STATE } from '../graphql/features.mutations'
 import {
   FEATURE_STATE_OPTIONS,
   FEATURE_STATE_TEXT_CLASS,
-  FEATURE_STATE_BADGE_CLASS,
+  featureStateTone,
 } from '../constants/feature-enums'
 import type { FeatureState } from '@/generated/graphql'
 
@@ -76,11 +76,7 @@ function StateSelectInner({ featureId, currentState }: FeatureStateControlProps)
 
 function ReadOnlyStateBadge({ state }: { state: FeatureState }) {
   const enumLabels = useEnumLabels()
-  return (
-    <Badge variant="outline" className={`rounded-full border ${FEATURE_STATE_BADGE_CLASS[state]}`}>
-      {enumLabels.featureState(state)}
-    </Badge>
-  )
+  return <StatusBadge tone={featureStateTone(state)}>{enumLabels.featureState(state)}</StatusBadge>
 }
 
 export function FeatureStateControl(props: FeatureStateControlProps) {

@@ -41,6 +41,7 @@ export function useFlags({
     environments: data?.getFlags.environments ?? [],
     items: data?.getFlags.items ?? [],
     totalCount: data?.getFlags.totalCount ?? 0,
+    lastSyncedAt: data?.getFlags.lastSyncedAt ?? null,
     loading,
     error: error ?? null,
     refetch,

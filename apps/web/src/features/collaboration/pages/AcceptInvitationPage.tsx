@@ -9,7 +9,9 @@ import { useAuth } from '@/context/auth.context'
 import { useSetAbility } from '@/context/ability.context'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { GlassCard } from '@/components/nebula/GlassCard'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { ROUTES } from '@/lib/routes'
 import { ACCEPT_INVITATION } from '../graphql/collaboration.operations'
 import { defineAbilityFor, type IProjectMembership, ProjectRole } from '@release-hub/shared'
@@ -68,20 +70,25 @@ export function AcceptInvitationPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-svh flex-col items-center justify-center bg-muted p-6">
+      <main className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_oklab,var(--brand-indigo-bright)_22%,transparent),transparent_60%)]"
+        />
+        <ThemeToggle />
         <motion.div
           variants={slideUp}
           initial="hidden"
           animate="visible"
           transition={{ duration: 0.3, ease: easeSoft }}
-          className="w-full max-w-sm"
+          className="relative z-10 w-full max-w-sm"
         >
-          <Card>
+          <GlassCard glow="indigo">
             <CardHeader className="text-center">
               <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <MailCheck className="size-5" />
+                <MailCheck className="size-5" aria-hidden="true" />
               </div>
-              <CardTitle className="font-display text-xl">{t('acceptInvite.title')}</CardTitle>
+              <CardTitle className="font-display text-display-md">{t('acceptInvite.title')}</CardTitle>
               <CardDescription>{t('acceptInvite.loginPrompt')}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -94,51 +101,56 @@ export function AcceptInvitationPage() {
                 {t('acceptInvite.accept')}
               </Button>
             </CardContent>
-          </Card>
+          </GlassCard>
         </motion.div>
       </main>
     )
   }
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center bg-muted p-6">
+    <main className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-6">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_oklab,var(--brand-indigo-bright)_22%,transparent),transparent_60%)]"
+      />
+      <ThemeToggle />
       <motion.div
         variants={slideUp}
         initial="hidden"
         animate="visible"
         transition={{ duration: 0.3, ease: easeSoft }}
-        className="w-full max-w-sm"
+        className="relative z-10 w-full max-w-sm"
       >
-        <Card>
+        <GlassCard glow={pageState === 'success' ? 'magenta' : 'indigo'}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <MailCheck className="size-5" />
+              <MailCheck className="size-5" aria-hidden="true" />
             </div>
-            <CardTitle className="font-display text-xl">{t('acceptInvite.title')}</CardTitle>
+            <CardTitle className="font-display text-display-md">{t('acceptInvite.title')}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
             {(pageState === 'idle' || pageState === 'accepting') && (
               <>
-                <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
                 <p className="text-sm text-muted-foreground">{t('acceptInvite.accepting')}</p>
               </>
             )}
             {pageState === 'success' && (
               <div className="flex flex-col items-center gap-2">
-                <CheckCircle2 className="size-6 text-green-500" />
+                <CheckCircle2 className="size-6 text-status-live" aria-hidden="true" />
                 <p className="text-sm text-muted-foreground">{t('acceptInvite.accepted')}</p>
               </div>
             )}
             {pageState === 'error' && (
               <Alert variant="destructive">
-                <AlertCircle className="size-4" />
+                <AlertCircle className="size-4" aria-hidden="true" />
                 <AlertDescription>{t('acceptInvite.error')}</AlertDescription>
               </Alert>
             )}
             {pageState === 'mismatch' && (
               <>
                 <Alert variant="destructive">
-                  <AlertCircle className="size-4" />
+                  <AlertCircle className="size-4" aria-hidden="true" />
                   <AlertDescription>{t('acceptInvite.mismatch')}</AlertDescription>
                 </Alert>
                 <Button
@@ -155,7 +167,7 @@ export function AcceptInvitationPage() {
               </>
             )}
           </CardContent>
-        </Card>
+        </GlassCard>
       </motion.div>
     </main>
   )

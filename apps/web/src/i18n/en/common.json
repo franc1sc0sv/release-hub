@@ -4,6 +4,7 @@
     "releases": "Releases",
     "features": "Features",
     "flags": "Flags",
+    "repoOps": "Repo Ops",
     "settings": "Settings"
   },
   "auth": {
@@ -34,7 +35,12 @@
     "signIn": "Sign in",
     "noAccount": "Don't have an account?",
     "registerError": "Could not create account",
-    "emailAlreadyExists": "An account with this email already exists"
+    "emailAlreadyExists": "An account with this email already exists",
+    "heroEyebrow": "Release Hub",
+    "heroHeadline": "Every release, traced back to its feature.",
+    "heroSupporting": "Sign in to track merged pull requests, flag states, and client-ready summaries across every release.",
+    "heroHeadlineRegister": "Turn your commit history into a release story.",
+    "heroSupportingRegister": "Create an account to connect a repository and start building traceable, client-ready releases."
   },
   "common": {
     "appName": "Release Hub",

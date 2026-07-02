@@ -1,0 +1,21 @@
+{
+  "title": "Command palette",
+  "description": "Search for pages, releases, features, or flags",
+  "inputPlaceholder": "Search or jump to...",
+  "noResults": "No results found.",
+  "typeToSearch": "Type at least 2 characters to search.",
+  "nav": {
+    "workspace": "Go to Workspace",
+    "releases": "Go to Releases",
+    "features": "Go to Features",
+    "flags": "Go to Flags",
+    "repoOps": "Go to Repo Ops",
+    "settings": "Go to Settings"
+  },
+  "groups": {
+    "navigation": "Navigation",
+    "releases": "Releases",
+    "features": "Features",
+    "flags": "Flags"
+  }
+}

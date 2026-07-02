@@ -3,6 +3,7 @@
   "subtitle": "Configuración del proyecto",
   "sections": {
     "connections": "Conexiones",
+    "notifications": "Notificaciones",
     "flagTracking": "Seguimiento de feature flags",
     "tags": "Taxonomía de etiquetas",
     "members": "Miembros",
@@ -21,7 +22,26 @@
       "description": "Opcional — matriz de feature flags y paridad",
       "connected": "Conectado",
       "disconnected": "No conectado",
-      "connect": "Conectar Flagsmith"
+      "connect": "Conectar Flagsmith",
+      "syncNow": "Sincronizar ahora",
+      "syncSuccess": "Se sincronizaron {{count}} flags desde Flagsmith.",
+      "syncError": "No se pudieron sincronizar los flags desde Flagsmith. Inténtalo de nuevo."
+    },
+    "slack": {
+      "label": "Slack",
+      "description": "Opcional — notificaciones de releases y flags en Slack",
+      "connected": "Conectado",
+      "disconnected": "No conectado",
+      "connect": "Conectar Slack",
+      "channelLabel": "Canal de notificaciones",
+      "channelPlaceholder": "Selecciona un canal",
+      "loadingChannels": "Cargando canales…",
+      "notifyOnCreated": "Notificar cuando se crea un release",
+      "notifyOnShipped": "Notificar cuando se lanza un release",
+      "notifyOnDeployed": "Notificar cuando se despliega un release",
+      "sendTest": "Enviar mensaje de prueba",
+      "testSent": "Mensaje de prueba enviado a Slack.",
+      "testFailed": "No se pudo enviar el mensaje de prueba. Inténtalo de nuevo."
     },
     "linear": {
       "label": "Linear",
@@ -37,6 +57,19 @@
     "disconnect": "Desconectar",
     "reconnect": "Reconectar",
     "readOnly": "Gestionado vía GitHub App",
+    "webhook": {
+      "githubLabel": "Webhook de GitHub",
+      "githubDescription": "Habilita la detección automática del estado de despliegue de los releases en este proyecto.",
+      "flagsmithLabel": "Webhook de Flagsmith",
+      "flagsmithDescription": "Mantiene la matriz de flags sincronizada cada vez que cambia un flag en Flagsmith.",
+      "copy": "Copiar URL del webhook",
+      "copied": "URL del webhook copiada al portapapeles.",
+      "secretSet": "Secreto configurado",
+      "secretNotSet": "Secreto no configurado",
+      "rotateSecret": "Rotar secreto",
+      "rotateTitle": "¿Rotar este secreto de webhook?",
+      "rotateDescription": "El secreto actual dejará de funcionar de inmediato. Actualízalo donde esté configurado este webhook antes de rotarlo."
+    },
     "dialog": {
       "apiKey": "Clave de API",
       "apiKeyPlaceholder": "Pega tu clave de API",

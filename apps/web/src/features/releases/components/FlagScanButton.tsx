@@ -37,7 +37,7 @@ export function FlagScanButton({ releaseId }: FlagScanButtonProps) {
       <Button
         variant="outline"
         size="sm"
-        className="rounded-full gap-2"
+        className="gap-2"
         disabled={loading}
         onClick={() => void handleScan()}
       >

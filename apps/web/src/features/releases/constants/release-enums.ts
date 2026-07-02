@@ -70,6 +70,16 @@ export const RELEASE_FLAG_DECISION_OPTIONS: ReleaseFlagDecisionType[] = [
   ReleaseFlagDecisionTypeValue.IN_PROGRESS,
 ]
 
+const RELEASE_FLAG_DECISION_TONE: Record<ReleaseFlagDecisionType, StatusBadgeToneValue> = {
+  ENABLE_IN_RELEASE: StatusBadgeTone.EMERALD,
+  SHIP_OFF: StatusBadgeTone.SLATE,
+  IN_PROGRESS: StatusBadgeTone.AMBER,
+}
+
+export function releaseFlagDecisionTone(decision: ReleaseFlagDecisionType): StatusBadgeToneValue {
+  return RELEASE_FLAG_DECISION_TONE[decision]
+}
+
 export const FlagChangeActionValue = {
   added: 'added',
   modified: 'modified',

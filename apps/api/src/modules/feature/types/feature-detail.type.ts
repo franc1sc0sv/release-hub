@@ -3,6 +3,7 @@ import { FeatureType } from './feature.type'
 import { ReleaseObjectType } from '../../release/types/release.type'
 import { PullRequestType } from '../../release/types/pull-request.type'
 import { FeatureState } from '../../../common/types/feature-state.enum'
+import { FlagStateType } from './flag-state.type'
 
 @ObjectType()
 export class FeatureReleaseSnapshotType {
@@ -11,6 +12,9 @@ export class FeatureReleaseSnapshotType {
 
   @Field(() => FeatureState)
   state: FeatureState
+
+  @Field(() => FlagStateType, { nullable: true })
+  flagState: FlagStateType | null
 }
 
 @ObjectType()

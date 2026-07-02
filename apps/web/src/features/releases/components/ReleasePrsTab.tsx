@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { Search, GitMerge, ExternalLink } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { GitMerge, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard } from '@/components/nebula/GlassCard'
+import { SearchField } from '@/components/nebula/SearchField'
 import { CardContent } from '@/components/ui/card'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
@@ -20,17 +20,6 @@ interface ReleasePrsTabProps {
 interface FlattenedPr {
   pr: PrNode
   featureName: string
-}
-
-function useDebouncedValue(value: string, delay: number): string {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(timer)
-  }, [value, delay])
-
-  return debounced
 }
 
 function flattenPrs(features: FeatureNodes): FlattenedPr[] {
@@ -50,8 +39,7 @@ function flattenPrs(features: FeatureNodes): FlattenedPr[] {
 export function ReleasePrsTab({ features }: ReleasePrsTabProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
-  const [searchInput, setSearchInput] = useState('')
-  const search = useDebouncedValue(searchInput, 250)
+  const [search, setSearch] = useState('')
 
   const flattenedPrs = flattenPrs(features)
   const normalizedSearch = search.trim().toLowerCase()
@@ -65,19 +53,12 @@ export function ReleasePrsTab({ features }: ReleasePrsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative w-full max-w-xs">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          aria-hidden
-        />
-        <Input
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          placeholder={t('view.prs.searchPlaceholder')}
-          aria-label={t('view.prs.searchPlaceholder')}
-          className="rounded-full pl-9"
-        />
-      </div>
+      <SearchField
+        value={search}
+        onValueChange={setSearch}
+        placeholder={t('view.prs.searchPlaceholder')}
+        className="w-full max-w-xs"
+      />
 
       {filteredPrs.length === 0 ? (
         <GlassCard>

@@ -22,4 +22,10 @@ export class ConnectionSettingsType {
 
   @Field(() => String)
   flagsmithWebhookPath: string
+
+  @Field(() => Boolean)
+  githubWebhookSecretSet: boolean
+
+  @Field(() => String)
+  githubWebhookPath: string
 }

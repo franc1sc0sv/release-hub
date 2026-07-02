@@ -15,15 +15,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CREATE_GITHUB_BRANCH } from '../graphql/releases.mutations'
-import { GITHUB_BRANCHES } from '../graphql/releases.queries'
 import { BranchCombobox } from './BranchCombobox'
-import type { GithubBranchType } from '@/generated/graphql'
 
 interface CreateBranchDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   projectId: string
-  branches: GithubBranchType[]
   defaultFromRef: string
   onCreated: (branchName: string) => void
 }
@@ -32,7 +29,6 @@ export function CreateBranchDialog({
   open,
   onOpenChange,
   projectId,
-  branches,
   defaultFromRef,
   onCreated,
 }: CreateBranchDialogProps) {
@@ -42,7 +38,7 @@ export function CreateBranchDialog({
   const [localError, setLocalError] = useState<string | null>(null)
 
   const [createGithubBranch, { loading }] = useMutation(CREATE_GITHUB_BRANCH, {
-    refetchQueries: [{ query: GITHUB_BRANCHES, variables: { projectId } }],
+    refetchQueries: ['SearchGithubBranches'],
   })
 
   function reset() {
@@ -94,7 +90,7 @@ export function CreateBranchDialog({
             <Label htmlFor="from-ref">{t('wizard.createBranch.fromRef')}</Label>
             <BranchCombobox
               id="from-ref"
-              branches={branches}
+              projectId={projectId}
               value={fromRef}
               onChange={setFromRef}
               placeholder={t('wizard.createBranch.fromRefPlaceholder')}

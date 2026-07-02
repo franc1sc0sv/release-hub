@@ -89,5 +89,77 @@
     "button": "Ejecutar cobertura",
     "success": "Escaneo de cobertura completo — {{flagsTracked}} flags rastreados, {{branchesScanned}} ramas escaneadas, {{prChangesDetected}} cambios de PR detectados.",
     "error": "El escaneo de cobertura falló. Verifica que haya un registro de flags configurado en Configuración."
+  },
+  "sync": {
+    "button": "Sincronizar",
+    "syncing": "Sincronizando...",
+    "lastSynced": "Última sincronización {{time}}",
+    "success_one": "Se sincronizó {{count}} flag desde Flagsmith",
+    "success_other": "Se sincronizaron {{count}} flags desde Flagsmith",
+    "error": "No se pudieron sincronizar los flags de Flagsmith. Revisa tu token y URL en Configuración."
+  },
+  "neverSynced": {
+    "heading": "Aún no hay flags sincronizados",
+    "description": "Ejecuta tu primera sincronización para traer el estado de los flags de Flagsmith a Release Hub.",
+    "cta": "Sincronizar ahora"
+  },
+  "detail": {
+    "overline": "Feature flag",
+    "breadcrumb": {
+      "flags": "Flags"
+    },
+    "loading": "Cargando flag...",
+    "error": {
+      "heading": "Error al cargar el flag",
+      "description": "Algo salió mal al cargar este flag. Inténtalo de nuevo."
+    },
+    "notFound": {
+      "heading": "Flag no encontrado",
+      "description": "No se pudo encontrar este flag para el proyecto actual."
+    },
+    "coverage": {
+      "button": "Reescanear",
+      "success": "Escaneo de cobertura completo para este flag.",
+      "error": "El escaneo de cobertura falló. Verifica que haya un registro de flags configurado en Configuración."
+    },
+    "currentStatus": {
+      "presentInCode": "Presente en el código",
+      "notPresentInCode": "No presente en el código",
+      "live": "Activo en un release lanzado",
+      "notLive": "Aún no está activo",
+      "decidedIn": "Decidido en",
+      "delivery": {
+        "label": "Entrega",
+        "shippedIn": "Lanzado en {{version}}",
+        "inDefaultBranch": "en la rama por defecto",
+        "notShipped": "Aún no lanzado"
+      }
+    },
+    "branches": {
+      "title": "Presencia en ramas",
+      "present": "Presente",
+      "absent": "Ausente",
+      "firstSeen": "Visto por primera vez {{time}}",
+      "lastConfirmed": "Confirmado {{time}}",
+      "rescan": "Reescanear",
+      "empty": "Aún no detectado en ninguna rama."
+    },
+    "linkedFeature": {
+      "title": "Feature vinculado",
+      "empty": "Aún no vinculado a un feature."
+    },
+    "releases": {
+      "title": "Aparece en releases",
+      "empty": "Aún no forma parte de ningún release."
+    },
+    "pullRequests": {
+      "title": "Modificado en PRs",
+      "empty": "Aún no se detectaron cambios en pull requests.",
+      "openGitHub": "Abrir PR #{{number}} en GitHub: {{title}}"
+    },
+    "decisionTimeline": {
+      "title": "Cronología de decisiones",
+      "empty": "Aún no se han tomado decisiones de release."
+    }
   }
 }

@@ -12,8 +12,6 @@ import esFeatures from './es/features.json'
 import enFeatures from './en/features.json'
 import esFlags from './es/flags.json'
 import enFlags from './en/flags.json'
-import esFlagDetail from './es/flagDetail.json'
-import enFlagDetail from './en/flagDetail.json'
 import esTickets from './es/tickets.json'
 import enTickets from './en/tickets.json'
 import esAi from './es/ai.json'
@@ -26,6 +24,12 @@ import esOnboarding from './es/onboarding.json'
 import enOnboarding from './en/onboarding.json'
 import esEditor from './es/editor.json'
 import enEditor from './en/editor.json'
+import esNotifications from './es/notifications.json'
+import enNotifications from './en/notifications.json'
+import esRepoOps from './es/repoOps.json'
+import enRepoOps from './en/repoOps.json'
+import esPalette from './es/palette.json'
+import enPalette from './en/palette.json'
 
 i18n.use(initReactI18next).init({
   lng: localStorage.getItem('language') ?? 'en',
@@ -39,13 +43,15 @@ i18n.use(initReactI18next).init({
       releases: esReleases,
       features: esFeatures,
       flags: esFlags,
-      flagDetail: esFlagDetail,
       tickets: esTickets,
       ai: esAi,
       settings: esSettings,
       collaboration: esCollaboration,
       onboarding: esOnboarding,
       editor: esEditor,
+      notifications: esNotifications,
+      repoOps: esRepoOps,
+      palette: esPalette,
     },
     en: {
       enums: enEnums,
@@ -54,13 +60,15 @@ i18n.use(initReactI18next).init({
       releases: enReleases,
       features: enFeatures,
       flags: enFlags,
-      flagDetail: enFlagDetail,
       tickets: enTickets,
       ai: enAi,
       settings: enSettings,
       collaboration: enCollaboration,
       onboarding: enOnboarding,
       editor: enEditor,
+      notifications: enNotifications,
+      repoOps: enRepoOps,
+      palette: enPalette,
     },
   },
   interpolation: {

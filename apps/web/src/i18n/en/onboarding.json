@@ -1,4 +1,8 @@
 {
+  "progress": {
+    "connectGithub": "Connect GitHub",
+    "selectRepo": "Select repository"
+  },
   "connectGithub": {
     "title": "Connect GitHub",
     "description": "Release Hub needs access to your GitHub account to detect merged pull requests and build releases. This connection is required to continue.",

@@ -1,0 +1,21 @@
+{
+  "title": "Paleta de comandos",
+  "description": "Busca páginas, releases, funcionalidades o flags",
+  "inputPlaceholder": "Buscar o ir a...",
+  "noResults": "No se encontraron resultados.",
+  "typeToSearch": "Escribe al menos 2 caracteres para buscar.",
+  "nav": {
+    "workspace": "Ir a Espacio de trabajo",
+    "releases": "Ir a Releases",
+    "features": "Ir a Funcionalidades",
+    "flags": "Ir a Flags",
+    "repoOps": "Ir a Operaciones de repo",
+    "settings": "Ir a Configuración"
+  },
+  "groups": {
+    "navigation": "Navegación",
+    "releases": "Releases",
+    "features": "Funcionalidades",
+    "flags": "Flags"
+  }
+}

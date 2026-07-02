@@ -23,6 +23,7 @@ import { RepoFileSearchQuery } from '../queries/repo-file-search/repo-file-searc
 import { UpdateConnectionSettingsCommand } from '../commands/update-connection-settings/update-connection-settings.command'
 import { SyncFlagsmithFlagsCommand } from '../commands/sync-flagsmith-flags/sync-flagsmith-flags.command'
 import { RotateFlagsmithWebhookSecretCommand } from '../commands/rotate-flagsmith-webhook-secret/rotate-flagsmith-webhook-secret.command'
+import { RotateGithubWebhookSecretCommand } from '../commands/rotate-github-webhook-secret/rotate-github-webhook-secret.command'
 import { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import { SortDirection } from '../../../common/types/sort-direction.enum'
 import { FlagsmithSyncSource } from '@release-hub/db'
@@ -150,5 +151,14 @@ export class IntegrationResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ConnectionSettingsType> {
     return this.commandBus.execute(new RotateFlagsmithWebhookSecretCommand(projectId, user.id))
+  }
+
+  @Mutation(() => ConnectionSettingsType)
+  @Can(Action.UPDATE, Subject.PROJECT)
+  rotateGithubWebhookSecret(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ConnectionSettingsType> {
+    return this.commandBus.execute(new RotateGithubWebhookSecretCommand(projectId, user.id))
   }
 }

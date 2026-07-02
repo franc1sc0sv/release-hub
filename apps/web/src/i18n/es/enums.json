@@ -53,5 +53,21 @@
     "ACCEPTED": "Aceptada",
     "EXPIRED": "Expirada",
     "REVOKED": "Revocada"
+  },
+  "notificationType": {
+    "RELEASE_CREATED": "Release creado",
+    "RELEASE_SHIPPED": "Release lanzado",
+    "RELEASE_DEPLOYED": "Release desplegado",
+    "FLAG_IN_PROGRESS_REMINDER": "Recordatorio de flag en progreso",
+    "FLAG_STALENESS_ALERT": "Alerta de flag inactivo",
+    "FLAG_DIGEST": "Resumen de flags"
+  },
+  "notificationChannel": {
+    "EMAIL": "Correo electrónico",
+    "SLACK_DM": "Mensaje directo de Slack"
+  },
+  "digestFrequency": {
+    "DAILY": "Diario",
+    "WEEKLY": "Semanal"
   }
 }

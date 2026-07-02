@@ -1,5 +1,11 @@
 import { graphql } from '@/generated/gql'
 
+export const SYNC_FLAGSMITH_FLAGS = graphql(`
+  mutation SyncFlagsmithFlags($projectId: ID!) {
+    syncFlagsmithFlags(projectId: $projectId)
+  }
+`)
+
 export const RUN_FLAG_COVERAGE = graphql(`
   mutation RunFlagCoverage($projectId: ID!) {
     runFlagCoverage(projectId: $projectId) {

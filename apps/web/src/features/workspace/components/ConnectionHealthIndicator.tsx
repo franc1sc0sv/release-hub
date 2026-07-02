@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Github, CheckCircle2, MinusCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
 import type { IntegrationStatus } from '@/generated/graphql'
 
 const CONNECTED: IntegrationStatus = 'CONNECTED'
@@ -44,23 +44,13 @@ function IntegrationRow({
       >
         <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <span className="text-sm font-medium text-foreground flex-1">{label}</span>
-        {isConnected ? (
-          <Badge
-            className="flex items-center gap-1 rounded-full border-0 bg-[var(--status-live-bg)] text-[var(--status-live-fg)] px-2"
-            aria-hidden="true"
-          >
-            <CheckCircle2 className="size-3" aria-hidden />
-            <span className="text-xs font-medium">{tooltipConnected}</span>
-          </Badge>
-        ) : (
-          <Badge
-            className="flex items-center gap-1 rounded-full border-0 bg-[var(--status-draft-bg)] text-[var(--status-draft-fg)] px-2"
-            aria-hidden="true"
-          >
-            <MinusCircle className="size-3" aria-hidden />
-            <span className="text-xs font-medium">{tooltipNotConfigured}</span>
-          </Badge>
-        )}
+        <StatusBadge
+          tone={isConnected ? StatusBadgeTone.EMERALD : StatusBadgeTone.SLATE}
+          icon={isConnected ? CheckCircle2 : MinusCircle}
+          className="pointer-events-none"
+        >
+          {isConnected ? tooltipConnected : tooltipNotConfigured}
+        </StatusBadge>
       </TooltipTrigger>
       <TooltipContent side="right">
         {isConnected ? tooltipConnected : tooltipNotConfigured}

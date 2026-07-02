@@ -201,7 +201,7 @@ export function ExportFlagsDialog({
           <GradientButton
             onClick={handleExport}
             disabled={!canExport}
-            className="gap-2 rounded-full border-0 bg-nebula-gradient text-white shadow-glow-indigo"
+            className="gap-2 border-0 bg-nebula-gradient text-white shadow-glow-indigo"
           >
             {exporting ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />

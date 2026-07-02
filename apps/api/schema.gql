@@ -88,6 +88,8 @@ type ConnectionSettingsType {
   flagsmithWebhookPath: String!
   flagsmithWebhookSecretSet: Boolean!
   githubConnected: Boolean!
+  githubWebhookPath: String!
+  githubWebhookSecretSet: Boolean!
   linearConnected: Boolean!
 }
 
@@ -187,6 +189,7 @@ type FeaturePageType {
 }
 
 type FeatureReleaseSnapshotType {
+  flagState: FlagStateType
   releaseId: ID!
   state: FeatureState!
 }
@@ -471,6 +474,7 @@ type Mutation {
   resyncReleasePullRequests(releaseId: ID!): ResyncReleaseSummaryType!
   revokeInvitation(invitationId: ID!): Boolean!
   rotateFlagsmithWebhookSecret(projectId: ID!): ConnectionSettingsType!
+  rotateGithubWebhookSecret(projectId: ID!): ConnectionSettingsType!
   runFlagCoverage(projectId: ID!): FlagCoverageSummaryType!
   runFlagCoverageForFlag(key: String!, projectId: ID!): TrackedFlagDetailType!
   savePrSummary(input: SavePrSummaryInput!): PullRequestType!

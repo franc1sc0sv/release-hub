@@ -66,6 +66,8 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
     const webhookSecretStatus = await this.projectRepository.findWebhookSecretStatus(command.projectId, tx)
     settings.flagsmithWebhookSecretSet = webhookSecretStatus?.flagsmithWebhookSecretSet ?? false
     settings.flagsmithWebhookPath = `/webhooks/flagsmith/${command.projectId}`
+    settings.githubWebhookSecretSet = webhookSecretStatus?.githubWebhookSecretSet ?? false
+    settings.githubWebhookPath = `/webhooks/github/${command.projectId}`
 
     const flagsmithJustConnected =
       !existing.flagsmithEnabled &&

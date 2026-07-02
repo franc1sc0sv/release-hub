@@ -1,6 +1,6 @@
 import { useState, useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react'
+import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import {
@@ -26,7 +26,7 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useProject } from '@/context/project.context'
 import { ROUTES } from '@/lib/routes'
 import { slideUp } from '@/lib/animations'
-import { GITHUB_BRANCHES, COMPARE_REFS } from '../graphql/releases.queries'
+import { COMPARE_REFS } from '../graphql/releases.queries'
 import { CREATE_RELEASE } from '../graphql/releases.mutations'
 import { BranchCombobox } from './BranchCombobox'
 import { CreateBranchDialog } from './CreateBranchDialog'
@@ -59,18 +59,11 @@ export function ReleaseWizard() {
 
   const projectId = activeProject?.id ?? ''
 
-  const { data: branchesData, loading: branchesLoading } = useQuery(GITHUB_BRANCHES, {
-    variables: { projectId },
-    skip: !projectId,
-    fetchPolicy: 'cache-and-network',
-  })
-
   const [runCompare, { data: compareData, loading: comparing, error: compareError }] =
     useLazyQuery(COMPARE_REFS, { fetchPolicy: 'network-only' })
 
   const [createRelease, { loading: creating }] = useMutation(CREATE_RELEASE)
 
-  const branches = branchesData?.githubBranches ?? []
   const comparison = compareData?.compareRefs ?? null
 
   function handleStep1Continue() {
@@ -138,8 +131,7 @@ export function ReleaseWizard() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
           >
             <Step1
-              branches={branches}
-              branchesLoading={branchesLoading}
+              projectId={projectId}
               baseRef={state.baseRef}
               compareRef={state.compareRef}
               onBaseChange={(v) => setState((prev) => ({ ...prev, baseRef: v }))}
@@ -221,7 +213,6 @@ export function ReleaseWizard() {
         open={createBranchOpen}
         onOpenChange={setCreateBranchOpen}
         projectId={projectId}
-        branches={branches}
         defaultFromRef={state.baseRef}
         onCreated={(name) => setState((prev) => ({ ...prev, compareRef: name }))}
       />
@@ -230,8 +221,7 @@ export function ReleaseWizard() {
 }
 
 interface Step1Props {
-  branches: Array<{ name: string; protected: boolean; commitSha: string }>
-  branchesLoading: boolean
+  projectId: string
   baseRef: string
   compareRef: string
   onBaseChange: (v: string) => void
@@ -240,8 +230,7 @@ interface Step1Props {
 }
 
 function Step1({
-  branches,
-  branchesLoading,
+  projectId,
   baseRef,
   compareRef,
   onBaseChange,
@@ -259,23 +248,15 @@ function Step1({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
-        {branchesLoading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-            {t('wizard.branches.loading')}
-          </div>
-        )}
-
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="base-branch">{t('wizard.branches.base')}</Label>
             <BranchCombobox
               id="base-branch"
-              branches={branches}
+              projectId={projectId}
               value={baseRef}
               onChange={onBaseChange}
               placeholder={t('wizard.branches.basePlaceholder')}
-              disabled={branchesLoading}
             />
           </div>
 
@@ -285,11 +266,10 @@ function Step1({
               <div className="min-w-0 flex-1">
                 <BranchCombobox
                   id="compare-branch"
-                  branches={branches}
+                  projectId={projectId}
                   value={compareRef}
                   onChange={onCompareChange}
                   placeholder={t('wizard.branches.comparePlaceholder')}
-                  disabled={branchesLoading}
                 />
               </div>
               <Button

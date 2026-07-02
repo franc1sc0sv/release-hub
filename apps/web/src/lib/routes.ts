@@ -10,6 +10,7 @@ export const ROUTES = {
   FEATURES_DETAIL: '/features/:id',
   FLAGS: '/flags',
   FLAG_DETAIL: '/flags/:flagKey',
+  REPO_OPS: '/repo-ops',
   SETTINGS: '/settings',
   INVITE: '/invite/:token',
   PROJECT_CREATE: '/projects/new',

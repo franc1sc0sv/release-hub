@@ -17,6 +17,27 @@ export const LIST_FEATURES = graphql(`
   }
 `)
 
+export const LIST_FEATURES_PAGE = graphql(`
+  query ListFeaturesPage($input: ListFeaturesPageInput!) {
+    listFeaturesPage(input: $input) {
+      totalCount
+      hasMore
+      items {
+        id
+        projectId
+        name
+        description
+        kind
+        suggested
+        tags
+        currentState
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`)
+
 export const GET_FEATURE = graphql(`
   query GetFeature($id: ID!) {
     getFeature(id: $id) {
@@ -65,6 +86,10 @@ export const GET_FEATURE = graphql(`
       snapshots {
         releaseId
         state
+        flagState {
+          staging
+          production
+        }
       }
     }
   }

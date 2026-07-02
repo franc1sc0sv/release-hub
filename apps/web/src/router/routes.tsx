@@ -23,6 +23,7 @@ const FeatureDetailPage = React.lazy(
 )
 const FlagsPage = React.lazy(() => import('@/features/flags/pages/FlagsPage'))
 const FlagDetailPage = React.lazy(() => import('@/features/flags/pages/FlagDetailPage'))
+const RepoOpsPage = React.lazy(() => import('@/features/repo-ops/pages/RepoOpsPage'))
 const SettingsPage = React.lazy(() => import('@/features/settings/pages/SettingsPage'))
 const CreateProjectPage = React.lazy(
   () => import('@/features/projects/pages/CreateProjectPage'),
@@ -110,6 +111,7 @@ export const router = createBrowserRouter([
           { path: ':flagKey', element: withSuspense(<FlagDetailPage />) },
         ],
       },
+      { path: 'repo-ops', element: withSuspense(<RepoOpsPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'projects/new', element: withSuspense(<CreateProjectPage />) },
     ],

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, AlertCircle, FlagIcon, Search } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Loader2, AlertCircle, FlagIcon } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { SearchField } from '@/components/nebula/SearchField'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { useReleaseFlags } from '../hooks/useReleaseFlags'
@@ -17,17 +17,6 @@ interface ReleaseFlagsTabProps {
   releaseId: string
 }
 
-function useDebouncedValue(value: string, delay: number): string {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(timer)
-  }, [value, delay])
-
-  return debounced
-}
-
 function isRemovedFlag(flag: ReleaseFlagRowData): boolean {
   return flag.changes.some((change) => change.action === FlagChangeActionValue.removed)
 }
@@ -39,8 +28,7 @@ function isAddedFlag(flag: ReleaseFlagRowData): boolean {
 export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
   const { t } = useTranslation('releases')
   const { flags, loading, error } = useReleaseFlags(releaseId)
-  const [searchInput, setSearchInput] = useState('')
-  const search = useDebouncedValue(searchInput, 250)
+  const [search, setSearch] = useState('')
 
   const filteredFlags = flags.filter((flag) =>
     flag.key.toLowerCase().includes(search.trim().toLowerCase()),
@@ -51,19 +39,12 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="relative w-full max-w-xs">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder={t('flags.searchPlaceholder')}
-            aria-label={t('flags.searchPlaceholder')}
-            className="rounded-full pl-9"
-          />
-        </div>
+        <SearchField
+          value={search}
+          onValueChange={setSearch}
+          placeholder={t('flags.searchPlaceholder')}
+          className="w-full max-w-xs"
+        />
         <FlagScanButton releaseId={releaseId} />
       </div>
 

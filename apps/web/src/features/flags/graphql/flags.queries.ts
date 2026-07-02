@@ -5,6 +5,7 @@ export const GET_FLAGS = graphql(`
     getFlags(input: $input) {
       environments
       totalCount
+      lastSyncedAt
       items {
         key
         createdAt

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Rocket } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Rocket } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard } from '@/components/nebula/GlassCard'
+import { SearchField } from '@/components/nebula/SearchField'
 import { CardContent } from '@/components/ui/card'
 import { ReleaseFeatureNode } from './ReleaseFeatureNode'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
@@ -16,22 +16,10 @@ interface ReleaseFeaturesTabProps {
   features: FeatureNodes
 }
 
-function useDebouncedValue(value: string, delay: number): string {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(timer)
-  }, [value, delay])
-
-  return debounced
-}
-
 export function ReleaseFeaturesTab({ features }: ReleaseFeaturesTabProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
-  const [searchInput, setSearchInput] = useState('')
-  const search = useDebouncedValue(searchInput, 250)
+  const [search, setSearch] = useState('')
 
   const acceptedFeatures = features.filter((node) => !node.feature.suggested)
   const filteredFeatures = acceptedFeatures.filter((node) =>
@@ -40,19 +28,12 @@ export function ReleaseFeaturesTab({ features }: ReleaseFeaturesTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative w-full max-w-xs">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          aria-hidden
-        />
-        <Input
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          placeholder={t('view.features.searchPlaceholder')}
-          aria-label={t('view.features.searchPlaceholder')}
-          className="rounded-full pl-9"
-        />
-      </div>
+      <SearchField
+        value={search}
+        onValueChange={setSearch}
+        placeholder={t('view.features.searchPlaceholder')}
+        className="w-full max-w-xs"
+      />
 
       {filteredFeatures.length === 0 ? (
         <GlassCard>

@@ -18,7 +18,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { DELETE_RELEASE } from '../graphql/releases.mutations'
-import { GET_RELEASES } from '../graphql/releases.queries'
 import { ReleaseStatusValue } from '../constants/release-enums'
 import type { ReleaseStatus } from '@/generated/graphql'
 
@@ -33,7 +32,6 @@ interface DeleteReleaseButtonProps {
 
 export function DeleteReleaseButton({
   releaseId,
-  projectId,
   releaseLabel,
   status,
   onDeleted,
@@ -43,7 +41,7 @@ export function DeleteReleaseButton({
   const [open, setOpen] = useState(false)
 
   const [deleteRelease, { loading }] = useMutation(DELETE_RELEASE, {
-    refetchQueries: [{ query: GET_RELEASES, variables: { projectId } }],
+    refetchQueries: ['GetReleasesPage'],
     awaitRefetchQueries: true,
     onCompleted: () => {
       toast.success(t('delete.success'))

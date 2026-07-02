@@ -3,6 +3,7 @@
   "subtitle": "Project configuration",
   "sections": {
     "connections": "Connections",
+    "notifications": "Notifications",
     "flagTracking": "Feature flag tracking",
     "tags": "Tag taxonomy",
     "members": "Members",
@@ -21,7 +22,26 @@
       "description": "Optional — feature flag matrix and parity",
       "connected": "Connected",
       "disconnected": "Not connected",
-      "connect": "Connect Flagsmith"
+      "connect": "Connect Flagsmith",
+      "syncNow": "Sync now",
+      "syncSuccess": "Synced {{count}} flags from Flagsmith.",
+      "syncError": "Couldn't sync flags from Flagsmith. Please try again."
+    },
+    "slack": {
+      "label": "Slack",
+      "description": "Optional — release and flag notifications in Slack",
+      "connected": "Connected",
+      "disconnected": "Not connected",
+      "connect": "Connect Slack",
+      "channelLabel": "Notification channel",
+      "channelPlaceholder": "Select a channel",
+      "loadingChannels": "Loading channels…",
+      "notifyOnCreated": "Notify when a release is created",
+      "notifyOnShipped": "Notify when a release is shipped",
+      "notifyOnDeployed": "Notify when a release is deployed",
+      "sendTest": "Send test message",
+      "testSent": "Test message sent to Slack.",
+      "testFailed": "Couldn't send the test message. Please try again."
     },
     "linear": {
       "label": "Linear",
@@ -37,6 +57,19 @@
     "disconnect": "Disconnect",
     "reconnect": "Reconnect",
     "readOnly": "Managed via GitHub App",
+    "webhook": {
+      "githubLabel": "GitHub webhook",
+      "githubDescription": "Powers automatic deployed-status detection for releases in this project.",
+      "flagsmithLabel": "Flagsmith webhook",
+      "flagsmithDescription": "Keeps the flag matrix in sync whenever a flag changes in Flagsmith.",
+      "copy": "Copy webhook URL",
+      "copied": "Webhook URL copied to clipboard.",
+      "secretSet": "Secret set",
+      "secretNotSet": "Secret not set",
+      "rotateSecret": "Rotate secret",
+      "rotateTitle": "Rotate this webhook secret?",
+      "rotateDescription": "The current secret will stop working immediately. Update it wherever this webhook is configured before rotating."
+    },
     "dialog": {
       "apiKey": "API key",
       "apiKeyPlaceholder": "Paste your API key",

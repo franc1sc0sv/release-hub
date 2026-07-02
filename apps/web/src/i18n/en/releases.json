@@ -50,7 +50,8 @@
       "compare": "Compare branch",
       "comparePlaceholder": "Select compare branch",
       "searchPlaceholder": "Search branches…",
-      "noResults": "No branches found"
+      "noResults": "No branches found",
+      "refineHint": "50+ branches found — refine your search to see more"
     },
     "createBranch": {
       "triggerLabel": "Create new branch",
@@ -130,9 +131,14 @@
   },
   "list": {
     "viewRelease": "View release",
+    "searchPlaceholder": "Search releases…",
     "error": {
       "heading": "Couldn't load releases",
       "description": "Something went wrong loading your releases. Please try again."
+    },
+    "noResults": {
+      "heading": "No releases found",
+      "description": "No releases match your search. Try a different term."
     }
   },
   "view": {

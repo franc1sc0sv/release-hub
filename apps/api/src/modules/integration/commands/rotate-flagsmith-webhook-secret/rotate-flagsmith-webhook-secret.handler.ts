@@ -51,6 +51,7 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
     await this.projectRepository.regenerateFlagsmithWebhookSecret(command.projectId, secret, tx)
 
     const credentials = await this.projectRepository.findCredentials(command.projectId, tx)
+    const webhookSecretStatus = await this.projectRepository.findWebhookSecretStatus(command.projectId, tx)
 
     const settings = new ConnectionSettingsType()
     settings.githubConnected = project.githubInstallationId !== null
@@ -60,6 +61,8 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
     settings.flagsmithProjectId = credentials?.flagsmithProjectId ?? null
     settings.flagsmithWebhookSecretSet = true
     settings.flagsmithWebhookPath = `/webhooks/flagsmith/${command.projectId}`
+    settings.githubWebhookSecretSet = webhookSecretStatus?.githubWebhookSecretSet ?? false
+    settings.githubWebhookPath = `/webhooks/github/${command.projectId}`
     return settings
   }
 }

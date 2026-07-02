@@ -9,6 +9,9 @@ import type {
   FlagChangeAction,
   FlagReferenceKind,
   ReleaseFlagDecisionType,
+  NotificationType,
+  NotificationChannel,
+  DigestFrequency,
 } from '@/generated/graphql'
 
 export function useEnumLabels() {
@@ -24,5 +27,8 @@ export function useEnumLabels() {
     flagAction: (v: FlagChangeAction): string => t(`flagAction.${v}`),
     flagReferenceKind: (v: FlagReferenceKind): string => t(`flagReferenceKind.${v}`),
     releaseFlagDecision: (v: ReleaseFlagDecisionType): string => t(`releaseFlagDecision.${v}`),
+    notificationType: (v: NotificationType): string => t(`notificationType.${v}`),
+    notificationChannel: (v: NotificationChannel): string => t(`notificationChannel.${v}`),
+    digestFrequency: (v: DigestFrequency): string => t(`digestFrequency.${v}`),
   }
 }

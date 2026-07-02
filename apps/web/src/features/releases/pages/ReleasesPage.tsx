@@ -1,27 +1,29 @@
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@apollo/client/react'
 import { motion } from 'motion/react'
 import { AlertCircle, ArrowRight, Loader2, Rocket } from 'lucide-react'
-import { NebulaBackground } from '@/components/nebula/NebulaBackground'
+import { PageShell } from '@/components/nebula/PageShell'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { EmptyState } from '@/components/nebula/EmptyState'
-import { PageHeader } from '@/components/nebula/PageHeader'
+import { SearchField } from '@/components/nebula/SearchField'
+import { StatusBadge } from '@/components/nebula/StatusBadge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Can } from '@/context/ability.context'
 import { useProject } from '@/context/project.context'
 import { Action, Subject } from '@release-hub/shared'
 import { ROUTES } from '@/lib/routes'
 import { staggerContainer, slideUp } from '@/lib/animations'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
-import { GET_RELEASES } from '../graphql/releases.queries'
+import { useInfiniteList } from '@/hooks/use-infinite-list'
+import { GET_RELEASES_PAGE } from '../graphql/releases.queries'
 import { DeleteReleaseButton } from '../components/DeleteReleaseButton'
-import { RELEASE_STATUS_BADGE_CLASS } from '../constants/release-enums'
-import type { GetReleasesQuery } from '@/generated/graphql'
+import { releaseStatusTone } from '../constants/release-enums'
+import type { GetReleasesPageQuery } from '@/generated/graphql'
 
-type ReleaseItem = GetReleasesQuery['getReleases'][number]
+type ReleaseItem = GetReleasesPageQuery['getReleasesPage']['items'][number]
 
 interface ReleaseRowProps {
   release: ReleaseItem
@@ -33,7 +35,6 @@ function ReleaseRow({ release, projectId }: ReleaseRowProps) {
   const enumLabels = useEnumLabels()
   const detailPath = ROUTES.RELEASE_DETAIL.replace(':releaseId', release.id)
 
-  const statusClasses = RELEASE_STATUS_BADGE_CLASS[release.status]
   const statusLabel = enumLabels.releaseStatus(release.status)
 
   const formattedDate = new Date(release.createdAt).toLocaleDateString(undefined, {
@@ -54,11 +55,9 @@ function ReleaseRow({ release, projectId }: ReleaseRowProps) {
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-foreground transition-colors group-hover:text-white">
-              {release.name}
+              {releaseLabel}
             </span>
-            <Badge className={`rounded-full border px-2 py-0.5 text-xs font-medium ${statusClasses}`}>
-              {statusLabel}
-            </Badge>
+            <StatusBadge tone={releaseStatusTone(release.status)}>{statusLabel}</StatusBadge>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
@@ -89,27 +88,41 @@ function ReleaseRow({ release, projectId }: ReleaseRowProps) {
   )
 }
 
+function ReleaseRowSkeleton() {
+  return <Skeleton className="h-[68px] w-full rounded-[var(--radius-card)]" />
+}
+
 export default function ReleasesPage() {
   const { t } = useTranslation('releases')
   const navigate = useNavigate()
   const { activeProject } = useProject()
+  const [search, setSearch] = useState('')
 
-  const { data, loading, error } = useQuery(GET_RELEASES, {
-    variables: { projectId: activeProject?.id ?? '' },
+  const variables = useMemo(
+    () => ({
+      projectId: activeProject?.id ?? '',
+      search: search || undefined,
+    }),
+    [activeProject?.id, search],
+  )
+
+  const { items, loadingInitial, loadingMore, error, sentinelRef } = useInfiniteList({
+    query: GET_RELEASES_PAGE,
+    variables,
+    selectPage: (data) => data.getReleasesPage,
     skip: !activeProject,
   })
 
-  const releases: ReleaseItem[] = data?.getReleases ?? []
+  const projectId = activeProject?.id ?? ''
 
   const body = (() => {
-    if (loading) {
+    if (loadingInitial) {
       return (
-        <GlassCard>
-          <CardContent className="flex flex-col items-center gap-4 py-16">
-            <Loader2 className="size-8 animate-spin text-indigo-400" />
-            <p className="text-sm text-muted-foreground">{t('loading')}</p>
-          </CardContent>
-        </GlassCard>
+        <div className="space-y-2">
+          {Array.from({ length: 5 }, (_, index) => (
+            <ReleaseRowSkeleton key={index} />
+          ))}
+        </div>
       )
     }
 
@@ -133,12 +146,12 @@ export default function ReleasesPage() {
       )
     }
 
-    if (releases.length === 0) {
+    if (items.length === 0) {
       return (
         <EmptyState
           icon={<Rocket className="size-7 text-brand-indigo-bright" aria-hidden />}
-          heading={t('empty.heading')}
-          description={t('empty.description')}
+          heading={search ? t('list.noResults.heading') : t('empty.heading')}
+          description={search ? t('list.noResults.description') : t('empty.description')}
         />
       )
     }
@@ -151,31 +164,46 @@ export default function ReleasesPage() {
         className="space-y-2"
         role="list"
       >
-        {releases.map((release) => (
-          <ReleaseRow key={release.id} release={release} projectId={activeProject?.id ?? ''} />
+        {items.map((release) => (
+          <ReleaseRow key={release.id} release={release} projectId={projectId} />
         ))}
       </motion.ul>
     )
   })()
 
   return (
-    <NebulaBackground className="p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <PageHeader
-          overline={t('subtitle')}
-          title={t('title')}
-          actions={
-            <Can I={Action.CREATE} a={Subject.RELEASE}>
-              <GradientButton onClick={() => navigate(ROUTES.RELEASE_BUILDER)}>
-                <Rocket className="mr-2 size-4" />
-                {t('new')}
-              </GradientButton>
-            </Can>
-          }
+    <PageShell
+      eyebrow={t('subtitle')}
+      title={t('title')}
+      actions={
+        <Can I={Action.CREATE} a={Subject.RELEASE}>
+          <GradientButton onClick={() => navigate(ROUTES.RELEASE_BUILDER)}>
+            <Rocket className="mr-2 size-4" />
+            {t('new')}
+          </GradientButton>
+        </Can>
+      }
+    >
+      <div className="space-y-4">
+        <SearchField
+          value={search}
+          onValueChange={setSearch}
+          placeholder={t('list.searchPlaceholder')}
+          className="max-w-xs"
         />
 
         {body}
+
+        {!loadingInitial && !error && items.length > 0 && (
+          <div ref={sentinelRef} aria-hidden className="h-1" />
+        )}
+
+        {loadingMore && (
+          <div className="flex justify-center py-3">
+            <Loader2 className="size-5 animate-spin text-indigo-400" aria-hidden />
+          </div>
+        )}
       </div>
-    </NebulaBackground>
+    </PageShell>
   )
 }

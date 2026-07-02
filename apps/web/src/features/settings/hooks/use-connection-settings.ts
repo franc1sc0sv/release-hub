@@ -5,6 +5,7 @@ import {
   UPDATE_CONNECTION_SETTINGS,
   FLAGSMITH_PROJECTS,
   VERIFY_FLAGSMITH_CONNECTION,
+  ROTATE_FLAGSMITH_WEBHOOK_SECRET,
 } from '../graphql/settings.operations'
 
 interface FlagsmithProjectOption {
@@ -38,6 +39,14 @@ export function useConnectionSettings(projectId: string) {
       refetchQueries: [
         { query: GET_CONNECTION_SETTINGS, variables: { projectId } },
       ],
+    },
+  )
+
+  const [rotateFlagsmithWebhookSecret, { loading: rotatingFlagsmithSecret }] = useMutation(
+    ROTATE_FLAGSMITH_WEBHOOK_SECRET,
+    {
+      variables: { projectId },
+      refetchQueries: [{ query: GET_CONNECTION_SETTINGS, variables: { projectId } }],
     },
   )
 
@@ -123,9 +132,11 @@ export function useConnectionSettings(projectId: string) {
     updating,
     loadingProjects,
     verifying,
+    rotatingFlagsmithSecret,
     loadFlagsmithProjects,
     verifyFlagsmithConnection,
     connectFlagsmith,
     disconnectFlagsmith,
+    rotateFlagsmithWebhookSecret: () => rotateFlagsmithWebhookSecret(),
   }
 }

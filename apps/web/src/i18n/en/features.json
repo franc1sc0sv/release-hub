@@ -4,6 +4,7 @@
   "new": "New feature",
   "count_one": "{{count}} feature",
   "count_other": "{{count}} features",
+  "searchPlaceholder": "Search features...",
   "state": {
     "label": "Feature state",
     "none": "No release yet"
@@ -34,6 +35,10 @@
     "description": "Features are the permanent ledger — every PR is traceable to one.",
     "cta": "Create feature"
   },
+  "emptySearch": {
+    "heading": "No features match your search",
+    "description": "Try a different name or clear the search to see the full ledger."
+  },
   "loading": "Loading features...",
   "error": {
     "heading": "Failed to load features",
@@ -49,6 +54,7 @@
     "compareRef": "Compare"
   },
   "detail": {
+    "noReleasesHeading": "No releases yet",
     "noReleases": "This feature has not appeared in any release yet.",
     "notFound": "Feature not found",
     "notFoundDescription": "This feature does not exist or has been deleted.",

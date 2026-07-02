@@ -28,4 +28,5 @@ export abstract class IProjectRepository implements IBaseRepository<IProject> {
   abstract updateFlagRegistry: RepositoryMethod<[id: string, data: IUpdateFlagRegistryData], IFlagRegistryConfigResult>
   abstract findWebhookSecretStatus: RepositoryMethod<[id: string], IProjectWebhookSecretStatus | null>
   abstract regenerateFlagsmithWebhookSecret: RepositoryMethod<[id: string, secret: string], void>
+  abstract regenerateGithubWebhookSecret: RepositoryMethod<[id: string, secret: string], void>
 }

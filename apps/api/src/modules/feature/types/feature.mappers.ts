@@ -66,6 +66,14 @@ function toFeatureReleaseSnapshotType(fir: IFeatureInRelease): FeatureReleaseSna
   const type = new FeatureReleaseSnapshotType()
   type.releaseId = fir.releaseId
   type.state = fir.state
+  if (fir.flagState !== null) {
+    const flagStateType = new FlagStateType()
+    flagStateType.staging = fir.flagState.staging
+    flagStateType.production = fir.flagState.production
+    type.flagState = flagStateType
+  } else {
+    type.flagState = null
+  }
   return type
 }
 

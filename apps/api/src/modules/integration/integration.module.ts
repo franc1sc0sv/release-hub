@@ -25,6 +25,7 @@ import { RepoFileSearchHandler } from './queries/repo-file-search/repo-file-sear
 import { UpdateConnectionSettingsHandler } from './commands/update-connection-settings/update-connection-settings.handler'
 import { SyncFlagsmithFlagsHandler } from './commands/sync-flagsmith-flags/sync-flagsmith-flags.handler'
 import { RotateFlagsmithWebhookSecretHandler } from './commands/rotate-flagsmith-webhook-secret/rotate-flagsmith-webhook-secret.handler'
+import { RotateGithubWebhookSecretHandler } from './commands/rotate-github-webhook-secret/rotate-github-webhook-secret.handler'
 import { HandleFlagsmithWebhookHandler } from './commands/handle-flagsmith-webhook/handle-flagsmith-webhook.handler'
 import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
 
@@ -48,6 +49,7 @@ import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
     UpdateConnectionSettingsHandler,
     SyncFlagsmithFlagsHandler,
     RotateFlagsmithWebhookSecretHandler,
+    RotateGithubWebhookSecretHandler,
     HandleFlagsmithWebhookHandler,
     FlagsmithConnectedHandler,
   ],

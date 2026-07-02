@@ -13,6 +13,21 @@
     "createProject": "New project",
     "active": "Active project"
   },
+  "hero": {
+    "greeting": "Welcome to Release Hub",
+    "greetingWithProject": "Welcome back to {{name}}",
+    "description": "Track every release, feature, and flag across your repositories in one place."
+  },
+  "projectsHeading": "Your projects",
+  "searchPlaceholder": "Search projects...",
+  "projectCard": {
+    "integrationsCount": "{{count}}/{{total}} connected",
+    "openHint": "Open to view releases, features, and flags."
+  },
+  "noResults": {
+    "heading": "No projects match your search",
+    "description": "Try a different name or repository."
+  },
   "empty": {
     "heading": "No projects yet",
     "description": "Connect a repository to start tracking releases.",

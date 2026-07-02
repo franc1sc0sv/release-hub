@@ -1,6 +1,16 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Github, Flag, Link2, CheckCircle2, XCircle, Loader2, AlertTriangle } from 'lucide-react'
+import { toast } from 'sonner'
+import {
+  Github,
+  Flag,
+  Link2,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  AlertTriangle,
+  RefreshCw,
+} from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -37,10 +47,15 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
+import { getApiBase } from '@/lib/api-client'
 import { staggerContainer, slideUp } from '@/lib/animations'
 import { useConnectionSettings } from '../hooks/use-connection-settings'
 import { useGithubConnection } from '../hooks/use-github-connection'
+import { useGithubWebhook } from '../hooks/use-github-webhook'
 import { useLinearConnection } from '../hooks/use-linear-connection'
+import { useSyncFlagsmithFlags } from '@/features/flags/hooks/use-sync-flagsmith-flags'
+import { SlackCard } from './slack-card'
+import { WebhookField } from './webhook-field'
 
 interface ConnectionsSectionProps {
   projectId: string
@@ -82,18 +97,24 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
     updating,
     loadingProjects,
     verifying,
+    rotatingFlagsmithSecret,
     loadFlagsmithProjects,
     verifyFlagsmithConnection,
     connectFlagsmith,
     disconnectFlagsmith,
+    rotateFlagsmithWebhookSecret,
   } = useConnectionSettings(projectId)
   const github = useGithubConnection()
+  const githubWebhook = useGithubWebhook(projectId)
   const linear = useLinearConnection(projectId)
+  const { sync: syncFlagsmithFlags, loading: syncingFlags } = useSyncFlagsmithFlags(projectId)
 
   const [dialog, setDialog] = useState<ConnectDialogState | null>(null)
 
   const containerVariants = reduceMotion ? undefined : staggerContainer
   const itemVariants = reduceMotion ? undefined : slideUp
+
+  const apiBase = getApiBase()
 
   function openDialog(): void {
     setDialog({
@@ -187,6 +208,16 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
     }
   }
 
+  async function handleSyncFlagsmithFlags(): Promise<void> {
+    try {
+      const result = await syncFlagsmithFlags()
+      const count = result.data?.syncFlagsmithFlags ?? 0
+      toast.success(t('connections.flagsmith.syncSuccess', { count }))
+    } catch {
+      toast.error(t('connections.flagsmith.syncError'))
+    }
+  }
+
   if (loading) {
     return (
       <GlassCard>
@@ -215,141 +246,192 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
             animate="visible"
             className="divide-y divide-border/40"
           >
-            <motion.li
-              variants={itemVariants}
-              className="flex items-center justify-between gap-4 px-6 py-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Github className="size-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">{t('connections.github.label')}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t('connections.github.description')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {github.connected ? (
-                  <>
-                    <Badge className="rounded-full border-0 bg-chart-4/15 font-medium text-chart-4">
-                      <CheckCircle2 className="mr-1 size-3" />
-                      {t('connections.github.connected')}
-                    </Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => github.reconnect()}
-                      disabled={github.loading || github.reconnecting}
-                    >
-                      {t('connections.reconnect')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Badge className="rounded-full border-0 bg-destructive/15 font-medium text-destructive">
-                      <XCircle className="mr-1 size-3" />
-                      {t('connections.github.disconnected')}
-                    </Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => github.connect()}
-                      disabled={github.loading}
-                    >
-                      {t('connections.github.connect')}
-                    </Button>
-                  </>
-                )}
-              </div>
-            </motion.li>
-
-            <motion.li
-              variants={itemVariants}
-              className="flex items-center justify-between gap-4 px-6 py-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Flag className="size-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">{t('connections.flagsmith.label')}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t('connections.flagsmith.description')}
-                  </p>
-                  {settings?.flagsmithConnected && settings.flagsmithUrl && (
-                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                      {settings.flagsmithUrl}
+            <motion.li variants={itemVariants} className="flex flex-col gap-4 px-6 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                    <Github className="size-5 text-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">{t('connections.github.label')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('connections.github.description')}
                     </p>
-                  )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {settings?.flagsmithConnected ? (
-                  <>
-                    <Badge className="rounded-full border-0 bg-chart-4/15 font-medium text-chart-4">
-                      <CheckCircle2 className="mr-1 size-3" />
-                      {t('connections.flagsmith.connected')}
-                    </Badge>
-                    <Can I={Action.UPDATE} a={Subject.PROJECT}>
-                      <AlertDialog>
-                        <AlertDialogTrigger
-                          render={
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-muted-foreground hover:text-destructive"
-                              disabled={updating}
-                            />
-                          }
-                        >
-                          {t('connections.disconnect')}
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {t('connections.dialog.disconnectTitle', {
-                                name: t('connections.flagsmith.label'),
-                              })}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t('connections.dialog.disconnectDescription')}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t('connections.dialog.cancel')}</AlertDialogCancel>
-                            <AlertDialogAction
-                              variant="destructive"
-                              onClick={disconnectFlagsmith}
-                            >
-                              {t('connections.disconnect')}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </Can>
-                  </>
-                ) : (
-                  <>
-                    <Badge className="rounded-full border-0 bg-destructive/15 font-medium text-destructive">
-                      <XCircle className="mr-1 size-3" />
-                      {t('connections.flagsmith.disconnected')}
-                    </Badge>
-                    <Can I={Action.UPDATE} a={Subject.PROJECT}>
+                <div className="flex items-center gap-3">
+                  {github.connected ? (
+                    <>
+                      <Badge className="rounded-full border-0 bg-chart-4/15 font-medium text-chart-4">
+                        <CheckCircle2 className="mr-1 size-3" />
+                        {t('connections.github.connected')}
+                      </Badge>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => openDialog()}
-                        disabled={updating}
+                        onClick={() => github.reconnect()}
+                        disabled={github.loading || github.reconnecting}
                       >
-                        {t('connections.flagsmith.connect')}
+                        {t('connections.reconnect')}
                       </Button>
-                    </Can>
-                  </>
-                )}
+                    </>
+                  ) : (
+                    <>
+                      <Badge className="rounded-full border-0 bg-destructive/15 font-medium text-destructive">
+                        <XCircle className="mr-1 size-3" />
+                        {t('connections.github.disconnected')}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => github.connect()}
+                        disabled={github.loading}
+                      >
+                        {t('connections.github.connect')}
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
+
+              {github.connected && (
+                <div className="ml-[52px]">
+                  <WebhookField
+                    label={t('connections.webhook.githubLabel')}
+                    description={t('connections.webhook.githubDescription')}
+                    url={
+                      githubWebhook.webhookPath
+                        ? `${apiBase}${githubWebhook.webhookPath}`
+                        : null
+                    }
+                    secretSet={githubWebhook.secretSet}
+                    rotating={githubWebhook.rotating}
+                    onRotate={githubWebhook.rotateSecret}
+                  />
+                </div>
+              )}
             </motion.li>
+
+            <motion.li variants={itemVariants} className="flex flex-col gap-4 px-6 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                    <Flag className="size-5 text-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {t('connections.flagsmith.label')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('connections.flagsmith.description')}
+                    </p>
+                    {settings?.flagsmithConnected && settings.flagsmithUrl && (
+                      <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                        {settings.flagsmithUrl}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {settings?.flagsmithConnected ? (
+                    <>
+                      <Badge className="rounded-full border-0 bg-chart-4/15 font-medium text-chart-4">
+                        <CheckCircle2 className="mr-1 size-3" />
+                        {t('connections.flagsmith.connected')}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void handleSyncFlagsmithFlags()}
+                        disabled={syncingFlags}
+                      >
+                        {syncingFlags ? (
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="mr-2 size-4" />
+                        )}
+                        {t('connections.flagsmith.syncNow')}
+                      </Button>
+                      <Can I={Action.UPDATE} a={Subject.PROJECT}>
+                        <AlertDialog>
+                          <AlertDialogTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-muted-foreground hover:text-destructive"
+                                disabled={updating}
+                              />
+                            }
+                          >
+                            {t('connections.disconnect')}
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                {t('connections.dialog.disconnectTitle', {
+                                  name: t('connections.flagsmith.label'),
+                                })}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('connections.dialog.disconnectDescription')}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>
+                                {t('connections.dialog.cancel')}
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                variant="destructive"
+                                onClick={disconnectFlagsmith}
+                              >
+                                {t('connections.disconnect')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </Can>
+                    </>
+                  ) : (
+                    <>
+                      <Badge className="rounded-full border-0 bg-destructive/15 font-medium text-destructive">
+                        <XCircle className="mr-1 size-3" />
+                        {t('connections.flagsmith.disconnected')}
+                      </Badge>
+                      <Can I={Action.UPDATE} a={Subject.PROJECT}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDialog()}
+                          disabled={updating}
+                        >
+                          {t('connections.flagsmith.connect')}
+                        </Button>
+                      </Can>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {settings?.flagsmithConnected && (
+                <div className="ml-[52px]">
+                  <WebhookField
+                    label={t('connections.webhook.flagsmithLabel')}
+                    description={t('connections.webhook.flagsmithDescription')}
+                    url={
+                      settings.flagsmithWebhookPath
+                        ? `${apiBase}${settings.flagsmithWebhookPath}`
+                        : null
+                    }
+                    secretSet={settings.flagsmithWebhookSecretSet}
+                    rotating={rotatingFlagsmithSecret}
+                    onRotate={rotateFlagsmithWebhookSecret}
+                  />
+                </div>
+              )}
+            </motion.li>
+
+            <SlackCard projectId={projectId} />
 
             <motion.li
               variants={itemVariants}

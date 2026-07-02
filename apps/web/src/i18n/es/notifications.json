@@ -1,0 +1,16 @@
+{
+  "title": "Preferencias de notificaciones",
+  "columns": {
+    "notification": "Notificación",
+    "email": "Correo",
+    "slack": "Slack",
+    "digestFrequency": "Frecuencia del resumen"
+  },
+  "toggleAriaLabel": "Activar {{type}} vía {{channel}}",
+  "digest": {
+    "frequencyLabel": "Frecuencia del resumen",
+    "sendTest": "Enviar resumen de prueba",
+    "testSent": "Resumen de prueba enviado.",
+    "testFailed": "No se pudo enviar el resumen de prueba. Inténtalo de nuevo."
+  }
+}

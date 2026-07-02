@@ -1,6 +1,14 @@
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FolderOpen, Rocket, LayoutList, Flag, Settings, type LucideIcon } from 'lucide-react'
+import {
+  FolderOpen,
+  Rocket,
+  LayoutList,
+  Flag,
+  GitBranch,
+  Settings,
+  type LucideIcon,
+} from 'lucide-react'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -21,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: ROUTES.RELEASES, labelKey: 'nav.releases', icon: Rocket },
   { to: ROUTES.FEATURES, labelKey: 'nav.features', icon: LayoutList },
   { to: ROUTES.FLAGS, labelKey: 'nav.flags', icon: Flag },
+  { to: ROUTES.REPO_OPS, labelKey: 'nav.repoOps', icon: GitBranch },
   { to: ROUTES.SETTINGS, labelKey: 'nav.settings', icon: Settings },
 ]
 

@@ -49,6 +49,7 @@ export interface IProjectConnectionCredentials {
 
 export interface IProjectWebhookSecretStatus {
   flagsmithWebhookSecretSet: boolean
+  githubWebhookSecretSet: boolean
 }
 
 export interface IProjectMembershipRecord {

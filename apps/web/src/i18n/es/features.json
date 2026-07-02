@@ -4,6 +4,7 @@
   "new": "Nueva funcionalidad",
   "count_one": "{{count}} funcionalidad",
   "count_other": "{{count}} funcionalidades",
+  "searchPlaceholder": "Buscar funcionalidades...",
   "state": {
     "label": "Estado de la funcionalidad",
     "none": "Sin lanzamiento aún"
@@ -34,6 +35,10 @@
     "description": "Las funcionalidades son el registro permanente — cada PR es trazable a una.",
     "cta": "Crear funcionalidad"
   },
+  "emptySearch": {
+    "heading": "Ninguna funcionalidad coincide con tu búsqueda",
+    "description": "Intenta con otro nombre o borra la búsqueda para ver el registro completo."
+  },
   "loading": "Cargando funcionalidades...",
   "error": {
     "heading": "Error al cargar funcionalidades",
@@ -49,6 +54,7 @@
     "compareRef": "Comparar"
   },
   "detail": {
+    "noReleasesHeading": "Sin lanzamientos aún",
     "noReleases": "Esta funcionalidad aún no ha aparecido en ningún lanzamiento.",
     "notFound": "Funcionalidad no encontrada",
     "notFoundDescription": "Esta funcionalidad no existe o ha sido eliminada.",
