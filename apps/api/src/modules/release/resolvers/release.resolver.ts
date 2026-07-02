@@ -24,8 +24,6 @@ import { ConfirmReleaseInput } from '../commands/confirm-release/confirm-release
 import { ShipReleaseInput } from '../commands/ship-release/ship-release.input'
 import { SaveReleaseSummaryInput } from '../commands/save-release-summary/save-release-summary.input'
 import { SavePrSummaryInput } from '../commands/save-pr-summary/save-pr-summary.input'
-import { DiffRefsQuery } from '../queries/diff-refs/diff-refs.query'
-import { GetReleasesQuery } from '../queries/get-releases/get-releases.query'
 import { GetReleasesPageQuery } from '../queries/get-releases-page/get-releases-page.query'
 import { GetReleaseQuery } from '../queries/get-release/get-release.query'
 import { GetReleaseTreeQuery } from '../queries/get-release-tree/get-release-tree.query'
@@ -54,16 +52,6 @@ export class ReleaseResolver {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Query(() => [ReleaseObjectType])
-  @UseGuards(PoliciesGuard)
-  @Can(Action.READ, Subject.RELEASE)
-  getReleases(
-    @Args('projectId', { type: () => ID }) projectId: string,
-    @CurrentUser() user: IJwtUser,
-  ): Promise<ReleaseObjectType[]> {
-    return this.queryBus.execute(new GetReleasesQuery(user.id, projectId))
-  }
-
   @Query(() => ReleaseObjectType)
   @UseGuards(PoliciesGuard)
   @Can(Action.READ, Subject.RELEASE)
@@ -82,20 +70,6 @@ export class ReleaseResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ReleaseTreeType> {
     return this.queryBus.execute(new GetReleaseTreeQuery(user.id, id))
-  }
-
-  @Query(() => [PullRequestType])
-  @UseGuards(PoliciesGuard)
-  @Can(Action.READ, Subject.PULL_REQUEST)
-  diffRefs(
-    @Args('projectId', { type: () => ID }) projectId: string,
-    @Args('baseRef', { type: () => String }) baseRef: string,
-    @Args('compareRef', { type: () => String }) compareRef: string,
-    @CurrentUser() user: IJwtUser,
-  ): Promise<PullRequestType[]> {
-    return this.queryBus.execute(
-      new DiffRefsQuery(user.id, projectId, baseRef, compareRef),
-    )
   }
 
   @Query(() => CoverageType)

@@ -24,19 +24,6 @@ export const CREATE_GITHUB_BRANCH = graphql(`
   }
 `)
 
-export const SHIP_RELEASE = graphql(`
-  mutation ShipRelease($input: ShipReleaseInput!) {
-    shipRelease(input: $input) {
-      id
-      name
-      status
-      tags
-      prUrl
-      projectId
-    }
-  }
-`)
-
 export const UPDATE_RELEASE = graphql(`
   mutation UpdateRelease($input: UpdateReleaseInput!) {
     updateRelease(input: $input) {

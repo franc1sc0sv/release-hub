@@ -14,7 +14,7 @@ import {
 import { CommitRow } from './CommitRow'
 import { TicketChip } from './TicketChip'
 import { PrSummaryPanel } from './PrSummaryPanel'
-import { LIST_FEATURES } from '@/features/features/graphql/features.queries'
+import { LIST_FEATURES_PAGE } from '@/features/features/graphql/features.queries'
 import { UPDATE_RELEASE } from '../graphql/releases.mutations'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
@@ -35,8 +35,8 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
   const [showCommits, setShowCommits] = useState(false)
   const reduceMotion = useReducedMotion()
 
-  const { data: featuresData } = useQuery(LIST_FEATURES, {
-    variables: { projectId },
+  const { data: featuresData } = useQuery(LIST_FEATURES_PAGE, {
+    variables: { input: { projectId, limit: 50, offset: 0, search: undefined } },
     fetchPolicy: 'cache-first',
   })
 
@@ -64,7 +64,7 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
     [updateRelease, releaseId, pr.id, t],
   )
 
-  const assignableFeatures = (featuresData?.listFeatures ?? []).filter(
+  const assignableFeatures = (featuresData?.listFeaturesPage.items ?? []).filter(
     (f) => !f.suggested,
   )
 

@@ -50,14 +50,6 @@ export class FeatureRepository extends IFeatureRepository {
     return this.toIFeature(row)
   }
 
-  findAllByProject = async (projectId: string, tx: TxClient): Promise<IFeature[]> => {
-    const rows = await tx.feature.findMany({
-      where: { projectId, deletedAt: null },
-      orderBy: [{ kind: 'desc' }, { createdAt: 'asc' }],
-    })
-    return rows.map((row) => this.toIFeature(row))
-  }
-
   findPage = async (filters: IFeaturesPageFilters, tx: TxClient): Promise<IFeaturesPage> => {
     const where = {
       projectId: filters.projectId,

@@ -1,22 +1,5 @@
 import { graphql } from '@/generated/gql'
 
-export const LIST_FEATURES = graphql(`
-  query ListFeatures($projectId: ID!) {
-    listFeatures(projectId: $projectId) {
-      id
-      projectId
-      name
-      description
-      kind
-      suggested
-      tags
-      currentState
-      createdAt
-      updatedAt
-    }
-  }
-`)
-
 export const LIST_FEATURES_PAGE = graphql(`
   query ListFeaturesPage($input: ListFeaturesPageInput!) {
     listFeaturesPage(input: $input) {

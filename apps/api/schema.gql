@@ -581,7 +581,6 @@ type Query {
   branchCleanupCandidates(projectId: ID!): [BranchCleanupCandidateType!]!
   compareFlags(baselineEnvironments: [String!]!, comparedEnvironments: [String!]!, projectId: ID!): FlagComparisonResultType!
   compareRefs(baseRef: String!, compareRef: String!, projectId: ID!): RefComparisonType!
-  diffRefs(baseRef: String!, compareRef: String!, projectId: ID!): [PullRequestType!]!
   exportSummary(input: ExportSummaryInput!): ExportResultType!
   flagRegistry(projectId: ID!): FlagRegistryConfigType!
   flagsmithProjects(apiKey: String!, projectId: ID!, url: String!): [FlagsmithProjectType!]!
@@ -592,7 +591,6 @@ type Query {
   getProject(id: ID!): ProjectType!
   getRelease(id: ID!): ReleaseObjectType!
   getReleaseTree(id: ID!): ReleaseTreeType!
-  getReleases(projectId: ID!): [ReleaseObjectType!]!
   getReleasesPage(limit: Float! = 20, offset: Float! = 0, projectId: ID!, search: String): ReleasesPageType!
   githubAuthorizeUrl: String!
   githubBranches(projectId: ID!): [GithubBranchType!]!
@@ -601,7 +599,6 @@ type Query {
   inProgressFlagReminders(excludeReleaseId: ID, projectId: ID!): [InProgressFlagReminderType!]!
   linearAuthorizeUrl(projectId: ID!): String!
   linearConnection(projectId: ID!): LinearConnectionStatus!
-  listFeatures(projectId: ID!): [FeatureType!]!
   listFeaturesPage(input: ListFeaturesPageInput!): FeaturePageType!
   listInvitations(projectId: ID!): [InvitationType!]!
   listMembers(projectId: ID!): [MemberType!]!

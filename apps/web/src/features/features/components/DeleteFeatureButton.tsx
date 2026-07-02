@@ -18,18 +18,15 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { DELETE_FEATURE } from '../graphql/features.mutations'
-import { LIST_FEATURES } from '../graphql/features.queries'
 
 interface DeleteFeatureButtonProps {
   featureId: string
-  projectId: string
   featureName: string
   onDeleted?: () => void
 }
 
 export function DeleteFeatureButton({
   featureId,
-  projectId,
   featureName,
   onDeleted,
 }: DeleteFeatureButtonProps) {
@@ -37,7 +34,7 @@ export function DeleteFeatureButton({
   const [open, setOpen] = useState(false)
 
   const [deleteFeature, { loading }] = useMutation(DELETE_FEATURE, {
-    refetchQueries: [{ query: LIST_FEATURES, variables: { projectId } }],
+    refetchQueries: ['ListFeaturesPage'],
     awaitRefetchQueries: true,
     onCompleted: () => {
       toast.success(t('delete.success'))

@@ -15,7 +15,6 @@ import { CreateFeatureInput } from '../types/create-feature.input'
 import { AssignPrToFeatureInput } from '../types/assign-pr-to-feature.input'
 import { SetFeatureStateInput } from '../commands/set-feature-state/set-feature-state.input'
 import { SetFeatureTagsInput } from '../commands/set-feature-tags/set-feature-tags.input'
-import { ListFeaturesQuery } from '../queries/list-features/list-features.query'
 import { ListFeaturesPageQuery } from '../queries/list-features-page/list-features-page.query'
 import { GetFeatureQuery } from '../queries/get-feature/get-feature.query'
 import { CreateFeatureCommand } from '../commands/create-feature/create-feature.command'
@@ -35,15 +34,6 @@ export class FeatureResolver {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
-
-  @Query(() => [FeatureType])
-  @Can(Action.READ, Subject.FEATURE)
-  listFeatures(
-    @Args('projectId', { type: () => ID }) projectId: string,
-    @CurrentUser() user: IJwtUser,
-  ): Promise<FeatureType[]> {
-    return this.queryBus.execute(new ListFeaturesQuery(projectId, user.id))
-  }
 
   @Query(() => FeaturePageType)
   @Can(Action.READ, Subject.FEATURE)

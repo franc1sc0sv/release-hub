@@ -28,7 +28,6 @@ import { GradientButton } from '@/components/nebula/GradientButton'
 import { useProject } from '@/context/project.context'
 import { PROJECT_TAGS } from '@/features/settings/graphql/settings.operations'
 import { CREATE_FEATURE } from '../graphql/features.mutations'
-import { LIST_FEATURES } from '../graphql/features.queries'
 
 interface CreateFeatureDialogProps {
   open: boolean
@@ -67,12 +66,7 @@ export function CreateFeatureDialog({ open, onOpenChange }: CreateFeatureDialogP
   const projectTags = tagsData?.projectTags ?? []
 
   const [createFeature, { loading }] = useMutation(CREATE_FEATURE, {
-    refetchQueries: [
-      {
-        query: LIST_FEATURES,
-        variables: { projectId: activeProject?.id ?? '' },
-      },
-    ],
+    refetchQueries: ['ListFeaturesPage'],
     onCompleted: (data) => {
       toast.success(t('toast.created', { name: data.createFeature.name }))
       setForm(EMPTY_FORM)

@@ -1,22 +1,5 @@
 import { graphql } from '@/generated/gql'
 
-export const GET_RELEASES = graphql(`
-  query GetReleases($projectId: ID!) {
-    getReleases(projectId: $projectId) {
-      id
-      name
-      baseRef
-      compareRef
-      status
-      tags
-      prUrl
-      projectId
-      createdAt
-      updatedAt
-    }
-  }
-`)
-
 export const GET_RELEASES_PAGE = graphql(`
   query GetReleasesPage($projectId: ID!, $limit: Float!, $offset: Float!, $search: String) {
     getReleasesPage(projectId: $projectId, limit: $limit, offset: $offset, search: $search) {
@@ -34,23 +17,6 @@ export const GET_RELEASES_PAGE = graphql(`
         createdAt
         updatedAt
       }
-    }
-  }
-`)
-
-export const GET_RELEASE = graphql(`
-  query GetRelease($id: ID!) {
-    getRelease(id: $id) {
-      id
-      name
-      baseRef
-      compareRef
-      status
-      tags
-      prUrl
-      projectId
-      createdAt
-      updatedAt
     }
   }
 `)
@@ -148,16 +114,6 @@ export const EXPORT_SUMMARY = graphql(`
   }
 `)
 
-export const SUGGEST_FEATURE_FOR_PR = graphql(`
-  query SuggestFeatureForPr($prId: ID!) {
-    suggestFeatureForPr(prId: $prId) {
-      featureId
-      confidence
-      rationale
-    }
-  }
-`)
-
 export const GENERATE_SUMMARY = graphql(`
   subscription GenerateSummary($input: GenerateSummaryInput!) {
     generateSummary(input: $input) {
@@ -233,30 +189,3 @@ export const IN_PROGRESS_FLAG_REMINDERS = graphql(`
   }
 `)
 
-export const DIFF_REFS = graphql(`
-  query DiffRefs($projectId: ID!, $baseRef: String!, $compareRef: String!) {
-    diffRefs(projectId: $projectId, baseRef: $baseRef, compareRef: $compareRef) {
-      id
-      number
-      title
-      body
-      author
-      mergedAt
-      releaseId
-      featureId
-      tickets {
-        issueId
-        source
-        url
-        title
-        confidence
-      }
-      commits {
-        sha
-        message
-        author
-        date
-      }
-    }
-  }
-`)

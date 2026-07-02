@@ -15,12 +15,6 @@ export const CREATE_FEATURE = graphql(`
   }
 `)
 
-export const ASSIGN_PR_TO_FEATURE = graphql(`
-  mutation AssignPrToFeature($input: AssignPrToFeatureInput!) {
-    assignPrToFeature(input: $input)
-  }
-`)
-
 export const SET_FEATURE_STATE = graphql(`
   mutation SetFeatureState($input: SetFeatureStateInput!) {
     setFeatureState(input: $input) {

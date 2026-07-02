@@ -7,16 +7,14 @@ import { Badge } from '@/components/ui/badge'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { SET_FEATURE_TAGS } from '../graphql/features.mutations'
-import { LIST_FEATURES } from '../graphql/features.queries'
 import { GET_FEATURE } from '../graphql/features.queries'
 
 interface TagChipsProps {
   featureId: string
-  projectId: string
   tags: string[]
 }
 
-function TagChipsEditable({ featureId, projectId, tags }: TagChipsProps) {
+function TagChipsEditable({ featureId, tags }: TagChipsProps) {
   const { t } = useTranslation('features')
   const [optimisticTags, setOptimisticTags] = useState<string[]>(tags)
   const [inputVisible, setInputVisible] = useState(false)
@@ -25,7 +23,7 @@ function TagChipsEditable({ featureId, projectId, tags }: TagChipsProps) {
 
   const [setFeatureTags] = useMutation(SET_FEATURE_TAGS, {
     refetchQueries: [
-      { query: LIST_FEATURES, variables: { projectId } },
+      'ListFeaturesPage',
       { query: GET_FEATURE, variables: { id: featureId } },
     ],
     awaitRefetchQueries: false,

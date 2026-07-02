@@ -17,8 +17,6 @@ import { PullRequestRepository } from './repositories/pull-request.repository'
 import { CommitRepository } from './repositories/commit.repository'
 import { FeatureInReleaseRepository } from './repositories/feature-in-release.repository'
 import { FeatureRepository } from '../feature/repositories/feature.repository'
-import { DiffRefsHandler } from './queries/diff-refs/diff-refs.handler'
-import { GetReleasesHandler } from './queries/get-releases/get-releases.handler'
 import { GetReleasesPageHandler } from './queries/get-releases-page/get-releases-page.handler'
 import { GetReleaseHandler } from './queries/get-release/get-release.handler'
 import { GetReleaseTreeHandler } from './queries/get-release-tree/get-release-tree.handler'
@@ -56,8 +54,6 @@ import { HandleGithubDeploymentWebhookHandler } from './commands/handle-github-d
     { provide: ICommitRepository, useClass: CommitRepository },
     { provide: IFeatureInReleaseRepository, useClass: FeatureInReleaseRepository },
     { provide: IFeatureRepository, useClass: FeatureRepository },
-    DiffRefsHandler,
-    GetReleasesHandler,
     GetReleasesPageHandler,
     GetReleaseHandler,
     GetReleaseTreeHandler,

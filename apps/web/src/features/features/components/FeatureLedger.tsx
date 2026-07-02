@@ -50,12 +50,8 @@ function FeatureRow({ feature }: { feature: FeaturePageItem }) {
         </div>
 
         <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
-          <TagChips featureId={feature.id} projectId={feature.projectId} tags={feature.tags} />
-          <DeleteFeatureButton
-            featureId={feature.id}
-            projectId={feature.projectId}
-            featureName={feature.name}
-          />
+          <TagChips featureId={feature.id} tags={feature.tags} />
+          <DeleteFeatureButton featureId={feature.id} featureName={feature.name} />
         </div>
       </div>
     </motion.li>
