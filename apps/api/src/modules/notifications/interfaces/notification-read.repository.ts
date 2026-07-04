@@ -7,6 +7,7 @@ import type {
   IInProgressFlagSummary,
   IEnabledProdFlagSummary,
   IDeployedReleaseSummary,
+  IShipOffReminderCandidate,
 } from './notification.interfaces'
 
 export abstract class INotificationReadRepository {
@@ -26,5 +27,9 @@ export abstract class INotificationReadRepository {
   abstract findReleasesDeployedInWindow: RepositoryMethod<
     [projectId: string, since: Date],
     IDeployedReleaseSummary[]
+  >
+  abstract findShipOffReminderCandidates: RepositoryMethod<
+    [projectId: string, reminderIntervalDays: number],
+    IShipOffReminderCandidate[]
   >
 }

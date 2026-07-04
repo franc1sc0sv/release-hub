@@ -4,6 +4,7 @@ import type { ITrackedFlag, ICreateTrackedFlagData, ITrackedFlagWithDetails } fr
 export abstract class ITrackedFlagRepository implements IBaseRepository<ITrackedFlag> {
   abstract findById: RepositoryMethod<[id: string], ITrackedFlag | null>
   abstract findByIdWithDetails: RepositoryMethod<[id: string], ITrackedFlagWithDetails | null>
+  abstract findByIdsWithDetails: RepositoryMethod<[ids: string[]], ITrackedFlagWithDetails[]>
   abstract findByProjectAndKey: RepositoryMethod<[projectId: string, key: string], ITrackedFlag | null>
   abstract findByProjectAndKeyWithDetails: RepositoryMethod<
     [projectId: string, key: string],

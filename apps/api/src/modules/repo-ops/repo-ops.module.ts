@@ -12,6 +12,9 @@ import { UnblockBranchHandler } from './commands/unblock-branch/unblock-branch.h
 import { DeleteGithubBranchesHandler } from './commands/delete-github-branches/delete-github-branches.handler'
 import { ListBlockedBranchesHandler } from './queries/list-blocked-branches/list-blocked-branches.handler'
 import { GetBranchCleanupCandidatesHandler } from './queries/get-branch-cleanup-candidates/get-branch-cleanup-candidates.handler'
+import { BranchCleanupPageHandler } from './queries/branch-cleanup-page/branch-cleanup-page.handler'
+import { GetBranchCleanupPlanHandler } from './queries/get-branch-cleanup-plan/get-branch-cleanup-plan.handler'
+import { GetBranchAuthorsHandler } from './queries/get-branch-authors/get-branch-authors.handler'
 
 @Module({
   imports: [CqrsModule, ProjectModule, IntegrationModule, GithubAuthModule, ReleaseModule],
@@ -23,6 +26,9 @@ import { GetBranchCleanupCandidatesHandler } from './queries/get-branch-cleanup-
     DeleteGithubBranchesHandler,
     ListBlockedBranchesHandler,
     GetBranchCleanupCandidatesHandler,
+    BranchCleanupPageHandler,
+    GetBranchCleanupPlanHandler,
+    GetBranchAuthorsHandler,
   ],
 })
 export class RepoOpsModule {}

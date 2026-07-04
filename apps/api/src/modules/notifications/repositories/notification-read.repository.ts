@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { ReleaseFlagDecisionType } from '@release-hub/db'
+import { ReleaseFlagDecisionType, ReleaseStatus } from '@release-hub/db'
 import { INotificationReadRepository } from '../interfaces/notification-read.repository'
 import type {
   IProjectSlackConnectionSummary,
@@ -10,7 +10,10 @@ import type {
   IInProgressFlagSummary,
   IEnabledProdFlagSummary,
   IDeployedReleaseSummary,
+  IShipOffReminderCandidate,
 } from '../interfaces/notification.interfaces'
+
+const SHIP_OFF_RELEASE_STATUSES: ReleaseStatus[] = [ReleaseStatus.merged, ReleaseStatus.deployed]
 
 const PROD_ENVIRONMENT_NAME_REGEX = /prod/i
 
@@ -47,9 +50,14 @@ export class NotificationReadRepository extends INotificationReadRepository {
   findAllActiveProjects = async (tx: TxClient): Promise<IProjectForDigest[]> => {
     const rows = await tx.project.findMany({
       where: { deletedAt: null },
-      select: { id: true, name: true, flagStaleDays: true },
+      select: { id: true, name: true, flagStaleDays: true, flagReminderIntervalDays: true },
     })
-    return rows.map((row) => ({ id: row.id, name: row.name, flagStaleDays: row.flagStaleDays }))
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      flagStaleDays: row.flagStaleDays,
+      flagReminderIntervalDays: row.flagReminderIntervalDays,
+    }))
   }
 
   findStaleInProgressFlags = async (
@@ -176,5 +184,65 @@ export class NotificationReadRepository extends INotificationReadRepository {
         prUrl: row.prUrl,
         deployedAt: row.deployedAt,
       }))
+  }
+
+  findShipOffReminderCandidates = async (
+    projectId: string,
+    reminderIntervalDays: number,
+    tx: TxClient,
+  ): Promise<IShipOffReminderCandidate[]> => {
+    const remindBefore = new Date()
+    remindBefore.setDate(remindBefore.getDate() - reminderIntervalDays)
+
+    const decisions = await tx.releaseFlagDecision.findMany({
+      where: { trackedFlag: { projectId, deletedAt: null } },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        trackedFlagId: true,
+        decision: true,
+        decidedAt: true,
+        release: { select: { status: true, deletedAt: true } },
+        trackedFlag: {
+          select: {
+            id: true,
+            projectId: true,
+            key: true,
+            lastRemindedAt: true,
+            flagsmithFlags: { select: { states: { select: { enabled: true } } } },
+          },
+        },
+      },
+    })
+
+    const latestByFlag = new Map<string, (typeof decisions)[number]>()
+    for (const decision of decisions) {
+      if (!latestByFlag.has(decision.trackedFlagId)) {
+        latestByFlag.set(decision.trackedFlagId, decision)
+      }
+    }
+
+    const candidates: IShipOffReminderCandidate[] = []
+    for (const decision of latestByFlag.values()) {
+      if (decision.decision !== ReleaseFlagDecisionType.SHIP_OFF) continue
+      if (decision.release.deletedAt !== null) continue
+      if (!SHIP_OFF_RELEASE_STATUSES.includes(decision.release.status)) continue
+
+      const { lastRemindedAt } = decision.trackedFlag
+      if (lastRemindedAt !== null && lastRemindedAt > remindBefore) continue
+
+      const allStates = decision.trackedFlag.flagsmithFlags.flatMap((flag) => flag.states)
+      const stillDisabled = allStates.every((state) => !state.enabled)
+      if (!stillDisabled) continue
+
+      candidates.push({
+        trackedFlagId: decision.trackedFlag.id,
+        projectId: decision.trackedFlag.projectId,
+        key: decision.trackedFlag.key,
+        lastRemindedAt,
+        decidedAt: decision.decidedAt,
+      })
+    }
+
+    return candidates
   }
 }

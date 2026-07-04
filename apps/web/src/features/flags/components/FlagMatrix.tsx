@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
@@ -15,10 +16,11 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/routes'
-import { slideUp } from '@/lib/animations'
+import { fadeIn } from '@/lib/animations'
 import type { FlagSortField, SortDirection, GetFlagsQuery } from '@/generated/graphql'
 import { EnvStateCell } from './EnvStateCell'
 import { FlagStaleBadge } from './FlagStaleBadge'
+import { FlagDeploymentStatusBadge } from './FlagDeploymentStatusBadge'
 
 type FlagItem = GetFlagsQuery['getFlags']['items'][number]
 
@@ -78,21 +80,30 @@ function SortableHeader({
 interface FlagRowProps {
   flag: FlagItem
   visibleEnvironments: string[]
+  onLabel: string
+  offLabel: string
 }
 
-function FlagRow({ flag, visibleEnvironments }: FlagRowProps) {
-  const reduceMotion = useReducedMotion()
+const FlagRow = memo(function FlagRow({
+  flag,
+  visibleEnvironments,
+  onLabel,
+  offLabel,
+}: FlagRowProps) {
   const formattedDate = flag.createdAt
     ? format(new Date(flag.createdAt), 'MMM d, yyyy')
     : null
 
+  const environmentsByName = useMemo(() => {
+    const map = new Map<string, FlagItem['environments'][number]>()
+    for (const env of flag.environments) {
+      map.set(env.name, env)
+    }
+    return map
+  }, [flag.environments])
+
   return (
-    <motion.tr
-      variants={reduceMotion ? undefined : slideUp}
-      initial="hidden"
-      animate="visible"
-      className="border-b transition-colors hover:bg-muted/50"
-    >
+    <TableRow>
       <TableCell className="pl-6">
         <div className="flex flex-wrap items-center gap-2">
           <Link
@@ -107,17 +118,20 @@ function FlagRow({ flag, visibleEnvironments }: FlagRowProps) {
       <TableCell className="text-sm text-muted-foreground font-mono">
         {formattedDate ?? '—'}
       </TableCell>
+      <TableCell>
+        <FlagDeploymentStatusBadge status={flag.deploymentStatus} />
+      </TableCell>
       {visibleEnvironments.map((env) => {
-        const state = flag.environments.find((e) => e.name === env)
+        const state = environmentsByName.get(env)
         return (
           <TableCell key={env}>
-            <EnvStateCell enabled={state?.enabled ?? false} />
+            <EnvStateCell enabled={state?.enabled ?? false} onLabel={onLabel} offLabel={offLabel} />
           </TableCell>
         )
       })}
-    </motion.tr>
+    </TableRow>
   )
-}
+})
 
 export function FlagMatrix({
   items,
@@ -129,69 +143,77 @@ export function FlagMatrix({
   activeSortEnv,
 }: FlagMatrixProps) {
   const { t } = useTranslation('flags')
+  const reduceMotion = useReducedMotion()
+  const onLabel = t('state.on')
+  const offLabel = t('state.off')
 
   return (
-    <GlassCard>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="font-display text-lg font-semibold">{t('title')}</CardTitle>
-          <span className="rounded-full bg-muted/60 px-3 py-1 font-mono text-sm text-muted-foreground">
-            {t('matrix.count', { count: totalCount })}
-          </span>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0 pb-2">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-6">
-                  <SortableHeader
-                    label={t('matrix.flag')}
-                    field="NAME"
-                    activeSortField={sortField}
-                    activeSortEnv={activeSortEnv}
-                    sortDirection={sortDirection}
-                    onSort={onSortChange}
-                  />
-                </TableHead>
-                <TableHead>
-                  <SortableHeader
-                    label={t('matrix.created')}
-                    field="CREATED"
-                    activeSortField={sortField}
-                    activeSortEnv={activeSortEnv}
-                    sortDirection={sortDirection}
-                    onSort={onSortChange}
-                  />
-                </TableHead>
-                {visibleEnvironments.map((env) => (
-                  <TableHead key={env}>
+    <motion.div variants={reduceMotion ? undefined : fadeIn} initial="hidden" animate="visible">
+      <GlassCard>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="font-display text-lg font-semibold">{t('title')}</CardTitle>
+            <span className="rounded-full bg-muted/60 px-3 py-1 font-mono text-sm text-muted-foreground">
+              {t('matrix.count', { count: totalCount })}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 pb-2">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6">
                     <SortableHeader
-                      label={env}
-                      field="ENVIRONMENT"
-                      envName={env}
+                      label={t('matrix.flag')}
+                      field="NAME"
                       activeSortField={sortField}
                       activeSortEnv={activeSortEnv}
                       sortDirection={sortDirection}
                       onSort={onSortChange}
                     />
                   </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label={t('matrix.created')}
+                      field="CREATED"
+                      activeSortField={sortField}
+                      activeSortEnv={activeSortEnv}
+                      sortDirection={sortDirection}
+                      onSort={onSortChange}
+                    />
+                  </TableHead>
+                  <TableHead className="font-medium text-muted-foreground">{t('matrix.status')}</TableHead>
+                  {visibleEnvironments.map((env) => (
+                    <TableHead key={env}>
+                      <SortableHeader
+                        label={env}
+                        field="ENVIRONMENT"
+                        envName={env}
+                        activeSortField={sortField}
+                        activeSortEnv={activeSortEnv}
+                        sortDirection={sortDirection}
+                        onSort={onSortChange}
+                      />
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map((flag) => (
+                  <FlagRow
+                    key={flag.key}
+                    flag={flag}
+                    visibleEnvironments={visibleEnvironments}
+                    onLabel={onLabel}
+                    offLabel={offLabel}
+                  />
                 ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((flag) => (
-                <FlagRow
-                  key={flag.key}
-                  flag={flag}
-                  visibleEnvironments={visibleEnvironments}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </GlassCard>
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </GlassCard>
+    </motion.div>
   )
 }

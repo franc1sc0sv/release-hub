@@ -8,12 +8,18 @@ import type {
   IFlagsmithFlagMatrixFilters,
   IFlagsmithFlagMatrixResult,
   IFlagsmithFlagRecord,
+  IReconcileFlagsResult,
+  IUpsertFlagsmithFlagWithStatesResult,
+  IFlagsmithFlagDetail,
 } from './flagsmith-sync.interfaces'
 
 export abstract class IFlagsmithFlagRepository {
   abstract upsertEnvironment: RepositoryMethod<[data: IUpsertFlagsmithEnvironmentData], { id: string; name: string }>
-  abstract upsertFlagWithStates: RepositoryMethod<[data: IUpsertFlagsmithFlagData], void>
-  abstract reconcileFlags: RepositoryMethod<[projectId: string, flags: IUpsertFlagsmithFlagData[]], void>
+  abstract upsertFlagWithStates: RepositoryMethod<
+    [data: IUpsertFlagsmithFlagData],
+    IUpsertFlagsmithFlagWithStatesResult
+  >
+  abstract reconcileFlags: RepositoryMethod<[projectId: string, flags: IUpsertFlagsmithFlagData[]], IReconcileFlagsResult>
   abstract softDeleteFlagsNotInKeys: RepositoryMethod<[projectId: string, keys: string[]], void>
   abstract softDeleteFlagByKey: RepositoryMethod<[projectId: string, key: string], void>
   abstract findFlagMatrix: RepositoryMethod<[filters: IFlagsmithFlagMatrixFilters], IFlagsmithFlagMatrixResult>
@@ -30,6 +36,7 @@ export abstract class IFlagsmithFlagRepository {
     [projectId: string, key: string, environmentName: string],
     { flagId: string; environmentId: string } | null
   >
+  abstract findFlagDetailByKey: RepositoryMethod<[projectId: string, key: string], IFlagsmithFlagDetail | null>
   abstract createSyncRun: RepositoryMethod<[data: ICreateFlagsmithSyncRunData], IFlagsmithSyncRun>
   abstract completeSyncRun: RepositoryMethod<[id: string, data: ICompleteFlagsmithSyncRunData], void>
   abstract failSyncRun: RepositoryMethod<[id: string, error: string], void>

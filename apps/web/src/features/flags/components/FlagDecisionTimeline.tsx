@@ -8,9 +8,9 @@ import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import { releaseFlagDecisionTone } from '@/features/releases/constants/release-enums'
 import { buildFlagDecisionTimeline } from '../lib/flag-decision-timeline'
-import type { TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 
 interface FlagDecisionTimelineProps {
   releases: TrackedFlagDetail['releases']

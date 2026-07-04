@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { GraphQLISODateTime } from '@nestjs/graphql'
+import { FlagDeploymentStatus } from '../../../common/types/flag-deployment-status.enum'
 
 @ObjectType()
 export class FlagEnvironmentStateType {
@@ -8,6 +9,9 @@ export class FlagEnvironmentStateType {
 
   @Field(() => Boolean)
   enabled!: boolean
+
+  @Field(() => String, { nullable: true })
+  value!: string | null
 }
 
 @ObjectType()
@@ -20,6 +24,9 @@ export class FlagRefType {
 
   @Field(() => [FlagEnvironmentStateType])
   environments!: FlagEnvironmentStateType[]
+
+  @Field(() => FlagDeploymentStatus)
+  deploymentStatus!: FlagDeploymentStatus
 }
 
 @ObjectType()

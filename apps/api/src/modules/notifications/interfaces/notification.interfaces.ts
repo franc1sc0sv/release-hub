@@ -10,6 +10,7 @@ export interface INotificationPayload {
   projectId: string
   releaseId: string | null
   flagIds: string[]
+  flagKey: string | null
 }
 
 export interface INotificationRecipientUser {
@@ -64,6 +65,7 @@ export interface IProjectForDigest {
   id: string
   name: string
   flagStaleDays: number
+  flagReminderIntervalDays: number
 }
 
 export interface IStaleFlagCandidate {
@@ -90,4 +92,49 @@ export interface IDeployedReleaseSummary {
   name: string | null
   prUrl: string | null
   deployedAt: Date
+}
+
+export interface IShipOffReminderCandidate {
+  trackedFlagId: string
+  projectId: string
+  key: string
+  lastRemindedAt: Date | null
+  decidedAt: Date | null
+}
+
+export interface INotification {
+  id: string
+  userId: string
+  projectId: string
+  projectName: string
+  type: NotificationType
+  title: string
+  body: string
+  url: string | null
+  flagKey: string | null
+  readAt: Date | null
+  createdAt: Date
+}
+
+export interface ICreateNotificationData {
+  userId: string
+  projectId: string
+  type: NotificationType
+  title: string
+  body: string
+  url: string | null
+  flagKey: string | null
+}
+
+export interface INotificationsPageFilters {
+  userId: string
+  limit: number
+  offset: number
+  projectId?: string
+}
+
+export interface INotificationsPage {
+  items: INotification[]
+  totalCount: number
+  hasMore: boolean
 }

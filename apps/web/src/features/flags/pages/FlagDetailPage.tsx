@@ -1,6 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@apollo/client/react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { AlertCircle, ChevronRight, Flag as FlagIcon } from 'lucide-react'
@@ -10,15 +9,18 @@ import { CardContent } from '@/components/ui/card'
 import { ROUTES } from '@/lib/routes'
 import { slideUp, staggerContainer } from '@/lib/animations'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
-import { TRACKED_FLAG } from '../graphql/flags.queries'
+import { useFlagDetail } from '../hooks/use-flag-detail'
 import { useRunFlagCoverageForFlag } from '../hooks/use-run-flag-coverage-for-flag'
 import { useProject } from '@/context/project.context'
 import { FlagStatusHero } from '../components/FlagStatusHero'
+import { FlagConflictBanner } from '../components/FlagConflictBanner'
+import { FlagEnvironmentsCard } from '../components/FlagEnvironmentsCard'
 import { FlagBranchPresenceSection } from '../components/FlagBranchPresenceSection'
 import { FlagLinkedFeatureCard } from '../components/FlagLinkedFeatureCard'
 import { FlagReleaseAppearancesCard } from '../components/FlagReleaseAppearancesCard'
 import { FlagPullRequestChangesCard } from '../components/FlagPullRequestChangesCard'
 import { FlagDecisionTimeline } from '../components/FlagDecisionTimeline'
+import { FlagHistoryTimeline } from '../components/FlagHistoryTimeline'
 import { FlagDetailSkeleton } from '../components/FlagDetailSkeleton'
 
 export default function FlagDetailPage() {
@@ -29,13 +31,8 @@ export default function FlagDetailPage() {
 
   const projectId = activeProject?.id ?? ''
 
-  const { data, loading, error } = useQuery(TRACKED_FLAG, {
-    variables: { projectId, key: flagKey ?? '' },
-    skip: !projectId || !flagKey,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const flag = data?.trackedFlag
+  const { flagDetail, loading, error } = useFlagDetail(projectId, flagKey ?? '')
+  const tracked = flagDetail?.tracked ?? null
 
   const { run: runCoverage, loading: rescanning } = useRunFlagCoverageForFlag(
     projectId,
@@ -76,7 +73,7 @@ export default function FlagDetailPage() {
           </span>
         </motion.nav>
 
-        {loading && !data && (
+        {loading && !flagDetail && (
           <motion.div variants={slideUp}>
             <span className="sr-only" role="status">
               {t('detail.loading')}
@@ -105,7 +102,7 @@ export default function FlagDetailPage() {
           </motion.div>
         )}
 
-        {!loading && !error && !flag && (
+        {!loading && !error && !flagDetail && (
           <motion.div variants={slideUp}>
             <EmptyState
               icon={<FlagIcon className="size-7 text-brand-indigo-bright" aria-hidden />}
@@ -115,11 +112,19 @@ export default function FlagDetailPage() {
           </motion.div>
         )}
 
-        {flag && (
+        {flagDetail && (
           <>
+            {flagDetail.hasConflict && (
+              <motion.div variants={slideUp}>
+                <FlagConflictBanner />
+              </motion.div>
+            )}
+
             <motion.div variants={slideUp}>
               <FlagStatusHero
-                flag={flag}
+                flagKey={flagDetail.key}
+                deploymentStatus={flagDetail.deploymentStatus}
+                tracked={tracked}
                 onRescan={() => void handleRescan()}
                 rescanning={rescanning}
               />
@@ -130,22 +135,30 @@ export default function FlagDetailPage() {
               className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[2fr_1fr]"
             >
               <div className="space-y-4">
+                <FlagEnvironmentsCard environments={flagDetail.flagsmith.environments} />
                 <FlagBranchPresenceSection
-                  branches={flag.branchPresences}
+                  branches={tracked?.branchPresences ?? []}
                   onRescan={() => void handleRescan()}
                   rescanning={rescanning}
                 />
                 <FlagPullRequestChangesCard
-                  changes={flag.pullRequestChanges}
+                  changes={tracked?.pullRequestChanges ?? []}
                   repo={activeProject?.repo ?? null}
                 />
-                <FlagDecisionTimeline releases={flag.releases} events={flag.events} />
+                <FlagDecisionTimeline
+                  releases={tracked?.releases ?? []}
+                  events={tracked?.events ?? []}
+                />
               </div>
 
               <div className="space-y-4">
-                <FlagLinkedFeatureCard feature={flag.feature} />
-                <FlagReleaseAppearancesCard releases={flag.releases} />
+                <FlagLinkedFeatureCard feature={tracked?.feature ?? null} />
+                <FlagReleaseAppearancesCard releases={tracked?.releases ?? []} />
               </div>
+            </motion.div>
+
+            <motion.div variants={slideUp}>
+              <FlagHistoryTimeline projectId={projectId} flagKey={flagDetail.key} />
             </motion.div>
           </>
         )}

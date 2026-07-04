@@ -22,7 +22,7 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
 
-  const { feature, state, clientAvailabilityKey, flagState, prs } = node
+  const { feature, state, clientAvailabilityKey, prs } = node
   const prCount = prs.length
   const toggleLabel = open
     ? t('view.feature.collapseLabel', { name: feature.name })
@@ -54,27 +54,6 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
             </Badge>
             <ClientAvailabilityLine clientAvailabilityKey={clientAvailabilityKey} />
           </div>
-
-          {flagState && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                {t('view.feature.flagState.staging')}{' '}
-                <span className={flagState.staging ? 'text-emerald-400' : 'text-rose-400'}>
-                  {flagState.staging
-                    ? t('view.feature.flagState.on')
-                    : t('view.feature.flagState.off')}
-                </span>
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                {t('view.feature.flagState.production')}{' '}
-                <span className={flagState.production ? 'text-emerald-400' : 'text-rose-400'}>
-                  {flagState.production
-                    ? t('view.feature.flagState.on')
-                    : t('view.feature.flagState.off')}
-                </span>
-              </span>
-            </div>
-          )}
 
           {feature.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">

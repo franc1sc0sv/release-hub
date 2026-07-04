@@ -12,6 +12,7 @@ import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { staggerContainer, slideUp } from '@/lib/animations'
 import { useFlagRegistry } from '../hooks/use-flag-registry'
+import { useFlagReminderInterval } from '../hooks/use-flag-reminder-interval'
 import { RepoFileCombobox } from './repo-file-combobox'
 
 interface FlagTrackingSectionProps {
@@ -49,8 +50,38 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
     }
   }, [flagRegistry])
 
+  const {
+    flagReminderIntervalDays,
+    loading: loadingReminderInterval,
+    saving: savingReminderInterval,
+    saveReminderInterval,
+  } = useFlagReminderInterval(projectId)
+
+  const [reminderIntervalInput, setReminderIntervalInput] = useState('')
+  const [reminderIntervalError, setReminderIntervalError] = useState(false)
+
+  useEffect(() => {
+    if (flagReminderIntervalDays === undefined) return
+    setReminderIntervalInput(String(flagReminderIntervalDays))
+  }, [flagReminderIntervalDays])
+
   const containerVariants = reduceMotion ? undefined : staggerContainer
   const itemVariants = reduceMotion ? undefined : slideUp
+
+  async function handleSaveReminderInterval(): Promise<void> {
+    const days = Number(reminderIntervalInput)
+    if (!Number.isInteger(days) || days < 1) {
+      setReminderIntervalError(true)
+      return
+    }
+    setReminderIntervalError(false)
+    try {
+      await saveReminderInterval(days)
+      toast.success(t('flagTracking.reminderInterval.saveSuccess'))
+    } catch {
+      toast.error(t('flagTracking.reminderInterval.saveError'))
+    }
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault()
@@ -145,6 +176,58 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
             </motion.div>
           </Can>
         </motion.form>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mt-4 space-y-2 border-t border-border/60 pt-4"
+        >
+          <motion.div variants={itemVariants}>
+            <Label htmlFor="flag-reminder-interval">{t('flagTracking.reminderInterval.label')}</Label>
+          </motion.div>
+          <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
+            {(allowed) => (
+              <>
+                <motion.div variants={itemVariants}>
+                  <Input
+                    id="flag-reminder-interval"
+                    type="number"
+                    min={1}
+                    value={reminderIntervalInput}
+                    onChange={(e) => {
+                      setReminderIntervalInput(e.target.value)
+                      setReminderIntervalError(false)
+                    }}
+                    disabled={!allowed || savingReminderInterval || loadingReminderInterval}
+                    aria-invalid={reminderIntervalError}
+                    className="max-w-32"
+                  />
+                </motion.div>
+                {reminderIntervalError && (
+                  <motion.p variants={itemVariants} className="text-xs text-destructive">
+                    {t('flagTracking.reminderInterval.invalid')}
+                  </motion.p>
+                )}
+                <motion.p variants={itemVariants} className="text-xs text-muted-foreground">
+                  {t('flagTracking.reminderInterval.hint')}
+                </motion.p>
+                {allowed && (
+                  <motion.div variants={itemVariants}>
+                    <Button
+                      type="button"
+                      onClick={() => void handleSaveReminderInterval()}
+                      disabled={savingReminderInterval || loadingReminderInterval}
+                    >
+                      {savingReminderInterval && <Loader2 className="mr-2 size-4 animate-spin" />}
+                      {t('flagTracking.reminderInterval.save')}
+                    </Button>
+                  </motion.div>
+                )}
+              </>
+            )}
+          </Can>
+        </motion.div>
       </CardContent>
     </GlassCard>
   )

@@ -125,6 +125,8 @@ model User {
   flagDecisions     ReleaseFlagDecision[]
   notificationPreferences UserNotificationPreference[]
   createdBlockedBranches  BlockedBranch[]
+  flagHistoryEvents       FlagHistoryEvent[]
+  notifications           Notification[]
 
   @@index([deletedAt])
   @@map("users")
@@ -210,6 +212,7 @@ model Project {
   linearEnabled    Boolean @default(false) @map("linear_enabled")
   flagRegistryPath   String? @map("flag_registry_path")
   flagRegistryBranch String? @map("flag_registry_branch")
+  flagReminderIntervalDays Int @default(7) @map("flag_reminder_interval_days")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
@@ -227,6 +230,8 @@ model Project {
   slackConnection       ProjectSlackConnection?
   notificationPreferences UserNotificationPreference[]
   blockedBranches       BlockedBranch[]
+  flagHistoryEvents     FlagHistoryEvent[]
+  notifications         Notification[]
 
   @@index([deletedAt])
   @@map("projects")
@@ -276,6 +281,7 @@ model Release {
   pullRequests      PullRequest[]
   featureInReleases FeatureInRelease[]
   flagDecisions     ReleaseFlagDecision[]
+  flagHistoryEvents FlagHistoryEvent[]
 
   @@index([projectId, deletedAt])
   @@map("releases")
@@ -381,6 +387,7 @@ model TrackedFlag {
   pullRequestChanges PullRequestFlagChange[]
   releaseDecisions  ReleaseFlagDecision[]
   flagsmithFlags    FlagsmithFlag[]
+  historyEvents     FlagHistoryEvent[]
 
   @@unique([projectId, key])
   @@index([projectId, deletedAt])
@@ -509,6 +516,7 @@ enum FlagsmithSyncStatus {
 enum NotificationChannel {
   email
   slack_dm
+  in_app
 
   @@map("notification_channel")
 }
@@ -520,6 +528,13 @@ enum NotificationType {
   flag_in_progress_reminder
   flag_staleness_alert
   flag_digest
+  flag_created
+  flag_deleted
+  flag_enabled
+  flag_disabled
+  flag_value_changed
+  flag_conflict
+  flag_ship_off_reminder
 
   @@map("notification_type")
 }
@@ -562,6 +577,7 @@ model FlagsmithFlag {
   project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   trackedFlag TrackedFlag?         @relation(fields: [trackedFlagId], references: [id], onDelete: SetNull)
   states      FlagsmithFlagState[]
+  historyEvents FlagHistoryEvent[]
 
   @@unique([projectId, key])
   @@index([projectId, deletedAt])
@@ -573,6 +589,7 @@ model FlagsmithFlagState {
   flagId        String   @map("flag_id")
   environmentId String   @map("environment_id")
   enabled       Boolean
+  value         String?  @map("value")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   flag        FlagsmithFlag        @relation(fields: [flagId], references: [id], onDelete: Cascade)
@@ -647,4 +664,77 @@ model BlockedBranch {
 
   @@unique([projectId, branchName])
   @@map("blocked_branches")
+}
+
+enum FlagHistoryEventType {
+  flag_created
+  flag_deleted
+  flag_enabled
+  flag_disabled
+  flag_value_changed
+  decision_enable_in_release
+  decision_ship_off
+  decision_in_progress
+  conflict_detected
+  reminder_sent
+  sync_completed
+  coverage_scan
+
+  @@map("flag_history_event_type")
+}
+
+enum FlagHistorySource {
+  webhook
+  sync
+  user
+  system
+
+  @@map("flag_history_source")
+}
+
+model FlagHistoryEvent {
+  id              String               @id @default(cuid())
+  projectId       String               @map("project_id")
+  flagKey         String               @map("flag_key")
+  trackedFlagId   String?              @map("tracked_flag_id")
+  flagsmithFlagId String?              @map("flagsmith_flag_id")
+  type            FlagHistoryEventType
+  environmentName String?              @map("environment_name")
+  previousValue   String?              @map("previous_value")
+  newValue        String?              @map("new_value")
+  releaseId       String?              @map("release_id")
+  actorId         String?              @map("actor_id")
+  source          FlagHistorySource
+  occurredAt      DateTime             @default(now()) @map("occurred_at")
+  createdAt       DateTime             @default(now()) @map("created_at")
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trackedFlag   TrackedFlag?   @relation(fields: [trackedFlagId], references: [id], onDelete: SetNull)
+  flagsmithFlag FlagsmithFlag? @relation(fields: [flagsmithFlagId], references: [id], onDelete: SetNull)
+  release       Release?       @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+  actor         User?          @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, flagKey, occurredAt])
+  @@index([projectId, occurredAt])
+  @@map("flag_history_events")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  projectId String           @map("project_id")
+  type      NotificationType
+  title     String
+  body      String
+  url       String?
+  flagKey   String?          @map("flag_key")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

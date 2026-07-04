@@ -24,13 +24,15 @@ interface CompareFlagsDialogProps {
 interface DivergenceChipProps {
   name: string
   enabled: boolean
+  onLabel: string
+  offLabel: string
 }
 
-function DivergenceChip({ name, enabled }: DivergenceChipProps) {
+function DivergenceChip({ name, enabled, onLabel, offLabel }: DivergenceChipProps) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-2.5 py-1">
       <span className="font-mono text-xs text-foreground">{name}</span>
-      <EnvStateCell enabled={enabled} />
+      <EnvStateCell enabled={enabled} onLabel={onLabel} offLabel={offLabel} />
     </span>
   )
 }
@@ -198,7 +200,13 @@ export function CompareFlagsDialog({
                     items={onInProdItems}
                     renderChips={(item) =>
                       item.divergences.map((d) => (
-                        <DivergenceChip key={d.name} name={d.name} enabled={false} />
+                        <DivergenceChip
+                          key={d.name}
+                          name={d.name}
+                          enabled={false}
+                          onLabel={t('state.on')}
+                          offLabel={t('state.off')}
+                        />
                       ))
                     }
                   />
@@ -208,7 +216,13 @@ export function CompareFlagsDialog({
                     items={offInProdItems}
                     renderChips={(item) =>
                       item.divergences.map((d) => (
-                        <DivergenceChip key={d.name} name={d.name} enabled={true} />
+                        <DivergenceChip
+                          key={d.name}
+                          name={d.name}
+                          enabled={true}
+                          onLabel={t('state.on')}
+                          offLabel={t('state.off')}
+                        />
                       ))
                     }
                   />

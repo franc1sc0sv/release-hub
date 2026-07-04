@@ -52,13 +52,19 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
 
     const trackedFlagIds = [...new Set(changes.map((change) => change.trackedFlagId))]
 
+    const flags = await this.trackedFlagRepository.findByIdsWithDetails(trackedFlagIds, tx)
+    const flagsById = new Map(flags.map((flag) => [flag.id, flag]))
+
+    const decisions = await this.releaseFlagDecisionRepository.findAllForRelease(query.releaseId, tx)
+    const decisionsByFlagId = new Map(decisions.map((decision) => [decision.trackedFlagId, decision]))
+
     const result: ReleaseFlagType[] = []
     for (const trackedFlagId of trackedFlagIds) {
-      const flag = await this.trackedFlagRepository.findByIdWithDetails(trackedFlagId, tx)
+      const flag = flagsById.get(trackedFlagId)
       if (!flag) continue
 
       const flagChanges = changes.filter((change) => change.trackedFlagId === trackedFlagId)
-      const decision = await this.releaseFlagDecisionRepository.findByReleaseAndFlag(query.releaseId, trackedFlagId, tx)
+      const decision = decisionsByFlagId.get(trackedFlagId) ?? null
 
       result.push(toReleaseFlagType(flag, flagChanges, decision))
     }

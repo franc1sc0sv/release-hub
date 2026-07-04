@@ -31,4 +31,17 @@ export default defineConfig({
   preview: {
     headers: crossOriginHeaders,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('@tiptap') || id.includes('prosemirror')) return 'tiptap'
+          if (id.includes('motion') || id.includes('framer-motion')) return 'motion'
+          if (id.includes('@apollo') || id.includes('graphql')) return 'apollo'
+          if (id.includes('date-fns')) return 'datefns'
+        },
+      },
+    },
+  },
 })

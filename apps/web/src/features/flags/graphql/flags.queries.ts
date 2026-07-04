@@ -9,6 +9,7 @@ export const GET_FLAGS = graphql(`
       items {
         key
         createdAt
+        deploymentStatus
         environments {
           name
           enabled
@@ -28,8 +29,8 @@ export const COMPARE_FLAGS = graphql(`
         createdAt
         baselineEnabled
         baselineConflict
-        baseline { name enabled }
-        divergences { name enabled }
+        baseline { name enabled value }
+        divergences { name enabled value }
       }
     }
   }
@@ -55,45 +56,80 @@ export const TRACKED_FLAGS = graphql(`
   }
 `)
 
-export const TRACKED_FLAG = graphql(`
-  query TrackedFlag($projectId: ID!, $key: String!) {
-    trackedFlag(projectId: $projectId, key: $key) {
-      id
+export const GET_FLAG_DETAIL = graphql(`
+  query GetFlagDetail($projectId: ID!, $key: String!) {
+    flagDetail(projectId: $projectId, key: $key) {
       key
-      presentInCode
-      delivery {
-        inDefaultBranch
-        shippedReleaseVersions
+      deploymentStatus
+      hasConflict
+      flagsmith {
+        exists
+        lastSyncedAt
+        environments {
+          name
+          enabled
+          value
+          updatedAt
+        }
       }
-      feature {
+      tracked {
         id
-        name
+        key
+        presentInCode
+        delivery {
+          inDefaultBranch
+          shippedReleaseVersions
+        }
+        feature {
+          id
+          name
+        }
+        branchPresences {
+          branch
+          present
+          firstSeenAt
+          lastConfirmedAt
+        }
+        releases {
+          releaseId
+          version
+          status
+          date
+          decision
+        }
+        pullRequestChanges {
+          prNumber
+          prTitle
+          prAuthor
+          prMergedAt
+          kind
+          action
+          detectedFile
+        }
+        events {
+          type
+          description
+          occurredAt
+        }
       }
-      branchPresences {
-        branch
-        present
-        firstSeenAt
-        lastConfirmedAt
-      }
-      releases {
-        releaseId
-        version
-        status
-        date
-        decision
-      }
-      pullRequestChanges {
-        prNumber
-        prTitle
-        prAuthor
-        prMergedAt
-        kind
-        action
-        detectedFile
-      }
-      events {
+    }
+  }
+`)
+
+export const GET_FLAG_HISTORY = graphql(`
+  query GetFlagHistory($input: GetFlagHistoryInput!) {
+    flagHistory(input: $input) {
+      totalCount
+      items {
+        id
         type
-        description
+        environmentName
+        previousValue
+        newValue
+        releaseId
+        releaseName
+        actorName
+        source
         occurredAt
       }
     }

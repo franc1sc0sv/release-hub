@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { IFlagsmithClient } from '../interfaces/flagsmith-client.abstract'
+import { stringifyFlagsmithValue } from '../utils/stringify-flagsmith-value'
 import type {
   IFlagsmithResult,
   IFlagsmithProjectsResult,
@@ -23,6 +24,7 @@ interface FlagsmithProjectResponse {
 interface FlagsmithFeatureStateResponse {
   feature: { name: string; created_date: string | null }
   enabled: boolean
+  feature_state_value: string | number | boolean | null
 }
 
 type FetchEnvResult =
@@ -30,7 +32,10 @@ type FetchEnvResult =
   | { ok: false; error: IFlagsmithClientError }
 
 type FetchEnvRichResult =
-  | { ok: true; flags: Array<{ key: string; createdAt: string | null; enabled: boolean }> }
+  | {
+      ok: true
+      flags: Array<{ key: string; createdAt: string | null; enabled: boolean; value: string | null }>
+    }
   | { ok: false; error: IFlagsmithClientError }
 
 type ListEnvironmentsResult =
@@ -136,11 +141,13 @@ export class FlagsmithClient extends IFlagsmithClient {
         const existing = flagMap.get(flag.key)
         if (existing) {
           existing.states[envName] = flag.enabled
+          existing.values[envName] = flag.value
         } else {
           flagMap.set(flag.key, {
             key: flag.key,
             createdAt: flag.createdAt,
             states: { [envName]: flag.enabled },
+            values: { [envName]: flag.value },
           })
         }
       }
@@ -148,10 +155,12 @@ export class FlagsmithClient extends IFlagsmithClient {
 
     const flags = Array.from(flagMap.values()).map((flag) => {
       const states: Record<string, boolean> = {}
+      const values: Record<string, string | null> = {}
       for (const name of envNames) {
         states[name] = flag.states[name] ?? false
+        values[name] = flag.values[name] ?? null
       }
-      return { key: flag.key, createdAt: flag.createdAt, states }
+      return { key: flag.key, createdAt: flag.createdAt, states, values }
     })
 
     return { ok: true, data: { environments: envNames, environmentDetails, flags } }
@@ -249,6 +258,7 @@ export class FlagsmithClient extends IFlagsmithClient {
           key: s.feature.name,
           createdAt: s.feature.created_date ?? null,
           enabled: s.enabled,
+          value: stringifyFlagsmithValue(s.feature_state_value),
         })),
       }
     } catch {

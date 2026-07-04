@@ -4,5 +4,6 @@ export class UpdateProjectCommand {
     readonly projectId: string,
     readonly name: string | undefined,
     readonly repo: string | undefined,
+    readonly flagReminderIntervalDays: number | undefined,
   ) {}
 }

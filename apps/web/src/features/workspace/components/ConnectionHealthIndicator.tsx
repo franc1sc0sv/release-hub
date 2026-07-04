@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Github, CheckCircle2, MinusCircle } from 'lucide-react'
+import { Github, Slack, CheckCircle2, MinusCircle, Lock, AlertTriangle } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
 import type { IntegrationStatus } from '@/generated/graphql'
@@ -20,6 +20,9 @@ interface IntegrationRowProps {
   status: IntegrationStatus
   tooltipConnected: string
   tooltipNotConfigured: string
+  required?: boolean
+  requiredLabel?: string
+  reconnectHint?: string
 }
 
 function IntegrationRow({
@@ -28,8 +31,17 @@ function IntegrationRow({
   status,
   tooltipConnected,
   tooltipNotConfigured,
+  required = false,
+  requiredLabel,
+  reconnectHint,
 }: IntegrationRowProps) {
   const isConnected = status === CONNECTED
+  const needsReconnect = required && !isConnected
+  const tooltipText = needsReconnect
+    ? (reconnectHint ?? tooltipNotConfigured)
+    : isConnected
+      ? tooltipConnected
+      : tooltipNotConfigured
 
   return (
     <Tooltip>
@@ -38,23 +50,24 @@ function IntegrationRow({
           <div
             className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent/50 transition-colors cursor-default"
             role="status"
-            aria-label={`${label}: ${isConnected ? tooltipConnected : tooltipNotConfigured}`}
+            aria-label={`${label}: ${tooltipText}`}
           />
         }
       >
         <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <span className="text-sm font-medium text-foreground flex-1">{label}</span>
+        {needsReconnect && (
+          <AlertTriangle className="size-3.5 shrink-0 text-amber-400" aria-hidden />
+        )}
         <StatusBadge
-          tone={isConnected ? StatusBadgeTone.EMERALD : StatusBadgeTone.SLATE}
-          icon={isConnected ? CheckCircle2 : MinusCircle}
+          tone={required ? StatusBadgeTone.INDIGO : isConnected ? StatusBadgeTone.EMERALD : StatusBadgeTone.SLATE}
+          icon={required ? Lock : isConnected ? CheckCircle2 : MinusCircle}
           className="pointer-events-none"
         >
-          {isConnected ? tooltipConnected : tooltipNotConfigured}
+          {required ? (requiredLabel ?? tooltipConnected) : isConnected ? tooltipConnected : tooltipNotConfigured}
         </StatusBadge>
       </TooltipTrigger>
-      <TooltipContent side="right">
-        {isConnected ? tooltipConnected : tooltipNotConfigured}
-      </TooltipContent>
+      <TooltipContent side="right">{tooltipText}</TooltipContent>
     </Tooltip>
   )
 }
@@ -84,9 +97,15 @@ interface ConnectionHealthIndicatorProps {
   github: IntegrationStatus
   linear: IntegrationStatus
   flagsmith: IntegrationStatus
+  slack: IntegrationStatus
 }
 
-export function ConnectionHealthIndicator({ github, linear, flagsmith }: ConnectionHealthIndicatorProps) {
+export function ConnectionHealthIndicator({
+  github,
+  linear,
+  flagsmith,
+  slack,
+}: ConnectionHealthIndicatorProps) {
   const { t } = useTranslation('workspace')
 
   return (
@@ -100,6 +119,9 @@ export function ConnectionHealthIndicator({ github, linear, flagsmith }: Connect
         status={github}
         tooltipConnected={t('connectionHealth.connected')}
         tooltipNotConfigured={t('connectionHealth.notConfigured')}
+        required
+        requiredLabel={t('connectionHealth.required')}
+        reconnectHint={t('connectionHealth.githubReconnectHint')}
       />
       <IntegrationRow
         icon={LinearIcon}
@@ -112,6 +134,13 @@ export function ConnectionHealthIndicator({ github, linear, flagsmith }: Connect
         icon={FlagsmithIcon}
         label={t('connectionHealth.flagsmith')}
         status={flagsmith}
+        tooltipConnected={t('connectionHealth.connected')}
+        tooltipNotConfigured={t('connectionHealth.notConfigured')}
+      />
+      <IntegrationRow
+        icon={Slack}
+        label={t('connectionHealth.slack')}
+        status={slack}
         tooltipConnected={t('connectionHealth.connected')}
         tooltipNotConfigured={t('connectionHealth.notConfigured')}
       />

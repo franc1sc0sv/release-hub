@@ -39,7 +39,10 @@
     "github": "GitHub",
     "linear": "Linear",
     "flagsmith": "Flagsmith",
+    "slack": "Slack",
     "connected": "Conectado",
-    "notConfigured": "No configurado"
+    "notConfigured": "No configurado",
+    "required": "Obligatorio",
+    "githubReconnectHint": "GitHub es obligatorio. Reconéctalo en Configuración para restaurar el acceso completo."
   }
 }

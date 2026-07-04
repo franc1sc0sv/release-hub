@@ -1,5 +1,5 @@
-import { Field, ID, InputType } from '@nestjs/graphql'
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { Field, ID, InputType, Int } from '@nestjs/graphql'
+import { IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
 
 @InputType()
 export class UpdateProjectInput {
@@ -20,4 +20,11 @@ export class UpdateProjectInput {
   @IsNotEmpty()
   @MaxLength(255)
   repo?: string
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(90)
+  flagReminderIntervalDays?: number
 }

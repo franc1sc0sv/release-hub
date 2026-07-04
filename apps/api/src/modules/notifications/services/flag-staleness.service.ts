@@ -3,17 +3,13 @@ import { IDatabaseService } from '../../../common/database/database.abstract'
 import { NotificationType } from '../../../common/types/notification-type.enum'
 import { INotificationReadRepository } from '../interfaces/notification-read.repository'
 import { NotificationDispatcherService } from './notification-dispatcher.service'
-import type { IProjectForDigest, IStaleFlagCandidate } from '../interfaces/notification.interfaces'
+import type {
+  IProjectForDigest,
+  IStaleFlagCandidate,
+  INotificationPayload,
+} from '../interfaces/notification.interfaces'
 
-function buildStalenessPayload(project: IProjectForDigest, candidates: IStaleFlagCandidate[]): {
-  type: typeof NotificationType.FLAG_STALENESS_ALERT
-  title: string
-  bodyLines: string[]
-  url: null
-  projectId: string
-  releaseId: null
-  flagIds: string[]
-} {
+function buildStalenessPayload(project: IProjectForDigest, candidates: IStaleFlagCandidate[]): INotificationPayload {
   return {
     type: NotificationType.FLAG_STALENESS_ALERT,
     title: `${project.name}: stale in-progress flags`,
@@ -26,6 +22,7 @@ function buildStalenessPayload(project: IProjectForDigest, candidates: IStaleFla
     projectId: project.id,
     releaseId: null,
     flagIds: candidates.map((candidate) => candidate.trackedFlagId),
+    flagKey: null,
   }
 }
 

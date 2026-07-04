@@ -1,6 +1,6 @@
-import type { ReleaseFlagDecisionType, TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery, ReleaseFlagDecisionType } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 type FlagRelease = TrackedFlagDetail['releases'][number]
 type FlagEvent = TrackedFlagDetail['events'][number]
 type DecidedFlagRelease = Omit<FlagRelease, 'decision'> & { decision: ReleaseFlagDecisionType }

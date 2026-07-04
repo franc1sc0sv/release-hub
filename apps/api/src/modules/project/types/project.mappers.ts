@@ -15,6 +15,9 @@ export function toConnectionHealth(project: IProject): ConnectionHealthType {
   health.flagsmith = project.flagsmithEnabled
     ? IntegrationStatus.CONNECTED
     : IntegrationStatus.NOT_CONFIGURED
+  health.slack = project.slackEnabled
+    ? IntegrationStatus.CONNECTED
+    : IntegrationStatus.NOT_CONFIGURED
   return health
 }
 
@@ -23,6 +26,7 @@ export function toProjectType(project: IProject): ProjectType {
   integrations.github = project.integrations.github
   integrations.linear = project.integrations.linear
   integrations.flagsmith = project.integrations.flagsmith
+  integrations.slack = project.integrations.slack
 
   const type = new ProjectType()
   type.id = project.id
@@ -30,6 +34,7 @@ export function toProjectType(project: IProject): ProjectType {
   type.repo = project.repo
   type.integrations = integrations
   type.connectionHealth = toConnectionHealth(project)
+  type.flagReminderIntervalDays = project.flagReminderIntervalDays
   type.ownerId = project.ownerId
   type.createdAt = project.createdAt
   type.updatedAt = project.updatedAt

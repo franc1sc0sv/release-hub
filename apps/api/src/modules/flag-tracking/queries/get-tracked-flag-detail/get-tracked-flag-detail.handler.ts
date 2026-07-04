@@ -54,10 +54,12 @@ export class GetTrackedFlagDetailHandler extends BaseQueryHandler<GetTrackedFlag
       if (release) releasesByPullRequestId.set(change.pullRequestId, release)
     }
 
+    const relevantReleaseIds = new Set([...releasesByPullRequestId.values()].map((release) => release.id))
+    const flagDecisions = await this.releaseFlagDecisionRepository.findAllForTrackedFlag(flag.id, tx)
     const decisionsByReleaseId = new Map<string, IReleaseFlagDecision>()
-    for (const release of releasesByPullRequestId.values()) {
-      const decision = await this.releaseFlagDecisionRepository.findByReleaseAndFlag(release.id, flag.id, tx)
-      if (decision) decisionsByReleaseId.set(release.id, decision)
+    for (const decision of flagDecisions) {
+      if (!relevantReleaseIds.has(decision.releaseId)) continue
+      decisionsByReleaseId.set(decision.releaseId, decision)
     }
 
     return buildTrackedFlagDetailType(flag, changes, releasesByPullRequestId, decisionsByReleaseId)

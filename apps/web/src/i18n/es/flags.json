@@ -19,6 +19,7 @@
   "matrix": {
     "flag": "Flag",
     "created": "Creado",
+    "status": "Estado",
     "count_one": "{{count}} flag",
     "count_other": "{{count}} flags"
   },
@@ -28,6 +29,16 @@
   "columns": {
     "label": "Entornos",
     "button": "Columnas"
+  },
+  "filters": {
+    "status": {
+      "button": "Estado",
+      "label": "Estado de despliegue"
+    },
+    "activity": {
+      "label": "Actividad",
+      "all": "Todos"
+    }
   },
   "state": {
     "on": "Activo",
@@ -125,8 +136,6 @@
     "currentStatus": {
       "presentInCode": "Presente en el código",
       "notPresentInCode": "No presente en el código",
-      "live": "Activo en un release lanzado",
-      "notLive": "Aún no está activo",
       "decidedIn": "Decidido en",
       "delivery": {
         "label": "Entrega",
@@ -134,6 +143,15 @@
         "inDefaultBranch": "en la rama por defecto",
         "notShipped": "Aún no lanzado"
       }
+    },
+    "conflict": {
+      "heading": "Lanzado habilitado, pero deshabilitado en un entorno",
+      "description": "Este flag se lanzó habilitado en un release, pero actualmente está deshabilitado en al menos un entorno. Lo que ven los clientes puede no coincidir con lo comunicado."
+    },
+    "environments": {
+      "title": "Entornos",
+      "empty": "Aún no está conectado a Flagsmith.",
+      "updated": "Actualizado {{time}}"
     },
     "branches": {
       "title": "Presencia en ramas",
@@ -160,6 +178,13 @@
     "decisionTimeline": {
       "title": "Cronología de decisiones",
       "empty": "Aún no se han tomado decisiones de release."
+    },
+    "history": {
+      "title": "Historial",
+      "empty": "El historial aparecerá aquí a medida que ocurran eventos.",
+      "event": {
+        "valueChange": "{{previous}} → {{next}}"
+      }
     }
   }
 }

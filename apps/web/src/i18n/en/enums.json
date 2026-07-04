@@ -34,6 +34,37 @@
     "DEFINITION": "Definition",
     "USAGE": "Usage"
   },
+  "flagActivityFilter": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive"
+  },
+  "flagDeploymentStatus": {
+    "SHIPPED_ON": "Shipped, on",
+    "SHIPPED_OFF": "Shipped, off",
+    "IN_PROGRESS": "In progress",
+    "CONFLICT": "Conflict",
+    "UNTRACKED": "Untracked"
+  },
+  "flagHistoryEventType": {
+    "FLAG_CREATED": "Flag created",
+    "FLAG_DELETED": "Flag deleted",
+    "FLAG_ENABLED": "Flag enabled",
+    "FLAG_DISABLED": "Flag disabled",
+    "FLAG_VALUE_CHANGED": "Value changed",
+    "DECISION_ENABLE_IN_RELEASE": "Decision: enable in release",
+    "DECISION_SHIP_OFF": "Decision: ship off",
+    "DECISION_IN_PROGRESS": "Decision: in progress",
+    "CONFLICT_DETECTED": "Conflict detected",
+    "REMINDER_SENT": "Reminder sent",
+    "SYNC_COMPLETED": "Sync completed",
+    "COVERAGE_SCAN": "Coverage scan"
+  },
+  "flagHistorySource": {
+    "WEBHOOK": "Webhook",
+    "SYNC": "Sync",
+    "USER": "User",
+    "SYSTEM": "System"
+  },
   "releaseFlagDecision": {
     "ENABLE_IN_RELEASE": "Enable in release",
     "SHIP_OFF": "Ship off",
@@ -58,16 +89,33 @@
     "RELEASE_CREATED": "Release created",
     "RELEASE_SHIPPED": "Release shipped",
     "RELEASE_DEPLOYED": "Release deployed",
+    "FLAG_CREATED": "Flag created",
+    "FLAG_DELETED": "Flag deleted",
+    "FLAG_ENABLED": "Flag enabled",
+    "FLAG_DISABLED": "Flag disabled",
+    "FLAG_VALUE_CHANGED": "Flag value changed",
+    "FLAG_CONFLICT": "Flag conflict",
     "FLAG_IN_PROGRESS_REMINDER": "Flag in-progress reminder",
+    "FLAG_SHIP_OFF_REMINDER": "Flag ship-off reminder",
     "FLAG_STALENESS_ALERT": "Flag staleness alert",
     "FLAG_DIGEST": "Flag digest"
   },
   "notificationChannel": {
+    "IN_APP": "In-App",
     "EMAIL": "Email",
     "SLACK_DM": "Slack DM"
   },
   "digestFrequency": {
     "DAILY": "Daily",
     "WEEKLY": "Weekly"
+  },
+  "branchBlockReason": {
+    "DEFAULT_BRANCH": "Default branch",
+    "GITHUB_PROTECTED": "GitHub protected",
+    "OPEN_PULL_REQUEST": "Open pull request",
+    "PROTECTED_NAME": "Protected name",
+    "RECENT_ACTIVITY": "Recent activity",
+    "MANUALLY_BLOCKED": "Manually blocked",
+    "RELEASE_REFERENCED": "Release reference"
   }
 }

@@ -13,6 +13,7 @@ export interface IAllEnvironmentFlag {
   key: string
   createdAt: string | null
   states: Record<string, boolean>
+  values: Record<string, string | null>
 }
 
 export interface IAllEnvironmentFlagsEnvironment {

@@ -7,6 +7,7 @@ import { DigestFrequency } from '../../../common/types/digest-frequency.enum'
 import { INotificationReadRepository } from '../interfaces/notification-read.repository'
 import { FlagStalenessService } from './flag-staleness.service'
 import { FlagDigestService } from './flag-digest.service'
+import { FlagShipOffReminderService } from './flag-ship-off-reminder.service'
 
 const WEEKLY_DIGEST_CRON = '0 8 * * 1'
 
@@ -17,6 +18,7 @@ export class NotificationCronService {
     private readonly notificationReadRepository: INotificationReadRepository,
     private readonly flagStalenessService: FlagStalenessService,
     private readonly flagDigestService: FlagDigestService,
+    private readonly flagShipOffReminderService: FlagShipOffReminderService,
     private readonly logger: ILogger,
   ) {}
 
@@ -46,6 +48,20 @@ export class NotificationCronService {
           {
             event: LogEvent.OPERATION_ERROR,
             job: 'flag-digest-daily',
+            projectId: project.id,
+            err: error instanceof Error ? error.message : String(error),
+          },
+          LogEvent.OPERATION_ERROR,
+        )
+      }
+
+      try {
+        await this.flagShipOffReminderService.runShipOffReminderScanForProject(project)
+      } catch (error) {
+        this.logger.error(
+          {
+            event: LogEvent.OPERATION_ERROR,
+            job: 'flag-ship-off-reminder',
             projectId: project.id,
             err: error instanceof Error ? error.message : String(error),
           },

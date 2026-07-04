@@ -34,6 +34,37 @@
     "DEFINITION": "Definición",
     "USAGE": "Uso"
   },
+  "flagActivityFilter": {
+    "ACTIVE": "Activo",
+    "INACTIVE": "Inactivo"
+  },
+  "flagDeploymentStatus": {
+    "SHIPPED_ON": "Lanzado, activo",
+    "SHIPPED_OFF": "Lanzado, inactivo",
+    "IN_PROGRESS": "En progreso",
+    "CONFLICT": "Conflicto",
+    "UNTRACKED": "Sin rastrear"
+  },
+  "flagHistoryEventType": {
+    "FLAG_CREATED": "Flag creado",
+    "FLAG_DELETED": "Flag eliminado",
+    "FLAG_ENABLED": "Flag habilitado",
+    "FLAG_DISABLED": "Flag deshabilitado",
+    "FLAG_VALUE_CHANGED": "Valor modificado",
+    "DECISION_ENABLE_IN_RELEASE": "Decisión: habilitar en release",
+    "DECISION_SHIP_OFF": "Decisión: lanzar apagado",
+    "DECISION_IN_PROGRESS": "Decisión: en progreso",
+    "CONFLICT_DETECTED": "Conflicto detectado",
+    "REMINDER_SENT": "Recordatorio enviado",
+    "SYNC_COMPLETED": "Sincronización completada",
+    "COVERAGE_SCAN": "Escaneo de cobertura"
+  },
+  "flagHistorySource": {
+    "WEBHOOK": "Webhook",
+    "SYNC": "Sincronización",
+    "USER": "Usuario",
+    "SYSTEM": "Sistema"
+  },
   "releaseFlagDecision": {
     "ENABLE_IN_RELEASE": "Habilitar en release",
     "SHIP_OFF": "Lanzar apagado",
@@ -58,16 +89,33 @@
     "RELEASE_CREATED": "Release creado",
     "RELEASE_SHIPPED": "Release lanzado",
     "RELEASE_DEPLOYED": "Release desplegado",
+    "FLAG_CREATED": "Flag creado",
+    "FLAG_DELETED": "Flag eliminado",
+    "FLAG_ENABLED": "Flag habilitado",
+    "FLAG_DISABLED": "Flag deshabilitado",
+    "FLAG_VALUE_CHANGED": "Valor de flag modificado",
+    "FLAG_CONFLICT": "Conflicto de flag",
     "FLAG_IN_PROGRESS_REMINDER": "Recordatorio de flag en progreso",
+    "FLAG_SHIP_OFF_REMINDER": "Recordatorio de apagado de flag",
     "FLAG_STALENESS_ALERT": "Alerta de flag inactivo",
     "FLAG_DIGEST": "Resumen de flags"
   },
   "notificationChannel": {
+    "IN_APP": "En la app",
     "EMAIL": "Correo electrónico",
     "SLACK_DM": "Mensaje directo de Slack"
   },
   "digestFrequency": {
     "DAILY": "Diario",
     "WEEKLY": "Semanal"
+  },
+  "branchBlockReason": {
+    "DEFAULT_BRANCH": "Rama predeterminada",
+    "GITHUB_PROTECTED": "Protegida en GitHub",
+    "OPEN_PULL_REQUEST": "Pull request abierto",
+    "PROTECTED_NAME": "Nombre protegido",
+    "RECENT_ACTIVITY": "Actividad reciente",
+    "MANUALLY_BLOCKED": "Bloqueada manualmente",
+    "RELEASE_REFERENCED": "Referencia de release"
   }
 }

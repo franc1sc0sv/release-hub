@@ -51,13 +51,13 @@ export class ProjectResolver {
   }
 
   @Mutation(() => ProjectType)
-  @Can(Action.UPDATE, Subject.PROJECT)
+  @Can(Action.MANAGE, Subject.PROJECT)
   updateProject(
     @Args('input', { type: () => UpdateProjectInput }) input: UpdateProjectInput,
     @CurrentUser() user: IJwtUser,
   ): Promise<ProjectType> {
     return this.commandBus.execute(
-      new UpdateProjectCommand(user.id, input.id, input.name, input.repo),
+      new UpdateProjectCommand(user.id, input.id, input.name, input.repo, input.flagReminderIntervalDays),
     )
   }
 

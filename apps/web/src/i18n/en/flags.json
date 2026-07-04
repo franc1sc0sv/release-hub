@@ -19,6 +19,7 @@
   "matrix": {
     "flag": "Flag",
     "created": "Created",
+    "status": "Status",
     "count_one": "{{count}} flag",
     "count_other": "{{count}} flags"
   },
@@ -28,6 +29,16 @@
   "columns": {
     "label": "Environments",
     "button": "Columns"
+  },
+  "filters": {
+    "status": {
+      "button": "Status",
+      "label": "Deployment status"
+    },
+    "activity": {
+      "label": "Activity",
+      "all": "All"
+    }
   },
   "state": {
     "on": "On",
@@ -125,8 +136,6 @@
     "currentStatus": {
       "presentInCode": "Present in code",
       "notPresentInCode": "Not present in code",
-      "live": "Live in a shipped release",
-      "notLive": "Not live yet",
       "decidedIn": "Decided in",
       "delivery": {
         "label": "Delivery",
@@ -134,6 +143,15 @@
         "inDefaultBranch": "in default branch",
         "notShipped": "Not shipped yet"
       }
+    },
+    "conflict": {
+      "heading": "Shipped enabled, but disabled in an environment",
+      "description": "This flag was shipped enabled in a release, but it is currently disabled in at least one environment. What clients see may not match what was communicated."
+    },
+    "environments": {
+      "title": "Environments",
+      "empty": "Not connected to Flagsmith yet.",
+      "updated": "Updated {{time}}"
     },
     "branches": {
       "title": "Branch presence",
@@ -160,6 +178,13 @@
     "decisionTimeline": {
       "title": "Decision timeline",
       "empty": "No release decisions made yet."
+    },
+    "history": {
+      "title": "History",
+      "empty": "History will appear here as events occur.",
+      "event": {
+        "valueChange": "{{previous}} → {{next}}"
+      }
     }
   }
 }

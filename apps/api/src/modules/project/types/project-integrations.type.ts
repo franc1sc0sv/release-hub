@@ -10,4 +10,7 @@ export class ProjectIntegrationsType {
 
   @Field(() => Boolean)
   flagsmith: boolean
+
+  @Field(() => Boolean)
+  slack: boolean
 }

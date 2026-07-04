@@ -19,4 +19,7 @@ export class ConnectionHealthType {
 
   @Field(() => IntegrationStatus)
   flagsmith: IntegrationStatus
+
+  @Field(() => IntegrationStatus)
+  slack: IntegrationStatus
 }

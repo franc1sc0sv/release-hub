@@ -86,6 +86,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         sortDirection: undefined,
         sortEnvironment: undefined,
         sortField: undefined,
+        activity: undefined,
+        statuses: undefined,
       },
     },
     skip: !projectId || !canSearch,

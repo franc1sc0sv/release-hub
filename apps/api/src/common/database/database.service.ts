@@ -8,4 +8,8 @@ export class PrismaDatabaseService extends IDatabaseService {
   async $transaction<T>(fn: (tx: TxClient) => Promise<T>): Promise<T> {
     return prisma.$transaction(fn, { maxWait: 15000, timeout: 30000 })
   }
+
+  $query<T>(fn: (tx: TxClient) => Promise<T>): Promise<T> {
+    return fn(prisma)
+  }
 }

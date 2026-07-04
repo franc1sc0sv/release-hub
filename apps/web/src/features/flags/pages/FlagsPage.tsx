@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
@@ -34,8 +34,9 @@ import { useProject } from '@/context/project.context'
 import { ROUTES } from '@/lib/routes'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import type { FlagSortField, SortDirection } from '@/generated/graphql'
+import type { FlagActivityFilter, FlagDeploymentStatus, FlagSortField, SortDirection } from '@/generated/graphql'
 import { useLocalStorage } from '@/hooks/use-local-storage'
+import { cn } from '@/lib/utils'
 import { useFlags } from '../hooks/use-flags'
 import { useRunFlagCoverage } from '../hooks/use-run-flag-coverage'
 import { useSyncFlagsmithFlags } from '../hooks/use-sync-flagsmith-flags'
@@ -43,8 +44,10 @@ import { FlagMatrix } from '../components/FlagMatrix'
 import { ColumnVisibilityMenu } from '../components/ColumnVisibilityMenu'
 import { CompareFlagsDialog } from '../components/CompareFlagsDialog'
 import { ExportFlagsDialog } from '../components/ExportFlagsDialog'
+import { FlagStatusFilterMenu } from '../components/FlagStatusFilterMenu'
+import { FlagActivityFilterControl } from '../components/FlagActivityFilterControl'
 
-const PAGE_SIZE = 100
+const PAGE_SIZE = 50
 
 export default function FlagsPage() {
   const { t, i18n } = useTranslation('flags')
@@ -61,6 +64,8 @@ export default function FlagsPage() {
   const [page, setPage] = useState(1)
   const [compareOpen, setCompareOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<FlagDeploymentStatus[]>([])
+  const [activityFilter, setActivityFilter] = useState<FlagActivityFilter | undefined>(undefined)
 
   const projectName = activeProject?.name ?? ''
 
@@ -90,12 +95,14 @@ export default function FlagsPage() {
     }
   }
 
-  const { environments, items, totalCount, lastSyncedAt, loading, error, refetch } = useFlags({
+  const { environments, items, totalCount, lastSyncedAt, loading, isRefetching, error, refetch } = useFlags({
     projectId: flagsmithEnabled ? projectId : null,
     search: searchInput || undefined,
     sortField,
     sortEnvironment: activeSortEnv,
     sortDirection,
+    statuses: statusFilter,
+    activity: activityFilter,
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
   })
@@ -111,7 +118,10 @@ export default function FlagsPage() {
     }
   }
 
-  const visibleEnvironments = environments.filter((e) => !hiddenEnvs.includes(e))
+  const visibleEnvironments = useMemo(
+    () => environments.filter((e) => !hiddenEnvs.includes(e)),
+    [environments, hiddenEnvs],
+  )
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const neverSynced = !loading && !error && lastSyncedAt === null
 
@@ -140,6 +150,16 @@ export default function FlagsPage() {
     },
     [hiddenEnvs, setHiddenEnvs],
   )
+
+  const handleStatusFilterChange = useCallback((statuses: FlagDeploymentStatus[]) => {
+    setStatusFilter(statuses)
+    setPage(1)
+  }, [])
+
+  const handleActivityFilterChange = useCallback((activity: FlagActivityFilter | undefined) => {
+    setActivityFilter(activity)
+    setPage(1)
+  }, [])
 
   const syncButton = (
     <Can I={Action.UPDATE} a={Subject.PROJECT}>
@@ -235,6 +255,10 @@ export default function FlagsPage() {
                   />
                 )}
 
+                <FlagStatusFilterMenu selected={statusFilter} onChange={handleStatusFilterChange} />
+
+                <FlagActivityFilterControl value={activityFilter} onChange={handleActivityFilterChange} />
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -311,15 +335,20 @@ export default function FlagsPage() {
               )}
 
               {!loading && !error && items.length > 0 && (
-                <FlagMatrix
-                  items={items}
-                  totalCount={totalCount}
-                  visibleEnvironments={visibleEnvironments}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSortChange={handleSortChange}
-                  activeSortEnv={activeSortEnv}
-                />
+                <div
+                  aria-busy={isRefetching}
+                  className={cn('transition-opacity duration-200', isRefetching && 'opacity-60')}
+                >
+                  <FlagMatrix
+                    items={items}
+                    totalCount={totalCount}
+                    visibleEnvironments={visibleEnvironments}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSortChange={handleSortChange}
+                    activeSortEnv={activeSortEnv}
+                  />
+                </div>
               )}
 
               {!loading && !error && totalPages > 1 && (

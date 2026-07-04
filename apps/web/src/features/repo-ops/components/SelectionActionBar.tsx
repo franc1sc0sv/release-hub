@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { GlassCard } from '@/components/nebula/GlassCard'
 
 interface SelectionActionBarProps {
   count: number
@@ -18,24 +17,25 @@ export function SelectionActionBar({ count, onClear, onDelete }: SelectionAction
     <AnimatePresence>
       {count > 0 && (
         <motion.div
-          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
+          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
-          className="sticky bottom-6 z-20 mx-auto w-fit"
         >
-          <GlassCard glow="indigo" className="flex items-center gap-4 rounded-full px-5 py-3">
+          <div className="glass flex items-center justify-between gap-4 rounded-[var(--radius-card)] border border-brand-indigo-bright/40 px-4 py-2 shadow-glow-indigo">
             <span className="font-mono text-sm text-foreground">
               {t('table.selectionCount', { count })}
             </span>
-            <Button variant="ghost" size="sm" onClick={onClear}>
-              {t('table.clearSelection')}
-            </Button>
-            <Button variant="destructive" size="sm" className="gap-1.5" onClick={onDelete}>
-              <Trash2 className="size-3.5" aria-hidden />
-              {t('table.deleteSelected')}
-            </Button>
-          </GlassCard>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={onClear}>
+                {t('table.clearSelection')}
+              </Button>
+              <Button variant="destructive" size="sm" className="gap-1.5" onClick={onDelete}>
+                <Trash2 className="size-3.5" aria-hidden />
+                {t('table.deleteSelected')}
+              </Button>
+            </div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

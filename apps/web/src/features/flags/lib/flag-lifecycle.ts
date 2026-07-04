@@ -1,7 +1,7 @@
 import { ReleaseFlagDecisionTypeValue } from '@/features/releases/constants/release-enums'
-import type { ReleaseFlagDecisionType, TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery, ReleaseFlagDecisionType } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 export type FlagReleaseAppearance = TrackedFlagDetail['releases'][number]
 type DecidedFlagReleaseAppearance = Omit<FlagReleaseAppearance, 'decision'> & {
   decision: ReleaseFlagDecisionType

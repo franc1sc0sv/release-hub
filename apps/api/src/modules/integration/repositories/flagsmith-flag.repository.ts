@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
 import { FlagsmithSyncStatus, kysely } from '@release-hub/db'
+import type { ReleaseFlagDecisionType } from '@release-hub/db'
 import { sql } from 'kysely'
 import { IFlagsmithFlagRepository } from '../interfaces/flagsmith-flag.repository'
 import { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import { SortDirection } from '../../../common/types/sort-direction.enum'
+import { FlagActivityFilter } from '../../../common/types/flag-activity-filter.enum'
+import { FlagDeploymentStatus } from '../../../common/types/flag-deployment-status.enum'
+import { computeFlagDeploymentStatus } from '../../../common/types/flag-deployment-status.util'
 import type {
   IUpsertFlagsmithEnvironmentData,
   IUpsertFlagsmithFlagData,
@@ -13,7 +17,14 @@ import type {
   ICompleteFlagsmithSyncRunData,
   IFlagsmithFlagMatrixFilters,
   IFlagsmithFlagMatrixResult,
+  IFlagsmithFlagMatrixItem,
   IFlagsmithFlagRecord,
+  IReconcileFlagsResult,
+  IFlagsmithFlagStateChange,
+  IFlagsmithFlagValueChange,
+  IUpsertFlagsmithFlagWithStatesResult,
+  IUpsertFlagsmithFlagStateChangeResult,
+  IFlagsmithFlagDetail,
 } from '../interfaces/flagsmith-sync.interfaces'
 
 function toIFlagsmithSyncRun(row: {
@@ -60,7 +71,16 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     return { id: row.id, name: row.name }
   }
 
-  upsertFlagWithStates = async (data: IUpsertFlagsmithFlagData, tx: TxClient): Promise<void> => {
+  upsertFlagWithStates = async (
+    data: IUpsertFlagsmithFlagData,
+    tx: TxClient,
+  ): Promise<IUpsertFlagsmithFlagWithStatesResult> => {
+    const existingFlag = await tx.flagsmithFlag.findUnique({
+      where: { projectId_key: { projectId: data.projectId, key: data.key } },
+      select: { id: true, deletedAt: true },
+    })
+    const isNewFlag = !existingFlag || existingFlag.deletedAt !== null
+
     const flag = await tx.flagsmithFlag.upsert({
       where: { projectId_key: { projectId: data.projectId, key: data.key } },
       create: {
@@ -77,6 +97,8 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       },
     })
 
+    const stateChanges: IUpsertFlagsmithFlagStateChangeResult[] = []
+
     for (const state of data.states) {
       const environment = await tx.flagsmithEnvironment.findFirst({
         where: { projectId: data.projectId, name: state.environmentName },
@@ -84,19 +106,34 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       })
       if (!environment) continue
 
+      const existingState = await tx.flagsmithFlagState.findUnique({
+        where: { flagId_environmentId: { flagId: flag.id, environmentId: environment.id } },
+        select: { enabled: true, value: true },
+      })
+
       await tx.flagsmithFlagState.upsert({
         where: { flagId_environmentId: { flagId: flag.id, environmentId: environment.id } },
-        create: { flagId: flag.id, environmentId: environment.id, enabled: state.enabled },
-        update: { enabled: state.enabled },
+        create: { flagId: flag.id, environmentId: environment.id, enabled: state.enabled, value: state.value },
+        update: { enabled: state.enabled, value: state.value },
+      })
+
+      stateChanges.push({
+        environmentName: state.environmentName,
+        previousEnabled: existingState?.enabled ?? null,
+        newEnabled: state.enabled,
+        previousValue: existingState?.value ?? null,
+        newValue: state.value,
       })
     }
+
+    return { flagId: flag.id, isNewFlag, stateChanges }
   }
 
   reconcileFlags = async (
     projectId: string,
     flags: IUpsertFlagsmithFlagData[],
     tx: TxClient,
-  ): Promise<void> => {
+  ): Promise<IReconcileFlagsResult> => {
     const syncedAt = new Date()
     const incomingKeys = flags.map((flag) => flag.key)
 
@@ -111,6 +148,30 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       select: { id: true, key: true, flagCreatedAt: true },
     })
     const existingByKey = new Map(existing.map((flag) => [flag.key, flag]))
+
+    const existingFlagIds = existing
+      .filter((flag) => incomingKeys.includes(flag.key))
+      .map((flag) => flag.id)
+    const keyByExistingFlagId = new Map(existing.map((flag) => [flag.id, flag.key]))
+
+    const existingStateRows =
+      existingFlagIds.length === 0
+        ? []
+        : await tx.flagsmithFlagState.findMany({
+            where: { flagId: { in: existingFlagIds } },
+            select: {
+              flagId: true,
+              enabled: true,
+              value: true,
+              environment: { select: { name: true } },
+            },
+          })
+    const existingStateByKeyEnv = new Map<string, { enabled: boolean; value: string | null }>()
+    for (const row of existingStateRows) {
+      const key = keyByExistingFlagId.get(row.flagId)
+      if (!key) continue
+      existingStateByKeyEnv.set(`${key}::${row.environment.name}`, { enabled: row.enabled, value: row.value })
+    }
 
     const toCreate = flags.filter((flag) => !existingByKey.has(flag.key))
     if (toCreate.length > 0) {
@@ -163,12 +224,47 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       return flag.states.flatMap((state) => {
         const environmentId = environmentIdByName.get(state.environmentName)
         if (!environmentId) return []
-        return [{ flagId, environmentId, enabled: state.enabled }]
+        return [{ flagId, environmentId, enabled: state.enabled, value: state.value }]
       })
     })
     if (stateRows.length > 0) {
       await tx.flagsmithFlagState.createMany({ data: stateRows })
     }
+
+    const enabledChanges: IFlagsmithFlagStateChange[] = []
+    const valueChanges: IFlagsmithFlagValueChange[] = []
+
+    for (const flag of flags) {
+      const flagId = flagIdByKey.get(flag.key)
+      if (!flagId || !existingByKey.has(flag.key)) continue
+
+      for (const state of flag.states) {
+        const previous = existingStateByKeyEnv.get(`${flag.key}::${state.environmentName}`)
+        if (!previous) continue
+
+        if (previous.enabled !== state.enabled) {
+          enabledChanges.push({
+            flagId,
+            key: flag.key,
+            environmentName: state.environmentName,
+            previousEnabled: previous.enabled,
+            newEnabled: state.enabled,
+          })
+        }
+
+        if (previous.value !== state.value) {
+          valueChanges.push({
+            flagId,
+            key: flag.key,
+            environmentName: state.environmentName,
+            previousValue: previous.value,
+            newValue: state.value,
+          })
+        }
+      }
+    }
+
+    return { enabledChanges, valueChanges }
   }
 
   softDeleteFlagsNotInKeys = async (projectId: string, keys: string[], tx: TxClient): Promise<void> => {
@@ -189,61 +285,103 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     filters: IFlagsmithFlagMatrixFilters,
     tx: TxClient,
   ): Promise<IFlagsmithFlagMatrixResult> => {
-    const environmentRows = await tx.flagsmithEnvironment.findMany({
-      where: { projectId: filters.projectId },
-      orderBy: { sortOrder: 'asc' },
-      select: { id: true, name: true },
-    })
+    const [environmentRows, latestSyncRun, candidateFlags, sortEnvironmentId] = await Promise.all([
+      tx.flagsmithEnvironment.findMany({
+        where: { projectId: filters.projectId },
+        orderBy: { sortOrder: 'asc' },
+        select: { id: true, name: true },
+      }),
+      tx.flagsmithSyncRun.findFirst({
+        where: { projectId: filters.projectId, status: FlagsmithSyncStatus.completed },
+        orderBy: { finishedAt: 'desc' },
+        select: { finishedAt: true },
+      }),
+      tx.flagsmithFlag.findMany({
+        where: {
+          projectId: filters.projectId,
+          deletedAt: null,
+          ...(filters.search ? { key: { contains: filters.search, mode: 'insensitive' as const } } : {}),
+        },
+        select: { id: true, key: true },
+      }),
+      this.resolveSortEnvironmentId(filters, tx),
+    ])
     const environments = environmentRows.map((env) => env.name)
-
-    const latestSyncRun = await tx.flagsmithSyncRun.findFirst({
-      where: { projectId: filters.projectId, status: FlagsmithSyncStatus.completed },
-      orderBy: { finishedAt: 'desc' },
-      select: { finishedAt: true },
-    })
     const lastSyncedAt = latestSyncRun?.finishedAt ?? null
 
     if (environments.length === 0) {
       return { environments: [], totalCount: 0, items: [], lastSyncedAt }
     }
 
-    let countQuery = kysely
-      .selectFrom('flagsmith_flags')
-      .select(({ fn }) => fn.countAll<string>().as('total'))
-      .where('project_id', '=', filters.projectId)
-      .where('deleted_at', 'is', null)
-
-    if (filters.search) {
-      countQuery = countQuery.where('key', 'ilike', `%${filters.search}%`)
+    if (candidateFlags.length === 0) {
+      return { environments, totalCount: 0, items: [], lastSyncedAt }
     }
 
-    const compiledCount = countQuery.compile()
-    const countRows = await tx.$queryRawUnsafe<{ total: string }[]>(
-      compiledCount.sql,
-      ...compiledCount.parameters,
-    )
-    const totalCount = Number(countRows[0]?.total ?? 0)
+    const candidateIds = candidateFlags.map((flag) => flag.id)
+    const keyByFlagId = new Map(candidateFlags.map((flag) => [flag.id, flag.key]))
+    const candidateKeys = [...new Set(candidateFlags.map((flag) => flag.key))]
 
-    let rowsQuery = kysely
-      .selectFrom('flagsmith_flags as flag')
-      .leftJoin('flagsmith_flag_states as state', 'state.flag_id', 'flag.id')
-      .leftJoin('flagsmith_environments as env', 'env.id', 'state.environment_id')
-      .select([
-        'flag.id as flagId',
-        'flag.key as key',
-        'flag.flag_created_at as createdAt',
-        'env.name as environmentName',
-        'state.enabled as enabled',
-      ])
-      .where('flag.project_id', '=', filters.projectId)
-      .where('flag.deleted_at', 'is', null)
+    const stateAggQuery = kysely
+      .selectFrom('flagsmith_flag_states')
+      .select(['flag_id', sql<boolean>`bool_or(enabled)`.as('anyEnabled'), sql<boolean>`bool_or(not enabled)`.as('anyDisabled')])
+      .where('flag_id', 'in', candidateIds)
+      .groupBy('flag_id')
+    const compiledAgg = stateAggQuery.compile()
 
-    if (filters.search) {
-      rowsQuery = rowsQuery.where('flag.key', 'ilike', `%${filters.search}%`)
+    const [aggRows, trackedFlags] = await Promise.all([
+      tx.$queryRawUnsafe<{ flag_id: string; anyEnabled: boolean; anyDisabled: boolean }[]>(
+        compiledAgg.sql,
+        ...compiledAgg.parameters,
+      ),
+      tx.trackedFlag.findMany({
+        where: { projectId: filters.projectId, deletedAt: null, key: { in: candidateKeys } },
+        select: { id: true, key: true },
+      }),
+    ])
+    const aggByFlagId = new Map(aggRows.map((row) => [row.flag_id, { anyEnabled: row.anyEnabled, anyDisabled: row.anyDisabled }]))
+    const trackedFlagIdByKey = new Map(trackedFlags.map((flag) => [flag.key, flag.id]))
+
+    const decisionRows = await tx.releaseFlagDecision.findMany({
+      where: { trackedFlagId: { in: [...trackedFlagIdByKey.values()] } },
+      orderBy: { updatedAt: 'desc' },
+      select: { trackedFlagId: true, decision: true },
+    })
+    const latestDecisionByTrackedFlagId = new Map<string, ReleaseFlagDecisionType>()
+    for (const row of decisionRows) {
+      if (!latestDecisionByTrackedFlagId.has(row.trackedFlagId)) {
+        latestDecisionByTrackedFlagId.set(row.trackedFlagId, row.decision)
+      }
     }
 
-    const sortEnvironmentId = await this.resolveSortEnvironmentId(filters, tx)
-    const pagedFlagIdsQuery = this.buildPagedFlagIdsQuery(filters, sortEnvironmentId)
+    const deploymentStatusByFlagId = new Map<string, FlagDeploymentStatus>()
+    for (const flagId of candidateIds) {
+      const key = keyByFlagId.get(flagId)
+      const trackedFlagId = key ? trackedFlagIdByKey.get(key) : undefined
+      const decision = trackedFlagId ? (latestDecisionByTrackedFlagId.get(trackedFlagId) ?? null) : null
+      const anyDisabled = aggByFlagId.get(flagId)?.anyDisabled ?? false
+      deploymentStatusByFlagId.set(flagId, computeFlagDeploymentStatus(decision, anyDisabled))
+    }
+
+    let filteredIds = candidateIds
+    if (filters.statuses && filters.statuses.length > 0) {
+      const statusSet = new Set(filters.statuses)
+      filteredIds = filteredIds.filter((id) =>
+        statusSet.has(deploymentStatusByFlagId.get(id) ?? FlagDeploymentStatus.UNTRACKED),
+      )
+    }
+    if (filters.activity) {
+      filteredIds = filteredIds.filter((id) => {
+        const anyEnabled = aggByFlagId.get(id)?.anyEnabled ?? false
+        return filters.activity === FlagActivityFilter.ACTIVE ? anyEnabled : !anyEnabled
+      })
+    }
+
+    const totalCount = filteredIds.length
+    if (totalCount === 0) {
+      return { environments, totalCount: 0, items: [], lastSyncedAt }
+    }
+
+    const pagedFlagIdsQuery = this.buildPagedFlagIdsQuery(filters, sortEnvironmentId, filteredIds)
     const compiledPagedIds = pagedFlagIdsQuery.compile()
     const pagedIdRows = await tx.$queryRawUnsafe<{ id: string }[]>(
       compiledPagedIds.sql,
@@ -255,11 +393,30 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       return { environments, totalCount, items: [], lastSyncedAt }
     }
 
-    rowsQuery = rowsQuery.where('flag.id', 'in', pagedFlagIds)
+    const rowsQuery = kysely
+      .selectFrom('flagsmith_flags as flag')
+      .leftJoin('flagsmith_flag_states as state', 'state.flag_id', 'flag.id')
+      .leftJoin('flagsmith_environments as env', 'env.id', 'state.environment_id')
+      .select([
+        'flag.id as flagId',
+        'flag.key as key',
+        'flag.flag_created_at as createdAt',
+        'env.name as environmentName',
+        'state.enabled as enabled',
+        'state.value as value',
+      ])
+      .where('flag.id', 'in', pagedFlagIds)
 
     const compiledRows = rowsQuery.compile()
     const rows = await tx.$queryRawUnsafe<
-      { flagId: string; key: string; createdAt: Date | null; environmentName: string | null; enabled: boolean | null }[]
+      {
+        flagId: string
+        key: string
+        createdAt: Date | null
+        environmentName: string | null
+        enabled: boolean | null
+        value: string | null
+      }[]
     >(compiledRows.sql, ...compiledRows.parameters)
 
     const flagOrder = new Map(pagedFlagIds.map((id, index) => [id, index]))
@@ -269,22 +426,24 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       const existing = flagsByOrder.get(row.flagId)
       const record = existing ?? { flagId: row.flagId, key: row.key, createdAt: row.createdAt, states: [] }
       if (row.environmentName !== null) {
-        record.states.push({ environmentName: row.environmentName, enabled: row.enabled ?? false })
+        record.states.push({ environmentName: row.environmentName, enabled: row.enabled ?? false, value: row.value })
       }
       flagsByOrder.set(row.flagId, record)
     }
 
-    const items: IFlagsmithFlagRecord[] = [...flagsByOrder.values()]
+    const items: IFlagsmithFlagMatrixItem[] = [...flagsByOrder.values()]
       .sort((a, b) => (flagOrder.get(a.flagId) ?? 0) - (flagOrder.get(b.flagId) ?? 0))
       .map((record) => {
-        const stateByEnv = new Map(record.states.map((state) => [state.environmentName, state.enabled]))
+        const stateByEnv = new Map(record.states.map((state) => [state.environmentName, state]))
         return {
           key: record.key,
           createdAt: record.createdAt,
           states: environments.map((name) => ({
             environmentName: name,
-            enabled: stateByEnv.get(name) ?? false,
+            enabled: stateByEnv.get(name)?.enabled ?? false,
+            value: stateByEnv.get(name)?.value ?? null,
           })),
+          deploymentStatus: deploymentStatusByFlagId.get(record.flagId) ?? FlagDeploymentStatus.UNTRACKED,
         }
       })
 
@@ -319,16 +478,20 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       select: {
         key: true,
         flagCreatedAt: true,
-        states: { select: { enabled: true, environment: { select: { name: true } } } },
+        states: { select: { enabled: true, value: true, environment: { select: { name: true } } } },
       },
     })
 
     const flags: IFlagsmithFlagRecord[] = rows.map((row) => {
-      const stateByEnv = new Map(row.states.map((state) => [state.environment.name, state.enabled]))
+      const stateByEnv = new Map(row.states.map((state) => [state.environment.name, state]))
       return {
         key: row.key,
         createdAt: row.flagCreatedAt,
-        states: environments.map((name) => ({ environmentName: name, enabled: stateByEnv.get(name) ?? false })),
+        states: environments.map((name) => ({
+          environmentName: name,
+          enabled: stateByEnv.get(name)?.enabled ?? false,
+          value: stateByEnv.get(name)?.value ?? null,
+        })),
       }
     })
 
@@ -387,6 +550,42 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     return { flagId: flag.id, environmentId: environment.id }
   }
 
+  findFlagDetailByKey = async (
+    projectId: string,
+    key: string,
+    tx: TxClient,
+  ): Promise<IFlagsmithFlagDetail | null> => {
+    const flag = await tx.flagsmithFlag.findFirst({
+      where: { projectId, key, deletedAt: null },
+      select: {
+        id: true,
+        key: true,
+        lastSyncedAt: true,
+        states: {
+          select: {
+            enabled: true,
+            value: true,
+            updatedAt: true,
+            environment: { select: { name: true } },
+          },
+        },
+      },
+    })
+    if (!flag) return null
+
+    return {
+      id: flag.id,
+      key: flag.key,
+      lastSyncedAt: flag.lastSyncedAt,
+      environments: flag.states.map((state) => ({
+        name: state.environment.name,
+        enabled: state.enabled,
+        value: state.value,
+        updatedAt: state.updatedAt,
+      })),
+    }
+  }
+
   createSyncRun = async (data: ICreateFlagsmithSyncRunData, tx: TxClient): Promise<IFlagsmithSyncRun> => {
     const row = await tx.flagsmithSyncRun.create({
       data: {
@@ -433,18 +632,17 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     return environment?.id ?? null
   }
 
-  private buildPagedFlagIdsQuery(filters: IFlagsmithFlagMatrixFilters, sortEnvironmentId: string | null) {
+  private buildPagedFlagIdsQuery(
+    filters: IFlagsmithFlagMatrixFilters,
+    sortEnvironmentId: string | null,
+    restrictIds: string[],
+  ) {
     const direction = filters.sortDirection === SortDirection.ASC ? 'asc' : 'desc'
 
     let query = kysely
       .selectFrom('flagsmith_flags as flag')
       .select('flag.id as id')
-      .where('flag.project_id', '=', filters.projectId)
-      .where('flag.deleted_at', 'is', null)
-
-    if (filters.search) {
-      query = query.where('flag.key', 'ilike', `%${filters.search}%`)
-    }
+      .where('flag.id', 'in', restrictIds)
 
     if (filters.sortField === FlagSortField.NAME) {
       return query.orderBy('flag.key', direction).limit(filters.limit).offset(filters.offset)

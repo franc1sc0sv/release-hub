@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@apollo/client/react'
@@ -13,6 +13,7 @@ import { slideUp, staggerContainer } from '@/lib/animations'
 import { useProject } from '@/context/project.context'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
 import { AiDraftStatusValue, ReleaseStatusValue } from '../constants/release-enums'
+import type { AiDraftStatus } from '@/generated/graphql'
 import { OverviewTab } from '../components/OverviewTab'
 import { DraftTab } from '../components/DraftTab'
 import { SummaryTab } from '../components/SummaryTab'
@@ -33,23 +34,19 @@ export default function ReleaseViewPage() {
   const reduceMotion = useReducedMotion()
   const { activeProject } = useProject()
 
-  const queryResult = useQuery(GET_RELEASE_TREE, {
+  const [knownAiStatus, setKnownAiStatus] = useState<AiDraftStatus | undefined>(undefined)
+  const pollInterval = !knownAiStatus || DRAFTING_STATUSES.has(knownAiStatus) ? POLL_INTERVAL_MS : 0
+
+  const { data, loading, error } = useQuery(GET_RELEASE_TREE, {
     variables: { id: releaseId ?? '' },
     skip: !releaseId,
-    pollInterval: POLL_INTERVAL_MS,
+    pollInterval,
   })
 
-  const { data, loading, error } = queryResult
-
-  const pollingRef = useRef(true)
-
-  useEffect(() => {
-    const aiStatus = data?.getReleaseTree?.release?.aiDraftStatus
-    if (aiStatus && !DRAFTING_STATUSES.has(aiStatus) && pollingRef.current) {
-      queryResult.stopPolling()
-      pollingRef.current = false
-    }
-  }, [data, queryResult])
+  const aiStatus = data?.getReleaseTree?.release?.aiDraftStatus
+  if (aiStatus !== knownAiStatus) {
+    setKnownAiStatus(aiStatus)
+  }
 
   if (loading && !data) {
     return (

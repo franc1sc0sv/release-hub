@@ -269,3 +269,21 @@ export const TRIGGER_FLAG_DIGEST = graphql(`
     triggerFlagDigest(projectId: $projectId)
   }
 `)
+
+export const GET_PROJECT_FLAG_REMINDER = graphql(`
+  query GetProjectFlagReminder($id: ID!) {
+    getProject(id: $id) {
+      id
+      flagReminderIntervalDays
+    }
+  }
+`)
+
+export const UPDATE_PROJECT_FLAG_REMINDER = graphql(`
+  mutation UpdateProjectFlagReminder($input: UpdateProjectInput!) {
+    updateProject(input: $input) {
+      id
+      flagReminderIntervalDays
+    }
+  }
+`)

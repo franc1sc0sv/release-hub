@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
 import {
@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { Skeleton } from '@/components/ui/skeleton'
 import { SummaryExportControls } from './SummaryExportControls'
 import { useGenerateSummary } from '../hooks/useGenerateSummary'
 import { SAVE_RELEASE_SUMMARY } from '../graphql/releases.mutations'
@@ -43,6 +43,10 @@ const TONES = ['concise', 'warm', 'formal'] as const
 
 type AiModel = (typeof AI_MODELS)[number]
 type Tone = (typeof TONES)[number]
+
+const RichTextEditor = lazy(() =>
+  import('@/components/editor/RichTextEditor').then((mod) => ({ default: mod.RichTextEditor })),
+)
 
 interface SummaryTabProps {
   release: ReleaseNode
@@ -300,12 +304,14 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
         <Separator className="mb-4 opacity-40" />
 
         <CardContent className="space-y-4">
-          <RichTextEditor
-            value={editorContent}
-            onChange={setEditorContent}
-            editable={!isStreaming}
-            placeholder={t('summary.editorPlaceholder')}
-          />
+          <Suspense fallback={<Skeleton className="h-[220px] w-full rounded-[var(--radius-card)]" />}>
+            <RichTextEditor
+              value={editorContent}
+              onChange={setEditorContent}
+              editable={!isStreaming}
+              placeholder={t('summary.editorPlaceholder')}
+            />
+          </Suspense>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">

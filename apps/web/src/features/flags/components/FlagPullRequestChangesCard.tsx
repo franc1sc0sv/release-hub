@@ -6,9 +6,9 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { FlagChangeActionValue } from '@/features/releases/constants/release-enums'
-import type { TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 type FlagPullRequestChange = TrackedFlagDetail['pullRequestChanges'][number]
 
 const CHANGE_TONE: Record<FlagPullRequestChange['action'], 'emerald' | 'amber' | 'rose' | 'slate'> = {

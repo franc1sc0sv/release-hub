@@ -18,6 +18,7 @@ export interface IFlagsmithWebhookFeatureState {
   feature: IFlagsmithWebhookFeature
   environment: IFlagsmithWebhookEnvironment
   enabled: boolean
+  feature_state_value?: string | number | boolean | null
 }
 
 export interface IFlagsmithWebhookPayload {
@@ -33,4 +34,5 @@ export interface IParsedFlagsmithWebhookEvent {
   featureKey: string
   environmentName: string
   enabled: boolean
+  value: string | null
 }

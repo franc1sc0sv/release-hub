@@ -31,7 +31,7 @@ export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectComman
     const ability = defineAbilityFor(memberships)
 
     if (
-      !ability.can(Action.UPDATE, {
+      !ability.can(Action.MANAGE, {
         kind: Subject.PROJECT,
         __type: Subject.PROJECT,
         projectId: command.projectId,
@@ -45,7 +45,11 @@ export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectComman
 
     const project = await this.projectRepository.update(
       command.projectId,
-      { name: command.name, repo: command.repo },
+      {
+        name: command.name,
+        repo: command.repo,
+        flagReminderIntervalDays: command.flagReminderIntervalDays,
+      },
       tx,
     )
 

@@ -10,18 +10,18 @@ import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { decryptToken } from '../../../../common/crypto/token-cipher'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
-import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
 import { IBlockedBranchRepository } from '../../interfaces/blocked-branch.repository'
-import type { IDeleteBranchOutcome } from '../../interfaces/repo-ops.interfaces'
+import { BranchBlockReason, type IDeleteBranchOutcome } from '../../interfaces/repo-ops.interfaces'
+import { deriveBranchBlockReasons } from '../../utils/branch-block-reason.util'
+import { fetchBranchCommitDetails } from '../../utils/fetch-branch-commit-details.util'
 import { DeleteGithubBranchesCommand } from './delete-github-branches.command'
 
 interface IResolvedDeleteBranchesSource {
   repo: string
   accessToken: string
-  releaseRefs: string[]
-  blockedBranchNames: string[]
+  blockedNames: Set<string>
 }
 
 @CommandHandler(DeleteGithubBranchesCommand)
@@ -34,7 +34,6 @@ export class DeleteGithubBranchesHandler extends PreparedCommandHandler<
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
     private readonly projectRepository: IProjectRepository,
-    private readonly releaseRepository: IReleaseRepository,
     private readonly gitHubClient: IGitHubClient,
     private readonly githubConnectionRepository: IGithubConnectionRepository,
     private readonly blockedBranchRepository: IBlockedBranchRepository,
@@ -45,20 +44,24 @@ export class DeleteGithubBranchesHandler extends PreparedCommandHandler<
   protected async prepare(
     command: DeleteGithubBranchesCommand,
   ): Promise<IDeleteBranchOutcome[]> {
-    const { repo, accessToken, releaseRefs, blockedBranchNames } = await this.resolveSource(command)
+    const { repo, accessToken, blockedNames } = await this.resolveSource(command)
 
-    const [branches, mergedHeads, openHeads, defaultBranch] = await Promise.all([
+    const [branches, openHeads, defaultBranch] = await Promise.all([
       this.gitHubClient.listBranches(repo, accessToken),
-      this.gitHubClient.listMergedPullRequestHeads(repo, accessToken),
       this.gitHubClient.listOpenPullRequestHeads(repo, accessToken),
       this.gitHubClient.getDefaultBranch(repo, accessToken),
     ])
 
     const branchByName = new Map(branches.map((branch) => [branch.name, branch]))
-    const mergedRefs = new Set(mergedHeads.map((head) => head.headRef))
     const openRefs = new Set(openHeads.map((head) => head.headRef))
-    const referencedRefs = new Set(releaseRefs)
-    const blockedRefs = new Set(blockedBranchNames)
+    const overriddenNames = new Set(command.overriddenBranchNames)
+
+    const commitDetails = await fetchBranchCommitDetails(
+      this.gitHubClient,
+      repo,
+      accessToken,
+      command.branchNames,
+    )
 
     const outcomes: IDeleteBranchOutcome[] = []
 
@@ -69,28 +72,19 @@ export class DeleteGithubBranchesHandler extends PreparedCommandHandler<
         continue
       }
 
-      const mergedViaPr = mergedRefs.has(branchName)
-      const noOpenPr = !openRefs.has(branchName)
-      const unreferencedByReleases = !referencedRefs.has(branchName)
-      const blocked = blockedRefs.has(branchName)
-      const isDefault = branchName === defaultBranch
+      const commitDetail = commitDetails.get(branchName) ?? null
+      const blockReasons = deriveBranchBlockReasons({
+        branchName,
+        isDefault: branchName === defaultBranch,
+        githubProtected: branch.protected,
+        hasOpenPr: openRefs.has(branchName),
+        lastCommitAt: commitDetail?.committedAt ?? null,
+        manuallyBlocked: blockedNames.has(branchName),
+      })
 
-      const safeToDelete =
-        mergedViaPr && noOpenPr && unreferencedByReleases && !blocked && !isDefault && !branch.protected
-
-      if (!safeToDelete) {
-        outcomes.push({
-          branchName,
-          deleted: false,
-          reason: this.buildRefusalReason({
-            mergedViaPr,
-            noOpenPr,
-            unreferencedByReleases,
-            blocked,
-            isDefault,
-            protectedBranch: branch.protected,
-          }),
-        })
+      const refusal = this.resolveRefusal(blockReasons, overriddenNames.has(branchName))
+      if (refusal) {
+        outcomes.push({ branchName, deleted: false, reason: refusal })
         continue
       }
 
@@ -114,21 +108,18 @@ export class DeleteGithubBranchesHandler extends PreparedCommandHandler<
     return prepared
   }
 
-  private buildRefusalReason(flags: {
-    mergedViaPr: boolean
-    noOpenPr: boolean
-    unreferencedByReleases: boolean
-    blocked: boolean
-    isDefault: boolean
-    protectedBranch: boolean
-  }): string {
-    if (flags.isDefault) return 'Branch is the default branch'
-    if (flags.blocked) return 'Branch is blocked from cleanup'
-    if (flags.protectedBranch) return 'Branch is protected on GitHub'
-    if (!flags.mergedViaPr) return 'Branch has no merged pull request'
-    if (!flags.noOpenPr) return 'Branch has an open pull request'
-    if (!flags.unreferencedByReleases) return 'Branch is referenced by a release'
-    return 'Branch failed the cleanup safety check'
+  private resolveRefusal(blockReasons: BranchBlockReason[], overridden: boolean): string | null {
+    if (blockReasons.includes(BranchBlockReason.DEFAULT_BRANCH)) return 'Branch is the default branch'
+    if (blockReasons.includes(BranchBlockReason.GITHUB_PROTECTED)) return 'Branch is protected on GitHub'
+    if (blockReasons.includes(BranchBlockReason.OPEN_PULL_REQUEST)) return 'Branch has an open pull request'
+    if (blockReasons.includes(BranchBlockReason.MANUALLY_BLOCKED)) return 'Branch is manually blocked'
+    if (!overridden && blockReasons.includes(BranchBlockReason.RECENT_ACTIVITY)) {
+      return 'Branch has recent activity (commit within the last 30 days)'
+    }
+    if (!overridden && blockReasons.includes(BranchBlockReason.PROTECTED_NAME)) {
+      return 'Branch name is a protected branch name'
+    }
+    return null
   }
 
   private async resolveSource(
@@ -152,15 +143,12 @@ export class DeleteGithubBranchesHandler extends PreparedCommandHandler<
       if (!project) throw new NotFoundException('Project')
 
       const accessToken = await this.resolveGitHubToken(command.userId, tx)
-
-      const releases = await this.releaseRepository.findAllByProject(command.projectId, tx)
       const blockedBranches = await this.blockedBranchRepository.findAllByProject(command.projectId, tx)
 
       return {
         repo: project.repo,
         accessToken,
-        releaseRefs: releases.flatMap((release) => [release.baseRef, release.compareRef]),
-        blockedBranchNames: blockedBranches.map((blocked) => blocked.branchName),
+        blockedNames: new Set(blockedBranches.map((blocked) => blocked.branchName)),
       }
     })
   }

@@ -25,7 +25,7 @@ export function BlockBranchDialog({ projectId, branchName }: BlockBranchDialogPr
   const { t } = useTranslation('repoOps')
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState('')
-  const { blockBranch, loading } = useBlockBranch(projectId)
+  const { blockBranch, loading } = useBlockBranch()
 
   async function handleConfirm() {
     try {

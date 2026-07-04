@@ -41,6 +41,8 @@ export class GetFlagsHandler extends BaseQueryHandler<GetFlagsQuery, FlagsResult
         sortField: query.sortField,
         sortEnvironment: query.sortEnvironment,
         sortDirection: query.sortDirection,
+        statuses: query.statuses,
+        activity: query.activity,
         limit: query.limit,
         offset: query.offset,
       },
@@ -52,12 +54,14 @@ export class GetFlagsHandler extends BaseQueryHandler<GetFlagsQuery, FlagsResult
         Object.assign(new FlagEnvironmentStateType(), {
           name: state.environmentName,
           enabled: state.enabled,
+          value: state.value,
         }),
       )
       return Object.assign(new FlagRefType(), {
         key: flag.key,
         createdAt: flag.createdAt,
         environments: envStates,
+        deploymentStatus: flag.deploymentStatus,
       })
     })
 

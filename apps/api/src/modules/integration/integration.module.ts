@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { ProjectModule } from '../project/project.module'
 import { LinearAuthModule } from '../linear-auth/linear-auth.module'
+import { FlagHistoryModule } from '../flag-tracking/flag-history.module'
 import { IntegrationResolver } from './resolvers/integration.resolver'
 import { IGitHubClient } from './interfaces/github-client.interface'
 import { GitHubClient } from './github.client'
@@ -30,7 +31,7 @@ import { HandleFlagsmithWebhookHandler } from './commands/handle-flagsmith-webho
 import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, LinearAuthModule],
+  imports: [CqrsModule, ProjectModule, LinearAuthModule, FlagHistoryModule],
   providers: [
     IntegrationResolver,
     { provide: IGitHubClient, useClass: GitHubClient },

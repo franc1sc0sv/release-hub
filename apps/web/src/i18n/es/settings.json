@@ -118,6 +118,14 @@
       "saveError": "No se pudo guardar el registro de flags. Inténtalo de nuevo.",
       "current": "Rastreando actualmente {{path}} en {{branch}}",
       "defaultBranch": "rama predeterminada"
+    },
+    "reminderInterval": {
+      "label": "Intervalo de recordatorio (días)",
+      "hint": "Con qué frecuencia se envían los recordatorios de apagado para flags que siguen activos en staging o producción.",
+      "invalid": "Ingresa un número entero de al menos 1 día.",
+      "save": "Guardar",
+      "saveSuccess": "Intervalo de recordatorio guardado.",
+      "saveError": "No se pudo guardar el intervalo de recordatorio. Inténtalo de nuevo."
     }
   },
   "tags": {

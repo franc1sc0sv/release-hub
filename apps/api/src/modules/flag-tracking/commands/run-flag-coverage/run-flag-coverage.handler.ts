@@ -1,6 +1,6 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { FlagAction, FlagReferenceKind } from '@release-hub/db'
+import { FlagAction, FlagReferenceKind, FlagHistoryEventType, FlagHistorySource } from '@release-hub/db'
 import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
@@ -19,6 +19,10 @@ import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository
 import { IFlagBranchPresenceRepository } from '../../interfaces/flag-branch-presence.repository'
 import { IPullRequestFlagChangeRepository } from '../../interfaces/pull-request-flag-change.repository'
 import { IFlagRegistryParser } from '../../interfaces/flag-registry-parser.abstract'
+import {
+  IFlagHistoryRepository,
+  FLAG_HISTORY_PROJECT_SCOPE_KEY,
+} from '../../interfaces/flag-history.repository'
 import type { IRunFlagCoveragePreparation } from '../../interfaces/flag-tracking.interfaces'
 import { FlagCoverageSummaryType } from '../../types/flag-coverage-summary.type'
 import { FlagCoverageRunEvent } from '../../events/flag-coverage-run.event'
@@ -49,6 +53,7 @@ export class RunFlagCoverageHandler extends PreparedCommandHandler<
     private readonly trackedFlagRepository: ITrackedFlagRepository,
     private readonly flagBranchPresenceRepository: IFlagBranchPresenceRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
+    private readonly flagHistoryRepository: IFlagHistoryRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -208,6 +213,18 @@ export class RunFlagCoverageHandler extends PreparedCommandHandler<
       (total, diff) => total + diff.added.length + diff.removed.length,
       0,
     )
+
+    await this.flagHistoryRepository.create(
+      {
+        projectId: command.projectId,
+        flagKey: FLAG_HISTORY_PROJECT_SCOPE_KEY,
+        type: FlagHistoryEventType.coverage_scan,
+        newValue: `flagsTracked=${summary.flagsTracked};branchesScanned=${summary.branchesScanned};prChangesDetected=${summary.prChangesDetected}`,
+        source: FlagHistorySource.system,
+      },
+      tx,
+    )
+
     return summary
   }
 

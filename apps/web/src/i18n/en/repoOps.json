@@ -1,44 +1,155 @@
 {
   "title": "Repo Ops",
   "subtitle": "Repository operations",
-  "description": "Find stale and merged branches, block the ones you want to keep, and clean up the rest with a reviewed, confirmed delete.",
-  "loading": "Loading branches...",
+  "description": "Review every branch in this repository and clean up the ones you no longer need with a reviewed, confirmed delete.",
+  "header": {
+    "branchCountLabel_one": "branch",
+    "branchCountLabel_other": "branches"
+  },
   "error": {
     "heading": "Could not load branches",
     "description": "GitHub returned an error while scanning branches. Check your connection in Settings.",
     "retry": "Retry"
   },
   "empty": {
-    "heading": "No branches to review",
-    "description": "Every branch in this repository is active, protected, or already blocked."
+    "heading": "No branches found",
+    "description": "No branches match your search, or this repository doesn't have any yet."
   },
   "search": {
     "placeholder": "Search branches..."
+  },
+  "filters": {
+    "authorAria": "Filter by author",
+    "authorAll": "All authors",
+    "activityAria": "Filter by activity range",
+    "activityAll": "Any activity",
+    "activityOptions": {
+      "LAST_WEEK": "Last week",
+      "LAST_MONTH": "Last month",
+      "LAST_3_MONTHS": "Last 3 months",
+      "LAST_6_MONTHS": "Last 6 months",
+      "OVER_6_MONTHS": "Older than 6 months"
+    },
+    "protectionAria": "Filter by protection",
+    "protectionAll": "All branches",
+    "protectionOptions": {
+      "PROTECTED": "Protected only",
+      "UNPROTECTED": "Deletable only"
+    },
+    "signalsLabel": "Signals",
+    "signalOptions": {
+      "MERGED_VIA_PR": "Merged",
+      "OPEN_PR": "Open PR",
+      "UNREFERENCED": "Unreferenced"
+    },
+    "clear": "Clear filters"
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{total}}"
   },
   "table": {
     "columns": {
       "branch": "Branch",
       "lastActivity": "Last activity",
+      "author": "Author",
+      "protection": "Protection",
       "signals": "Signals",
       "actions": "Actions"
     },
+    "protectionBadge": "Protected",
+    "selectAll": "Select all branches on this page",
     "selectBranch": "Select branch {{branchName}}",
-    "suggested": "Suggested for deletion",
-    "lockedBlocked": "Blocked",
-    "lockedDefault": "Default branch",
-    "lockedProtected": "Protected",
-    "unknownActivity": "Unknown",
     "signals": {
       "none": "No signals",
       "mergedViaPr": "Merged",
-      "stale": "Stale",
       "unreferencedByReleases": "Unreferenced",
-      "noOpenPr": "No open PR"
+      "openPr": "PR #{{number}}",
+      "openPrAria": "Open pull request #{{number}} on GitHub"
+    },
+    "signalTooltips": {
+      "mergedViaPr": "This branch's changes were merged into another branch through a pull request.",
+      "unreferencedByReleases": "This branch is not used as the base or compare ref of any release in this project.",
+      "openPr": "This branch is the head of an open pull request. Click to open it on GitHub."
+    },
+    "sort": {
+      "aria": "Sort by {{label}}"
+    },
+    "sortSignals": {
+      "MERGED_VIA_PR": "Merged",
+      "OPEN_PR": "Open PR",
+      "UNREFERENCED": "Unreferenced"
     },
     "selectionCount_one": "{{count}} branch selected",
     "selectionCount_other": "{{count}} branches selected",
     "clearSelection": "Clear",
     "deleteSelected": "Delete"
+  },
+  "protected": {
+    "shieldLabel": "This branch is protected from deletion",
+    "unprotect": "Unprotect",
+    "unprotectTrigger": "Unprotect branch {{branchName}}",
+    "unprotected": "Unprotected for this session",
+    "reasonDescription": {
+      "DEFAULT_BRANCH": "This is the repository's default branch. It can never be deleted.",
+      "GITHUB_PROTECTED": "This branch has GitHub branch protection enabled. It can never be deleted from here.",
+      "OPEN_PULL_REQUEST": "This branch is the head of an open pull request.",
+      "RECENT_ACTIVITY": "This branch has a commit within the last 30 days. Someone may still be working on it.",
+      "PROTECTED_NAME": "This branch name (main, master, dev, or develop) is treated as protected by convention.",
+      "MANUALLY_BLOCKED": "This branch was manually blocked from cleanup by a project member. Unblock it to make it deletable.",
+      "RELEASE_REFERENCED": "This branch is used as the base or compare ref of a release in this project."
+    },
+    "unprotectDialog": {
+      "title": "Unprotect \"{{branchName}}\"?",
+      "description": "This branch is protected for the reasons below. Overriding removes that protection for this session only.",
+      "acknowledge": "I understand the risks and want to make this branch selectable for deletion.",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "confirmTitle": "Confirm override",
+      "confirmDescription": "\"{{branchName}}\" will become selectable for deletion. You'll still need to confirm the delete separately.",
+      "back": "Back",
+      "confirmAction": "Unprotect branch"
+    }
+  },
+  "cleanAll": {
+    "trigger": "Clean all branches",
+    "title": "Clean all branches",
+    "description": "Every branch is analyzed before anything happens. Review exactly what will be deleted and what will be kept — protected branches are never touched.",
+    "loading": "Analyzing every branch in the repository...",
+    "error": "Could not build the cleanup plan. Try again.",
+    "executionError": "The deletion was interrupted. Review the results below and retry if needed.",
+    "deletableCount_one": "{{count}} branch will be deleted",
+    "deletableCount_other": "{{count}} branches will be deleted",
+    "keptCount_one": "{{count}} branch will be kept",
+    "keptCount_other": "{{count}} branches will be kept",
+    "totalLabel": "{{total}} branches analyzed",
+    "deletableHeading": "Will be deleted",
+    "keptHeading": "Will be kept (protected)",
+    "tabs": {
+      "delete": "To delete ({{count}})",
+      "kept": "Protected ({{count}})"
+    },
+    "searchDelete": "Search branches to delete...",
+    "searchKept": "Search protected branches...",
+    "noMatches": "No branches match your search.",
+    "nothingToDelete": "There is nothing safe to delete — every branch is protected.",
+    "noActivity": "no commit activity",
+    "unknownAuthor": "unknown author",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "back": "Back",
+    "confirmWarning_one": "You are about to permanently delete {{count}} branch from GitHub. This cannot be undone.",
+    "confirmWarning_other": "You are about to permanently delete {{count}} branches from GitHub. This cannot be undone.",
+    "confirmationLabel": "Type {{word}} to confirm",
+    "confirmAction_one": "Delete {{count}} branch",
+    "confirmAction_other": "Delete {{count}} branches",
+    "runningLabel": "Deleting branches... {{done}} of {{total}}",
+    "doneDeleted_one": "{{count}} branch deleted",
+    "doneDeleted_other": "{{count}} branches deleted",
+    "doneRefused_one": "{{count}} branch could not be deleted",
+    "doneRefused_other": "{{count}} branches could not be deleted",
+    "close": "Close"
   },
   "block": {
     "trigger": "Block branch {{branchName}}",
@@ -51,25 +162,32 @@
     "success": "Blocked \"{{branchName}}\"",
     "error": "Could not block this branch. Try again."
   },
-  "blockedList": {
-    "title": "Blocked branches",
-    "empty": "No branches are currently blocked.",
-    "reasonWithDate": "{{reason}} · Blocked {{date}}",
-    "dateOnly": "Blocked {{date}}",
-    "unblock": "Unblock",
-    "unblockSuccess": "Unblocked \"{{branchName}}\"",
-    "unblockError": "Could not unblock this branch. Try again."
+  "unblock": {
+    "trigger": "Unblock branch {{branchName}}",
+    "dialogTitle": "Unblock \"{{branchName}}\"?",
+    "dialogDescription": "This branch will become eligible for cleanup suggestions and deletion again.",
+    "cancel": "Cancel",
+    "confirm": "Unblock branch",
+    "success": "Unblocked \"{{branchName}}\"",
+    "error": "Could not unblock this branch. Try again."
   },
   "delete": {
     "dialogTitle": "Delete branches",
     "dialogDescription_one": "You're about to permanently delete {{count}} branch from GitHub. This cannot be undone.",
     "dialogDescription_other": "You're about to permanently delete {{count}} branches from GitHub. This cannot be undone.",
-    "confirmationLabel_one": "Type {{count}} to confirm",
-    "confirmationLabel_other": "Type {{count}} to confirm",
+    "listLastActivity": "Last activity: {{time}}",
+    "listAuthor": "Author: {{author}}",
+    "unknownActivity": "no commit activity",
+    "unknownAuthor": "Unknown",
+    "confirmationLabel": "Type {{word}} to confirm",
     "cancel": "Cancel",
     "confirm": "Delete branches",
     "close": "Close",
     "outcomeDeleted": "Deleted",
-    "outcomeRefused": "Could not be deleted"
+    "outcomeRefused": "Could not be deleted",
+    "toastAllDeleted_one": "Deleted {{count}} branch",
+    "toastAllDeleted_other": "Deleted {{count}} branches",
+    "toastPartial": "{{deleted}} of {{total}} branches deleted",
+    "toastRefused": "\"{{branchName}}\" was not deleted: {{reason}}"
   }
 }

@@ -136,6 +136,9 @@ export class ProjectRepository extends IProjectRepository {
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.repo !== undefined && { repo: data.repo }),
+        ...(data.flagReminderIntervalDays !== undefined && {
+          flagReminderIntervalDays: data.flagReminderIntervalDays,
+        }),
       },
       include: {
         memberships: {
@@ -235,6 +238,8 @@ export class ProjectRepository extends IProjectRepository {
       githubInstallationId: string | null
       linearEnabled: boolean
       flagsmithEnabled: boolean
+      slackEnabled: boolean
+      flagReminderIntervalDays: number
       createdAt: Date
       updatedAt: Date
       memberships: { userId: string }[]
@@ -247,10 +252,13 @@ export class ProjectRepository extends IProjectRepository {
       githubInstallationId: row.githubInstallationId,
       linearEnabled: row.linearEnabled,
       flagsmithEnabled: row.flagsmithEnabled,
+      slackEnabled: row.slackEnabled,
+      flagReminderIntervalDays: row.flagReminderIntervalDays,
       integrations: {
         github: row.githubInstallationId !== null,
         linear: row.linearEnabled,
         flagsmith: row.flagsmithEnabled,
+        slack: row.slackEnabled,
       },
       ownerId: row.memberships[0]?.userId ?? '',
       createdAt: row.createdAt,

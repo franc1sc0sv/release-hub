@@ -7,9 +7,9 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import type { TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 type FlagBranchPresence = TrackedFlagDetail['branchPresences'][number]
 
 interface FlagBranchRowProps {

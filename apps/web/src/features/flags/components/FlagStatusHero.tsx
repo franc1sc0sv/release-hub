@@ -7,26 +7,34 @@ import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
-import { releaseFlagDecisionTone } from '@/features/releases/constants/release-enums'
 import { deriveFlagLifecycleStatus } from '../lib/flag-lifecycle'
-import type { TrackedFlagQuery } from '@/generated/graphql'
+import { FlagDeploymentStatusBadge } from './FlagDeploymentStatusBadge'
+import type { FlagDeploymentStatus, GetFlagDetailQuery } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 
 interface FlagStatusHeroProps {
-  flag: TrackedFlagDetail
+  flagKey: string
+  deploymentStatus: FlagDeploymentStatus
+  tracked: TrackedFlagDetail | null
   onRescan: () => void
   rescanning: boolean
 }
 
-export function FlagStatusHero({ flag, onRescan, rescanning }: FlagStatusHeroProps) {
+export function FlagStatusHero({
+  flagKey,
+  deploymentStatus,
+  tracked,
+  onRescan,
+  rescanning,
+}: FlagStatusHeroProps) {
   const { t } = useTranslation('flags')
-  const enumLabels = useEnumLabels()
 
-  const lifecycle = deriveFlagLifecycleStatus(flag.releases)
-  const isShippedSomewhere = flag.delivery.shippedReleaseVersions.length > 0
+  const presentInCode = tracked?.presentInCode ?? false
+  const shippedVersions = tracked?.delivery.shippedReleaseVersions ?? []
+  const inDefaultBranch = tracked?.delivery.inDefaultBranch ?? false
+  const { release: decidedRelease } = deriveFlagLifecycleStatus(tracked?.releases ?? [])
 
   return (
     <GlassCard glow="indigo">
@@ -37,24 +45,17 @@ export function FlagStatusHero({ flag, onRescan, rescanning }: FlagStatusHeroPro
               {t('detail.overline')}
             </p>
             <h1 className="break-words font-mono text-display-lg font-bold tracking-tight text-foreground">
-              {flag.key}
+              {flagKey}
             </h1>
             <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge tone={releaseFlagDecisionTone(lifecycle.decision)}>
-                {enumLabels.releaseFlagDecision(lifecycle.decision)}
-              </StatusBadge>
+              <FlagDeploymentStatusBadge status={deploymentStatus} />
               <StatusBadge
-                tone={flag.presentInCode ? 'emerald' : 'slate'}
-                icon={flag.presentInCode ? CheckCircle2 : CircleDashed}
+                tone={presentInCode ? 'emerald' : 'slate'}
+                icon={presentInCode ? CheckCircle2 : CircleDashed}
               >
-                {flag.presentInCode
+                {presentInCode
                   ? t('detail.currentStatus.presentInCode')
                   : t('detail.currentStatus.notPresentInCode')}
-              </StatusBadge>
-              <StatusBadge tone={isShippedSomewhere ? 'emerald-soft' : 'slate'}>
-                {isShippedSomewhere
-                  ? t('detail.currentStatus.live')
-                  : t('detail.currentStatus.notLive')}
               </StatusBadge>
             </div>
           </div>
@@ -75,7 +76,7 @@ export function FlagStatusHero({ flag, onRescan, rescanning }: FlagStatusHeroPro
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             {t('detail.currentStatus.delivery.label')}
           </p>
-          {flag.delivery.shippedReleaseVersions.length === 0 ? (
+          {shippedVersions.length === 0 ? (
             <p className="font-mono text-sm text-muted-foreground">
               {t('detail.currentStatus.delivery.notShipped')}
             </p>
@@ -83,10 +84,10 @@ export function FlagStatusHero({ flag, onRescan, rescanning }: FlagStatusHeroPro
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-sm text-foreground">
                 {t('detail.currentStatus.delivery.shippedIn', {
-                  version: flag.delivery.shippedReleaseVersions.join(', '),
+                  version: shippedVersions.join(', '),
                 })}
               </span>
-              {flag.delivery.inDefaultBranch && (
+              {inDefaultBranch && (
                 <StatusBadge tone="indigo">
                   {t('detail.currentStatus.delivery.inDefaultBranch')}
                 </StatusBadge>
@@ -94,19 +95,19 @@ export function FlagStatusHero({ flag, onRescan, rescanning }: FlagStatusHeroPro
             </div>
           )}
 
-          {lifecycle.release && (
+          {decidedRelease && (
             <>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 {t('detail.currentStatus.decidedIn')}
               </p>
               <Link
                 to={{
-                  pathname: ROUTES.RELEASE_DETAIL.replace(':releaseId', lifecycle.release.releaseId),
+                  pathname: ROUTES.RELEASE_DETAIL.replace(':releaseId', decidedRelease.releaseId),
                   search: '?section=flags',
                 }}
                 className="w-fit font-mono text-sm text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {lifecycle.release.version}
+                {decidedRelease.version}
               </Link>
             </>
           )}

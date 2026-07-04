@@ -1,10 +1,13 @@
 import type { FlagsmithSyncSource, FlagsmithSyncStatus } from '@release-hub/db'
 import type { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import type { SortDirection } from '../../../common/types/sort-direction.enum'
+import type { FlagDeploymentStatus } from '../../../common/types/flag-deployment-status.enum'
+import type { FlagActivityFilter } from '../../../common/types/flag-activity-filter.enum'
 
 export interface IFlagsmithFlagState {
   environmentName: string
   enabled: boolean
+  value: string | null
 }
 
 export interface IFlagsmithFlagRecord {
@@ -13,12 +16,18 @@ export interface IFlagsmithFlagRecord {
   states: IFlagsmithFlagState[]
 }
 
+export interface IFlagsmithFlagMatrixItem extends IFlagsmithFlagRecord {
+  deploymentStatus: FlagDeploymentStatus
+}
+
 export interface IFlagsmithFlagMatrixFilters {
   projectId: string
   search: string | undefined
   sortField: FlagSortField
   sortEnvironment: string | undefined
   sortDirection: SortDirection
+  statuses: FlagDeploymentStatus[] | undefined
+  activity: FlagActivityFilter | undefined
   limit: number
   offset: number
 }
@@ -26,7 +35,7 @@ export interface IFlagsmithFlagMatrixFilters {
 export interface IFlagsmithFlagMatrixResult {
   environments: string[]
   totalCount: number
-  items: IFlagsmithFlagRecord[]
+  items: IFlagsmithFlagMatrixItem[]
   lastSyncedAt: Date | null
 }
 
@@ -40,6 +49,7 @@ export interface IUpsertFlagsmithEnvironmentData {
 export interface IUpsertFlagsmithFlagStateData {
   environmentName: string
   enabled: boolean
+  value: string | null
 }
 
 export interface IUpsertFlagsmithFlagData {
@@ -78,4 +88,53 @@ export interface IFlagsmithEnvironmentEnabledState {
 export interface IFlagsmithKnownFlagEnvironment {
   flagId: string
   environmentId: string
+}
+
+export interface IFlagsmithFlagStateChange {
+  flagId: string
+  key: string
+  environmentName: string
+  previousEnabled: boolean
+  newEnabled: boolean
+}
+
+export interface IFlagsmithFlagValueChange {
+  flagId: string
+  key: string
+  environmentName: string
+  previousValue: string | null
+  newValue: string | null
+}
+
+export interface IReconcileFlagsResult {
+  enabledChanges: IFlagsmithFlagStateChange[]
+  valueChanges: IFlagsmithFlagValueChange[]
+}
+
+export interface IUpsertFlagsmithFlagStateChangeResult {
+  environmentName: string
+  previousEnabled: boolean | null
+  newEnabled: boolean
+  previousValue: string | null
+  newValue: string | null
+}
+
+export interface IUpsertFlagsmithFlagWithStatesResult {
+  flagId: string
+  isNewFlag: boolean
+  stateChanges: IUpsertFlagsmithFlagStateChangeResult[]
+}
+
+export interface IFlagsmithFlagDetailEnvironmentState {
+  name: string
+  enabled: boolean
+  value: string | null
+  updatedAt: Date
+}
+
+export interface IFlagsmithFlagDetail {
+  id: string
+  key: string
+  lastSyncedAt: Date | null
+  environments: IFlagsmithFlagDetailEnvironmentState[]
 }

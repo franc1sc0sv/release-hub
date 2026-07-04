@@ -1,10 +1,10 @@
 import { useMutation } from '@apollo/client/react'
 import { RUN_FLAG_COVERAGE_FOR_FLAG } from '../graphql/flags.mutations'
-import { TRACKED_FLAG } from '../graphql/flags.queries'
+import { GET_FLAG_DETAIL } from '../graphql/flags.queries'
 
 export function useRunFlagCoverageForFlag(projectId: string, flagKey: string) {
   const [runFlagCoverageForFlag, { loading }] = useMutation(RUN_FLAG_COVERAGE_FOR_FLAG, {
-    refetchQueries: [{ query: TRACKED_FLAG, variables: { projectId, key: flagKey } }],
+    refetchQueries: [{ query: GET_FLAG_DETAIL, variables: { projectId, key: flagKey } }],
     awaitRefetchQueries: true,
   })
 

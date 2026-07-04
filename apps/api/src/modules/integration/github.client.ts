@@ -20,11 +20,92 @@ import {
   type IGitHubDeleteBranchResult,
   type IGitHubDeployment,
   type IGitHubDeploymentStatus,
+  type IGitHubBranchCommitDetail,
 } from './interfaces/github-client.interface'
+
+interface ICacheEntry<T> {
+  at: number
+  value: T
+}
+
+interface IGitHubGraphqlCommitAuthor {
+  name: string | null
+  avatarUrl: string | null
+  user: { login: string | null } | null
+}
+
+interface IGitHubGraphqlRefTarget {
+  committedDate: string
+  author: IGitHubGraphqlCommitAuthor | null
+}
+
+interface IGitHubGraphqlRef {
+  target: IGitHubGraphqlRefTarget | null
+}
+
+interface IGitHubBranchCommitsGraphqlResponse {
+  repository: Record<string, IGitHubGraphqlRef | null> | null
+}
+
+const BRANCH_LIST_CACHE_TTL_MS = 60_000
+const MERGED_HEADS_CACHE_TTL_MS = 60_000
+const OPEN_HEADS_CACHE_TTL_MS = 60_000
+const BRANCH_COMMIT_CACHE_TTL_MS = 60_000
+const DEFAULT_BRANCH_CACHE_TTL_MS = 600_000
+const BRANCH_COMMIT_GRAPHQL_CHUNK_SIZE = 50
 
 @Injectable()
 export class GitHubClient extends IGitHubClient {
   private readonly logger = new Logger(GitHubClient.name)
+
+  private readonly branchesCache = new Map<string, ICacheEntry<IGitHubBranch[]>>()
+  private readonly mergedHeadsCache = new Map<string, ICacheEntry<IGitHubMergedPullRequestHead[]>>()
+  private readonly openHeadsCache = new Map<string, ICacheEntry<IGitHubOpenPullRequestHead[]>>()
+  private readonly defaultBranchCache = new Map<string, ICacheEntry<string>>()
+  private readonly branchCommitCache = new Map<
+    string,
+    Map<string, ICacheEntry<IGitHubBranchCommitDetail | null>>
+  >()
+
+  private readCache<T>(cache: Map<string, ICacheEntry<T>>, key: string, ttlMs: number): T | undefined {
+    const entry = cache.get(key)
+    if (!entry) return undefined
+    if (Date.now() - entry.at > ttlMs) {
+      cache.delete(key)
+      return undefined
+    }
+    return entry.value
+  }
+
+  private writeCache<T>(cache: Map<string, ICacheEntry<T>>, key: string, value: T): void {
+    cache.set(key, { at: Date.now(), value })
+  }
+
+  private readBranchCommitCache(repo: string, branchName: string): IGitHubBranchCommitDetail | null | undefined {
+    const repoCache = this.branchCommitCache.get(repo)
+    if (!repoCache) return undefined
+    return this.readCache(repoCache, branchName, BRANCH_COMMIT_CACHE_TTL_MS)
+  }
+
+  private writeBranchCommitCache(
+    repo: string,
+    branchName: string,
+    value: IGitHubBranchCommitDetail | null,
+  ): void {
+    let repoCache = this.branchCommitCache.get(repo)
+    if (!repoCache) {
+      repoCache = new Map<string, ICacheEntry<IGitHubBranchCommitDetail | null>>()
+      this.branchCommitCache.set(repo, repoCache)
+    }
+    this.writeCache(repoCache, branchName, value)
+  }
+
+  private clearBranchCaches(repo: string): void {
+    this.branchesCache.delete(repo)
+    this.mergedHeadsCache.delete(repo)
+    this.openHeadsCache.delete(repo)
+    this.branchCommitCache.delete(repo)
+  }
 
   async revokeAuthorization(accessToken: string): Promise<void> {
     const clientId = process.env.GITHUB_APP_CLIENT_ID
@@ -216,6 +297,9 @@ export class GitHubClient extends IGitHubClient {
       throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
     }
 
+    const cached = this.readCache(this.branchesCache, repo, BRANCH_LIST_CACHE_TTL_MS)
+    if (cached) return cached
+
     const octokit = new Octokit({ auth: accessToken })
     try {
       const branches = await octokit.paginate(
@@ -223,11 +307,13 @@ export class GitHubClient extends IGitHubClient {
         { owner, repo: repoName, per_page: 100 },
         (response) => response.data,
       )
-      return branches.map((branch) => ({
+      const result = branches.map((branch) => ({
         name: branch.name,
         protected: branch.protected,
         commitSha: branch.commit.sha,
       }))
+      this.writeCache(this.branchesCache, repo, result)
+      return result
     } catch (error) {
       this.mapOctokitError(error)
     }
@@ -288,6 +374,9 @@ export class GitHubClient extends IGitHubClient {
       throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
     }
 
+    const cached = this.readCache(this.mergedHeadsCache, repo, MERGED_HEADS_CACHE_TTL_MS)
+    if (cached) return cached
+
     const octokit = new Octokit({ auth: accessToken })
     const maxResults = 500
     const heads: IGitHubMergedPullRequestHead[] = []
@@ -312,6 +401,7 @@ export class GitHubClient extends IGitHubClient {
       this.mapOctokitError(error)
     }
 
+    this.writeCache(this.mergedHeadsCache, repo, heads)
     return heads
   }
 
@@ -324,6 +414,9 @@ export class GitHubClient extends IGitHubClient {
       throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
     }
 
+    const cached = this.readCache(this.openHeadsCache, repo, OPEN_HEADS_CACHE_TTL_MS)
+    if (cached) return cached
+
     const octokit = new Octokit({ auth: accessToken })
     try {
       const prs = await octokit.paginate(
@@ -331,7 +424,9 @@ export class GitHubClient extends IGitHubClient {
         { owner, repo: repoName, state: 'open', per_page: 100 },
         (response) => response.data,
       )
-      return prs.map((pr) => ({ headRef: pr.head.ref, prNumber: pr.number }))
+      const result = prs.map((pr) => ({ headRef: pr.head.ref, prNumber: pr.number }))
+      this.writeCache(this.openHeadsCache, repo, result)
+      return result
     } catch (error) {
       this.mapOctokitError(error)
     }
@@ -350,6 +445,7 @@ export class GitHubClient extends IGitHubClient {
     const octokit = new Octokit({ auth: accessToken })
     try {
       await octokit.git.deleteRef({ owner, repo: repoName, ref: `heads/${branchName}` })
+      this.clearBranchCaches(repo)
       return { deleted: true }
     } catch (error) {
       const status = (error as { status?: number }).status
@@ -466,6 +562,7 @@ export class GitHubClient extends IGitHubClient {
       this.mapOctokitError(error)
     }
 
+    this.clearBranchCaches(repo)
     return { name: newBranchName, protected: false, commitSha: sha }
   }
 
@@ -511,10 +608,15 @@ export class GitHubClient extends IGitHubClient {
       throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
     }
 
+    const cached = this.readCache(this.defaultBranchCache, repo, DEFAULT_BRANCH_CACHE_TTL_MS)
+    if (cached) return cached
+
     const octokit = new Octokit({ auth: accessToken })
     try {
       const response = await octokit.repos.get({ owner, repo: repoName })
-      return response.data.default_branch
+      const result = response.data.default_branch
+      this.writeCache(this.defaultBranchCache, repo, result)
+      return result
     } catch (error) {
       this.mapOctokitError(error)
     }
@@ -596,6 +698,95 @@ export class GitHubClient extends IGitHubClient {
     } catch (error) {
       this.mapOctokitError(error)
     }
+  }
+
+  async getBranchCommitDetails(
+    repo: string,
+    branchNames: string[],
+    accessToken: string,
+  ): Promise<Map<string, IGitHubBranchCommitDetail | null>> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const result = new Map<string, IGitHubBranchCommitDetail | null>()
+    const uncachedNames: string[] = []
+
+    for (const branchName of branchNames) {
+      const cached = this.readBranchCommitCache(repo, branchName)
+      if (cached !== undefined) {
+        result.set(branchName, cached)
+      } else {
+        uncachedNames.push(branchName)
+      }
+    }
+
+    if (uncachedNames.length === 0) return result
+
+    const octokit = new Octokit({ auth: accessToken })
+
+    for (let i = 0; i < uncachedNames.length; i += BRANCH_COMMIT_GRAPHQL_CHUNK_SIZE) {
+      const chunk = uncachedNames.slice(i, i + BRANCH_COMMIT_GRAPHQL_CHUNK_SIZE)
+      const chunkDetails = await this.fetchBranchCommitDetailsChunk(octokit, owner, repoName, chunk)
+      for (const branchName of chunk) {
+        const detail = chunkDetails.get(branchName) ?? null
+        this.writeBranchCommitCache(repo, branchName, detail)
+        result.set(branchName, detail)
+      }
+    }
+
+    return result
+  }
+
+  private async fetchBranchCommitDetailsChunk(
+    octokit: Octokit,
+    owner: string,
+    repoName: string,
+    branchNames: string[],
+  ): Promise<Map<string, IGitHubBranchCommitDetail>> {
+    const aliases = branchNames.map((_, index) => `b${index}`)
+    const refFields = aliases
+      .map(
+        (alias) =>
+          `${alias}: ref(qualifiedName: $${alias}) { target { ... on Commit { committedDate author { name avatarUrl user { login } } } } }`,
+      )
+      .join('\n')
+    const query = `query GetBranchCommitDetails($owner: String!, $name: String!, ${aliases
+      .map((alias) => `$${alias}: String!`)
+      .join(', ')}) {
+      repository(owner: $owner, name: $name) {
+        ${refFields}
+      }
+    }`
+
+    const variables: Record<string, string> = { owner, name: repoName }
+    branchNames.forEach((branchName, index) => {
+      variables[aliases[index]] = `refs/heads/${branchName}`
+    })
+
+    const result = new Map<string, IGitHubBranchCommitDetail>()
+
+    try {
+      const response = await octokit.graphql<IGitHubBranchCommitsGraphqlResponse>(query, variables)
+      const repository = response.repository
+      if (!repository) return result
+
+      branchNames.forEach((branchName, index) => {
+        const target = repository[aliases[index]]?.target ?? null
+        if (!target) return
+        result.set(branchName, {
+          committedAt: new Date(target.committedDate),
+          authorLogin: target.author?.user?.login ?? null,
+          authorName: target.author?.name ?? null,
+          authorAvatarUrl: target.author?.avatarUrl ?? null,
+        })
+      })
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+
+    return result
   }
 
   private async resolveHeadSha(

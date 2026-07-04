@@ -4,9 +4,9 @@ import { ChevronRight, Layers } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/lib/routes'
-import type { TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 
 interface FlagLinkedFeatureCardProps {
   feature: TrackedFlagDetail['feature']

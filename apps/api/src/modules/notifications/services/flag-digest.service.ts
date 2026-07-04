@@ -41,6 +41,7 @@ function buildDigestPayload(
     projectId: project.id,
     releaseId: null,
     flagIds: [],
+    flagKey: null,
   }
 }
 

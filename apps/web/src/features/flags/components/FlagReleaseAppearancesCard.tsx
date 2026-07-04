@@ -8,9 +8,9 @@ import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import { releaseStatusTone, releaseFlagDecisionTone } from '@/features/releases/constants/release-enums'
-import type { TrackedFlagQuery } from '@/generated/graphql'
+import type { GetFlagDetailQuery } from '@/generated/graphql'
 
-type TrackedFlagDetail = NonNullable<TrackedFlagQuery['trackedFlag']>
+type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 type FlagRelease = TrackedFlagDetail['releases'][number]
 
 interface FlagReleaseRowProps {

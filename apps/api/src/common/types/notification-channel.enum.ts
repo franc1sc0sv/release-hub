@@ -3,6 +3,7 @@ import { registerEnumType } from '@nestjs/graphql'
 export const NotificationChannel = {
   EMAIL: 'email',
   SLACK_DM: 'slack_dm',
+  IN_APP: 'in_app',
 } as const
 
 export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel]

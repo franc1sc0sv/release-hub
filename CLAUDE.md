@@ -85,11 +85,12 @@ Optional integrations degrade gracefully when disconnected — their UI hides an
 
 ### Transactions
 
-- **Always transactional** — both commands AND queries wrap in `$transaction`
-- Repositories require `tx: TxClient` — enforced at compile time via `RepositoryMethod` type
+- **Commands wrap writes in `$transaction`** — atomicity matters when multiple writes must succeed or fail together
+- **Queries run through `$query`** — no transaction; reads don't need atomicity, and interactive transactions cost 2 extra round-trips (BEGIN + COMMIT) on the remote DB
+- Repositories still require `tx: TxClient` as their first parameter — both `$transaction` and `$query` satisfy this signature, so repository code never branches on which path it's called from
 - Use `RepositoryMethod<[...args], TReturn>` in abstract repo classes — makes `tx` structurally required
 - All repository interfaces must implement `IBaseRepository<TEntity>` from `common/cqrs/`
-- `IDatabaseService` only exposes `$transaction()` — no `get client()`
+- `IDatabaseService` exposes `$transaction()` (commands) and `$query()` (queries) — no `get client()`
 
 ### Inversion of Control
 

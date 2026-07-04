@@ -4,6 +4,7 @@ export interface IProjectIntegrations {
   github: boolean
   linear: boolean
   flagsmith: boolean
+  slack: boolean
 }
 
 export interface IProject {
@@ -14,6 +15,8 @@ export interface IProject {
   githubInstallationId: string | null
   linearEnabled: boolean
   flagsmithEnabled: boolean
+  slackEnabled: boolean
+  flagReminderIntervalDays: number
   ownerId: string
   createdAt: Date
   updatedAt: Date
@@ -32,6 +35,7 @@ export interface ICreateProjectData {
 export interface IUpdateProjectData {
   name?: string
   repo?: string
+  flagReminderIntervalDays?: number
 }
 
 export interface IProjectIntegrationSettings {

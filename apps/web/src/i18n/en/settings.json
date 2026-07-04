@@ -118,6 +118,14 @@
       "saveError": "Couldn't save the flag registry. Please try again.",
       "current": "Currently tracking {{path}} on {{branch}}",
       "defaultBranch": "default branch"
+    },
+    "reminderInterval": {
+      "label": "Reminder interval (days)",
+      "hint": "How often ship-off reminders are sent for flags that are still live in staging or production.",
+      "invalid": "Enter a whole number of at least 1 day.",
+      "save": "Save",
+      "saveSuccess": "Reminder interval saved.",
+      "saveError": "Couldn't save the reminder interval. Please try again."
     }
   },
   "tags": {

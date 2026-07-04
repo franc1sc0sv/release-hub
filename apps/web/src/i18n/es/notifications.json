@@ -2,15 +2,40 @@
   "title": "Preferencias de notificaciones",
   "columns": {
     "notification": "Notificación",
+    "inApp": "En la app",
     "email": "Correo",
     "slack": "Slack",
-    "digestFrequency": "Frecuencia del resumen"
+    "selectAllRow": "Seleccionar todo",
+    "selectAllAriaLabel": "Activar todas las notificaciones para {{channel}}"
+  },
+  "groups": {
+    "releases": "Releases",
+    "flags": "Flags"
   },
   "toggleAriaLabel": "Activar {{type}} vía {{channel}}",
   "digest": {
     "frequencyLabel": "Frecuencia del resumen",
+    "description": "Con qué frecuencia se envía el correo de resumen de flags cuando está activado.",
     "sendTest": "Enviar resumen de prueba",
     "testSent": "Resumen de prueba enviado.",
     "testFailed": "No se pudo enviar el resumen de prueba. Inténtalo de nuevo."
+  },
+  "bell": {
+    "label": "Notificaciones",
+    "tooltip": "Notificaciones",
+    "ariaLabel": "Notificaciones, {{count}} sin leer"
+  },
+  "sheet": {
+    "title": "Notificaciones",
+    "description": "{{count}} en total",
+    "markAllRead": "Marcar todo como leído",
+    "loadMore": "Cargar más",
+    "empty": {
+      "heading": "Aún no hay notificaciones",
+      "description": "La actividad de releases y flags de tus proyectos aparecerá aquí."
+    }
+  },
+  "listItem": {
+    "unread": "Sin leer"
   }
 }

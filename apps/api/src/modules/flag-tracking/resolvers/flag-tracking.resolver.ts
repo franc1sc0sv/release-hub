@@ -25,6 +25,10 @@ import { GetTrackedFlagsQuery } from '../queries/get-tracked-flags/get-tracked-f
 import { GetTrackedFlagDetailQuery } from '../queries/get-tracked-flag-detail/get-tracked-flag-detail.query'
 import { GetReleaseFlagsQuery } from '../queries/get-release-flags/get-release-flags.query'
 import { GetFlagRegistryQuery } from '../queries/get-flag-registry/get-flag-registry.query'
+import { GetFlagHistoryQuery } from '../queries/get-flag-history/get-flag-history.query'
+import { GetFlagDetailQuery } from '../queries/get-flag-detail/get-flag-detail.query'
+import { GetFlagHistoryInput, FlagHistoryPageType } from '../types/flag-history.type'
+import { FlagDetailType } from '../types/flag-detail.type'
 
 @Resolver()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -119,5 +123,26 @@ export class FlagTrackingResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<FlagRegistryConfigType> {
     return this.queryBus.execute(new GetFlagRegistryQuery(projectId, user.id))
+  }
+
+  @Query(() => FlagHistoryPageType)
+  @Can(Action.READ, Subject.PROJECT)
+  flagHistory(
+    @Args('input', { type: () => GetFlagHistoryInput }) input: GetFlagHistoryInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<FlagHistoryPageType> {
+    return this.queryBus.execute(
+      new GetFlagHistoryQuery(input.projectId, input.flagKey, user.id, input.limit ?? 20, input.offset ?? 0),
+    )
+  }
+
+  @Query(() => FlagDetailType, { nullable: true })
+  @Can(Action.READ, Subject.PROJECT)
+  flagDetail(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('key', { type: () => String }) key: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<FlagDetailType | null> {
+    return this.queryBus.execute(new GetFlagDetailQuery(projectId, key, user.id))
   }
 }

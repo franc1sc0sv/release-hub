@@ -25,6 +25,7 @@ export class NotificationReleaseShippedHandler {
         projectId: event.projectId,
         releaseId: event.releaseId,
         flagIds: [],
+        flagKey: null,
       }
 
       await Promise.all([

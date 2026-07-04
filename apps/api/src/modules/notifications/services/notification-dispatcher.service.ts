@@ -6,6 +6,7 @@ import { NotificationType } from '../../../common/types/notification-type.enum'
 import { DigestFrequency } from '../../../common/types/digest-frequency.enum'
 import { INotificationReadRepository } from '../interfaces/notification-read.repository'
 import { INotificationPreferenceRepository } from '../interfaces/notification-preference.repository'
+import { INotificationRepository } from '../interfaces/notification.repository'
 import { EmailNotificationProvider } from '../providers/email-notification.provider'
 import { SlackDmProvider } from '../providers/slack-dm.provider'
 import { SlackChannelProvider } from '../providers/slack-channel.provider'
@@ -43,6 +44,7 @@ export class NotificationDispatcherService {
     private readonly db: IDatabaseService,
     private readonly notificationReadRepository: INotificationReadRepository,
     private readonly notificationPreferenceRepository: INotificationPreferenceRepository,
+    private readonly notificationRepository: INotificationRepository,
     private readonly emailProvider: EmailNotificationProvider,
     private readonly slackDmProvider: SlackDmProvider,
     private readonly slackChannelProvider: SlackChannelProvider,
@@ -64,6 +66,28 @@ export class NotificationDispatcherService {
     })
 
     await Promise.all(members.map((member) => this.dispatchToMember(member, preferences, type, payload)))
+
+    const inAppRecipients = members.filter((member) => {
+      const memberPreferences = preferences.filter((pref) => pref.userId === member.userId)
+      return resolvePreference(memberPreferences, type, NotificationChannel.IN_APP).enabled
+    })
+
+    if (inAppRecipients.length > 0) {
+      await this.db.$transaction((tx) =>
+        this.notificationRepository.createMany(
+          inAppRecipients.map((member) => ({
+            userId: member.userId,
+            projectId: payload.projectId,
+            type,
+            title: payload.title,
+            body: payload.bodyLines.join('\n'),
+            url: payload.url,
+            flagKey: payload.flagKey,
+          })),
+          tx,
+        ),
+      )
+    }
   }
 
   private async dispatchToMember(
@@ -110,6 +134,13 @@ export class NotificationDispatcherService {
       [NotificationType.FLAG_IN_PROGRESS_REMINDER]: false,
       [NotificationType.FLAG_STALENESS_ALERT]: false,
       [NotificationType.FLAG_DIGEST]: false,
+      [NotificationType.FLAG_CREATED]: false,
+      [NotificationType.FLAG_DELETED]: false,
+      [NotificationType.FLAG_ENABLED]: false,
+      [NotificationType.FLAG_DISABLED]: false,
+      [NotificationType.FLAG_VALUE_CHANGED]: false,
+      [NotificationType.FLAG_CONFLICT]: false,
+      [NotificationType.FLAG_SHIP_OFF_REMINDER]: false,
     }
     if (!gate[type]) return
 

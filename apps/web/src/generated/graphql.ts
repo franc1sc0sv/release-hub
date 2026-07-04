@@ -65,6 +65,22 @@ export type BlockedBranchType = {
   reason: Maybe<Scalars['String']['output']>;
 };
 
+export type BranchActivityRange =
+  | 'LAST_3_MONTHS'
+  | 'LAST_6_MONTHS'
+  | 'LAST_MONTH'
+  | 'LAST_WEEK'
+  | 'OVER_6_MONTHS';
+
+export type BranchBlockReason =
+  | 'DEFAULT_BRANCH'
+  | 'GITHUB_PROTECTED'
+  | 'MANUALLY_BLOCKED'
+  | 'OPEN_PULL_REQUEST'
+  | 'PROTECTED_NAME'
+  | 'RECENT_ACTIVITY'
+  | 'RELEASE_REFERENCED';
+
 export type BranchCleanupCandidateType = {
   __typename?: 'BranchCleanupCandidateType';
   lastCommitDate: Maybe<Scalars['DateTime']['output']>;
@@ -72,6 +88,71 @@ export type BranchCleanupCandidateType = {
   protected: Scalars['Boolean']['output'];
   signals: BranchCleanupSignalsType;
   suggested: Scalars['Boolean']['output'];
+};
+
+export type BranchCleanupPageInput = {
+  activity: InputMaybe<BranchActivityRange>;
+  authorFilter: InputMaybe<Scalars['String']['input']>;
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  projectId: Scalars['ID']['input'];
+  protection: InputMaybe<BranchProtectionFilter>;
+  search: InputMaybe<Scalars['String']['input']>;
+  signals: InputMaybe<Array<BranchSignalFilter>>;
+  sortDirection: InputMaybe<SortDirection>;
+  sortField: InputMaybe<BranchCleanupSortField>;
+};
+
+export type BranchCleanupPageItemType = {
+  __typename?: 'BranchCleanupPageItemType';
+  blockReasons: Array<BranchBlockReason>;
+  deletable: Scalars['Boolean']['output'];
+  githubProtected: Scalars['Boolean']['output'];
+  isDefault: Scalars['Boolean']['output'];
+  lastCommitAt: Maybe<Scalars['DateTime']['output']>;
+  lastCommitAuthorAvatarUrl: Maybe<Scalars['String']['output']>;
+  lastCommitAuthorLogin: Maybe<Scalars['String']['output']>;
+  lastCommitAuthorName: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  openPullRequestNumber: Maybe<Scalars['Int']['output']>;
+  openPullRequestUrl: Maybe<Scalars['String']['output']>;
+  overridable: Scalars['Boolean']['output'];
+  signals: BranchCleanupPageSignalsType;
+};
+
+export type BranchCleanupPageSignalsType = {
+  __typename?: 'BranchCleanupPageSignalsType';
+  mergedViaPr: Scalars['Boolean']['output'];
+  noOpenPr: Scalars['Boolean']['output'];
+  unreferencedByReleases: Scalars['Boolean']['output'];
+};
+
+export type BranchCleanupPageType = {
+  __typename?: 'BranchCleanupPageType';
+  items: Array<BranchCleanupPageItemType>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type BranchCleanupPlanDeletableType = {
+  __typename?: 'BranchCleanupPlanDeletableType';
+  lastCommitAt: Maybe<Scalars['DateTime']['output']>;
+  lastCommitAuthorAvatarUrl: Maybe<Scalars['String']['output']>;
+  lastCommitAuthorLogin: Maybe<Scalars['String']['output']>;
+  lastCommitAuthorName: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+};
+
+export type BranchCleanupPlanKeptType = {
+  __typename?: 'BranchCleanupPlanKeptType';
+  blockReasons: Array<BranchBlockReason>;
+  name: Scalars['String']['output'];
+};
+
+export type BranchCleanupPlanType = {
+  __typename?: 'BranchCleanupPlanType';
+  deletable: Array<BranchCleanupPlanDeletableType>;
+  kept: Array<BranchCleanupPlanKeptType>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type BranchCleanupSignalsType = {
@@ -83,6 +164,23 @@ export type BranchCleanupSignalsType = {
   stale: Scalars['Boolean']['output'];
   unreferencedByReleases: Scalars['Boolean']['output'];
 };
+
+export type BranchCleanupSortField =
+  | 'AUTHOR'
+  | 'LAST_ACTIVITY'
+  | 'MERGED_VIA_PR'
+  | 'OPEN_PR'
+  | 'PROTECTED'
+  | 'UNREFERENCED';
+
+export type BranchProtectionFilter =
+  | 'PROTECTED'
+  | 'UNPROTECTED';
+
+export type BranchSignalFilter =
+  | 'MERGED_VIA_PR'
+  | 'OPEN_PR'
+  | 'UNREFERENCED';
 
 export type CommitType = {
   __typename?: 'CommitType';
@@ -101,6 +199,7 @@ export type ConnectionHealthType = {
   flagsmith: IntegrationStatus;
   github: IntegrationStatus;
   linear: IntegrationStatus;
+  slack: IntegrationStatus;
 };
 
 export type ConnectionSettingsType = {
@@ -163,6 +262,7 @@ export type DeleteBranchOutcomeType = {
 
 export type DeleteGithubBranchesInput = {
   branchNames: Array<Scalars['String']['input']>;
+  overriddenBranchNames: InputMaybe<Array<Scalars['String']['input']>>;
   projectId: Scalars['ID']['input'];
 };
 
@@ -239,6 +339,10 @@ export type FeatureType = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type FlagActivityFilter =
+  | 'ACTIVE'
+  | 'INACTIVE';
+
 export type FlagBranchPresenceDetailType = {
   __typename?: 'FlagBranchPresenceDetailType';
   branch: Scalars['String']['output'];
@@ -284,15 +388,88 @@ export type FlagCoverageSummaryType = {
   prChangesDetected: Scalars['Int']['output'];
 };
 
+export type FlagDeploymentStatus =
+  | 'CONFLICT'
+  | 'IN_PROGRESS'
+  | 'SHIPPED_OFF'
+  | 'SHIPPED_ON'
+  | 'UNTRACKED';
+
+export type FlagDetailFlagsmithEnvironmentType = {
+  __typename?: 'FlagDetailFlagsmithEnvironmentType';
+  enabled: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  value: Maybe<Scalars['String']['output']>;
+};
+
+export type FlagDetailFlagsmithType = {
+  __typename?: 'FlagDetailFlagsmithType';
+  environments: Array<FlagDetailFlagsmithEnvironmentType>;
+  exists: Scalars['Boolean']['output'];
+  lastSyncedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type FlagDetailType = {
+  __typename?: 'FlagDetailType';
+  deploymentStatus: FlagDeploymentStatus;
+  flagsmith: FlagDetailFlagsmithType;
+  hasConflict: Scalars['Boolean']['output'];
+  key: Scalars['String']['output'];
+  tracked: Maybe<TrackedFlagDetailType>;
+};
+
 export type FlagEnvironmentStateType = {
   __typename?: 'FlagEnvironmentStateType';
   enabled: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
+  value: Maybe<Scalars['String']['output']>;
 };
+
+export type FlagHistoryEventEntryType = {
+  __typename?: 'FlagHistoryEventEntryType';
+  actorName: Maybe<Scalars['String']['output']>;
+  environmentName: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  newValue: Maybe<Scalars['String']['output']>;
+  occurredAt: Scalars['DateTime']['output'];
+  previousValue: Maybe<Scalars['String']['output']>;
+  releaseId: Maybe<Scalars['ID']['output']>;
+  releaseName: Maybe<Scalars['String']['output']>;
+  source: FlagHistorySource;
+  type: FlagHistoryEventType;
+};
+
+export type FlagHistoryEventType =
+  | 'CONFLICT_DETECTED'
+  | 'COVERAGE_SCAN'
+  | 'DECISION_ENABLE_IN_RELEASE'
+  | 'DECISION_IN_PROGRESS'
+  | 'DECISION_SHIP_OFF'
+  | 'FLAG_CREATED'
+  | 'FLAG_DELETED'
+  | 'FLAG_DISABLED'
+  | 'FLAG_ENABLED'
+  | 'FLAG_VALUE_CHANGED'
+  | 'REMINDER_SENT'
+  | 'SYNC_COMPLETED';
+
+export type FlagHistoryPageType = {
+  __typename?: 'FlagHistoryPageType';
+  items: Array<FlagHistoryEventEntryType>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type FlagHistorySource =
+  | 'SYNC'
+  | 'SYSTEM'
+  | 'USER'
+  | 'WEBHOOK';
 
 export type FlagRefType = {
   __typename?: 'FlagRefType';
   createdAt: Maybe<Scalars['DateTime']['output']>;
+  deploymentStatus: FlagDeploymentStatus;
   environments: Array<FlagEnvironmentStateType>;
   key: Scalars['String']['output'];
 };
@@ -351,7 +528,15 @@ export type GenerateSummaryInput = {
   tone: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GetFlagHistoryInput = {
+  flagKey: Scalars['String']['input'];
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  projectId: Scalars['ID']['input'];
+};
+
 export type GetFlagsInput = {
+  activity: InputMaybe<FlagActivityFilter>;
   limit: InputMaybe<Scalars['Int']['input']>;
   offset: InputMaybe<Scalars['Int']['input']>;
   projectId: Scalars['ID']['input'];
@@ -359,6 +544,7 @@ export type GetFlagsInput = {
   sortDirection: InputMaybe<SortDirection>;
   sortEnvironment: InputMaybe<Scalars['String']['input']>;
   sortField: InputMaybe<FlagSortField>;
+  statuses: InputMaybe<Array<FlagDeploymentStatus>>;
 };
 
 export type GithubBranchSearchItemType = {
@@ -502,6 +688,8 @@ export type Mutation = {
   login: AuthTokensType;
   loginWithCode: AuthTokensType;
   logout: Scalars['Boolean']['output'];
+  markAllNotificationsRead: Scalars['Boolean']['output'];
+  markNotificationRead: Scalars['Boolean']['output'];
   reauthorizeGithub: Scalars['Boolean']['output'];
   refreshToken: AuthTokensType;
   regenerateDraft: ReleaseObjectType;
@@ -651,6 +839,11 @@ export type MutationLoginWithCodeArgs = {
 
 export type MutationLogoutArgs = {
   input: LogoutInput;
+};
+
+
+export type MutationMarkNotificationReadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -827,7 +1020,22 @@ export type MutationUpdateSlackNotificationSettingsArgs = {
 
 export type NotificationChannel =
   | 'EMAIL'
+  | 'IN_APP'
   | 'SLACK_DM';
+
+export type NotificationEntryType = {
+  __typename?: 'NotificationEntryType';
+  body: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  flagKey: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  projectId: Scalars['ID']['output'];
+  projectName: Scalars['String']['output'];
+  readAt: Maybe<Scalars['DateTime']['output']>;
+  title: Scalars['String']['output'];
+  type: NotificationType;
+  url: Maybe<Scalars['String']['output']>;
+};
 
 export type NotificationPreferenceEntryType = {
   __typename?: 'NotificationPreferenceEntryType';
@@ -838,12 +1046,32 @@ export type NotificationPreferenceEntryType = {
 };
 
 export type NotificationType =
+  | 'FLAG_CONFLICT'
+  | 'FLAG_CREATED'
+  | 'FLAG_DELETED'
   | 'FLAG_DIGEST'
+  | 'FLAG_DISABLED'
+  | 'FLAG_ENABLED'
   | 'FLAG_IN_PROGRESS_REMINDER'
+  | 'FLAG_SHIP_OFF_REMINDER'
   | 'FLAG_STALENESS_ALERT'
+  | 'FLAG_VALUE_CHANGED'
   | 'RELEASE_CREATED'
   | 'RELEASE_DEPLOYED'
   | 'RELEASE_SHIPPED';
+
+export type NotificationsPageInput = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  projectId: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type NotificationsPageType = {
+  __typename?: 'NotificationsPageType';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<NotificationEntryType>;
+  totalCount: Scalars['Int']['output'];
+};
 
 export type PrAssignmentInput = {
   featureId: InputMaybe<Scalars['ID']['input']>;
@@ -855,6 +1083,7 @@ export type ProjectIntegrationsType = {
   flagsmith: Scalars['Boolean']['output'];
   github: Scalars['Boolean']['output'];
   linear: Scalars['Boolean']['output'];
+  slack: Scalars['Boolean']['output'];
 };
 
 export type ProjectRole =
@@ -874,6 +1103,7 @@ export type ProjectType = {
   __typename?: 'ProjectType';
   connectionHealth: ConnectionHealthType;
   createdAt: Scalars['DateTime']['output'];
+  flagReminderIntervalDays: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   integrations: ProjectIntegrationsType;
   name: Scalars['String']['output'];
@@ -906,10 +1136,15 @@ export type PullRequestType = {
 export type Query = {
   __typename?: 'Query';
   blockedBranches: Array<BlockedBranchType>;
+  branchAuthors: Array<Scalars['String']['output']>;
   branchCleanupCandidates: Array<BranchCleanupCandidateType>;
+  branchCleanupPage: BranchCleanupPageType;
+  branchCleanupPlan: BranchCleanupPlanType;
   compareFlags: FlagComparisonResultType;
   compareRefs: RefComparisonType;
   exportSummary: ExportResultType;
+  flagDetail: Maybe<FlagDetailType>;
+  flagHistory: FlagHistoryPageType;
   flagRegistry: FlagRegistryConfigType;
   flagsmithProjects: Array<FlagsmithProjectType>;
   getConnectionSettings: ConnectionSettingsType;
@@ -933,6 +1168,7 @@ export type Query = {
   listProjects: Array<ProjectType>;
   me: UserProfileType;
   notificationPreferences: Array<NotificationPreferenceEntryType>;
+  notifications: NotificationsPageType;
   projectTags: Array<ProjectTagType>;
   releaseFlags: Array<ReleaseFlagType>;
   releasePullRequestsPage: ReleasePullRequestsPageType;
@@ -944,6 +1180,7 @@ export type Query = {
   suggestFeatureForPr: AiSuggestionType;
   trackedFlag: Maybe<TrackedFlagDetailType>;
   trackedFlags: Array<TrackedFlagType>;
+  unreadNotificationsCount: Scalars['Int']['output'];
   verifyFlagsmithConnection: FlagsmithVerifyResult;
 };
 
@@ -953,7 +1190,22 @@ export type QueryBlockedBranchesArgs = {
 };
 
 
+export type QueryBranchAuthorsArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
 export type QueryBranchCleanupCandidatesArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryBranchCleanupPageArgs = {
+  input: BranchCleanupPageInput;
+};
+
+
+export type QueryBranchCleanupPlanArgs = {
   projectId: Scalars['ID']['input'];
 };
 
@@ -974,6 +1226,17 @@ export type QueryCompareRefsArgs = {
 
 export type QueryExportSummaryArgs = {
   input: ExportSummaryInput;
+};
+
+
+export type QueryFlagDetailArgs = {
+  key: Scalars['String']['input'];
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryFlagHistoryArgs = {
+  input: GetFlagHistoryInput;
 };
 
 
@@ -1070,6 +1333,11 @@ export type QueryListMembersArgs = {
 
 export type QueryNotificationPreferencesArgs = {
   projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryNotificationsArgs = {
+  input: NotificationsPageInput;
 };
 
 
@@ -1485,6 +1753,7 @@ export type UpdateNotificationPreferenceInput = {
 };
 
 export type UpdateProjectInput = {
+  flagReminderIntervalDays: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
   name: InputMaybe<Scalars['String']['input']>;
   repo: InputMaybe<Scalars['String']['input']>;
@@ -1662,7 +1931,7 @@ export type GetFlagsQueryVariables = Exact<{
 }>;
 
 
-export type GetFlagsQuery = { __typename?: 'Query', getFlags: { __typename?: 'FlagsResultType', environments: Array<string>, totalCount: number, lastSyncedAt: string | null, items: Array<{ __typename?: 'FlagRefType', key: string, createdAt: string | null, environments: Array<{ __typename?: 'FlagEnvironmentStateType', name: string, enabled: boolean }> }> } };
+export type GetFlagsQuery = { __typename?: 'Query', getFlags: { __typename?: 'FlagsResultType', environments: Array<string>, totalCount: number, lastSyncedAt: string | null, items: Array<{ __typename?: 'FlagRefType', key: string, createdAt: string | null, deploymentStatus: FlagDeploymentStatus, environments: Array<{ __typename?: 'FlagEnvironmentStateType', name: string, enabled: boolean }> }> } };
 
 export type CompareFlagsQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -1671,7 +1940,7 @@ export type CompareFlagsQueryVariables = Exact<{
 }>;
 
 
-export type CompareFlagsQuery = { __typename?: 'Query', compareFlags: { __typename?: 'FlagComparisonResultType', baselineEnvironments: Array<string>, comparedEnvironments: Array<string>, items: Array<{ __typename?: 'FlagComparisonRowType', key: string, createdAt: string | null, baselineEnabled: boolean | null, baselineConflict: boolean, baseline: Array<{ __typename?: 'FlagEnvironmentStateType', name: string, enabled: boolean }>, divergences: Array<{ __typename?: 'FlagEnvironmentStateType', name: string, enabled: boolean }> }> } };
+export type CompareFlagsQuery = { __typename?: 'Query', compareFlags: { __typename?: 'FlagComparisonResultType', baselineEnvironments: Array<string>, comparedEnvironments: Array<string>, items: Array<{ __typename?: 'FlagComparisonRowType', key: string, createdAt: string | null, baselineEnabled: boolean | null, baselineConflict: boolean, baseline: Array<{ __typename?: 'FlagEnvironmentStateType', name: string, enabled: boolean, value: string | null }>, divergences: Array<{ __typename?: 'FlagEnvironmentStateType', name: string, enabled: boolean, value: string | null }> }> } };
 
 export type TrackedFlagsQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -1680,13 +1949,44 @@ export type TrackedFlagsQueryVariables = Exact<{
 
 export type TrackedFlagsQuery = { __typename?: 'Query', trackedFlags: Array<{ __typename?: 'TrackedFlagType', id: string, key: string, presentInCode: boolean, addedInPullRequestNumber: number | null, branchesPresentCount: number, branchPresences: Array<{ __typename?: 'FlagBranchPresenceType', branch: string, present: boolean }>, feature: { __typename?: 'TrackedFlagFeatureType', id: string, name: string } | null }> };
 
-export type TrackedFlagQueryVariables = Exact<{
+export type GetFlagDetailQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
   key: Scalars['String']['input'];
 }>;
 
 
-export type TrackedFlagQuery = { __typename?: 'Query', trackedFlag: { __typename?: 'TrackedFlagDetailType', id: string, key: string, presentInCode: boolean, delivery: { __typename?: 'TrackedFlagDeliveryType', inDefaultBranch: boolean, shippedReleaseVersions: Array<string> }, feature: { __typename?: 'TrackedFlagFeatureType', id: string, name: string } | null, branchPresences: Array<{ __typename?: 'FlagBranchPresenceDetailType', branch: string, present: boolean, firstSeenAt: string, lastConfirmedAt: string }>, releases: Array<{ __typename?: 'TrackedFlagReleaseType', releaseId: string, version: string, status: ReleaseStatus, date: string, decision: ReleaseFlagDecisionType | null }>, pullRequestChanges: Array<{ __typename?: 'TrackedFlagPullRequestChangeType', prNumber: number, prTitle: string, prAuthor: string, prMergedAt: string, kind: FlagReferenceKind, action: FlagChangeAction, detectedFile: string | null }>, events: Array<{ __typename?: 'TrackedFlagEventType', type: string, description: string, occurredAt: string }> } | null };
+export type GetFlagDetailQuery = { __typename?: 'Query', flagDetail: { __typename?: 'FlagDetailType', key: string, deploymentStatus: FlagDeploymentStatus, hasConflict: boolean, flagsmith: { __typename?: 'FlagDetailFlagsmithType', exists: boolean, lastSyncedAt: string | null, environments: Array<{ __typename?: 'FlagDetailFlagsmithEnvironmentType', name: string, enabled: boolean, value: string | null, updatedAt: string }> }, tracked: { __typename?: 'TrackedFlagDetailType', id: string, key: string, presentInCode: boolean, delivery: { __typename?: 'TrackedFlagDeliveryType', inDefaultBranch: boolean, shippedReleaseVersions: Array<string> }, feature: { __typename?: 'TrackedFlagFeatureType', id: string, name: string } | null, branchPresences: Array<{ __typename?: 'FlagBranchPresenceDetailType', branch: string, present: boolean, firstSeenAt: string, lastConfirmedAt: string }>, releases: Array<{ __typename?: 'TrackedFlagReleaseType', releaseId: string, version: string, status: ReleaseStatus, date: string, decision: ReleaseFlagDecisionType | null }>, pullRequestChanges: Array<{ __typename?: 'TrackedFlagPullRequestChangeType', prNumber: number, prTitle: string, prAuthor: string, prMergedAt: string, kind: FlagReferenceKind, action: FlagChangeAction, detectedFile: string | null }>, events: Array<{ __typename?: 'TrackedFlagEventType', type: string, description: string, occurredAt: string }> } | null } | null };
+
+export type GetFlagHistoryQueryVariables = Exact<{
+  input: GetFlagHistoryInput;
+}>;
+
+
+export type GetFlagHistoryQuery = { __typename?: 'Query', flagHistory: { __typename?: 'FlagHistoryPageType', totalCount: number, items: Array<{ __typename?: 'FlagHistoryEventEntryType', id: string, type: FlagHistoryEventType, environmentName: string | null, previousValue: string | null, newValue: string | null, releaseId: string | null, releaseName: string | null, actorName: string | null, source: FlagHistorySource, occurredAt: string }> } };
+
+export type MarkNotificationReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type MarkNotificationReadMutation = { __typename?: 'Mutation', markNotificationRead: boolean };
+
+export type MarkAllNotificationsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkAllNotificationsReadMutation = { __typename?: 'Mutation', markAllNotificationsRead: boolean };
+
+export type NotificationsQueryVariables = Exact<{
+  input: NotificationsPageInput;
+}>;
+
+
+export type NotificationsQuery = { __typename?: 'Query', notifications: { __typename?: 'NotificationsPageType', totalCount: number, hasMore: boolean, items: Array<{ __typename?: 'NotificationEntryType', id: string, projectId: string, projectName: string, type: NotificationType, title: string, body: string, url: string | null, flagKey: string | null, readAt: string | null, createdAt: string }> } };
+
+export type UnreadNotificationsCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UnreadNotificationsCountQuery = { __typename?: 'Query', unreadNotificationsCount: number };
 
 export type GithubRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1905,19 +2205,26 @@ export type DeleteGithubBranchesMutationVariables = Exact<{
 
 export type DeleteGithubBranchesMutation = { __typename?: 'Mutation', deleteGithubBranches: Array<{ __typename?: 'DeleteBranchOutcomeType', branchName: string, deleted: boolean, reason: string | null }> };
 
-export type GetBranchCleanupCandidatesQueryVariables = Exact<{
+export type GetBranchCleanupPageQueryVariables = Exact<{
+  input: BranchCleanupPageInput;
+}>;
+
+
+export type GetBranchCleanupPageQuery = { __typename?: 'Query', branchCleanupPage: { __typename?: 'BranchCleanupPageType', totalCount: number, items: Array<{ __typename?: 'BranchCleanupPageItemType', name: string, isDefault: boolean, githubProtected: boolean, lastCommitAt: string | null, lastCommitAuthorLogin: string | null, lastCommitAuthorName: string | null, lastCommitAuthorAvatarUrl: string | null, openPullRequestNumber: number | null, openPullRequestUrl: string | null, blockReasons: Array<BranchBlockReason>, deletable: boolean, overridable: boolean, signals: { __typename?: 'BranchCleanupPageSignalsType', mergedViaPr: boolean, noOpenPr: boolean, unreferencedByReleases: boolean } }> } };
+
+export type GetBranchAuthorsQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
 }>;
 
 
-export type GetBranchCleanupCandidatesQuery = { __typename?: 'Query', branchCleanupCandidates: Array<{ __typename?: 'BranchCleanupCandidateType', name: string, lastCommitDate: string | null, protected: boolean, suggested: boolean, signals: { __typename?: 'BranchCleanupSignalsType', mergedViaPr: boolean, stale: boolean, unreferencedByReleases: boolean, noOpenPr: boolean, blocked: boolean, isDefault: boolean } }> };
+export type GetBranchAuthorsQuery = { __typename?: 'Query', branchAuthors: Array<string> };
 
-export type GetBlockedBranchesQueryVariables = Exact<{
+export type GetBranchCleanupPlanQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
 }>;
 
 
-export type GetBlockedBranchesQuery = { __typename?: 'Query', blockedBranches: Array<{ __typename?: 'BlockedBranchType', id: string, branchName: string, reason: string | null, createdAt: string, createdById: string, projectId: string }> };
+export type GetBranchCleanupPlanQuery = { __typename?: 'Query', branchCleanupPlan: { __typename?: 'BranchCleanupPlanType', totalCount: number, deletable: Array<{ __typename?: 'BranchCleanupPlanDeletableType', name: string, lastCommitAt: string | null, lastCommitAuthorLogin: string | null, lastCommitAuthorName: string | null, lastCommitAuthorAvatarUrl: string | null }>, kept: Array<{ __typename?: 'BranchCleanupPlanKeptType', name: string, blockReasons: Array<BranchBlockReason> }> } };
 
 export type GithubWebhookSettingsQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -2131,17 +2438,31 @@ export type TriggerFlagDigestMutationVariables = Exact<{
 
 export type TriggerFlagDigestMutation = { __typename?: 'Mutation', triggerFlagDigest: boolean };
 
+export type GetProjectFlagReminderQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetProjectFlagReminderQuery = { __typename?: 'Query', getProject: { __typename?: 'ProjectType', id: string, flagReminderIntervalDays: number } };
+
+export type UpdateProjectFlagReminderMutationVariables = Exact<{
+  input: UpdateProjectInput;
+}>;
+
+
+export type UpdateProjectFlagReminderMutation = { __typename?: 'Mutation', updateProject: { __typename?: 'ProjectType', id: string, flagReminderIntervalDays: number } };
+
 export type ListProjectsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListProjectsQuery = { __typename?: 'Query', listProjects: Array<{ __typename?: 'ProjectType', id: string, name: string, repo: string, connectionHealth: { __typename?: 'ConnectionHealthType', github: IntegrationStatus, linear: IntegrationStatus, flagsmith: IntegrationStatus }, integrations: { __typename?: 'ProjectIntegrationsType', github: boolean, linear: boolean, flagsmith: boolean } }> };
+export type ListProjectsQuery = { __typename?: 'Query', listProjects: Array<{ __typename?: 'ProjectType', id: string, name: string, repo: string, connectionHealth: { __typename?: 'ConnectionHealthType', github: IntegrationStatus, linear: IntegrationStatus, flagsmith: IntegrationStatus, slack: IntegrationStatus }, integrations: { __typename?: 'ProjectIntegrationsType', github: boolean, linear: boolean, flagsmith: boolean, slack: boolean } }> };
 
 export type GetProjectQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetProjectQuery = { __typename?: 'Query', getProject: { __typename?: 'ProjectType', id: string, name: string, repo: string, connectionHealth: { __typename?: 'ConnectionHealthType', github: IntegrationStatus, linear: IntegrationStatus, flagsmith: IntegrationStatus }, integrations: { __typename?: 'ProjectIntegrationsType', github: boolean, linear: boolean, flagsmith: boolean } } };
+export type GetProjectQuery = { __typename?: 'Query', getProject: { __typename?: 'ProjectType', id: string, name: string, repo: string, connectionHealth: { __typename?: 'ConnectionHealthType', github: IntegrationStatus, linear: IntegrationStatus, flagsmith: IntegrationStatus, slack: IntegrationStatus }, integrations: { __typename?: 'ProjectIntegrationsType', github: boolean, linear: boolean, flagsmith: boolean, slack: boolean } } };
 
 
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"accessToken"}},{"kind":"Field","name":{"kind":"Name","value":"refreshToken"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
@@ -2166,10 +2487,15 @@ export const GetFeatureDocument = {"kind":"Document","definitions":[{"kind":"Ope
 export const SyncFlagsmithFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SyncFlagsmithFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"syncFlagsmithFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<SyncFlagsmithFlagsMutation, SyncFlagsmithFlagsMutationVariables>;
 export const RunFlagCoverageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RunFlagCoverage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"runFlagCoverage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagsTracked"}},{"kind":"Field","name":{"kind":"Name","value":"branchesScanned"}},{"kind":"Field","name":{"kind":"Name","value":"prChangesDetected"}}]}}]}}]} as unknown as DocumentNode<RunFlagCoverageMutation, RunFlagCoverageMutationVariables>;
 export const RunFlagCoverageForFlagDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RunFlagCoverageForFlag"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"runFlagCoverageForFlag"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"presentInCode"}},{"kind":"Field","name":{"kind":"Name","value":"delivery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inDefaultBranch"}},{"kind":"Field","name":{"kind":"Name","value":"shippedReleaseVersions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"feature"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"branchPresences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branch"}},{"kind":"Field","name":{"kind":"Name","value":"present"}},{"kind":"Field","name":{"kind":"Name","value":"firstSeenAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastConfirmedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"releases"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"version"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pullRequestChanges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"prNumber"}},{"kind":"Field","name":{"kind":"Name","value":"prTitle"}},{"kind":"Field","name":{"kind":"Name","value":"prAuthor"}},{"kind":"Field","name":{"kind":"Name","value":"prMergedAt"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"detectedFile"}}]}},{"kind":"Field","name":{"kind":"Name","value":"events"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"occurredAt"}}]}}]}}]}}]} as unknown as DocumentNode<RunFlagCoverageForFlagMutation, RunFlagCoverageForFlagMutationVariables>;
-export const GetFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"GetFlagsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"environments"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"lastSyncedAt"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"environments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFlagsQuery, GetFlagsQueryVariables>;
-export const CompareFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CompareFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"baselineEnvironments"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"comparedEnvironments"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"compareFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"baselineEnvironments"},"value":{"kind":"Variable","name":{"kind":"Name","value":"baselineEnvironments"}}},{"kind":"Argument","name":{"kind":"Name","value":"comparedEnvironments"},"value":{"kind":"Variable","name":{"kind":"Name","value":"comparedEnvironments"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"baselineEnvironments"}},{"kind":"Field","name":{"kind":"Name","value":"comparedEnvironments"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"baselineEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"baselineConflict"}},{"kind":"Field","name":{"kind":"Name","value":"baseline"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"divergences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CompareFlagsQuery, CompareFlagsQueryVariables>;
+export const GetFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"GetFlagsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"environments"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"lastSyncedAt"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"deploymentStatus"}},{"kind":"Field","name":{"kind":"Name","value":"environments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFlagsQuery, GetFlagsQueryVariables>;
+export const CompareFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CompareFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"baselineEnvironments"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"comparedEnvironments"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"compareFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"baselineEnvironments"},"value":{"kind":"Variable","name":{"kind":"Name","value":"baselineEnvironments"}}},{"kind":"Argument","name":{"kind":"Name","value":"comparedEnvironments"},"value":{"kind":"Variable","name":{"kind":"Name","value":"comparedEnvironments"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"baselineEnvironments"}},{"kind":"Field","name":{"kind":"Name","value":"comparedEnvironments"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"baselineEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"baselineConflict"}},{"kind":"Field","name":{"kind":"Name","value":"baseline"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}},{"kind":"Field","name":{"kind":"Name","value":"divergences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CompareFlagsQuery, CompareFlagsQueryVariables>;
 export const TrackedFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TrackedFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackedFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"presentInCode"}},{"kind":"Field","name":{"kind":"Name","value":"addedInPullRequestNumber"}},{"kind":"Field","name":{"kind":"Name","value":"branchesPresentCount"}},{"kind":"Field","name":{"kind":"Name","value":"branchPresences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branch"}},{"kind":"Field","name":{"kind":"Name","value":"present"}}]}},{"kind":"Field","name":{"kind":"Name","value":"feature"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<TrackedFlagsQuery, TrackedFlagsQueryVariables>;
-export const TrackedFlagDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TrackedFlag"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackedFlag"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"presentInCode"}},{"kind":"Field","name":{"kind":"Name","value":"delivery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inDefaultBranch"}},{"kind":"Field","name":{"kind":"Name","value":"shippedReleaseVersions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"feature"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"branchPresences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branch"}},{"kind":"Field","name":{"kind":"Name","value":"present"}},{"kind":"Field","name":{"kind":"Name","value":"firstSeenAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastConfirmedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"releases"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"version"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pullRequestChanges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"prNumber"}},{"kind":"Field","name":{"kind":"Name","value":"prTitle"}},{"kind":"Field","name":{"kind":"Name","value":"prAuthor"}},{"kind":"Field","name":{"kind":"Name","value":"prMergedAt"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"detectedFile"}}]}},{"kind":"Field","name":{"kind":"Name","value":"events"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"occurredAt"}}]}}]}}]}}]} as unknown as DocumentNode<TrackedFlagQuery, TrackedFlagQueryVariables>;
+export const GetFlagDetailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFlagDetail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagDetail"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"deploymentStatus"}},{"kind":"Field","name":{"kind":"Name","value":"hasConflict"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"exists"}},{"kind":"Field","name":{"kind":"Name","value":"lastSyncedAt"}},{"kind":"Field","name":{"kind":"Name","value":"environments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"tracked"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"presentInCode"}},{"kind":"Field","name":{"kind":"Name","value":"delivery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inDefaultBranch"}},{"kind":"Field","name":{"kind":"Name","value":"shippedReleaseVersions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"feature"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"branchPresences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branch"}},{"kind":"Field","name":{"kind":"Name","value":"present"}},{"kind":"Field","name":{"kind":"Name","value":"firstSeenAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastConfirmedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"releases"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"version"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pullRequestChanges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"prNumber"}},{"kind":"Field","name":{"kind":"Name","value":"prTitle"}},{"kind":"Field","name":{"kind":"Name","value":"prAuthor"}},{"kind":"Field","name":{"kind":"Name","value":"prMergedAt"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"detectedFile"}}]}},{"kind":"Field","name":{"kind":"Name","value":"events"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"occurredAt"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFlagDetailQuery, GetFlagDetailQueryVariables>;
+export const GetFlagHistoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFlagHistory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"GetFlagHistoryInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagHistory"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"environmentName"}},{"kind":"Field","name":{"kind":"Name","value":"previousValue"}},{"kind":"Field","name":{"kind":"Name","value":"newValue"}},{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"releaseName"}},{"kind":"Field","name":{"kind":"Name","value":"actorName"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"occurredAt"}}]}}]}}]}}]} as unknown as DocumentNode<GetFlagHistoryQuery, GetFlagHistoryQueryVariables>;
+export const MarkNotificationReadDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MarkNotificationRead"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"markNotificationRead"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>;
+export const MarkAllNotificationsReadDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MarkAllNotificationsRead"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"markAllNotificationsRead"}}]}}]} as unknown as DocumentNode<MarkAllNotificationsReadMutation, MarkAllNotificationsReadMutationVariables>;
+export const NotificationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Notifications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"NotificationsPageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notifications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"hasMore"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"flagKey"}},{"kind":"Field","name":{"kind":"Name","value":"readAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<NotificationsQuery, NotificationsQueryVariables>;
+export const UnreadNotificationsCountDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"UnreadNotificationsCount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unreadNotificationsCount"}}]}}]} as unknown as DocumentNode<UnreadNotificationsCountQuery, UnreadNotificationsCountQueryVariables>;
 export const GithubRepositoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GithubRepositories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubRepositories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"private"}},{"kind":"Field","name":{"kind":"Name","value":"defaultBranch"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"htmlUrl"}}]}}]}}]} as unknown as DocumentNode<GithubRepositoriesQuery, GithubRepositoriesQueryVariables>;
 export const CreateProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProjectInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"repo"}}]}}]}}]} as unknown as DocumentNode<CreateProjectMutation, CreateProjectMutationVariables>;
 export const CreateReleaseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateRelease"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateReleaseInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createRelease"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"baseRef"}},{"kind":"Field","name":{"kind":"Name","value":"compareRef"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<CreateReleaseMutation, CreateReleaseMutationVariables>;
@@ -2200,8 +2526,9 @@ export const InProgressFlagRemindersDocument = {"kind":"Document","definitions":
 export const BlockBranchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"BlockBranch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"BlockBranchInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"blockBranch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"branchName"}},{"kind":"Field","name":{"kind":"Name","value":"reason"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}}]}}]}}]} as unknown as DocumentNode<BlockBranchMutation, BlockBranchMutationVariables>;
 export const UnblockBranchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UnblockBranch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UnblockBranchInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unblockBranch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<UnblockBranchMutation, UnblockBranchMutationVariables>;
 export const DeleteGithubBranchesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteGithubBranches"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeleteGithubBranchesInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteGithubBranches"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchName"}},{"kind":"Field","name":{"kind":"Name","value":"deleted"}},{"kind":"Field","name":{"kind":"Name","value":"reason"}}]}}]}}]} as unknown as DocumentNode<DeleteGithubBranchesMutation, DeleteGithubBranchesMutationVariables>;
-export const GetBranchCleanupCandidatesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchCleanupCandidates"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchCleanupCandidates"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitDate"}},{"kind":"Field","name":{"kind":"Name","value":"protected"}},{"kind":"Field","name":{"kind":"Name","value":"suggested"}},{"kind":"Field","name":{"kind":"Name","value":"signals"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mergedViaPr"}},{"kind":"Field","name":{"kind":"Name","value":"stale"}},{"kind":"Field","name":{"kind":"Name","value":"unreferencedByReleases"}},{"kind":"Field","name":{"kind":"Name","value":"noOpenPr"}},{"kind":"Field","name":{"kind":"Name","value":"blocked"}},{"kind":"Field","name":{"kind":"Name","value":"isDefault"}}]}}]}}]}}]} as unknown as DocumentNode<GetBranchCleanupCandidatesQuery, GetBranchCleanupCandidatesQueryVariables>;
-export const GetBlockedBranchesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBlockedBranches"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"blockedBranches"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"branchName"}},{"kind":"Field","name":{"kind":"Name","value":"reason"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}}]}}]}}]} as unknown as DocumentNode<GetBlockedBranchesQuery, GetBlockedBranchesQueryVariables>;
+export const GetBranchCleanupPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchCleanupPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"BranchCleanupPageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchCleanupPage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"isDefault"}},{"kind":"Field","name":{"kind":"Name","value":"githubProtected"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorLogin"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorName"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"openPullRequestNumber"}},{"kind":"Field","name":{"kind":"Name","value":"openPullRequestUrl"}},{"kind":"Field","name":{"kind":"Name","value":"blockReasons"}},{"kind":"Field","name":{"kind":"Name","value":"deletable"}},{"kind":"Field","name":{"kind":"Name","value":"overridable"}},{"kind":"Field","name":{"kind":"Name","value":"signals"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mergedViaPr"}},{"kind":"Field","name":{"kind":"Name","value":"noOpenPr"}},{"kind":"Field","name":{"kind":"Name","value":"unreferencedByReleases"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetBranchCleanupPageQuery, GetBranchCleanupPageQueryVariables>;
+export const GetBranchAuthorsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchAuthors"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchAuthors"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<GetBranchAuthorsQuery, GetBranchAuthorsQueryVariables>;
+export const GetBranchCleanupPlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchCleanupPlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchCleanupPlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"deletable"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorLogin"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorName"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorAvatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"kept"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"blockReasons"}}]}}]}}]}}]} as unknown as DocumentNode<GetBranchCleanupPlanQuery, GetBranchCleanupPlanQueryVariables>;
 export const GithubWebhookSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GithubWebhookSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getConnectionSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubWebhookPath"}},{"kind":"Field","name":{"kind":"Name","value":"githubWebhookSecretSet"}}]}}]}}]} as unknown as DocumentNode<GithubWebhookSettingsQuery, GithubWebhookSettingsQueryVariables>;
 export const RotateGithubWebhookSecretDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RotateGithubWebhookSecret"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rotateGithubWebhookSecret"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubWebhookPath"}},{"kind":"Field","name":{"kind":"Name","value":"githubWebhookSecretSet"}}]}}]}}]} as unknown as DocumentNode<RotateGithubWebhookSecretMutation, RotateGithubWebhookSecretMutationVariables>;
 export const GetConnectionSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetConnectionSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getConnectionSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithUrl"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithProjectId"}},{"kind":"Field","name":{"kind":"Name","value":"linearConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithWebhookPath"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithWebhookSecretSet"}}]}}]}}]} as unknown as DocumentNode<GetConnectionSettingsQuery, GetConnectionSettingsQueryVariables>;
@@ -2232,5 +2559,7 @@ export const SendSlackTestMessageDocument = {"kind":"Document","definitions":[{"
 export const NotificationPreferencesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NotificationPreferences"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notificationPreferences"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notificationType"}},{"kind":"Field","name":{"kind":"Name","value":"channel"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"digestFrequency"}}]}}]}}]} as unknown as DocumentNode<NotificationPreferencesQuery, NotificationPreferencesQueryVariables>;
 export const UpdateNotificationPreferenceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateNotificationPreference"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateNotificationPreferenceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateNotificationPreference"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notificationType"}},{"kind":"Field","name":{"kind":"Name","value":"channel"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"digestFrequency"}}]}}]}}]} as unknown as DocumentNode<UpdateNotificationPreferenceMutation, UpdateNotificationPreferenceMutationVariables>;
 export const TriggerFlagDigestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TriggerFlagDigest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"triggerFlagDigest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<TriggerFlagDigestMutation, TriggerFlagDigestMutationVariables>;
-export const ListProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListProjects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listProjects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"repo"}},{"kind":"Field","name":{"kind":"Name","value":"connectionHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}}]}},{"kind":"Field","name":{"kind":"Name","value":"integrations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}}]}}]}}]}}]} as unknown as DocumentNode<ListProjectsQuery, ListProjectsQueryVariables>;
-export const GetProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"repo"}},{"kind":"Field","name":{"kind":"Name","value":"connectionHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}}]}},{"kind":"Field","name":{"kind":"Name","value":"integrations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}}]}}]}}]}}]} as unknown as DocumentNode<GetProjectQuery, GetProjectQueryVariables>;
+export const GetProjectFlagReminderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProjectFlagReminder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flagReminderIntervalDays"}}]}}]}}]} as unknown as DocumentNode<GetProjectFlagReminderQuery, GetProjectFlagReminderQueryVariables>;
+export const UpdateProjectFlagReminderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProjectFlagReminder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProjectInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flagReminderIntervalDays"}}]}}]}}]} as unknown as DocumentNode<UpdateProjectFlagReminderMutation, UpdateProjectFlagReminderMutationVariables>;
+export const ListProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListProjects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listProjects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"repo"}},{"kind":"Field","name":{"kind":"Name","value":"connectionHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}},{"kind":"Field","name":{"kind":"Name","value":"slack"}}]}},{"kind":"Field","name":{"kind":"Name","value":"integrations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}},{"kind":"Field","name":{"kind":"Name","value":"slack"}}]}}]}}]}}]} as unknown as DocumentNode<ListProjectsQuery, ListProjectsQueryVariables>;
+export const GetProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"repo"}},{"kind":"Field","name":{"kind":"Name","value":"connectionHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}},{"kind":"Field","name":{"kind":"Name","value":"slack"}}]}},{"kind":"Field","name":{"kind":"Name","value":"integrations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"github"}},{"kind":"Field","name":{"kind":"Name","value":"linear"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmith"}},{"kind":"Field","name":{"kind":"Name","value":"slack"}}]}}]}}]}}]} as unknown as DocumentNode<GetProjectQuery, GetProjectQueryVariables>;

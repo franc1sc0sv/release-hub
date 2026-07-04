@@ -1,44 +1,155 @@
 {
   "title": "Operaciones de repo",
   "subtitle": "Operaciones del repositorio",
-  "description": "Encuentra ramas obsoletas y fusionadas, bloquea las que quieras conservar y limpia el resto con una eliminación revisada y confirmada.",
-  "loading": "Cargando ramas...",
+  "description": "Revisa todas las ramas de este repositorio y limpia las que ya no necesites con una eliminación revisada y confirmada.",
+  "header": {
+    "branchCountLabel_one": "rama",
+    "branchCountLabel_other": "ramas"
+  },
   "error": {
     "heading": "No se pudieron cargar las ramas",
     "description": "GitHub devolvió un error al analizar las ramas. Revisa tu conexión en Configuración.",
     "retry": "Reintentar"
   },
   "empty": {
-    "heading": "No hay ramas para revisar",
-    "description": "Todas las ramas de este repositorio están activas, protegidas o ya bloqueadas."
+    "heading": "No se encontraron ramas",
+    "description": "Ninguna rama coincide con tu búsqueda, o este repositorio aún no tiene ninguna."
   },
   "search": {
     "placeholder": "Buscar ramas..."
+  },
+  "filters": {
+    "authorAria": "Filtrar por autor",
+    "authorAll": "Todos los autores",
+    "activityAria": "Filtrar por rango de actividad",
+    "activityAll": "Cualquier actividad",
+    "activityOptions": {
+      "LAST_WEEK": "Última semana",
+      "LAST_MONTH": "Último mes",
+      "LAST_3_MONTHS": "Últimos 3 meses",
+      "LAST_6_MONTHS": "Últimos 6 meses",
+      "OVER_6_MONTHS": "Más de 6 meses"
+    },
+    "protectionAria": "Filtrar por protección",
+    "protectionAll": "Todas las ramas",
+    "protectionOptions": {
+      "PROTECTED": "Solo protegidas",
+      "UNPROTECTED": "Solo eliminables"
+    },
+    "signalsLabel": "Señales",
+    "signalOptions": {
+      "MERGED_VIA_PR": "Fusionada",
+      "OPEN_PR": "PR abierto",
+      "UNREFERENCED": "Sin referencias"
+    },
+    "clear": "Limpiar filtros"
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "pageOf": "Página {{page}} de {{total}}"
   },
   "table": {
     "columns": {
       "branch": "Rama",
       "lastActivity": "Última actividad",
+      "author": "Autor",
+      "protection": "Protección",
       "signals": "Señales",
       "actions": "Acciones"
     },
+    "protectionBadge": "Protegida",
+    "selectAll": "Seleccionar todas las ramas de esta página",
     "selectBranch": "Seleccionar rama {{branchName}}",
-    "suggested": "Sugerida para eliminar",
-    "lockedBlocked": "Bloqueada",
-    "lockedDefault": "Rama predeterminada",
-    "lockedProtected": "Protegida",
-    "unknownActivity": "Desconocida",
     "signals": {
       "none": "Sin señales",
       "mergedViaPr": "Fusionada",
-      "stale": "Obsoleta",
       "unreferencedByReleases": "Sin referencias",
-      "noOpenPr": "Sin PR abierto"
+      "openPr": "PR #{{number}}",
+      "openPrAria": "Abrir el pull request #{{number}} en GitHub"
+    },
+    "signalTooltips": {
+      "mergedViaPr": "Los cambios de esta rama se fusionaron en otra rama mediante un pull request.",
+      "unreferencedByReleases": "Esta rama no se usa como referencia base ni de comparación en ningún release de este proyecto.",
+      "openPr": "Esta rama es la cabeza de un pull request abierto. Haz clic para abrirlo en GitHub."
+    },
+    "sort": {
+      "aria": "Ordenar por {{label}}"
+    },
+    "sortSignals": {
+      "MERGED_VIA_PR": "Fusionada",
+      "OPEN_PR": "PR abierto",
+      "UNREFERENCED": "Sin referencias"
     },
     "selectionCount_one": "{{count}} rama seleccionada",
     "selectionCount_other": "{{count}} ramas seleccionadas",
     "clearSelection": "Limpiar",
     "deleteSelected": "Eliminar"
+  },
+  "protected": {
+    "shieldLabel": "Esta rama está protegida contra eliminación",
+    "unprotect": "Desproteger",
+    "unprotectTrigger": "Desproteger rama {{branchName}}",
+    "unprotected": "Desprotegida para esta sesión",
+    "reasonDescription": {
+      "DEFAULT_BRANCH": "Esta es la rama predeterminada del repositorio. Nunca se puede eliminar.",
+      "GITHUB_PROTECTED": "Esta rama tiene protección de rama activada en GitHub. No se puede eliminar desde aquí.",
+      "OPEN_PULL_REQUEST": "Esta rama es la cabeza de un pull request abierto.",
+      "RECENT_ACTIVITY": "Esta rama tiene un commit en los últimos 30 días. Alguien podría seguir trabajando en ella.",
+      "PROTECTED_NAME": "Este nombre de rama (main, master, dev o develop) se trata como protegido por convención.",
+      "MANUALLY_BLOCKED": "Esta rama fue bloqueada manualmente de la limpieza por un miembro del proyecto. Desbloquéala para poder eliminarla.",
+      "RELEASE_REFERENCED": "Esta rama se usa como referencia base o de comparación de un release en este proyecto."
+    },
+    "unprotectDialog": {
+      "title": "¿Desproteger \"{{branchName}}\"?",
+      "description": "Esta rama está protegida por los motivos que se muestran a continuación. Anular la protección la retira solo durante esta sesión.",
+      "acknowledge": "Entiendo los riesgos y quiero que esta rama sea seleccionable para eliminar.",
+      "cancel": "Cancelar",
+      "continue": "Continuar",
+      "confirmTitle": "Confirmar anulación",
+      "confirmDescription": "\"{{branchName}}\" quedará seleccionable para eliminar. Igual deberás confirmar la eliminación por separado.",
+      "back": "Atrás",
+      "confirmAction": "Desproteger rama"
+    }
+  },
+  "cleanAll": {
+    "trigger": "Limpiar todas las ramas",
+    "title": "Limpiar todas las ramas",
+    "description": "Cada rama se analiza antes de hacer nada. Revisa exactamente qué se eliminará y qué se conservará — las ramas protegidas nunca se tocan.",
+    "loading": "Analizando todas las ramas del repositorio...",
+    "error": "No se pudo generar el plan de limpieza. Inténtalo de nuevo.",
+    "executionError": "La eliminación se interrumpió. Revisa los resultados e inténtalo de nuevo si es necesario.",
+    "deletableCount_one": "{{count}} rama se eliminará",
+    "deletableCount_other": "{{count}} ramas se eliminarán",
+    "keptCount_one": "{{count}} rama se conservará",
+    "keptCount_other": "{{count}} ramas se conservarán",
+    "totalLabel": "{{total}} ramas analizadas",
+    "deletableHeading": "Se eliminarán",
+    "keptHeading": "Se conservarán (protegidas)",
+    "tabs": {
+      "delete": "Para eliminar ({{count}})",
+      "kept": "Protegidas ({{count}})"
+    },
+    "searchDelete": "Buscar ramas para eliminar...",
+    "searchKept": "Buscar ramas protegidas...",
+    "noMatches": "Ninguna rama coincide con tu búsqueda.",
+    "nothingToDelete": "No hay nada seguro que eliminar — todas las ramas están protegidas.",
+    "noActivity": "sin actividad de commits",
+    "unknownAuthor": "autor desconocido",
+    "continue": "Continuar",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "confirmWarning_one": "Estás a punto de eliminar permanentemente {{count}} rama de GitHub. Esta acción no se puede deshacer.",
+    "confirmWarning_other": "Estás a punto de eliminar permanentemente {{count}} ramas de GitHub. Esta acción no se puede deshacer.",
+    "confirmationLabel": "Escribe {{word}} para confirmar",
+    "confirmAction_one": "Eliminar {{count}} rama",
+    "confirmAction_other": "Eliminar {{count}} ramas",
+    "runningLabel": "Eliminando ramas... {{done}} de {{total}}",
+    "doneDeleted_one": "{{count}} rama eliminada",
+    "doneDeleted_other": "{{count}} ramas eliminadas",
+    "doneRefused_one": "{{count}} rama no se pudo eliminar",
+    "doneRefused_other": "{{count}} ramas no se pudieron eliminar",
+    "close": "Cerrar"
   },
   "block": {
     "trigger": "Bloquear rama {{branchName}}",
@@ -51,25 +162,32 @@
     "success": "Se bloqueó \"{{branchName}}\"",
     "error": "No se pudo bloquear esta rama. Inténtalo de nuevo."
   },
-  "blockedList": {
-    "title": "Ramas bloqueadas",
-    "empty": "No hay ramas bloqueadas actualmente.",
-    "reasonWithDate": "{{reason}} · Bloqueada el {{date}}",
-    "dateOnly": "Bloqueada el {{date}}",
-    "unblock": "Desbloquear",
-    "unblockSuccess": "Se desbloqueó \"{{branchName}}\"",
-    "unblockError": "No se pudo desbloquear esta rama. Inténtalo de nuevo."
+  "unblock": {
+    "trigger": "Desbloquear rama {{branchName}}",
+    "dialogTitle": "¿Desbloquear \"{{branchName}}\"?",
+    "dialogDescription": "Esta rama volverá a ser elegible para sugerencias de limpieza y eliminación.",
+    "cancel": "Cancelar",
+    "confirm": "Desbloquear rama",
+    "success": "Se desbloqueó \"{{branchName}}\"",
+    "error": "No se pudo desbloquear esta rama. Inténtalo de nuevo."
   },
   "delete": {
     "dialogTitle": "Eliminar ramas",
     "dialogDescription_one": "Estás a punto de eliminar permanentemente {{count}} rama de GitHub. Esta acción no se puede deshacer.",
     "dialogDescription_other": "Estás a punto de eliminar permanentemente {{count}} ramas de GitHub. Esta acción no se puede deshacer.",
-    "confirmationLabel_one": "Escribe {{count}} para confirmar",
-    "confirmationLabel_other": "Escribe {{count}} para confirmar",
+    "listLastActivity": "Última actividad: {{time}}",
+    "listAuthor": "Autor: {{author}}",
+    "unknownActivity": "sin actividad de commits",
+    "unknownAuthor": "Desconocido",
+    "confirmationLabel": "Escribe {{word}} para confirmar",
     "cancel": "Cancelar",
     "confirm": "Eliminar ramas",
     "close": "Cerrar",
     "outcomeDeleted": "Eliminada",
-    "outcomeRefused": "No se pudo eliminar"
+    "outcomeRefused": "No se pudo eliminar",
+    "toastAllDeleted_one": "Se eliminó {{count}} rama",
+    "toastAllDeleted_other": "Se eliminaron {{count}} ramas",
+    "toastPartial": "{{deleted}} de {{total}} ramas eliminadas",
+    "toastRefused": "\"{{branchName}}\" no se eliminó: {{reason}}"
   }
 }

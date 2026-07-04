@@ -50,6 +50,8 @@ export class IntegrationResolver {
         input.sortField ?? FlagSortField.CREATED,
         input.sortEnvironment,
         input.sortDirection ?? SortDirection.DESC,
+        input.statuses,
+        input.activity,
         input.limit ?? 100,
         input.offset ?? 0,
       ),

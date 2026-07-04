@@ -86,6 +86,24 @@ export class TrackedFlagRepository extends ITrackedFlagRepository {
     }
   }
 
+  findByIdsWithDetails = async (ids: string[], tx: TxClient): Promise<ITrackedFlagWithDetails[]> => {
+    if (ids.length === 0) return []
+    const rows = await tx.trackedFlag.findMany({
+      where: { id: { in: ids }, deletedAt: null },
+      include: {
+        feature: { select: { id: true, name: true } },
+        addedInPullRequest: { select: { id: true, number: true } },
+        branchPresence: true,
+      },
+    })
+    return rows.map((row): ITrackedFlagWithDetails => ({
+      ...toITrackedFlag(row),
+      feature: row.feature,
+      addedInPullRequest: row.addedInPullRequest,
+      branchPresence: row.branchPresence.map(toIFlagBranchPresence),
+    }))
+  }
+
   findByProjectAndKey = async (projectId: string, key: string, tx: TxClient): Promise<ITrackedFlag | null> => {
     const row = await tx.trackedFlag.findFirst({ where: { projectId, key, deletedAt: null } })
     if (!row) return null

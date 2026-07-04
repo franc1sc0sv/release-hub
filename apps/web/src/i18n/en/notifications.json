@@ -2,15 +2,40 @@
   "title": "Notification preferences",
   "columns": {
     "notification": "Notification",
+    "inApp": "In-App",
     "email": "Email",
     "slack": "Slack",
-    "digestFrequency": "Digest frequency"
+    "selectAllRow": "Select all",
+    "selectAllAriaLabel": "Toggle all notifications for {{channel}}"
+  },
+  "groups": {
+    "releases": "Releases",
+    "flags": "Flags"
   },
   "toggleAriaLabel": "Toggle {{type}} via {{channel}}",
   "digest": {
     "frequencyLabel": "Digest frequency",
+    "description": "How often the flag digest email is sent when enabled.",
     "sendTest": "Send test digest",
     "testSent": "Test digest sent.",
     "testFailed": "Couldn't send the test digest. Please try again."
+  },
+  "bell": {
+    "label": "Notifications",
+    "tooltip": "Notifications",
+    "ariaLabel": "Notifications, {{count}} unread"
+  },
+  "sheet": {
+    "title": "Notifications",
+    "description": "{{count}} total",
+    "markAllRead": "Mark all as read",
+    "loadMore": "Load more",
+    "empty": {
+      "heading": "No notifications yet",
+      "description": "Release and flag activity for your projects will show up here."
+    }
+  },
+  "listItem": {
+    "unread": "Unread"
   }
 }

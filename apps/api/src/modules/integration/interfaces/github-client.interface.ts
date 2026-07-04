@@ -106,6 +106,13 @@ export interface IGitHubDeploymentStatus {
   createdAt: string
 }
 
+export interface IGitHubBranchCommitDetail {
+  committedAt: Date
+  authorLogin: string | null
+  authorName: string | null
+  authorAvatarUrl: string | null
+}
+
 export abstract class IGitHubClient {
   abstract compareMergedPullRequests(
     repo: string,
@@ -203,4 +210,10 @@ export abstract class IGitHubClient {
     deploymentId: number,
     accessToken: string,
   ): Promise<IGitHubDeploymentStatus | null>
+
+  abstract getBranchCommitDetails(
+    repo: string,
+    branchNames: string[],
+    accessToken: string,
+  ): Promise<Map<string, IGitHubBranchCommitDetail | null>>
 }

@@ -4,6 +4,7 @@ import { ProjectModule } from '../project/project.module'
 import { IntegrationModule } from '../integration/integration.module'
 import { GithubAuthModule } from '../github-auth/github-auth.module'
 import { ReleaseModule } from '../release/release.module'
+import { FlagHistoryModule } from './flag-history.module'
 import { FlagTrackingResolver } from './resolvers/flag-tracking.resolver'
 import { ITrackedFlagRepository } from './interfaces/tracked-flag.repository'
 import { TrackedFlagRepository } from './repositories/tracked-flag.repository'
@@ -11,8 +12,6 @@ import { IFlagBranchPresenceRepository } from './interfaces/flag-branch-presence
 import { FlagBranchPresenceRepository } from './repositories/flag-branch-presence.repository'
 import { IPullRequestFlagChangeRepository } from './interfaces/pull-request-flag-change.repository'
 import { PullRequestFlagChangeRepository } from './repositories/pull-request-flag-change.repository'
-import { IReleaseFlagDecisionRepository } from './interfaces/release-flag-decision.repository'
-import { ReleaseFlagDecisionRepository } from './repositories/release-flag-decision.repository'
 import { IFlagRegistryParser } from './interfaces/flag-registry-parser.abstract'
 import { FlagRegistryParser } from './parsers/flag-registry-parser'
 import { SetFlagRegistryHandler } from './commands/set-flag-registry/set-flag-registry.handler'
@@ -24,15 +23,23 @@ import { GetTrackedFlagsHandler } from './queries/get-tracked-flags/get-tracked-
 import { GetTrackedFlagDetailHandler } from './queries/get-tracked-flag-detail/get-tracked-flag-detail.handler'
 import { GetReleaseFlagsHandler } from './queries/get-release-flags/get-release-flags.handler'
 import { GetFlagRegistryHandler } from './queries/get-flag-registry/get-flag-registry.handler'
+import { GetFlagHistoryHandler } from './queries/get-flag-history/get-flag-history.handler'
+import { GetFlagDetailHandler } from './queries/get-flag-detail/get-flag-detail.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, IntegrationModule, GithubAuthModule, forwardRef(() => ReleaseModule)],
+  imports: [
+    CqrsModule,
+    ProjectModule,
+    IntegrationModule,
+    GithubAuthModule,
+    FlagHistoryModule,
+    forwardRef(() => ReleaseModule),
+  ],
   providers: [
     FlagTrackingResolver,
     { provide: ITrackedFlagRepository, useClass: TrackedFlagRepository },
     { provide: IFlagBranchPresenceRepository, useClass: FlagBranchPresenceRepository },
     { provide: IPullRequestFlagChangeRepository, useClass: PullRequestFlagChangeRepository },
-    { provide: IReleaseFlagDecisionRepository, useClass: ReleaseFlagDecisionRepository },
     { provide: IFlagRegistryParser, useClass: FlagRegistryParser },
     SetFlagRegistryHandler,
     RunFlagCoverageHandler,
@@ -43,7 +50,9 @@ import { GetFlagRegistryHandler } from './queries/get-flag-registry/get-flag-reg
     GetTrackedFlagDetailHandler,
     GetReleaseFlagsHandler,
     GetFlagRegistryHandler,
+    GetFlagHistoryHandler,
+    GetFlagDetailHandler,
   ],
-  exports: [IPullRequestFlagChangeRepository, ITrackedFlagRepository, IReleaseFlagDecisionRepository],
+  exports: [IPullRequestFlagChangeRepository, ITrackedFlagRepository, FlagHistoryModule],
 })
 export class FlagTrackingModule {}

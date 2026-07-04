@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { BreadcrumbProvider, useBreadcrumb } from '@/context/breadcrumb.context'
 import { ProjectSwitcher } from '@/features/workspace/components/ProjectSwitcher'
+import { NotificationBell } from '@/features/notifications/components/NotificationBell'
 
 const ROUTE_KEYS: Record<string, string> = {
   workspace: 'nav.workspace',
@@ -55,6 +56,7 @@ function AppShellInner() {
         </SidebarContent>
 
         <SidebarFooter>
+          <NotificationBell />
           <UserMenu />
         </SidebarFooter>
       </Sidebar>

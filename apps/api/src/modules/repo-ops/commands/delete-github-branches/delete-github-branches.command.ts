@@ -3,5 +3,6 @@ export class DeleteGithubBranchesCommand {
     readonly userId: string,
     readonly projectId: string,
     readonly branchNames: string[],
+    readonly overriddenBranchNames: string[],
   ) {}
 }

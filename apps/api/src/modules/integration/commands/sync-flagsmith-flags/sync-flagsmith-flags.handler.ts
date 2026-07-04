@@ -1,5 +1,6 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
+import { FlagHistoryEventType, FlagHistorySource } from '@release-hub/db'
 import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
@@ -11,6 +12,11 @@ import { IProjectRepository } from '../../../project/interfaces/project.reposito
 import { IFlagsmithClient } from '../../interfaces/flagsmith-client.abstract'
 import { IFlagsmithFlagRepository } from '../../interfaces/flagsmith-flag.repository'
 import type { IAllEnvironmentFlagsData } from '../../interfaces/integration.interfaces'
+import {
+  IFlagHistoryRepository,
+  FLAG_HISTORY_PROJECT_SCOPE_KEY,
+} from '../../../flag-tracking/interfaces/flag-history.repository'
+import type { ICreateFlagHistoryEventData } from '../../../flag-tracking/interfaces/flag-history.repository'
 import { SyncFlagsmithFlagsCommand } from './sync-flagsmith-flags.command'
 
 interface IPreparedSync {
@@ -30,6 +36,7 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
     private readonly projectRepository: IProjectRepository,
     private readonly flagsmithClient: IFlagsmithClient,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
+    private readonly flagHistoryRepository: IFlagHistoryRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -111,13 +118,17 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
       )
     }
 
-    await this.flagsmithFlagRepository.reconcileFlags(
+    const diff = await this.flagsmithFlagRepository.reconcileFlags(
       command.projectId,
       flags.map((flag) => ({
         projectId: command.projectId,
         key: flag.key,
         createdAt: flag.createdAt ? new Date(flag.createdAt) : null,
-        states: environments.map((name) => ({ environmentName: name, enabled: flag.states[name] ?? false })),
+        states: environments.map((name) => ({
+          environmentName: name,
+          enabled: flag.states[name] ?? false,
+          value: flag.values[name] ?? null,
+        })),
       })),
       tx,
     )
@@ -129,6 +140,44 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
     )
 
     await this.flagsmithFlagRepository.completeSyncRun(syncRun.id, { flagCount: flags.length }, tx)
+
+    const historyRows: ICreateFlagHistoryEventData[] = diff.enabledChanges
+      .map(
+        (change): ICreateFlagHistoryEventData => ({
+          projectId: command.projectId,
+          flagKey: change.key,
+          flagsmithFlagId: change.flagId,
+          type: change.newEnabled ? FlagHistoryEventType.flag_enabled : FlagHistoryEventType.flag_disabled,
+          environmentName: change.environmentName,
+          previousValue: String(change.previousEnabled),
+          newValue: String(change.newEnabled),
+          source: FlagHistorySource.sync,
+        }),
+      )
+      .concat(
+        diff.valueChanges.map(
+          (change): ICreateFlagHistoryEventData => ({
+            projectId: command.projectId,
+            flagKey: change.key,
+            flagsmithFlagId: change.flagId,
+            type: FlagHistoryEventType.flag_value_changed,
+            environmentName: change.environmentName,
+            previousValue: change.previousValue,
+            newValue: change.newValue,
+            source: FlagHistorySource.sync,
+          }),
+        ),
+      )
+
+    historyRows.push({
+      projectId: command.projectId,
+      flagKey: FLAG_HISTORY_PROJECT_SCOPE_KEY,
+      type: FlagHistoryEventType.sync_completed,
+      newValue: String(flags.length),
+      source: FlagHistorySource.sync,
+    })
+
+    await this.flagHistoryRepository.createMany(historyRows, tx)
 
     return flags.length
   }

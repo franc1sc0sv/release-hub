@@ -47,12 +47,89 @@ type BlockedBranchType {
   reason: String
 }
 
+enum BranchActivityRange {
+  LAST_3_MONTHS
+  LAST_6_MONTHS
+  LAST_MONTH
+  LAST_WEEK
+  OVER_6_MONTHS
+}
+
+enum BranchBlockReason {
+  DEFAULT_BRANCH
+  GITHUB_PROTECTED
+  MANUALLY_BLOCKED
+  OPEN_PULL_REQUEST
+  PROTECTED_NAME
+  RECENT_ACTIVITY
+  RELEASE_REFERENCED
+}
+
 type BranchCleanupCandidateType {
   lastCommitDate: DateTime
   name: String!
   protected: Boolean!
   signals: BranchCleanupSignalsType!
   suggested: Boolean!
+}
+
+input BranchCleanupPageInput {
+  activity: BranchActivityRange
+  authorFilter: String
+  limit: Int = 15
+  offset: Int = 0
+  projectId: ID!
+  protection: BranchProtectionFilter
+  search: String
+  signals: [BranchSignalFilter!]
+  sortDirection: SortDirection = DESC
+  sortField: BranchCleanupSortField
+}
+
+type BranchCleanupPageItemType {
+  blockReasons: [BranchBlockReason!]!
+  deletable: Boolean!
+  githubProtected: Boolean!
+  isDefault: Boolean!
+  lastCommitAt: DateTime
+  lastCommitAuthorAvatarUrl: String
+  lastCommitAuthorLogin: String
+  lastCommitAuthorName: String
+  name: String!
+  openPullRequestNumber: Int
+  openPullRequestUrl: String
+  overridable: Boolean!
+  signals: BranchCleanupPageSignalsType!
+}
+
+type BranchCleanupPageSignalsType {
+  mergedViaPr: Boolean!
+  noOpenPr: Boolean!
+  unreferencedByReleases: Boolean!
+}
+
+type BranchCleanupPageType {
+  items: [BranchCleanupPageItemType!]!
+  totalCount: Int!
+}
+
+type BranchCleanupPlanDeletableType {
+  lastCommitAt: DateTime
+  lastCommitAuthorAvatarUrl: String
+  lastCommitAuthorLogin: String
+  lastCommitAuthorName: String
+  name: String!
+}
+
+type BranchCleanupPlanKeptType {
+  blockReasons: [BranchBlockReason!]!
+  name: String!
+}
+
+type BranchCleanupPlanType {
+  deletable: [BranchCleanupPlanDeletableType!]!
+  kept: [BranchCleanupPlanKeptType!]!
+  totalCount: Int!
 }
 
 type BranchCleanupSignalsType {
@@ -62,6 +139,26 @@ type BranchCleanupSignalsType {
   noOpenPr: Boolean!
   stale: Boolean!
   unreferencedByReleases: Boolean!
+}
+
+enum BranchCleanupSortField {
+  AUTHOR
+  LAST_ACTIVITY
+  MERGED_VIA_PR
+  OPEN_PR
+  PROTECTED
+  UNREFERENCED
+}
+
+enum BranchProtectionFilter {
+  PROTECTED
+  UNPROTECTED
+}
+
+enum BranchSignalFilter {
+  MERGED_VIA_PR
+  OPEN_PR
+  UNREFERENCED
 }
 
 type CommitType {
@@ -79,6 +176,7 @@ type ConnectionHealthType {
   flagsmith: IntegrationStatus!
   github: IntegrationStatus!
   linear: IntegrationStatus!
+  slack: IntegrationStatus!
 }
 
 type ConnectionSettingsType {
@@ -143,6 +241,7 @@ type DeleteBranchOutcomeType {
 
 input DeleteGithubBranchesInput {
   branchNames: [String!]!
+  overriddenBranchNames: [String!] = []
   projectId: ID!
 }
 
@@ -218,6 +317,11 @@ type FeatureType {
   updatedAt: DateTime!
 }
 
+enum FlagActivityFilter {
+  ACTIVE
+  INACTIVE
+}
+
 type FlagBranchPresenceDetailType {
   branch: String!
   firstSeenAt: DateTime!
@@ -259,13 +363,84 @@ type FlagCoverageSummaryType {
   prChangesDetected: Int!
 }
 
+enum FlagDeploymentStatus {
+  CONFLICT
+  IN_PROGRESS
+  SHIPPED_OFF
+  SHIPPED_ON
+  UNTRACKED
+}
+
+type FlagDetailFlagsmithEnvironmentType {
+  enabled: Boolean!
+  name: String!
+  updatedAt: DateTime!
+  value: String
+}
+
+type FlagDetailFlagsmithType {
+  environments: [FlagDetailFlagsmithEnvironmentType!]!
+  exists: Boolean!
+  lastSyncedAt: DateTime
+}
+
+type FlagDetailType {
+  deploymentStatus: FlagDeploymentStatus!
+  flagsmith: FlagDetailFlagsmithType!
+  hasConflict: Boolean!
+  key: String!
+  tracked: TrackedFlagDetailType
+}
+
 type FlagEnvironmentStateType {
   enabled: Boolean!
   name: String!
+  value: String
+}
+
+type FlagHistoryEventEntryType {
+  actorName: String
+  environmentName: String
+  id: ID!
+  newValue: String
+  occurredAt: DateTime!
+  previousValue: String
+  releaseId: ID
+  releaseName: String
+  source: FlagHistorySource!
+  type: FlagHistoryEventType!
+}
+
+enum FlagHistoryEventType {
+  CONFLICT_DETECTED
+  COVERAGE_SCAN
+  DECISION_ENABLE_IN_RELEASE
+  DECISION_IN_PROGRESS
+  DECISION_SHIP_OFF
+  FLAG_CREATED
+  FLAG_DELETED
+  FLAG_DISABLED
+  FLAG_ENABLED
+  FLAG_VALUE_CHANGED
+  REMINDER_SENT
+  SYNC_COMPLETED
+}
+
+type FlagHistoryPageType {
+  items: [FlagHistoryEventEntryType!]!
+  totalCount: Int!
+}
+
+enum FlagHistorySource {
+  SYNC
+  SYSTEM
+  USER
+  WEBHOOK
 }
 
 type FlagRefType {
   createdAt: DateTime
+  deploymentStatus: FlagDeploymentStatus!
   environments: [FlagEnvironmentStateType!]!
   key: String!
 }
@@ -321,7 +496,15 @@ input GenerateSummaryInput {
   tone: String
 }
 
+input GetFlagHistoryInput {
+  flagKey: String!
+  limit: Int = 20
+  offset: Int = 0
+  projectId: ID!
+}
+
 input GetFlagsInput {
+  activity: FlagActivityFilter
   limit: Int = 100
   offset: Int = 0
   projectId: ID!
@@ -329,6 +512,7 @@ input GetFlagsInput {
   sortDirection: SortDirection = DESC
   sortEnvironment: String
   sortField: FlagSortField = CREATED
+  statuses: [FlagDeploymentStatus!]
 }
 
 type GithubBranchSearchItemType {
@@ -464,6 +648,8 @@ type Mutation {
   login(input: LoginInput!): AuthTokensType!
   loginWithCode(input: LoginWithCodeInput!): AuthTokensType!
   logout(input: LogoutInput!): Boolean!
+  markAllNotificationsRead: Boolean!
+  markNotificationRead(id: ID!): Boolean!
   reauthorizeGithub: Boolean!
   refreshToken(input: RefreshTokenInput!): AuthTokensType!
   regenerateDraft(releaseId: ID!, resume: Boolean! = true): ReleaseObjectType!
@@ -502,7 +688,21 @@ type Mutation {
 
 enum NotificationChannel {
   EMAIL
+  IN_APP
   SLACK_DM
+}
+
+type NotificationEntryType {
+  body: String!
+  createdAt: DateTime!
+  flagKey: String
+  id: ID!
+  projectId: ID!
+  projectName: String!
+  readAt: DateTime
+  title: String!
+  type: NotificationType!
+  url: String
 }
 
 type NotificationPreferenceEntryType {
@@ -513,12 +713,31 @@ type NotificationPreferenceEntryType {
 }
 
 enum NotificationType {
+  FLAG_CONFLICT
+  FLAG_CREATED
+  FLAG_DELETED
   FLAG_DIGEST
+  FLAG_DISABLED
+  FLAG_ENABLED
   FLAG_IN_PROGRESS_REMINDER
+  FLAG_SHIP_OFF_REMINDER
   FLAG_STALENESS_ALERT
+  FLAG_VALUE_CHANGED
   RELEASE_CREATED
   RELEASE_DEPLOYED
   RELEASE_SHIPPED
+}
+
+input NotificationsPageInput {
+  limit: Int = 20
+  offset: Int = 0
+  projectId: ID
+}
+
+type NotificationsPageType {
+  hasMore: Boolean!
+  items: [NotificationEntryType!]!
+  totalCount: Int!
 }
 
 input PrAssignmentInput {
@@ -530,6 +749,7 @@ type ProjectIntegrationsType {
   flagsmith: Boolean!
   github: Boolean!
   linear: Boolean!
+  slack: Boolean!
 }
 
 enum ProjectRole {
@@ -548,6 +768,7 @@ type ProjectTagType {
 type ProjectType {
   connectionHealth: ConnectionHealthType!
   createdAt: DateTime!
+  flagReminderIntervalDays: Int!
   id: ID!
   integrations: ProjectIntegrationsType!
   name: String!
@@ -578,10 +799,15 @@ type PullRequestType {
 
 type Query {
   blockedBranches(projectId: ID!): [BlockedBranchType!]!
+  branchAuthors(projectId: ID!): [String!]!
   branchCleanupCandidates(projectId: ID!): [BranchCleanupCandidateType!]!
+  branchCleanupPage(input: BranchCleanupPageInput!): BranchCleanupPageType!
+  branchCleanupPlan(projectId: ID!): BranchCleanupPlanType!
   compareFlags(baselineEnvironments: [String!]!, comparedEnvironments: [String!]!, projectId: ID!): FlagComparisonResultType!
   compareRefs(baseRef: String!, compareRef: String!, projectId: ID!): RefComparisonType!
   exportSummary(input: ExportSummaryInput!): ExportResultType!
+  flagDetail(key: String!, projectId: ID!): FlagDetailType
+  flagHistory(input: GetFlagHistoryInput!): FlagHistoryPageType!
   flagRegistry(projectId: ID!): FlagRegistryConfigType!
   flagsmithProjects(apiKey: String!, projectId: ID!, url: String!): [FlagsmithProjectType!]!
   getConnectionSettings(projectId: ID!): ConnectionSettingsType!
@@ -605,6 +831,7 @@ type Query {
   listProjects: [ProjectType!]!
   me: UserProfileType!
   notificationPreferences(projectId: ID!): [NotificationPreferenceEntryType!]!
+  notifications(input: NotificationsPageInput!): NotificationsPageType!
   projectTags(projectId: ID!): [ProjectTagType!]!
   releaseFlags(releaseId: ID!): [ReleaseFlagType!]!
   releasePullRequestsPage(limit: Float! = 20, offset: Float! = 0, releaseId: ID!, search: String): ReleasePullRequestsPageType!
@@ -616,6 +843,7 @@ type Query {
   suggestFeatureForPr(prId: ID!): AiSuggestionType!
   trackedFlag(key: String!, projectId: ID!): TrackedFlagDetailType
   trackedFlags(projectId: ID!): [TrackedFlagType!]!
+  unreadNotificationsCount: Int!
   verifyFlagsmithConnection(apiKey: String!, flagsmithProjectId: String!, projectId: ID!, url: String!): FlagsmithVerifyResult!
 }
 
@@ -935,6 +1163,7 @@ input UpdateNotificationPreferenceInput {
 }
 
 input UpdateProjectInput {
+  flagReminderIntervalDays: Int
   id: ID!
   name: String
   repo: String

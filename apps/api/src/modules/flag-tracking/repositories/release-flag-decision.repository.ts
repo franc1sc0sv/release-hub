@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { ReleaseFlagDecisionType } from '@release-hub/db'
+import { ReleaseFlagDecisionType, ReleaseStatus } from '@release-hub/db'
 import {
   IReleaseFlagDecisionRepository,
 } from '../interfaces/release-flag-decision.repository'
+import type { IActiveEnableDecisionForFlag } from '../interfaces/release-flag-decision.repository'
 import type {
   ICreateReleaseFlagDecisionData,
   IReleaseFlagDecision,
@@ -54,6 +55,11 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
 
   findAllForRelease = async (releaseId: string, tx: TxClient): Promise<IReleaseFlagDecision[]> => {
     const rows = await tx.releaseFlagDecision.findMany({ where: { releaseId } })
+    return rows.map(toIReleaseFlagDecision)
+  }
+
+  findAllForTrackedFlag = async (trackedFlagId: string, tx: TxClient): Promise<IReleaseFlagDecision[]> => {
+    const rows = await tx.releaseFlagDecision.findMany({ where: { trackedFlagId } })
     return rows.map(toIReleaseFlagDecision)
   }
 
@@ -115,5 +121,43 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
     }
 
     return [...latestByFlag.values()]
+  }
+
+  findActiveEnableDecisionForFlag = async (
+    projectId: string,
+    key: string,
+    tx: TxClient,
+  ): Promise<IActiveEnableDecisionForFlag | null> => {
+    const trackedFlag = await tx.trackedFlag.findFirst({
+      where: { projectId, key, deletedAt: null },
+      select: { id: true },
+    })
+    if (!trackedFlag) return null
+
+    const decision = await tx.releaseFlagDecision.findFirst({
+      where: {
+        trackedFlagId: trackedFlag.id,
+        decision: ReleaseFlagDecisionType.ENABLE_IN_RELEASE,
+        release: { status: { in: [ReleaseStatus.merged, ReleaseStatus.deployed] } },
+      },
+      orderBy: { decidedAt: 'desc' },
+      select: { releaseId: true, release: { select: { name: true, compareRef: true } } },
+    })
+    if (!decision) return null
+
+    return {
+      trackedFlagId: trackedFlag.id,
+      releaseId: decision.releaseId,
+      releaseName: decision.release.name ?? decision.release.compareRef,
+    }
+  }
+
+  findLatestForTrackedFlag = async (trackedFlagId: string, tx: TxClient): Promise<IReleaseFlagDecision | null> => {
+    const row = await tx.releaseFlagDecision.findFirst({
+      where: { trackedFlagId },
+      orderBy: { updatedAt: 'desc' },
+    })
+    if (!row) return null
+    return toIReleaseFlagDecision(row)
   }
 }

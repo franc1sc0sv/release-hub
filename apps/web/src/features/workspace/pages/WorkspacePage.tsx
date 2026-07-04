@@ -32,11 +32,10 @@ interface ProjectCardProps {
 function ProjectCard({ project, onSelect }: ProjectCardProps) {
   const { t } = useTranslation('workspace')
 
-  const connectedCount = [
-    project.integrations.github,
-    project.integrations.linear,
-    project.integrations.flagsmith,
-  ].filter(Boolean).length
+  const connectedCount =
+    1 +
+    [project.integrations.linear, project.integrations.flagsmith, project.integrations.slack].filter(Boolean)
+      .length
 
   return (
     <motion.div variants={slideUp}>
@@ -55,7 +54,7 @@ function ProjectCard({ project, onSelect }: ProjectCardProps) {
                 tone={connectedCount > 0 ? StatusBadgeTone.EMERALD : StatusBadgeTone.SLATE}
                 icon={Github}
               >
-                {t('projectCard.integrationsCount', { count: connectedCount, total: 3 })}
+                {t('projectCard.integrationsCount', { count: connectedCount, total: 4 })}
               </StatusBadge>
             </div>
             <h2 className="mt-3 truncate font-display text-lg font-semibold text-foreground">
@@ -93,6 +92,7 @@ export default function WorkspacePage() {
   const github: IntegrationStatus = githubData?.githubConnection.connected ? CONNECTED : NOT_CONFIGURED
   const linear: IntegrationStatus = linearData?.linearConnection?.connected ? CONNECTED : NOT_CONFIGURED
   const flagsmith: IntegrationStatus = activeProject?.connectionHealth.flagsmith ?? NOT_CONFIGURED
+  const slack: IntegrationStatus = activeProject?.connectionHealth.slack ?? NOT_CONFIGURED
 
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -224,6 +224,7 @@ export default function WorkspacePage() {
                   github={github}
                   linear={linear}
                   flagsmith={flagsmith}
+                  slack={slack}
                 />
               </CardContent>
             </GlassCard>

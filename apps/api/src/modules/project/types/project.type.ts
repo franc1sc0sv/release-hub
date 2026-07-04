@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
 import { ProjectIntegrationsType } from './project-integrations.type'
 import { ConnectionHealthType } from './connection-health.type'
 
@@ -18,6 +18,9 @@ export class ProjectType {
 
   @Field(() => ConnectionHealthType)
   connectionHealth: ConnectionHealthType
+
+  @Field(() => Int)
+  flagReminderIntervalDays: number
 
   @Field(() => String)
   ownerId: string
