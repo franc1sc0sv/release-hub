@@ -1,13 +1,23 @@
 {
   "progress": {
-    "connectGithub": "Connect GitHub",
-    "selectRepo": "Select repository"
+    "createOrg": "Create organization",
+    "installApp": "Install GitHub App"
   },
-  "connectGithub": {
-    "title": "Connect GitHub",
-    "description": "Release Hub needs access to your GitHub account to detect merged pull requests and build releases. This connection is required to continue.",
-    "button": "Connect GitHub",
-    "note": "You will be redirected to GitHub to authorize the app."
+  "createOrg": {
+    "title": "Create your organization",
+    "description": "An organization groups your projects and teammates. You can rename it or add more later.",
+    "nameLabel": "Organization name",
+    "namePlaceholder": "Acme Inc.",
+    "submit": "Create organization",
+    "creating": "Creating…",
+    "error": "Could not create the organization. Please try again."
+  },
+  "installApp": {
+    "title": "Install the GitHub App",
+    "description": "Release Hub uses a GitHub App to detect merged pull requests and build releases for this organization.",
+    "installButton": "Install GitHub App for {{org}}",
+    "hint": "You'll pick which repositories to grant on GitHub. Your organization starts empty — you can add projects afterward.",
+    "skip": "Skip for now"
   },
   "selectRepo": {
     "title": "Select a repository",

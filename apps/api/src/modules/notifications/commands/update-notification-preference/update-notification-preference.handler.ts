@@ -1,12 +1,12 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { INotificationPreferenceRepository } from '../../interfaces/notification-preference.repository'
 import { NotificationPreferenceEntryType } from '../../types/notification-preference.type'
 import { DigestFrequency } from '../../../../common/types/digest-frequency.enum'
@@ -20,7 +20,7 @@ export class UpdateNotificationPreferenceHandler extends BaseCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly notificationPreferenceRepository: INotificationPreferenceRepository,
   ) {
     super(db, eventEmitter)
@@ -31,18 +31,16 @@ export class UpdateNotificationPreferenceHandler extends BaseCommandHandler<
     tx: TxClient,
     _events: IDomainEvent[],
   ): Promise<NotificationPreferenceEntryType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: command.userId,
         projectId: command.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.PROJECT,
+      },
+      tx,
+    )
 
     const updated = await this.notificationPreferenceRepository.upsert(
       {

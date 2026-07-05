@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs'
 import { ProjectModule } from '../project/project.module'
 import { ReleaseModule } from '../release/release.module'
 import { ProjectTagModule } from '../project-tag/project-tag.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { FeatureResolver } from './resolvers/feature.resolver'
 import { IFeatureRepository } from './interfaces/feature.repository'
 import { FeatureRepository } from './repositories/feature.repository'
@@ -19,7 +20,7 @@ import { RejectSuggestedFeatureHandler } from './commands/reject-suggested-featu
 import { DeleteFeatureHandler } from './commands/delete-feature/delete-feature.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, ReleaseModule, ProjectTagModule],
+  imports: [CqrsModule, ProjectModule, ReleaseModule, ProjectTagModule, OrganizationModule],
   providers: [
     FeatureResolver,
     { provide: IFeatureRepository, useClass: FeatureRepository },

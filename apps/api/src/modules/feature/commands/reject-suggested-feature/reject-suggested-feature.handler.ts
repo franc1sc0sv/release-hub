@@ -1,14 +1,15 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { RejectSuggestedFeatureCommand } from './reject-suggested-feature.command'
@@ -18,7 +19,7 @@ export class RejectSuggestedFeatureHandler extends BaseCommandHandler<RejectSugg
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
-    private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly featureRepository: IFeatureRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
   ) {
@@ -40,18 +41,11 @@ export class RejectSuggestedFeatureHandler extends BaseCommandHandler<RejectSugg
       )
     }
 
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.FEATURE,
-        __type: Subject.FEATURE,
-        projectId: feature.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.orgRepository,
+      { actorId: command.userId, projectId: feature.projectId, action: Action.UPDATE, subjectKind: Subject.FEATURE },
+      tx,
+    )
 
     await this.pullRequestRepository.clearFeatureAssignment(command.featureId, tx)
     await this.featureRepository.softDelete(command.featureId, tx)

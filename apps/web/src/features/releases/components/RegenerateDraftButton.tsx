@@ -12,6 +12,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { DisabledTooltip } from '@/components/DisabledTooltip'
+import { isAiEnabled } from '@/lib/ai-availability'
 import { REGENERATE_DRAFT } from '../graphql/releases.mutations'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
 import { AiDraftStatusValue } from '../constants/release-enums'
@@ -26,6 +28,8 @@ export function RegenerateDraftButton({
   aiDraftStatus,
 }: RegenerateDraftButtonProps) {
   const { t } = useTranslation('releases')
+  const { t: tAi } = useTranslation('ai')
+  const aiEnabled = isAiEnabled()
 
   const isRunning =
     aiDraftStatus === AiDraftStatusValue.PENDING ||
@@ -46,6 +50,26 @@ export function RegenerateDraftButton({
   )
 
   const disabled = isRunning || loading
+
+  if (!aiEnabled) {
+    return (
+      <Can I={Action.UPDATE} a={Subject.RELEASE}>
+        <DisabledTooltip tooltip={tAi('unavailable.tooltip')}>
+          <Button
+            variant="outline"
+            size="sm"
+            aria-disabled
+            tabIndex={-1}
+            aria-label={t('draft.regenerate')}
+            className="pointer-events-none gap-1.5 opacity-50"
+          >
+            <RefreshCcw className="size-3.5" aria-hidden />
+            {t('draft.regenerate')}
+          </Button>
+        </DisabledTooltip>
+      </Can>
+    )
+  }
 
   return (
     <Can I={Action.UPDATE} a={Subject.RELEASE}>

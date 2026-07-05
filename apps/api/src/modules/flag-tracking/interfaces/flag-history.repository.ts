@@ -14,6 +14,9 @@ export interface ICreateFlagHistoryEventData {
   newValue?: string | null
   releaseId?: string | null
   actorId?: string | null
+  branchName?: string | null
+  prNumber?: number | null
+  detectedFile?: string | null
   source: FlagHistorySource
   occurredAt?: Date
 }
@@ -32,6 +35,9 @@ export interface IFlagHistoryEvent {
   releaseName: string | null
   actorId: string | null
   actorName: string | null
+  branchName: string | null
+  prNumber: number | null
+  detectedFile: string | null
   source: FlagHistorySource
   occurredAt: Date
 }

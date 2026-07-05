@@ -1,27 +1,22 @@
 import { type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useQuery } from '@apollo/client/react'
 import { ROUTES } from '@/lib/routes'
-import { useProject } from '@/context/project.context'
-import { GITHUB_CONNECTION } from '@/features/settings/graphql/settings.operations'
+import { useOrganization } from '@/context/organization.context'
 
 interface OnboardingGateProps {
   children: ReactNode
 }
 
 export function OnboardingGate({ children }: OnboardingGateProps) {
-  const { projects, loading: projectsLoading } = useProject()
-  const { data: githubData, loading: githubLoading } = useQuery(GITHUB_CONNECTION, {
-    fetchPolicy: 'cache-and-network',
-  })
+  const { organizations, loading } = useOrganization()
 
-  if (projectsLoading || githubLoading) {
+  if (loading && organizations.length === 0) {
     return <>{children}</>
   }
 
-  const githubConnected = githubData?.githubConnection.connected ?? false
+  const onboardingComplete = organizations.length >= 1
 
-  if (!githubConnected || projects.length === 0) {
+  if (!onboardingComplete) {
     return <Navigate to={ROUTES.ONBOARDING} replace />
   }
 

@@ -4,6 +4,7 @@ export const GET_CONNECTION_SETTINGS = graphql(`
   query GetConnectionSettings($projectId: ID!) {
     getConnectionSettings(projectId: $projectId) {
       githubConnected
+      githubAuthMode
       flagsmithConnected
       flagsmithUrl
       flagsmithProjectId
@@ -75,6 +76,21 @@ export const GITHUB_CONNECTION = graphql(`
 export const GITHUB_AUTHORIZE_URL = graphql(`
   query GithubAuthorizeUrl {
     githubAuthorizeUrl
+  }
+`)
+
+export const GITHUB_INSTALL_URL = graphql(`
+  query GithubInstallUrl($projectId: String, $organizationId: String) {
+    githubInstallUrl(projectId: $projectId, organizationId: $organizationId)
+  }
+`)
+
+export const COMPLETE_GITHUB_INSTALLATION = graphql(`
+  mutation CompleteGithubInstallation($input: CompleteGithubInstallationInput!) {
+    completeGithubInstallation(input: $input) {
+      organizationId
+      connected
+    }
   }
 `)
 
@@ -284,6 +300,30 @@ export const UPDATE_PROJECT_FLAG_REMINDER = graphql(`
     updateProject(input: $input) {
       id
       flagReminderIntervalDays
+    }
+  }
+`)
+
+export const FLAGSMITH_ENVIRONMENTS = graphql(`
+  query FlagsmithEnvironments($projectId: ID!) {
+    flagsmithEnvironments(projectId: $projectId)
+  }
+`)
+
+export const GET_PROJECT_CONFLICT_ENVIRONMENTS = graphql(`
+  query GetProjectConflictEnvironments($id: ID!) {
+    getProject(id: $id) {
+      id
+      conflictEnvironments
+    }
+  }
+`)
+
+export const UPDATE_PROJECT_CONFLICT_ENVIRONMENTS = graphql(`
+  mutation UpdateProjectConflictEnvironments($input: UpdateProjectInput!) {
+    updateProject(input: $input) {
+      id
+      conflictEnvironments
     }
   }
 `)

@@ -1,11 +1,15 @@
 {
   "nav": {
     "workspace": "Espacio de trabajo",
+    "overview": "Resumen",
     "releases": "Releases",
     "features": "Funcionalidades",
     "flags": "Flags",
     "repoOps": "Operaciones de repo",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "organization": "Organización",
+    "integrations": "Integraciones",
+    "backToOrganization": "Organización"
   },
   "auth": {
     "login": "Iniciar sesión",

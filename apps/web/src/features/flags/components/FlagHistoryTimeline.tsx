@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import type { LucideIcon } from 'lucide-react'
@@ -10,6 +11,9 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleDashed,
+  Code2,
+  FileCode,
+  GitBranch,
   PenLine,
   PlusCircle,
   RadarIcon,
@@ -29,6 +33,7 @@ import {
   PaginationLink,
 } from '@/components/ui/pagination'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
+import { ROUTES } from '@/lib/routes'
 import { FlagHistoryEventTypeValue, flagHistorySourceTone } from '../constants/flag-enums'
 import { useFlagHistory } from '../hooks/use-flag-history'
 import type { FlagHistoryEventType, GetFlagHistoryQuery } from '@/generated/graphql'
@@ -48,6 +53,9 @@ const EVENT_ICON: Record<FlagHistoryEventType, LucideIcon> = {
   [FlagHistoryEventTypeValue.REMINDER_SENT]: BellRing,
   [FlagHistoryEventTypeValue.SYNC_COMPLETED]: RefreshCw,
   [FlagHistoryEventTypeValue.COVERAGE_SCAN]: RadarIcon,
+  [FlagHistoryEventTypeValue.DETECTED_DEFINITION]: FileCode,
+  [FlagHistoryEventTypeValue.DETECTED_USAGE]: Code2,
+  [FlagHistoryEventTypeValue.FIRST_SEEN_BRANCH]: GitBranch,
 }
 
 const PAGE_SIZE = 50
@@ -59,9 +67,16 @@ interface FlagHistoryRowProps {
 function FlagHistoryRow({ event }: FlagHistoryRowProps) {
   const { t, i18n } = useTranslation('flags')
   const enumLabels = useEnumLabels()
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
   const locale = i18n.language.startsWith('es') ? es : enUS
   const Icon = EVENT_ICON[event.type]
   const hasValueChange = event.previousValue !== null || event.newValue !== null
+  const releaseDetailPath = (releaseId: string) =>
+    generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+      organizationId: organizationId ?? '',
+      projectId: projectId ?? '',
+      releaseId,
+    })
 
   return (
     <li className="flex items-start gap-3 border-t border-border py-3 first:border-t-0 first:pt-0">
@@ -76,6 +91,9 @@ function FlagHistoryRow({ event }: FlagHistoryRowProps) {
           {event.environmentName && (
             <span className="font-mono text-xs text-muted-foreground">{event.environmentName}</span>
           )}
+          {event.branchName && (
+            <span className="font-mono text-xs text-muted-foreground">{event.branchName}</span>
+          )}
         </div>
         {hasValueChange && (
           <p className="font-mono text-xs text-muted-foreground">
@@ -85,12 +103,42 @@ function FlagHistoryRow({ event }: FlagHistoryRowProps) {
             })}
           </p>
         )}
+        {event.detectedFile && (
+          <p className="truncate font-mono text-xs text-muted-foreground">{event.detectedFile}</p>
+        )}
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <StatusBadge tone={flagHistorySourceTone(event.source)}>
             {enumLabels.flagHistorySource(event.source)}
           </StatusBadge>
           {event.actorName && <span>{event.actorName}</span>}
-          {event.releaseName && <span className="font-mono">{event.releaseName}</span>}
+          {event.prNumber !== null &&
+            (event.releaseId ? (
+              <Link
+                to={{
+                  pathname: releaseDetailPath(event.releaseId),
+                  search: '?section=flags',
+                }}
+                className="font-mono underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                #{event.prNumber}
+              </Link>
+            ) : (
+              <span className="font-mono">#{event.prNumber}</span>
+            ))}
+          {event.releaseName &&
+            (event.releaseId ? (
+              <Link
+                to={{
+                  pathname: releaseDetailPath(event.releaseId),
+                  search: '?section=flags',
+                }}
+                className="font-mono underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {event.releaseName}
+              </Link>
+            ) : (
+              <span className="font-mono">{event.releaseName}</span>
+            ))}
           <time dateTime={event.occurredAt} className="font-mono">
             {formatDistanceToNow(new Date(event.occurredAt), { addSuffix: true, locale })}
           </time>

@@ -1,11 +1,13 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException, ConflictException } from '../../../../common/errors'
+import { NotFoundException, ConflictException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IProjectTagRepository } from '../../interfaces/project-tag.repository'
 import { ProjectTagType } from '../../types/project-tag.type'
@@ -16,6 +18,7 @@ export class CreateProjectTagHandler extends BaseCommandHandler<CreateProjectTag
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly projectTagRepository: IProjectTagRepository,
   ) {
@@ -27,18 +30,11 @@ export class CreateProjectTagHandler extends BaseCommandHandler<CreateProjectTag
     tx: TxClient,
     _events: IDomainEvent[],
   ): Promise<ProjectTagType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
-        projectId: command.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.orgRepository,
+      { actorId: command.userId, projectId: command.projectId, action: Action.UPDATE, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(command.projectId, tx)
     if (!project) throw new NotFoundException('Project')

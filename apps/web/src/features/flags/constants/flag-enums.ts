@@ -53,6 +53,9 @@ export const FlagHistoryEventTypeValue = {
   REMINDER_SENT: 'REMINDER_SENT',
   SYNC_COMPLETED: 'SYNC_COMPLETED',
   COVERAGE_SCAN: 'COVERAGE_SCAN',
+  DETECTED_DEFINITION: 'DETECTED_DEFINITION',
+  DETECTED_USAGE: 'DETECTED_USAGE',
+  FIRST_SEEN_BRANCH: 'FIRST_SEEN_BRANCH',
 } as const satisfies Record<FlagHistoryEventType, FlagHistoryEventType>
 
 export const FlagHistorySourceValue = {

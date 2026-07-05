@@ -1,12 +1,13 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { PullRequestType } from '../../types/pull-request.type'
 import { toPullRequestType } from '../../types/release.mappers'
@@ -17,7 +18,7 @@ export class SavePrSummaryHandler extends BaseCommandHandler<SavePrSummaryComman
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
   ) {
     super(db, eventEmitter)
@@ -28,9 +29,6 @@ export class SavePrSummaryHandler extends BaseCommandHandler<SavePrSummaryComman
     tx: TxClient,
     _events: IDomainEvent[],
   ): Promise<PullRequestType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
     const pr = await this.pullRequestRepository.findById(command.prId, tx)
     if (!pr) throw new NotFoundException('PullRequest')
 
@@ -41,15 +39,16 @@ export class SavePrSummaryHandler extends BaseCommandHandler<SavePrSummaryComman
 
     if (!releaseProjectId) throw new NotFoundException('Release')
 
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.PULL_REQUEST,
-        __type: Subject.PULL_REQUEST,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: command.userId,
         projectId: releaseProjectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.UPDATE,
+        subjectKind: Subject.PULL_REQUEST,
+      },
+      tx,
+    )
 
     const updated = await this.pullRequestRepository.updateSummary(
       command.prId,

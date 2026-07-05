@@ -1,11 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import { NotFoundException } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IAiRepository } from '../../interfaces/ai.repository'
 import { IAiProvider } from '../../interfaces/ai-provider.abstract'
 import { featureStateToClientLine } from '../../prompts/availability-line'
@@ -19,7 +19,7 @@ export class GenerateSummaryHandler extends BaseQueryHandler<
 > {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly aiRepository: IAiRepository,
     private readonly aiProvider: IAiProvider,
   ) {
@@ -40,21 +40,16 @@ export class GenerateSummaryHandler extends BaseQueryHandler<
       throw new NotFoundException('Release')
     }
 
-    const memberships = await this.projectRepository.findMembershipsForUser(
-      query.userId,
+    await authorizeProjectAction(
+      this.orgRepository,
+      {
+        actorId: query.userId,
+        projectId: releaseContext.projectId,
+        action: Action.READ,
+        subjectKind: Subject.RELEASE,
+      },
       tx,
     )
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
-        projectId: releaseContext.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
 
     const releaseTitle = releaseContext.name || releaseContext.compareRef
 

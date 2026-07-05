@@ -1,9 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../interfaces/project.repository'
 import { ProjectType } from '../../types/project.type'
 import { toProjectType } from '../../types/project.mappers'
@@ -14,22 +16,22 @@ export class GetProjectHandler extends BaseQueryHandler<GetProjectQuery, Project
   constructor(
     protected readonly db: IDatabaseService,
     private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
   ) {
     super(db)
   }
 
   protected async handle(query: GetProjectQuery, tx: TxClient): Promise<ProjectType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    const projectSubject = {
-      kind: Subject.PROJECT,
-      __type: Subject.PROJECT,
-      projectId: query.projectId,
-    }
-    if (!ability.can(Action.READ, projectSubject)) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.orgRepository,
+      {
+        actorId: query.userId,
+        projectId: query.projectId,
+        action: Action.READ,
+        subjectKind: Subject.PROJECT,
+      },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(query.projectId, tx)
 

@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DisabledTooltip } from '@/components/DisabledTooltip'
+import { isAiEnabled } from '@/lib/ai-availability'
 import { SummaryExportControls } from './SummaryExportControls'
 import { useGenerateSummary } from '../hooks/useGenerateSummary'
 import { SAVE_RELEASE_SUMMARY } from '../graphql/releases.mutations'
@@ -57,6 +59,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
   const { t } = useTranslation('releases')
   const { t: tAi } = useTranslation('ai')
   const enumLabels = useEnumLabels()
+  const aiEnabled = isAiEnabled()
 
   const [model, setModel] = useState<AiModel>('claude-haiku-4-5-20251001')
   const [tone, setTone] = useState<Tone>('warm')
@@ -147,6 +150,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
             </CardTitle>
           </div>
 
+          {aiEnabled ? (
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5">
               <label
@@ -230,9 +234,22 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
               </Button>
             )}
           </div>
+          ) : (
+            <DisabledTooltip tooltip={tAi('unavailable.tooltip')}>
+              <Button
+                size="sm"
+                aria-disabled
+                tabIndex={-1}
+                className="pointer-events-none bg-primary text-white opacity-50"
+              >
+                <Sparkles className="mr-1.5 size-3.5" aria-hidden />
+                {t('summary.generate')}
+              </Button>
+            </DisabledTooltip>
+          )}
         </CardHeader>
 
-        {features.length > 0 && (
+        {aiEnabled && features.length > 0 && (
           <CardContent className="pt-0 pb-4">
             <Separator className="mb-4 opacity-40" />
             <fieldset>
@@ -280,7 +297,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
           </CardContent>
         )}
 
-        {state.status === 'error' && (
+        {aiEnabled && state.status === 'error' && (
           <CardContent className="pt-0">
             <p className="text-sm text-destructive" role="alert">
               {tAi('summary.error')}

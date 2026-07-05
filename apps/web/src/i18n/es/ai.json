@@ -32,5 +32,8 @@
     "formal": "Formal"
   },
   "copy": "Copiar",
-  "copyAriaLabel": "Copiar resumen al portapapeles"
+  "copyAriaLabel": "Copiar resumen al portapapeles",
+  "unavailable": {
+    "tooltip": "Las funciones de IA no están disponibles en este entorno"
+  }
 }

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, generatePath } from 'react-router-dom'
 import { useQuery } from '@apollo/client/react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Github, Loader2 } from 'lucide-react'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { GITHUB_CONNECTION } from '@/features/settings/graphql/settings.operations'
 import { slideUp } from '@/lib/animations'
 import { ROUTES } from '@/lib/routes'
+import { useProject } from '@/context/project.context'
 import { ReleaseWizard } from '../components/ReleaseWizard'
 
 export default function ReleaseBuilderPage() {
@@ -59,6 +60,7 @@ export default function ReleaseBuilderPage() {
 function GithubNotConnected() {
   const { t } = useTranslation('releases')
   const navigate = useNavigate()
+  const { activeProject } = useProject()
 
   return (
     <GlassCard glow="indigo">
@@ -74,7 +76,18 @@ function GithubNotConnected() {
             {t('builder.githubNotConnected.description')}
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate(ROUTES.SETTINGS)}>
+        <Button
+          variant="outline"
+          onClick={() =>
+            activeProject &&
+            navigate(
+              generatePath(ROUTES.PROJECT_SETTINGS, {
+                organizationId: activeProject.organizationId,
+                projectId: activeProject.id,
+              }),
+            )
+          }
+        >
           {t('builder.githubNotConnected.cta')}
         </Button>
       </CardContent>

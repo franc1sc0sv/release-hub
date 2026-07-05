@@ -1,10 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { ReleaseObjectType } from '../../types/release.type'
 import { toReleaseObjectType } from '../../types/release.mappers'
@@ -14,28 +15,26 @@ import { GetReleaseQuery } from './get-release.query'
 export class GetReleaseHandler extends BaseQueryHandler<GetReleaseQuery, ReleaseObjectType> {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
   ) {
     super(db)
   }
 
   protected async handle(query: GetReleaseQuery, tx: TxClient): Promise<ReleaseObjectType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
     const release = await this.releaseRepository.findById(query.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: query.userId,
         projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.RELEASE,
+      },
+      tx,
+    )
 
     return toReleaseObjectType(release)
   }

@@ -1,5 +1,4 @@
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
-import { FlagReferenceKind } from '@release-hub/db'
 import type {
   ITrackedFlagWithDetails,
   IFlagBranchPresence,
@@ -15,7 +14,6 @@ import {
   TrackedFlagPullRequestChangeType,
   TrackedFlagReleaseType,
   TrackedFlagDeliveryType,
-  TrackedFlagEventType,
 } from './tracked-flag-detail.type'
 
 function toFlagBranchPresenceType(presence: IFlagBranchPresence): FlagBranchPresenceType {
@@ -148,38 +146,6 @@ export function buildTrackedFlagDetailType(
     .filter((release) => release.status === ReleaseStatus.DEPLOYED)
     .map((release) => release.name ?? release.compareRef)
   type.delivery = delivery
-
-  const events: TrackedFlagEventType[] = []
-
-  for (const change of changes) {
-    const isDefinition = change.kind === FlagReferenceKind.DEFINITION
-    const event = new TrackedFlagEventType()
-    event.type = isDefinition ? 'detected_definition' : 'detected_usage'
-    event.occurredAt = change.createdAt
-    event.description = `${isDefinition ? 'Definition' : 'Usage'} detected in PR #${change.pullRequest.number} (${change.pullRequest.title})`
-    events.push(event)
-  }
-
-  for (const presence of flag.branchPresence) {
-    const event = new TrackedFlagEventType()
-    event.type = 'first_seen_branch'
-    event.occurredAt = presence.firstSeenAt
-    event.description = `First seen on branch ${presence.branch}`
-    events.push(event)
-  }
-
-  for (const release of releasesById.values()) {
-    const decision = decisionsByReleaseId.get(release.id)
-    if (!decision || !decision.decidedAt) continue
-    const event = new TrackedFlagEventType()
-    event.type = 'decision_made'
-    event.occurredAt = decision.decidedAt
-    event.description = `Decision "${decision.decision}" made for release ${release.name ?? release.compareRef}`
-    events.push(event)
-  }
-
-  events.sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
-  type.events = events
 
   return type
 }

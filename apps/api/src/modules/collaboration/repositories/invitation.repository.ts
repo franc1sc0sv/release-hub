@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
 import type { InvitationStatus as PrismaInvitationStatus } from '@release-hub/db'
+import type { OrgRole } from '@release-hub/db'
 import { IInvitationRepository } from '../interfaces/collaboration.repository'
 import type { IInvitation, ICreateInvitationData } from '../interfaces/collaboration.interfaces'
 import { InvitationStatus } from '../../../common/types/invitation-status.enum'
-import type { ProjectRole } from '../../../common/types/project-role.enum'
 
 @Injectable()
 export class InvitationRepository extends IInvitationRepository {
@@ -20,14 +20,14 @@ export class InvitationRepository extends IInvitationRepository {
     return this.toIInvitation(row)
   }
 
-  findPendingByProjectAndEmail = async (
-    projectId: string,
+  findPendingByOrgAndEmail = async (
+    organizationId: string,
     email: string,
     tx: TxClient,
   ): Promise<IInvitation | null> => {
     const row = await tx.invitation.findFirst({
       where: {
-        projectId,
+        organizationId,
         email: { equals: email, mode: 'insensitive' },
         status: InvitationStatus.PENDING,
       },
@@ -36,9 +36,9 @@ export class InvitationRepository extends IInvitationRepository {
     return this.toIInvitation(row)
   }
 
-  findAllByProject = async (projectId: string, tx: TxClient): Promise<IInvitation[]> => {
+  findAllByOrganization = async (organizationId: string, tx: TxClient): Promise<IInvitation[]> => {
     const rows = await tx.invitation.findMany({
-      where: { projectId },
+      where: { organizationId },
       orderBy: { createdAt: 'desc' },
     })
     return rows.map((row) => this.toIInvitation(row))
@@ -47,7 +47,7 @@ export class InvitationRepository extends IInvitationRepository {
   create = async (data: ICreateInvitationData, tx: TxClient): Promise<IInvitation> => {
     const row = await tx.invitation.create({
       data: {
-        projectId: data.projectId,
+        organizationId: data.organizationId,
         email: data.email,
         role: data.role,
         invitedById: data.invitedById,
@@ -86,8 +86,8 @@ export class InvitationRepository extends IInvitationRepository {
   private toIInvitation(row: {
     id: string
     email: string
-    projectId: string
-    role: ProjectRole
+    organizationId: string
+    role: OrgRole
     status: PrismaInvitationStatus
     token: string
     expiresAt: Date
@@ -98,7 +98,7 @@ export class InvitationRepository extends IInvitationRepository {
     return {
       id: row.id,
       email: row.email,
-      projectId: row.projectId,
+      organizationId: row.organizationId,
       role: row.role,
       status: row.status,
       token: row.token,

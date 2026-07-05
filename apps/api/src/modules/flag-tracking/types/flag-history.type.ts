@@ -54,6 +54,15 @@ export class FlagHistoryEventEntryType {
   @Field(() => String, { nullable: true })
   actorName!: string | null
 
+  @Field(() => String, { nullable: true })
+  branchName!: string | null
+
+  @Field(() => Int, { nullable: true })
+  prNumber!: number | null
+
+  @Field(() => String, { nullable: true })
+  detectedFile!: string | null
+
   @Field(() => FlagHistorySource)
   source!: FlagHistorySource
 

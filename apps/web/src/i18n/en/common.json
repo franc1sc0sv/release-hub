@@ -1,11 +1,15 @@
 {
   "nav": {
     "workspace": "Workspace",
+    "overview": "Overview",
     "releases": "Releases",
     "features": "Features",
     "flags": "Flags",
     "repoOps": "Repo Ops",
-    "settings": "Settings"
+    "settings": "Settings",
+    "organization": "Organization",
+    "integrations": "Integrations",
+    "backToOrganization": "Organization"
   },
   "auth": {
     "login": "Sign in",

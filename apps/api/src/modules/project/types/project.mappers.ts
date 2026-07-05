@@ -5,10 +5,9 @@ import { ConnectionHealthType, IntegrationStatus } from './connection-health.typ
 
 export function toConnectionHealth(project: IProject): ConnectionHealthType {
   const health = new ConnectionHealthType()
-  health.github =
-    project.githubInstallationId !== null
-      ? IntegrationStatus.CONNECTED
-      : IntegrationStatus.NOT_CONFIGURED
+  health.github = project.integrations.github
+    ? IntegrationStatus.CONNECTED
+    : IntegrationStatus.NOT_CONFIGURED
   health.linear = project.linearEnabled
     ? IntegrationStatus.CONNECTED
     : IntegrationStatus.NOT_CONFIGURED
@@ -30,11 +29,14 @@ export function toProjectType(project: IProject): ProjectType {
 
   const type = new ProjectType()
   type.id = project.id
+  type.organizationId = project.organizationId
   type.name = project.name
   type.repo = project.repo
+  type.githubAuthMode = project.githubAuthMode
   type.integrations = integrations
   type.connectionHealth = toConnectionHealth(project)
   type.flagReminderIntervalDays = project.flagReminderIntervalDays
+  type.conflictEnvironments = project.conflictEnvironments
   type.ownerId = project.ownerId
   type.createdAt = project.createdAt
   type.updatedAt = project.updatedAt

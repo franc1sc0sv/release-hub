@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Bell, Loader2, Send } from 'lucide-react'
+import { AlertTriangle, Bell, Flag, Loader2, Mail, Rocket, Send, Slack, type LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
+import { GradientButton } from '@/components/nebula/GradientButton'
+import { EmptyState } from '@/components/nebula/EmptyState'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   Select,
   SelectContent,
@@ -18,6 +18,7 @@ import {
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
+import { cn } from '@/lib/utils'
 import { staggerContainer, slideUp } from '@/lib/animations'
 import {
   ALL_NOTIFICATION_TYPES,
@@ -25,8 +26,10 @@ import {
   FLAG_NOTIFICATION_TYPES,
   NotificationChannelValue,
   NotificationTypeValue,
+  DigestFrequencyValue,
   DIGEST_FREQUENCY_OPTIONS,
 } from '@/lib/notification-enums'
+import { NOTIFICATION_TYPE_ICON } from '@/features/notifications/constants/notification-icons'
 import { useNotificationPreferences } from '../hooks/use-notification-preferences'
 import { useSlackConnection } from '../hooks/use-slack-connection'
 import type { DigestFrequency, NotificationChannel, NotificationType } from '@/generated/graphql'
@@ -37,9 +40,26 @@ interface NotificationPreferencesSectionProps {
 
 interface NotificationGroup {
   key: string
-  label: string
+  icon: LucideIcon
+  labelKey: string
   types: NotificationType[]
 }
+
+interface NotificationColumn {
+  channel: NotificationChannel
+  label: string
+  icon: LucideIcon
+}
+
+const GRID_CLASS_BY_COLUMN_COUNT: Record<number, string> = {
+  2: 'grid-cols-[minmax(0,1fr)_5rem_5rem]',
+  3: 'grid-cols-[minmax(0,1fr)_5rem_5rem_5rem]',
+}
+
+const GROUPS: NotificationGroup[] = [
+  { key: 'releases', icon: Rocket, labelKey: 'groups.releases.label', types: RELEASE_NOTIFICATION_TYPES },
+  { key: 'flags', icon: Flag, labelKey: 'groups.flags.label', types: FLAG_NOTIFICATION_TYPES },
+]
 
 export function NotificationPreferencesSection({
   projectId,
@@ -50,6 +70,7 @@ export function NotificationPreferencesSection({
   const {
     preferences,
     loading,
+    error,
     updating,
     triggeringDigest,
     setPreference,
@@ -74,8 +95,19 @@ export function NotificationPreferencesSection({
         (p) =>
           p.notificationType === notificationType &&
           p.channel === NotificationChannelValue.EMAIL,
-      )?.digestFrequency ?? 'WEEKLY'
+      )?.digestFrequency ?? DigestFrequencyValue.WEEKLY
     )
+  }
+
+  function allEnabled(notificationTypes: NotificationType[], channel: NotificationChannel): boolean {
+    return notificationTypes.every((notificationType) => isEnabled(notificationType, channel))
+  }
+
+  async function handleBulkToggle(
+    notificationTypes: NotificationType[],
+    channel: NotificationChannel,
+  ): Promise<void> {
+    await setPreferencesForColumn(notificationTypes, channel, !allEnabled(notificationTypes, channel))
   }
 
   async function handleTriggerDigest(): Promise<void> {
@@ -87,132 +119,177 @@ export function NotificationPreferencesSection({
     }
   }
 
-  const columns: { channel: NotificationChannel; label: string }[] = [
-    { channel: NotificationChannelValue.IN_APP, label: t('columns.inApp') },
-    { channel: NotificationChannelValue.EMAIL, label: t('columns.email') },
+  const columns: NotificationColumn[] = [
+    { channel: NotificationChannelValue.IN_APP, label: t('channels.inApp'), icon: Bell },
+    { channel: NotificationChannelValue.EMAIL, label: t('channels.email'), icon: Mail },
     ...(slack.connected
-      ? [{ channel: NotificationChannelValue.SLACK_DM, label: t('columns.slack') }]
+      ? [{ channel: NotificationChannelValue.SLACK_DM, label: t('channels.slack'), icon: Slack }]
       : []),
   ]
-
-  const groups: NotificationGroup[] = [
-    { key: 'releases', label: t('groups.releases'), types: RELEASE_NOTIFICATION_TYPES },
-    { key: 'flags', label: t('groups.flags'), types: FLAG_NOTIFICATION_TYPES },
-  ]
-
-  function columnCheckedState(channel: NotificationChannel): {
-    checked: boolean
-    indeterminate: boolean
-  } {
-    const enabledCount = ALL_NOTIFICATION_TYPES.filter((type) => isEnabled(type, channel)).length
-    return {
-      checked: enabledCount === ALL_NOTIFICATION_TYPES.length,
-      indeterminate: enabledCount > 0 && enabledCount < ALL_NOTIFICATION_TYPES.length,
-    }
-  }
+  const gridClass = GRID_CLASS_BY_COLUMN_COUNT[columns.length] ?? GRID_CLASS_BY_COLUMN_COUNT[2]
 
   if (loading) {
     return (
-      <GlassCard>
-        <CardContent className="space-y-3 p-6">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-10 w-full rounded-[var(--radius-card)]" />
-          ))}
-        </CardContent>
-      </GlassCard>
+      <div className="space-y-6">
+        <GlassCard>
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <Skeleton className="h-10 w-48 rounded-[var(--radius-button)]" />
+            <Skeleton className="h-8 w-40 rounded-[var(--radius-button)]" />
+          </CardContent>
+        </GlassCard>
+        {GROUPS.map((group) => (
+          <GlassCard key={group.key}>
+            <CardContent className="space-y-3 p-6">
+              {[0, 1, 2].map((row) => (
+                <Skeleton key={row} className="h-14 w-full rounded-[var(--radius-card)]" />
+              ))}
+            </CardContent>
+          </GlassCard>
+        ))}
+        <GlassCard>
+          <CardContent className="p-6">
+            <Skeleton className="h-10 w-full rounded-[var(--radius-button)]" />
+          </CardContent>
+        </GlassCard>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        icon={<AlertTriangle className="size-6 text-destructive" />}
+        heading={t('error.heading')}
+        description={t('error.description')}
+      />
     )
   }
 
   return (
-    <GlassCard className="overflow-hidden">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base font-semibold">
-          <Bell className="size-4 text-muted-foreground" />
-          {t('title')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <motion.div variants={containerVariants} initial="hidden" animate="visible">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/60 hover:bg-transparent">
-                <TableHead className="text-overline uppercase text-muted-foreground">
-                  {t('columns.notification')}
-                </TableHead>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={itemVariants}>
+        <GlassCard>
+          <CardContent className={cn('grid items-center gap-4 p-4', gridClass)}>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {t('allNotifications.label')}
+              </p>
+              <p className="text-xs text-muted-foreground">{t('allNotifications.description')}</p>
+            </div>
+            {columns.map((column) => {
+              const checked = allEnabled(ALL_NOTIFICATION_TYPES, column.channel)
+              return (
+                <div key={column.channel} className="flex flex-col items-center gap-1.5">
+                  <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
+                  <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
+                    {(allowed) => (
+                      <div className={cn('rounded-full', checked && 'shadow-glow-indigo')}>
+                        <Switch
+                          checked={checked}
+                          onCheckedChange={() =>
+                            void handleBulkToggle(ALL_NOTIFICATION_TYPES, column.channel)
+                          }
+                          disabled={!allowed || updating}
+                          aria-label={t('allNotifications.toggleAriaLabel', {
+                            channel: column.label,
+                          })}
+                        />
+                      </div>
+                    )}
+                  </Can>
+                </div>
+              )
+            })}
+          </CardContent>
+        </GlassCard>
+      </motion.div>
+
+      {GROUPS.map((group) => (
+        <motion.div key={group.key} variants={itemVariants}>
+          <GlassCard>
+            <CardHeader className="gap-3">
+              <div className={cn('grid items-center gap-4', gridClass)}>
+                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                  <group.icon className="size-4 text-muted-foreground" aria-hidden />
+                  {t(group.labelKey)}
+                </CardTitle>
                 {columns.map((column) => (
-                  <TableHead
-                    key={column.channel}
-                    className="text-overline text-center uppercase text-muted-foreground"
-                  >
-                    {column.label}
-                  </TableHead>
+                  <div key={column.channel} className="flex flex-col items-center gap-1 text-center">
+                    <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
+                    <span className="text-overline uppercase text-muted-foreground">
+                      {column.label}
+                    </span>
+                  </div>
                 ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow className="border-border/40 bg-muted/20 hover:bg-muted/20">
-                <TableCell className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {t('columns.selectAllRow')}
-                </TableCell>
+              </div>
+              <div className={cn('grid items-center gap-4 border-t border-border/40 pt-3', gridClass)}>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('groups.enableAll')}
+                </span>
                 {columns.map((column) => {
-                  const { checked, indeterminate } = columnCheckedState(column.channel)
+                  const checked = allEnabled(group.types, column.channel)
                   return (
-                    <TableCell key={column.channel} className="text-center">
+                    <div key={column.channel} className="flex justify-center">
                       <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
                         {(allowed) => (
-                          <Checkbox
-                            checked={checked}
-                            indeterminate={indeterminate}
-                            onCheckedChange={(value) =>
-                              setPreferencesForColumn(
-                                ALL_NOTIFICATION_TYPES,
-                                column.channel,
-                                value === true,
-                              )
-                            }
-                            disabled={!allowed || updating}
-                            aria-label={t('columns.selectAllAriaLabel', { channel: column.label })}
-                          />
-                        )}
-                      </Can>
-                    </TableCell>
-                  )
-                })}
-              </TableRow>
-
-              {groups.flatMap((group) => [
-                <TableRow key={`${group.key}-header`} className="border-border/40 hover:bg-transparent">
-                  <TableCell
-                    colSpan={columns.length + 1}
-                    className="bg-muted/10 text-overline uppercase tracking-widest text-muted-foreground"
-                  >
-                    {group.label}
-                  </TableCell>
-                </TableRow>,
-                ...group.types.map((notificationType) => (
-                  <motion.tr
-                    key={notificationType}
-                    variants={itemVariants}
-                    className="border-border/40 transition-colors hover:bg-accent/40"
-                  >
-                    <TableCell className="font-medium text-foreground">
-                      {enumLabels.notificationType(notificationType)}
-                    </TableCell>
-                    {columns.map((column) => (
-                      <TableCell key={column.channel} className="text-center">
-                        <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
-                          {(allowed) => (
-                            <Checkbox
-                              aria-label={t('toggleAriaLabel', {
-                                type: enumLabels.notificationType(notificationType),
+                          <div className={cn('rounded-full', checked && 'shadow-glow-indigo')}>
+                            <Switch
+                              checked={checked}
+                              onCheckedChange={() => void handleBulkToggle(group.types, column.channel)}
+                              disabled={!allowed || updating}
+                              aria-label={t('groups.enableAllAriaLabel', {
+                                group: t(group.labelKey),
                                 channel: column.label,
                               })}
+                            />
+                          </div>
+                        )}
+                      </Can>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardHeader>
+            <CardContent className="divide-y divide-border/40 p-0">
+              {group.types.map((notificationType) => {
+                const EventIcon = NOTIFICATION_TYPE_ICON[notificationType]
+                return (
+                  <div
+                    key={notificationType}
+                    className={cn(
+                      'grid items-center gap-4 px-6 py-3 transition-colors hover:bg-accent/30',
+                      gridClass,
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <EventIcon className="size-4 text-foreground" aria-hidden />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {enumLabels.notificationType(notificationType)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t(`hints.${notificationType}`)}
+                        </p>
+                      </div>
+                    </div>
+                    {columns.map((column) => (
+                      <div key={column.channel} className="flex justify-center">
+                        <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
+                          {(allowed) => (
+                            <Switch
                               checked={isEnabled(notificationType, column.channel)}
                               onCheckedChange={(checked) =>
-                                setPreference(
+                                void setPreference(
                                   notificationType,
                                   column.channel,
-                                  checked === true,
+                                  checked,
                                   notificationType === NotificationTypeValue.FLAG_DIGEST &&
                                     column.channel === NotificationChannelValue.EMAIL
                                     ? digestFrequencyFor(notificationType)
@@ -220,75 +297,86 @@ export function NotificationPreferencesSection({
                                 )
                               }
                               disabled={!allowed || updating}
+                              aria-label={t('toggleAriaLabel', {
+                                type: enumLabels.notificationType(notificationType),
+                                channel: column.label,
+                              })}
                             />
                           )}
                         </Can>
-                      </TableCell>
+                      </div>
                     ))}
-                  </motion.tr>
-                )),
-              ])}
-            </TableBody>
-          </Table>
+                  </div>
+                )
+              })}
+            </CardContent>
+          </GlassCard>
         </motion.div>
+      ))}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 p-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">{t('digest.frequencyLabel')}</p>
-            <p className="text-xs text-muted-foreground">{t('digest.description')}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
-              {(allowed) => (
-                <Select
-                  value={digestFrequencyFor(NotificationTypeValue.FLAG_DIGEST)}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPreference(
-                      NotificationTypeValue.FLAG_DIGEST,
-                      NotificationChannelValue.EMAIL,
-                      isEnabled(NotificationTypeValue.FLAG_DIGEST, NotificationChannelValue.EMAIL),
-                      value as DigestFrequency,
-                    )
-                  }}
-                  disabled={!allowed || updating}
-                >
-                  <SelectTrigger className="w-36" aria-label={t('digest.frequencyLabel')}>
-                    <SelectValue>
-                      {(value: string) =>
-                        value ? enumLabels.digestFrequency(value as DigestFrequency) : null
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DIGEST_FREQUENCY_OPTIONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {enumLabels.digestFrequency(option)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </Can>
+      <motion.div variants={itemVariants}>
+        <GlassCard>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <Mail className="size-4 text-muted-foreground" aria-hidden />
+              {t('digest.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">{t('digest.frequencyLabel')}</p>
+              <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
+                {(allowed) => (
+                  <Select
+                    value={digestFrequencyFor(NotificationTypeValue.FLAG_DIGEST)}
+                    onValueChange={(value) => {
+                      if (!value) return
+                      void setPreference(
+                        NotificationTypeValue.FLAG_DIGEST,
+                        NotificationChannelValue.EMAIL,
+                        isEnabled(NotificationTypeValue.FLAG_DIGEST, NotificationChannelValue.EMAIL),
+                        value as DigestFrequency,
+                      )
+                    }}
+                    disabled={!allowed || updating}
+                  >
+                    <SelectTrigger className="w-36" aria-label={t('digest.frequencyLabel')}>
+                      <SelectValue>
+                        {(value: string) =>
+                          value ? enumLabels.digestFrequency(value as DigestFrequency) : null
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DIGEST_FREQUENCY_OPTIONS.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {enumLabels.digestFrequency(option)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </Can>
+              <p className="text-xs text-muted-foreground">{t('digest.description')}</p>
+            </div>
             <Can I={Action.UPDATE} a={Subject.PROJECT}>
-              <Button
+              <GradientButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={() => void handleTriggerDigest()}
                 disabled={triggeringDigest}
+                className="gap-2 border-0 bg-nebula-gradient text-white shadow-glow-indigo hover:shadow-glow-lg"
               >
                 {triggeringDigest ? (
-                  <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
                 ) : (
-                  <Send className="mr-1.5 size-3.5" />
+                  <Send className="size-4" aria-hidden />
                 )}
                 {t('digest.sendTest')}
-              </Button>
+              </GradientButton>
             </Can>
-          </div>
-        </div>
-      </CardContent>
-    </GlassCard>
+          </CardContent>
+        </GlassCard>
+      </motion.div>
+    </motion.div>
   )
 }

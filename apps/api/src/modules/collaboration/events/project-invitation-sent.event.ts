@@ -7,7 +7,7 @@ export class ProjectInvitationSentEvent implements IProjectInvitationSentEvent {
   constructor(
     readonly to: string,
     readonly inviterName: string,
-    readonly projectName: string,
+    readonly organizationName: string,
     readonly acceptToken: string,
   ) {}
 }

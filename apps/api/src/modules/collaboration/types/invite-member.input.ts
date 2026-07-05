@@ -1,18 +1,18 @@
 import { Field, ID, InputType } from '@nestjs/graphql'
 import { IsEmail, IsEnum, IsString } from 'class-validator'
-import { ProjectRole } from '../../../common/types/project-role.enum'
+import { OrgRole } from '../../../common/types/org-role.enum'
 
 @InputType()
 export class InviteMemberInput {
   @Field(() => ID)
   @IsString()
-  projectId: string
+  organizationId: string
 
   @Field(() => String)
   @IsEmail()
   email: string
 
-  @Field(() => ProjectRole)
-  @IsEnum(ProjectRole)
-  role: ProjectRole
+  @Field(() => OrgRole)
+  @IsEnum(OrgRole)
+  role: OrgRole
 }

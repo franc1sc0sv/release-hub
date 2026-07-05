@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'motion/react'
 import { AlertCircle, Layers, Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import { SearchField } from '@/components/nebula/SearchField'
@@ -31,7 +31,12 @@ function FeatureRow({ feature }: { feature: FeaturePageItem }) {
   const { t } = useTranslation('features')
   const enumLabels = useEnumLabels()
   const reduceMotion = useReducedMotion()
-  const detailPath = ROUTES.FEATURES_DETAIL.replace(':id', feature.id)
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
+  const detailPath = generatePath(ROUTES.PROJECT_FEATURE_DETAIL, {
+    organizationId: organizationId ?? '',
+    projectId: projectId ?? '',
+    id: feature.id,
+  })
 
   return (
     <motion.li variants={reduceMotion ? undefined : slideUp}>

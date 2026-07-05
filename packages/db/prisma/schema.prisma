@@ -90,12 +90,12 @@ enum TicketSource {
   @@map("ticket_source")
 }
 
-enum ProjectRole {
+enum OrgRole {
   owner
   member
   viewer
 
-  @@map("project_role")
+  @@map("org_role")
 }
 
 enum InvitationStatus {
@@ -105,6 +105,51 @@ enum InvitationStatus {
   expired
 
   @@map("invitation_status")
+}
+
+enum GithubAuthMode {
+  installation
+  oauth
+}
+
+enum GithubInstallationStatus {
+  active
+  suspended
+  deleted
+}
+
+model Organization {
+  id                   String    @id @default(cuid())
+  name                 String
+  slug                 String?   @unique
+  githubInstallationId String?   @map("github_installation_id")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  deletedAt            DateTime? @map("deleted_at")
+
+  memberships OrganizationMembership[]
+  projects    Project[]
+  invitations Invitation[]
+  githubInstallations GithubInstallation[]
+
+  @@index([deletedAt])
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  organizationId String   @map("organization_id")
+  role           OrgRole  @default(member)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@map("organization_memberships")
 }
 
 model User {
@@ -119,7 +164,7 @@ model User {
 
   loginCodes        LoginCode[]
   refreshTokens     RefreshToken[]
-  memberships       Membership[]
+  organizationMemberships OrganizationMembership[]
   invitationsSent   Invitation[]       @relation("InvitedBy")
   githubConnection  GithubConnection?
   flagDecisions     ReleaseFlagDecision[]
@@ -147,6 +192,54 @@ model GithubConnection {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("github_connections")
+}
+
+model GithubInstallation {
+  id                  String                   @id @default(cuid())
+  installationId      BigInt                   @unique @map("installation_id")
+  organizationId      String?                  @map("organization_id")
+  accountLogin        String                   @map("account_login")
+  accountType         String                   @map("account_type")
+  accountId           BigInt                   @map("account_id")
+  repositorySelection String                   @map("repository_selection")
+  status              GithubInstallationStatus @default(active)
+  suspendedAt         DateTime?                @map("suspended_at")
+  createdAt           DateTime                 @default(now()) @map("created_at")
+  updatedAt           DateTime                 @updatedAt @map("updated_at")
+
+  organization Organization?            @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  repositories GithubInstallationRepo[]
+
+  @@index([organizationId])
+  @@map("github_installations")
+}
+
+model GithubInstallationRepo {
+  id                 String   @id @default(cuid())
+  installationRowId  String   @map("installation_row_id")
+  repoId             BigInt   @map("repo_id")
+  fullName           String   @map("full_name")
+  private            Boolean  @default(false)
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  installation GithubInstallation @relation(fields: [installationRowId], references: [id], onDelete: Cascade)
+
+  @@unique([installationRowId, repoId])
+  @@index([fullName])
+  @@map("github_installation_repos")
+}
+
+model GithubInstallState {
+  id             String    @id @default(cuid())
+  nonce          String    @unique
+  organizationId String    @map("organization_id")
+  projectId      String?   @map("project_id")
+  expiresAt      DateTime  @map("expires_at")
+  consumedAt     DateTime? @map("consumed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([expiresAt])
+  @@map("github_install_states")
 }
 
 model ProjectLinearConnection {
@@ -198,9 +291,11 @@ model RefreshToken {
 
 model Project {
   id          String    @id @default(cuid())
+  organizationId String @map("organization_id")
   name        String
   repo        String
   githubInstallationId String? @map("github_installation_id")
+  githubAuthMode GithubAuthMode @default(oauth) @map("github_auth_mode")
   flagsmithEnabled Boolean @default(false) @map("flagsmith_enabled")
   flagsmithUrl     String? @map("flagsmith_url")
   flagsmithApiKey  String? @map("flagsmith_api_key")
@@ -213,14 +308,14 @@ model Project {
   flagRegistryPath   String? @map("flag_registry_path")
   flagRegistryBranch String? @map("flag_registry_branch")
   flagReminderIntervalDays Int @default(7) @map("flag_reminder_interval_days")
+  conflictEnvironments String[] @default([]) @map("conflict_environments")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   features    Feature[]
   releases    Release[]
-  memberships Membership[]
-  invitations Invitation[]
   projectTags ProjectTag[]
   linearConnection ProjectLinearConnection?
   trackedFlags TrackedFlag[]
@@ -234,6 +329,7 @@ model Project {
   notifications         Notification[]
 
   @@index([deletedAt])
+  @@index([organizationId])
   @@map("projects")
 }
 
@@ -460,38 +556,22 @@ model ProjectTag {
   @@map("project_tags")
 }
 
-model Membership {
-  id        String      @id @default(cuid())
-  userId    String      @map("user_id")
-  projectId String      @map("project_id")
-  role      ProjectRole @default(member)
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, projectId])
-  @@index([projectId])
-  @@map("memberships")
-}
-
 model Invitation {
-  id          String           @id @default(cuid())
-  projectId   String           @map("project_id")
-  email       String
-  role        ProjectRole      @default(member)
-  token       String           @unique @default(cuid())
-  status      InvitationStatus @default(pending)
-  expiresAt   DateTime         @map("expires_at")
-  invitedById String           @map("invited_by_id")
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  id             String           @id @default(cuid())
+  organizationId String           @map("organization_id")
+  email          String
+  role           OrgRole          @default(member)
+  token          String           @unique @default(cuid())
+  status         InvitationStatus @default(pending)
+  expiresAt      DateTime         @map("expires_at")
+  invitedById    String           @map("invited_by_id")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
 
-  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  invitedBy  User    @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
 
-  @@index([projectId])
+  @@index([organizationId])
   @@index([email])
   @@index([token])
   @@map("invitations")
@@ -679,6 +759,9 @@ enum FlagHistoryEventType {
   reminder_sent
   sync_completed
   coverage_scan
+  detected_definition
+  detected_usage
+  first_seen_branch
 
   @@map("flag_history_event_type")
 }
@@ -704,6 +787,9 @@ model FlagHistoryEvent {
   newValue        String?              @map("new_value")
   releaseId       String?              @map("release_id")
   actorId         String?              @map("actor_id")
+  branchName      String?              @map("branch_name")
+  prNumber        Int?                 @map("pr_number")
+  detectedFile    String?              @map("detected_file")
   source          FlagHistorySource
   occurredAt      DateTime             @default(now()) @map("occurred_at")
   createdAt       DateTime             @default(now()) @map("created_at")

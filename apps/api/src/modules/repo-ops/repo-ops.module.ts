@@ -4,12 +4,16 @@ import { ProjectModule } from '../project/project.module'
 import { IntegrationModule } from '../integration/integration.module'
 import { GithubAuthModule } from '../github-auth/github-auth.module'
 import { ReleaseModule } from '../release/release.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { RepoOpsResolver } from './resolvers/repo-ops.resolver'
 import { IBlockedBranchRepository } from './interfaces/blocked-branch.repository'
 import { BlockedBranchRepository } from './repositories/blocked-branch.repository'
 import { BlockBranchHandler } from './commands/block-branch/block-branch.handler'
 import { UnblockBranchHandler } from './commands/unblock-branch/unblock-branch.handler'
 import { DeleteGithubBranchesHandler } from './commands/delete-github-branches/delete-github-branches.handler'
+import { HandleGithubPushWebhookHandler } from './commands/handle-github-push-webhook/handle-github-push-webhook.handler'
+import { HandleGithubRefWebhookHandler } from './commands/handle-github-ref-webhook/handle-github-ref-webhook.handler'
+import { HandleGithubPullRequestWebhookHandler } from './commands/handle-github-pull-request-webhook/handle-github-pull-request-webhook.handler'
 import { ListBlockedBranchesHandler } from './queries/list-blocked-branches/list-blocked-branches.handler'
 import { GetBranchCleanupCandidatesHandler } from './queries/get-branch-cleanup-candidates/get-branch-cleanup-candidates.handler'
 import { BranchCleanupPageHandler } from './queries/branch-cleanup-page/branch-cleanup-page.handler'
@@ -17,13 +21,16 @@ import { GetBranchCleanupPlanHandler } from './queries/get-branch-cleanup-plan/g
 import { GetBranchAuthorsHandler } from './queries/get-branch-authors/get-branch-authors.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, IntegrationModule, GithubAuthModule, ReleaseModule],
+  imports: [CqrsModule, ProjectModule, IntegrationModule, GithubAuthModule, ReleaseModule, OrganizationModule],
   providers: [
     RepoOpsResolver,
     { provide: IBlockedBranchRepository, useClass: BlockedBranchRepository },
     BlockBranchHandler,
     UnblockBranchHandler,
     DeleteGithubBranchesHandler,
+    HandleGithubPushWebhookHandler,
+    HandleGithubRefWebhookHandler,
+    HandleGithubPullRequestWebhookHandler,
     ListBlockedBranchesHandler,
     GetBranchCleanupCandidatesHandler,
     BranchCleanupPageHandler,

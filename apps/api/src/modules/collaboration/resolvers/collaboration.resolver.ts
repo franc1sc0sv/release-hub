@@ -31,11 +31,11 @@ export class CollaborationResolver {
   @Query(() => [MemberType])
   @Can(Action.READ, Subject.MEMBERSHIP)
   async listMembers(
-    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('organizationId', { type: () => ID }) organizationId: string,
     @CurrentUser() user: IJwtUser,
   ): Promise<MemberType[]> {
     const members: IMemberProfile[] = await this.queryBus.execute(
-      new ListMembersQuery(user.id, projectId),
+      new ListMembersQuery(user.id, organizationId),
     )
     return members.map(toMemberType)
   }
@@ -43,11 +43,11 @@ export class CollaborationResolver {
   @Query(() => [InvitationType])
   @Can(Action.READ, Subject.INVITATION)
   async listInvitations(
-    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('organizationId', { type: () => ID }) organizationId: string,
     @CurrentUser() user: IJwtUser,
   ): Promise<InvitationType[]> {
     const invitations: IInvitation[] = await this.queryBus.execute(
-      new ListInvitationsQuery(user.id, projectId),
+      new ListInvitationsQuery(user.id, organizationId),
     )
     return invitations.map(toInvitationType)
   }
@@ -59,7 +59,7 @@ export class CollaborationResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<InvitationType> {
     const invitation: IInvitation = await this.commandBus.execute(
-      new InviteMemberCommand(user.id, input.projectId, input.email, input.role),
+      new InviteMemberCommand(user.id, input.organizationId, input.email, input.role),
     )
     return toInvitationType(invitation)
   }

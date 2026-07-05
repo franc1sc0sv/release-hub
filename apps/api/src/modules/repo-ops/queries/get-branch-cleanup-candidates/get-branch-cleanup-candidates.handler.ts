@@ -1,16 +1,15 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
-import { AppException } from '../../../../common/errors/app.exception'
-import { ErrorCode } from '../../../../common/errors/error-codes.enum'
-import { decryptToken } from '../../../../common/crypto/token-cipher'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
-import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
 import { IGitHubClient, type IGitHubBranch } from '../../../integration/interfaces/github-client.interface'
+import { IGithubTokenResolver } from '../../../integration/interfaces/github-token-resolver.abstract'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IBlockedBranchRepository } from '../../interfaces/blocked-branch.repository'
 import type { IBranchCleanupCandidate } from '../../interfaces/repo-ops.interfaces'
 import { GetBranchCleanupCandidatesQuery } from './get-branch-cleanup-candidates.query'
@@ -27,8 +26,9 @@ export class GetBranchCleanupCandidatesHandler extends BaseQueryHandler<
     private readonly projectRepository: IProjectRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly gitHubClient: IGitHubClient,
-    private readonly githubConnectionRepository: IGithubConnectionRepository,
+    private readonly tokenResolver: IGithubTokenResolver,
     private readonly blockedBranchRepository: IBlockedBranchRepository,
+    private readonly organizationRepository: IOrganizationRepository,
   ) {
     super(db)
   }
@@ -37,23 +37,21 @@ export class GetBranchCleanupCandidatesHandler extends BaseQueryHandler<
     query: GetBranchCleanupCandidatesQuery,
     tx: TxClient,
   ): Promise<IBranchCleanupCandidate[]> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: query.userId,
         projectId: query.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.PROJECT,
+      },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(query.projectId, tx)
     if (!project) throw new NotFoundException('Project')
 
-    const accessToken = await this.resolveAccessToken(query.userId, tx)
+    const accessToken = await this.tokenResolver.resolveForProject(query.projectId, query.userId, tx)
 
     const [branches, mergedHeads, openHeads, releases, blockedBranches, defaultBranch] =
       await Promise.all([
@@ -129,16 +127,5 @@ export class GetBranchCleanupCandidatesHandler extends BaseQueryHandler<
   private isStale(lastCommitDate: Date | null): boolean {
     if (lastCommitDate === null) return false
     return Date.now() - lastCommitDate.getTime() > STALE_AFTER_DAYS * 24 * 60 * 60 * 1000
-  }
-
-  private async resolveAccessToken(userId: string, tx: TxClient): Promise<string> {
-    const connection = await this.githubConnectionRepository.findByUserId(userId, tx)
-    if (!connection) {
-      throw new AppException(
-        'GitHub is not connected. Please connect your GitHub account in settings.',
-        ErrorCode.GITHUB_NOT_CONNECTED,
-      )
-    }
-    return decryptToken(connection.accessToken)
   }
 }

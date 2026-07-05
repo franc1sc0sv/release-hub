@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
+import { GithubAuthMode } from '../../../common/types/github-auth-mode.enum'
 import { ProjectIntegrationsType } from './project-integrations.type'
 import { ConnectionHealthType } from './connection-health.type'
 
@@ -7,11 +8,17 @@ export class ProjectType {
   @Field(() => ID)
   id: string
 
+  @Field(() => ID)
+  organizationId: string
+
   @Field(() => String)
   name: string
 
   @Field(() => String)
   repo: string
+
+  @Field(() => GithubAuthMode)
+  githubAuthMode: GithubAuthMode
 
   @Field(() => ProjectIntegrationsType)
   integrations: ProjectIntegrationsType
@@ -21,6 +28,9 @@ export class ProjectType {
 
   @Field(() => Int)
   flagReminderIntervalDays: number
+
+  @Field(() => [String])
+  conflictEnvironments: string[]
 
   @Field(() => String)
   ownerId: string

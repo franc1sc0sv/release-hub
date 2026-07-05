@@ -1,9 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { ISlackConnectionRepository } from '../../interfaces/slack-connection.repository'
 import { SlackConnectionStatus } from '../../types/slack-connection-status.type'
@@ -13,6 +15,7 @@ import { GetSlackConnectionQuery } from './get-slack-connection.query'
 export class GetSlackConnectionHandler extends BaseQueryHandler<GetSlackConnectionQuery, SlackConnectionStatus> {
   constructor(
     protected readonly db: IDatabaseService,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly slackConnectionRepository: ISlackConnectionRepository,
   ) {
@@ -23,18 +26,16 @@ export class GetSlackConnectionHandler extends BaseQueryHandler<GetSlackConnecti
     query: GetSlackConnectionQuery,
     tx: TxClient,
   ): Promise<SlackConnectionStatus> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
+    await authorizeProjectAction(
+      this.orgRepository,
+      {
+        actorId: query.userId,
         projectId: query.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.PROJECT,
+      },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(query.projectId, tx)
     if (!project) throw new NotFoundException('Project')

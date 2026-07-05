@@ -1,12 +1,15 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { ConnectionSettingsType } from '../../types/connection-settings.type'
+import { toConnectionSettings } from '../../types/connection-settings.mappers'
 import { FlagsmithConnectedEvent } from '../../events/flagsmith-connected.event'
 import { UpdateConnectionSettingsCommand } from './update-connection-settings.command'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
@@ -19,6 +22,7 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
   ) {
     super(db, eventEmitter)
@@ -29,17 +33,11 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
     tx: TxClient,
     events: IDomainEvent[],
   ): Promise<ConnectionSettingsType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    const projectSubject = {
-      kind: Subject.PROJECT,
-      __type: Subject.PROJECT,
-      projectId: command.projectId,
-    }
-    if (!ability.can(Action.UPDATE, projectSubject)) {
-      throw new ForbiddenException()
-    }
+    const organizationId = await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: command.userId, projectId: command.projectId, action: Action.UPDATE, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const existing = await this.projectRepository.findById(command.projectId, tx)
     if (!existing) throw new NotFoundException('Project')
@@ -54,20 +52,22 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
       tx,
     )
 
-    const settings = new ConnectionSettingsType()
-    settings.githubConnected = updated.githubInstallationId !== null
-    settings.linearConnected = updated.linearEnabled
-    settings.flagsmithConnected = updated.flagsmithEnabled
-
     const credentials = await this.projectRepository.findCredentials(command.projectId, tx)
-    settings.flagsmithUrl = credentials?.flagsmithUrl ?? null
-    settings.flagsmithProjectId = credentials?.flagsmithProjectId ?? null
-
     const webhookSecretStatus = await this.projectRepository.findWebhookSecretStatus(command.projectId, tx)
-    settings.flagsmithWebhookSecretSet = webhookSecretStatus?.flagsmithWebhookSecretSet ?? false
-    settings.flagsmithWebhookPath = `/webhooks/flagsmith/${command.projectId}`
-    settings.githubWebhookSecretSet = webhookSecretStatus?.githubWebhookSecretSet ?? false
-    settings.githubWebhookPath = `/webhooks/github/${command.projectId}`
+
+    const orgHasActiveInstallation =
+      (await this.organizationRepository.findActiveInstallationIdForOrg(organizationId, tx)) !== null
+
+    const settings = toConnectionSettings({
+      projectId: command.projectId,
+      githubAuthMode: updated.githubAuthMode,
+      githubInstallationId: updated.githubInstallationId,
+      linearEnabled: updated.linearEnabled,
+      flagsmithEnabled: updated.flagsmithEnabled,
+      orgHasActiveInstallation,
+      credentials,
+      webhookSecretStatus,
+    })
 
     const flagsmithJustConnected =
       !existing.flagsmithEnabled &&

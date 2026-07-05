@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
-import { ProjectRole } from '../../../common/types/project-role.enum'
+import { OrgRole } from '../../../common/types/org-role.enum'
 import { InvitationStatus } from '../../../common/types/invitation-status.enum'
 
 @ObjectType()
@@ -11,10 +11,10 @@ export class InvitationType {
   email: string
 
   @Field(() => ID)
-  projectId: string
+  organizationId: string
 
-  @Field(() => ProjectRole)
-  role: ProjectRole
+  @Field(() => OrgRole)
+  role: OrgRole
 
   @Field(() => InvitationStatus)
   status: InvitationStatus

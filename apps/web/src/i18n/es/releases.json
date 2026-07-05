@@ -228,6 +228,7 @@
       "descriptionPlaceholder": "Describe qué hace esta funcionalidad…"
     },
     "prsByFeature": "Pull requests por funcionalidad",
+    "manualAssignHint": "La IA no está disponible en este entorno — asigna cada pull request a una funcionalidad manualmente abajo.",
     "noFeatures": "No se encontraron funcionalidades para este release. Agrega pull requests fusionados primero.",
     "defaultFeature": "Por defecto",
     "assignTo": "Funcionalidad",
@@ -267,6 +268,7 @@
   "prSummary": {
     "title": "Resumen IA",
     "empty": "Sin resumen aún",
+    "add": "Agregar resumen",
     "generate": "Generar",
     "regenerate": "Regenerar",
     "edit": "Editar",

@@ -278,6 +278,7 @@ export class GitHubClient extends IGitHubClient {
         },
       )
       return repos.slice(0, 200).map((repo) => ({
+        githubId: repo.id,
         fullName: repo.full_name,
         name: repo.name,
         owner: repo.owner.login,

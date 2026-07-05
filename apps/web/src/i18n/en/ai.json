@@ -32,5 +32,8 @@
     "formal": "Formal"
   },
   "copy": "Copy",
-  "copyAriaLabel": "Copy summary to clipboard"
+  "copyAriaLabel": "Copy summary to clipboard",
+  "unavailable": {
+    "tooltip": "AI features are unavailable in this environment"
+  }
 }

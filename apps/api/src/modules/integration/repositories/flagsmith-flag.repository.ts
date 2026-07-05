@@ -321,6 +321,11 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     const keyByFlagId = new Map(candidateFlags.map((flag) => [flag.id, flag.key]))
     const candidateKeys = [...new Set(candidateFlags.map((flag) => flag.key))]
 
+    const watchedEnvironmentIds =
+      filters.watchedEnvironments.length > 0
+        ? environmentRows.filter((env) => filters.watchedEnvironments.includes(env.name)).map((env) => env.id)
+        : []
+
     const stateAggQuery = kysely
       .selectFrom('flagsmith_flag_states')
       .select(['flag_id', sql<boolean>`bool_or(enabled)`.as('anyEnabled'), sql<boolean>`bool_or(not enabled)`.as('anyDisabled')])
@@ -328,17 +333,35 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       .groupBy('flag_id')
     const compiledAgg = stateAggQuery.compile()
 
-    const [aggRows, trackedFlags] = await Promise.all([
+    const watchedAggQuery =
+      watchedEnvironmentIds.length > 0
+        ? kysely
+            .selectFrom('flagsmith_flag_states')
+            .select(['flag_id', sql<boolean>`bool_or(not enabled)`.as('anyDisabled')])
+            .where('flag_id', 'in', candidateIds)
+            .where('environment_id', 'in', watchedEnvironmentIds)
+            .groupBy('flag_id')
+        : null
+    const compiledWatchedAgg = watchedAggQuery?.compile() ?? null
+
+    const [aggRows, watchedAggRows, trackedFlags] = await Promise.all([
       tx.$queryRawUnsafe<{ flag_id: string; anyEnabled: boolean; anyDisabled: boolean }[]>(
         compiledAgg.sql,
         ...compiledAgg.parameters,
       ),
+      compiledWatchedAgg
+        ? tx.$queryRawUnsafe<{ flag_id: string; anyDisabled: boolean }[]>(
+            compiledWatchedAgg.sql,
+            ...compiledWatchedAgg.parameters,
+          )
+        : Promise.resolve([]),
       tx.trackedFlag.findMany({
         where: { projectId: filters.projectId, deletedAt: null, key: { in: candidateKeys } },
         select: { id: true, key: true },
       }),
     ])
     const aggByFlagId = new Map(aggRows.map((row) => [row.flag_id, { anyEnabled: row.anyEnabled, anyDisabled: row.anyDisabled }]))
+    const watchedDisabledByFlagId = new Map(watchedAggRows.map((row) => [row.flag_id, row.anyDisabled]))
     const trackedFlagIdByKey = new Map(trackedFlags.map((flag) => [flag.key, flag.id]))
 
     const decisionRows = await tx.releaseFlagDecision.findMany({
@@ -358,7 +381,10 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       const key = keyByFlagId.get(flagId)
       const trackedFlagId = key ? trackedFlagIdByKey.get(key) : undefined
       const decision = trackedFlagId ? (latestDecisionByTrackedFlagId.get(trackedFlagId) ?? null) : null
-      const anyDisabled = aggByFlagId.get(flagId)?.anyDisabled ?? false
+      const anyDisabled =
+        watchedEnvironmentIds.length > 0
+          ? (watchedDisabledByFlagId.get(flagId) ?? false)
+          : (aggByFlagId.get(flagId)?.anyDisabled ?? false)
       deploymentStatusByFlagId.set(flagId, computeFlagDeploymentStatus(decision, anyDisabled))
     }
 
@@ -584,6 +610,15 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
         updatedAt: state.updatedAt,
       })),
     }
+  }
+
+  findEnvironmentNames = async (projectId: string, tx: TxClient): Promise<string[]> => {
+    const rows = await tx.flagsmithEnvironment.findMany({
+      where: { projectId },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      select: { name: true },
+    })
+    return rows.map((row) => row.name)
   }
 
   createSyncRun = async (data: ICreateFlagsmithSyncRunData, tx: TxClient): Promise<IFlagsmithSyncRun> => {

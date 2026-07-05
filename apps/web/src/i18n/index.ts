@@ -30,6 +30,10 @@ import esRepoOps from './es/repoOps.json'
 import enRepoOps from './en/repoOps.json'
 import esPalette from './es/palette.json'
 import enPalette from './en/palette.json'
+import esOrganization from './es/organization.json'
+import enOrganization from './en/organization.json'
+import esGithubSetup from './es/githubSetup.json'
+import enGithubSetup from './en/githubSetup.json'
 
 i18n.use(initReactI18next).init({
   lng: localStorage.getItem('language') ?? 'en',
@@ -52,6 +56,8 @@ i18n.use(initReactI18next).init({
       notifications: esNotifications,
       repoOps: esRepoOps,
       palette: esPalette,
+      organization: esOrganization,
+      githubSetup: esGithubSetup,
     },
     en: {
       enums: enEnums,
@@ -69,6 +75,8 @@ i18n.use(initReactI18next).init({
       notifications: enNotifications,
       repoOps: enRepoOps,
       palette: enPalette,
+      organization: enOrganization,
+      githubSetup: enGithubSetup,
     },
   },
   interpolation: {

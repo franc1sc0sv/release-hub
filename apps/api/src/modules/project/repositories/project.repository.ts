@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { DEFAULT_FEATURES } from '@release-hub/db'
-import { ProjectRole } from '@release-hub/shared'
+import { DEFAULT_FEATURES, OrgRole, GithubAuthMode, GithubInstallationStatus } from '@release-hub/db'
 import { IProjectRepository } from '../interfaces/project.repository'
 import type {
   IProject,
   ICreateProjectData,
   IUpdateProjectData,
-  IProjectMembershipRecord,
   IProjectConnectionCredentials,
   IProjectIntegrationSettings,
   IFlagRegistryConfig,
@@ -22,10 +20,19 @@ export class ProjectRepository extends IProjectRepository {
     const row = await tx.project.findFirst({
       where: { id, deletedAt: null },
       include: {
-        memberships: {
-          where: { role: ProjectRole.OWNER },
-          select: { userId: true },
-          take: 1,
+        organization: {
+          select: {
+            memberships: {
+              where: { role: OrgRole.owner },
+              select: { userId: true },
+              take: 1,
+            },
+            githubInstallations: {
+              where: { status: GithubInstallationStatus.active },
+              select: { id: true },
+              take: 1,
+            },
+          },
         },
       },
     })
@@ -37,13 +44,22 @@ export class ProjectRepository extends IProjectRepository {
     const rows = await tx.project.findMany({
       where: {
         deletedAt: null,
-        memberships: { some: { userId } },
+        organization: { deletedAt: null, memberships: { some: { userId } } },
       },
       include: {
-        memberships: {
-          where: { role: ProjectRole.OWNER },
-          select: { userId: true },
-          take: 1,
+        organization: {
+          select: {
+            memberships: {
+              where: { role: OrgRole.owner },
+              select: { userId: true },
+              take: 1,
+            },
+            githubInstallations: {
+              where: { status: GithubInstallationStatus.active },
+              select: { id: true },
+              take: 1,
+            },
+          },
         },
       },
       orderBy: { createdAt: 'asc' },
@@ -55,10 +71,19 @@ export class ProjectRepository extends IProjectRepository {
     const rows = await tx.project.findMany({
       where: { deletedAt: null },
       include: {
-        memberships: {
-          where: { role: ProjectRole.OWNER },
-          select: { userId: true },
-          take: 1,
+        organization: {
+          select: {
+            memberships: {
+              where: { role: OrgRole.owner },
+              select: { userId: true },
+              take: 1,
+            },
+            githubInstallations: {
+              where: { status: GithubInstallationStatus.active },
+              select: { id: true },
+              take: 1,
+            },
+          },
         },
       },
       orderBy: { createdAt: 'asc' },
@@ -86,31 +111,29 @@ export class ProjectRepository extends IProjectRepository {
     }
   }
 
-  findMembershipsForUser = async (
-    userId: string,
-    tx: TxClient,
-  ): Promise<IProjectMembershipRecord[]> => {
-    const rows = await tx.membership.findMany({
-      where: { userId },
-      select: { projectId: true, role: true },
-    })
-    return rows.map((row) => ({ projectId: row.projectId, role: row.role }))
-  }
-
   create = async (data: ICreateProjectData, tx: TxClient): Promise<IProject> => {
     const row = await tx.project.create({
       data: {
         name: data.name,
         repo: data.repo,
-        memberships: {
-          create: { userId: data.ownerId, role: ProjectRole.OWNER },
-        },
+        organizationId: data.organizationId,
+        ...(data.githubAuthMode != null && { githubAuthMode: data.githubAuthMode }),
+        ...(data.githubInstallationId != null && { githubInstallationId: data.githubInstallationId }),
       },
       include: {
-        memberships: {
-          where: { role: ProjectRole.OWNER },
-          select: { userId: true },
-          take: 1,
+        organization: {
+          select: {
+            memberships: {
+              where: { role: OrgRole.owner },
+              select: { userId: true },
+              take: 1,
+            },
+            githubInstallations: {
+              where: { status: GithubInstallationStatus.active },
+              select: { id: true },
+              take: 1,
+            },
+          },
         },
       },
     })
@@ -139,12 +162,24 @@ export class ProjectRepository extends IProjectRepository {
         ...(data.flagReminderIntervalDays !== undefined && {
           flagReminderIntervalDays: data.flagReminderIntervalDays,
         }),
+        ...(data.conflictEnvironments !== undefined && {
+          conflictEnvironments: data.conflictEnvironments,
+        }),
       },
       include: {
-        memberships: {
-          where: { role: ProjectRole.OWNER },
-          select: { userId: true },
-          take: 1,
+        organization: {
+          select: {
+            memberships: {
+              where: { role: OrgRole.owner },
+              select: { userId: true },
+              take: 1,
+            },
+            githubInstallations: {
+              where: { status: GithubInstallationStatus.active },
+              select: { id: true },
+              take: 1,
+            },
+          },
         },
       },
     })
@@ -166,14 +201,35 @@ export class ProjectRepository extends IProjectRepository {
         ...(data.flagsmithProjectId !== undefined && { flagsmithProjectId: data.flagsmithProjectId }),
       },
       include: {
-        memberships: {
-          where: { role: ProjectRole.OWNER },
-          select: { userId: true },
-          take: 1,
+        organization: {
+          select: {
+            memberships: {
+              where: { role: OrgRole.owner },
+              select: { userId: true },
+              take: 1,
+            },
+            githubInstallations: {
+              where: { status: GithubInstallationStatus.active },
+              select: { id: true },
+              take: 1,
+            },
+          },
         },
       },
     })
     return this.toIProject(row)
+  }
+
+  setInstallationMode = async (
+    id: string,
+    mode: GithubAuthMode,
+    installationId: string,
+    tx: TxClient,
+  ): Promise<void> => {
+    await tx.project.update({
+      where: { id },
+      data: { githubAuthMode: mode, githubInstallationId: installationId },
+    })
   }
 
   delete = async (id: string, tx: TxClient): Promise<void> => {
@@ -233,34 +289,46 @@ export class ProjectRepository extends IProjectRepository {
   private toIProject(
     row: {
       id: string
+      organizationId: string
       name: string
       repo: string
+      githubAuthMode: GithubAuthMode
       githubInstallationId: string | null
       linearEnabled: boolean
       flagsmithEnabled: boolean
       slackEnabled: boolean
       flagReminderIntervalDays: number
+      conflictEnvironments: string[]
       createdAt: Date
       updatedAt: Date
-      memberships: { userId: string }[]
+      organization: {
+        memberships: { userId: string }[]
+        githubInstallations: { id: string }[]
+      }
     },
   ): IProject {
+    const orgHasActiveInstallation = row.organization.githubInstallations.length > 0
     return {
       id: row.id,
+      organizationId: row.organizationId,
       name: row.name,
       repo: row.repo,
+      githubAuthMode: row.githubAuthMode,
       githubInstallationId: row.githubInstallationId,
       linearEnabled: row.linearEnabled,
       flagsmithEnabled: row.flagsmithEnabled,
       slackEnabled: row.slackEnabled,
       flagReminderIntervalDays: row.flagReminderIntervalDays,
+      conflictEnvironments: row.conflictEnvironments,
       integrations: {
-        github: row.githubInstallationId !== null,
+        github:
+          orgHasActiveInstallation ||
+          (row.githubAuthMode === GithubAuthMode.installation && row.githubInstallationId !== null),
         linear: row.linearEnabled,
         flagsmith: row.flagsmithEnabled,
         slack: row.slackEnabled,
       },
-      ownerId: row.memberships[0]?.userId ?? '',
+      ownerId: row.organization.memberships[0]?.userId ?? '',
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }

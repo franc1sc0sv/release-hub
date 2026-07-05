@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { CheckCircle2, CircleDashed, Loader2, RadarIcon } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent } from '@/components/ui/card'
@@ -30,6 +30,7 @@ export function FlagStatusHero({
   rescanning,
 }: FlagStatusHeroProps) {
   const { t } = useTranslation('flags')
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   const presentInCode = tracked?.presentInCode ?? false
   const shippedVersions = tracked?.delivery.shippedReleaseVersions ?? []
@@ -102,7 +103,11 @@ export function FlagStatusHero({
               </p>
               <Link
                 to={{
-                  pathname: ROUTES.RELEASE_DETAIL.replace(':releaseId', decidedRelease.releaseId),
+                  pathname: generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+                    organizationId: organizationId ?? '',
+                    projectId: projectId ?? '',
+                    releaseId: decidedRelease.releaseId,
+                  }),
                   search: '?section=flags',
                 }}
                 className="w-fit font-mono text-sm text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

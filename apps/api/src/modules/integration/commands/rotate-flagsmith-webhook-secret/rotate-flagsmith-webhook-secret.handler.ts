@@ -1,14 +1,17 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
 import { randomBytes } from 'crypto'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { ConnectionSettingsType } from '../../types/connection-settings.type'
+import { toConnectionSettings } from '../../types/connection-settings.mappers'
 import { RotateFlagsmithWebhookSecretCommand } from './rotate-flagsmith-webhook-secret.command'
 
 const WEBHOOK_SECRET_BYTES = 32
@@ -21,6 +24,7 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
   ) {
     super(db, eventEmitter)
@@ -31,18 +35,11 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
     tx: TxClient,
     _events: IDomainEvent[],
   ): Promise<ConnectionSettingsType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
-        projectId: command.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    const organizationId = await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: command.userId, projectId: command.projectId, action: Action.UPDATE, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(command.projectId, tx)
     if (!project) throw new NotFoundException('Project')
@@ -53,16 +50,18 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
     const credentials = await this.projectRepository.findCredentials(command.projectId, tx)
     const webhookSecretStatus = await this.projectRepository.findWebhookSecretStatus(command.projectId, tx)
 
-    const settings = new ConnectionSettingsType()
-    settings.githubConnected = project.githubInstallationId !== null
-    settings.linearConnected = project.linearEnabled
-    settings.flagsmithConnected = project.flagsmithEnabled
-    settings.flagsmithUrl = credentials?.flagsmithUrl ?? null
-    settings.flagsmithProjectId = credentials?.flagsmithProjectId ?? null
-    settings.flagsmithWebhookSecretSet = true
-    settings.flagsmithWebhookPath = `/webhooks/flagsmith/${command.projectId}`
-    settings.githubWebhookSecretSet = webhookSecretStatus?.githubWebhookSecretSet ?? false
-    settings.githubWebhookPath = `/webhooks/github/${command.projectId}`
-    return settings
+    const orgHasActiveInstallation =
+      (await this.organizationRepository.findActiveInstallationIdForOrg(organizationId, tx)) !== null
+
+    return toConnectionSettings({
+      projectId: command.projectId,
+      githubAuthMode: project.githubAuthMode,
+      githubInstallationId: project.githubInstallationId,
+      linearEnabled: project.linearEnabled,
+      flagsmithEnabled: project.flagsmithEnabled,
+      orgHasActiveInstallation,
+      credentials,
+      webhookSecretStatus,
+    })
   }
 }

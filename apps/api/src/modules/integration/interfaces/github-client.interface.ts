@@ -24,6 +24,7 @@ export interface IGitHubCreateTagResult {
 }
 
 export interface IGithubRepository {
+  githubId: number
   fullName: string
   name: string
   owner: string

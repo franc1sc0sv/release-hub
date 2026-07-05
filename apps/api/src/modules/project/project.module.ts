@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
+import { OrganizationModule } from '../organization/organization.module'
 import { ProjectResolver } from './resolvers/project.resolver'
 import { IProjectRepository } from './interfaces/project.repository'
 import { ProjectRepository } from './repositories/project.repository'
@@ -10,7 +11,7 @@ import { UpdateProjectHandler } from './commands/update-project/update-project.h
 import { DeleteProjectHandler } from './commands/delete-project/delete-project.handler'
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, OrganizationModule],
   providers: [
     ProjectResolver,
     { provide: IProjectRepository, useClass: ProjectRepository },

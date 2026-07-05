@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { AlertTriangle, Check, Loader2, X, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,7 @@ interface ReminderRowProps {
 
 function ReminderRow({ reminder, releaseId, projectId }: ReminderRowProps) {
   const { t } = useTranslation('releases')
+  const { organizationId } = useParams<{ organizationId: string }>()
   const [pendingDecision, setPendingDecision] = useState<ReleaseFlagDecisionType | null>(null)
   const [resolved, setResolved] = useState(false)
 
@@ -69,7 +70,11 @@ function ReminderRow({ reminder, releaseId, projectId }: ReminderRowProps) {
     <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border border-amber-500/20 bg-amber-500/5 px-4 py-3">
       <div className="min-w-0 flex-1 space-y-1">
         <Link
-          to={ROUTES.FLAG_DETAIL.replace(':flagKey', reminder.key)}
+          to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+            organizationId: organizationId ?? '',
+            projectId,
+            flagKey: reminder.key,
+          })}
           className="font-mono text-sm font-medium text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {reminder.key}

@@ -1,9 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IFlagsmithFlagRepository } from '../../interfaces/flagsmith-flag.repository'
 import { FlagEnvironmentStateType, FlagComparisonRowType, FlagComparisonResultType } from '../../types/flag-ref.type'
@@ -13,6 +15,7 @@ import { CompareFlagsQuery } from './compare-flags.query'
 export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, FlagComparisonResultType> {
   constructor(
     protected readonly db: IDatabaseService,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
   ) {
@@ -20,12 +23,11 @@ export class CompareFlagsHandler extends BaseQueryHandler<CompareFlagsQuery, Fla
   }
 
   protected async handle(query: CompareFlagsQuery, tx: TxClient): Promise<FlagComparisonResultType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (!ability.can(Action.READ, { kind: Subject.PROJECT, __type: Subject.PROJECT, projectId: query.projectId })) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: query.userId, projectId: query.projectId, action: Action.READ, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(query.projectId, tx)
     if (!project) throw new NotFoundException('Project')

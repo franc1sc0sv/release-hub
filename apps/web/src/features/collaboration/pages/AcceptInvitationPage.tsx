@@ -14,14 +14,14 @@ import { GlassCard } from '@/components/nebula/GlassCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ROUTES } from '@/lib/routes'
 import { ACCEPT_INVITATION } from '../graphql/collaboration.operations'
-import { defineAbilityFor, type IProjectMembership, ProjectRole } from '@release-hub/shared'
-import type { ProjectRole as GqlProjectRole } from '@/generated/graphql'
+import { defineAbilityFor, type IOrgMembership, OrgRole } from '@release-hub/shared'
+import type { OrgRole as GqlOrgRole } from '@/generated/graphql'
 import { slideUp, easeSoft } from '@/lib/animations'
 
-const GQL_ROLE_MAP: Record<GqlProjectRole, IProjectMembership['role']> = {
-  OWNER: ProjectRole.OWNER,
-  MEMBER: ProjectRole.MEMBER,
-  VIEWER: ProjectRole.VIEWER,
+const ORG_ROLE_MAP: Record<GqlOrgRole, OrgRole> = {
+  owner: OrgRole.OWNER,
+  member: OrgRole.MEMBER,
+  viewer: OrgRole.VIEWER,
 }
 
 type PageState = 'idle' | 'accepting' | 'success' | 'error' | 'mismatch'
@@ -39,16 +39,16 @@ export function AcceptInvitationPage() {
   const [acceptInvitation] = useMutation(ACCEPT_INVITATION, {
     onCompleted(data) {
       if (user) {
-        const memberships: IProjectMembership[] = [
+        const memberships: IOrgMembership[] = [
           {
-            projectId: data.acceptInvitation.projectId,
-            role: GQL_ROLE_MAP[data.acceptInvitation.role],
+            organizationId: data.acceptInvitation.organizationId,
+            role: ORG_ROLE_MAP[data.acceptInvitation.role],
           },
         ]
         setAbility(defineAbilityFor(memberships))
       }
       setPageState('success')
-      setTimeout(() => navigate(ROUTES.WORKSPACE), 1500)
+      setTimeout(() => navigate('/'), 1500)
     },
     onError(error) {
       const isForbidden =

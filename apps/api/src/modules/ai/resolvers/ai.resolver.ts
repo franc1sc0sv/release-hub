@@ -6,6 +6,8 @@ import { PoliciesGuard } from '../../../common/guards/policies.guard'
 import { Can } from '../../../common/decorators/check-policies.decorator'
 import { CurrentUser } from '../../../common/decorators/current-user.decorator'
 import { Action, Subject } from '@release-hub/shared'
+import { AiDisabledException } from '../../../common/errors'
+import { isAiEnabled } from '../../../common/config/ai-availability'
 import type { IJwtUser } from '../../../common/types'
 import { AiSuggestionType } from '../types/ai-suggestion.type'
 import { SummaryChunkType } from '../types/summary-chunk.type'
@@ -32,6 +34,9 @@ export class AiResolver {
     @Args('resume', { type: () => Boolean, defaultValue: true }) resume: boolean,
     @CurrentUser() user: IJwtUser,
   ): Promise<ReleaseObjectType> {
+    if (!isAiEnabled()) {
+      throw new AiDisabledException()
+    }
     return this.commandBus.execute(new RegenerateDraftCommand(releaseId, user.id, resume))
   }
 
@@ -41,6 +46,9 @@ export class AiResolver {
     @Args('prId', { type: () => ID }) prId: string,
     @CurrentUser() user: IJwtUser,
   ): Promise<PullRequestType> {
+    if (!isAiEnabled()) {
+      throw new AiDisabledException()
+    }
     return this.commandBus.execute(new GeneratePrSummaryCommand(prId, user.id))
   }
 
@@ -50,6 +58,9 @@ export class AiResolver {
     @Args('prId', { type: () => ID }) prId: string,
     @CurrentUser() user: IJwtUser,
   ): Promise<AiSuggestionType> {
+    if (!isAiEnabled()) {
+      throw new AiDisabledException()
+    }
     return this.queryBus.execute<SuggestFeatureForPrQuery, AiSuggestionType>(
       new SuggestFeatureForPrQuery(prId, user.id),
     )
@@ -64,6 +75,9 @@ export class AiResolver {
     const user = ctx.req?.user
     if (!user) {
       throw new UnauthorizedException()
+    }
+    if (!isAiEnabled()) {
+      throw new AiDisabledException()
     }
 
     const iterable = await this.queryBus.execute<

@@ -3,6 +3,7 @@ import type { TxClient } from '@release-hub/db'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { ForbiddenException } from '../../../../common/errors'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../interfaces/project.repository'
 import { ProjectType } from '../../types/project.type'
 import { toProjectType } from '../../types/project.mappers'
@@ -13,12 +14,13 @@ export class ListProjectsHandler extends BaseQueryHandler<ListProjectsQuery, Pro
   constructor(
     protected readonly db: IDatabaseService,
     private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
   ) {
     super(db)
   }
 
   protected async handle(query: ListProjectsQuery, tx: TxClient): Promise<ProjectType[]> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
+    const memberships = await this.orgRepository.findOrgMembershipsForUser(query.userId, tx)
 
     if (memberships.length === 0) {
       throw new ForbiddenException()

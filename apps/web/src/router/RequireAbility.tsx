@@ -22,7 +22,7 @@ export function RequireAbility({ action, subject }: RequireAbilityProps) {
   }
 
   if (!ability.can(action, subject)) {
-    return <Navigate to={ROUTES.WORKSPACE} replace />
+    return <Navigate to={ROUTES.ROOT} replace />
   }
 
   return <Outlet />

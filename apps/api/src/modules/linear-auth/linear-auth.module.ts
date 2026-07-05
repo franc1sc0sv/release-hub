@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { JwtModule } from '@nestjs/jwt'
+import { OrganizationModule } from '../organization/organization.module'
 import { ProjectModule } from '../project/project.module'
 import { ILinearConnectionRepository } from './interfaces/linear-connection.repository'
 import { LinearConnectionRepository } from './repositories/linear-connection.repository'
@@ -17,6 +18,7 @@ import { CheckLinearAuthorizeHandler } from './queries/check-linear-authorize/ch
     JwtModule.register({
       secret: process.env.JWT_SECRET!,
     }),
+    OrganizationModule,
     ProjectModule,
   ],
   controllers: [LinearAuthController],

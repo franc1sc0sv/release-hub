@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@apollo/client/react'
 import { motion, useReducedMotion } from 'motion/react'
@@ -28,7 +28,7 @@ const DRAFTING_STATUSES = new Set<string>([
 ])
 
 export default function ReleaseViewPage() {
-  const { releaseId } = useParams<{ releaseId: string }>()
+  const { organizationId, releaseId } = useParams<{ organizationId: string; releaseId: string }>()
   const { t } = useTranslation('releases')
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
@@ -86,6 +86,10 @@ export default function ReleaseViewPage() {
   const { release, features } = data.getReleaseTree
   const projectId = activeProject?.id ?? release.projectId
   const isDraftStatus = release.status === ReleaseStatusValue.DRAFT
+  const releasesPath = generatePath(ROUTES.PROJECT_RELEASES, {
+    organizationId: organizationId ?? '',
+    projectId,
+  })
 
   return (
     <NebulaBackground className="p-6">
@@ -97,7 +101,7 @@ export default function ReleaseViewPage() {
       >
         <motion.div variants={slideUp}>
           <Link
-            to={ROUTES.RELEASES}
+            to={releasesPath}
             className="inline-flex items-center gap-1.5 rounded-full px-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
@@ -163,7 +167,7 @@ export default function ReleaseViewPage() {
               projectId={projectId}
               releaseLabel={release.name ?? `${release.baseRef} → ${release.compareRef}`}
               status={release.status}
-              onDeleted={() => navigate(ROUTES.RELEASES)}
+              onDeleted={() => navigate(releasesPath)}
               variant="icon"
             />
           </div>

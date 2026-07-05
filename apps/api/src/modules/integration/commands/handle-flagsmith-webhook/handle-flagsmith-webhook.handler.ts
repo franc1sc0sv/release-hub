@@ -5,6 +5,7 @@ import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
+import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IFlagsmithFlagRepository } from '../../interfaces/flagsmith-flag.repository'
 import { FlagsmithWebhookEventType } from '../../interfaces/flagsmith-webhook.interfaces'
 import type { IParsedFlagsmithWebhookEvent } from '../../interfaces/flagsmith-webhook.interfaces'
@@ -32,6 +33,7 @@ export class HandleFlagsmithWebhookHandler extends PreparedCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly projectRepository: IProjectRepository,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
     private readonly flagHistoryRepository: IFlagHistoryRepository,
     private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
@@ -73,6 +75,8 @@ export class HandleFlagsmithWebhookHandler extends PreparedCommandHandler<
 
     const parsed = prepared.parsed
     const historyRows: ICreateFlagHistoryEventData[] = []
+    const project = await this.projectRepository.findById(command.projectId, tx)
+    const watchedEnvironments = project?.conflictEnvironments ?? []
 
     if (parsed.eventType === FlagsmithWebhookEventType.FLAG_DELETED) {
       const existing = await this.flagsmithFlagRepository.findFlagAndEnvironmentIds(
@@ -148,7 +152,12 @@ export class HandleFlagsmithWebhookHandler extends PreparedCommandHandler<
             change.newEnabled ? FlagWebhookTransition.ENABLED : FlagWebhookTransition.DISABLED,
           ),
         )
-        if (!change.newEnabled) disabledTransition = true
+        if (
+          !change.newEnabled &&
+          (watchedEnvironments.length === 0 || watchedEnvironments.includes(change.environmentName))
+        ) {
+          disabledTransition = true
+        }
       }
 
       if (!result.isNewFlag && change.previousValue !== change.newValue) {

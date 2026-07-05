@@ -1,4 +1,4 @@
-import type { ProjectRole } from '@release-hub/shared'
+import type { GithubAuthMode } from '@release-hub/db'
 
 export interface IProjectIntegrations {
   github: boolean
@@ -9,14 +9,17 @@ export interface IProjectIntegrations {
 
 export interface IProject {
   id: string
+  organizationId: string
   name: string
   repo: string
   integrations: IProjectIntegrations
+  githubAuthMode: GithubAuthMode
   githubInstallationId: string | null
   linearEnabled: boolean
   flagsmithEnabled: boolean
   slackEnabled: boolean
   flagReminderIntervalDays: number
+  conflictEnvironments: string[]
   ownerId: string
   createdAt: Date
   updatedAt: Date
@@ -29,13 +32,16 @@ export interface IProjectFilters {
 export interface ICreateProjectData {
   name: string
   repo: string
-  ownerId: string
+  organizationId: string
+  githubAuthMode?: GithubAuthMode
+  githubInstallationId?: string
 }
 
 export interface IUpdateProjectData {
   name?: string
   repo?: string
   flagReminderIntervalDays?: number
+  conflictEnvironments?: string[]
 }
 
 export interface IProjectIntegrationSettings {
@@ -54,11 +60,6 @@ export interface IProjectConnectionCredentials {
 export interface IProjectWebhookSecretStatus {
   flagsmithWebhookSecretSet: boolean
   githubWebhookSecretSet: boolean
-}
-
-export interface IProjectMembershipRecord {
-  projectId: string
-  role: ProjectRole
 }
 
 export interface IFlagRegistryConfig {

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { JwtModule } from '@nestjs/jwt'
+import { OrganizationModule } from '../organization/organization.module'
 import { ProjectModule } from '../project/project.module'
 import { ISlackConnectionRepository } from './interfaces/slack-connection.repository'
 import { SlackConnectionRepository } from './repositories/slack-connection.repository'
@@ -23,6 +24,7 @@ import { ListSlackChannelsHandler } from './queries/list-slack-channels/list-sla
     JwtModule.register({
       secret: process.env.JWT_SECRET!,
     }),
+    OrganizationModule,
     ProjectModule,
   ],
   controllers: [SlackAuthController],

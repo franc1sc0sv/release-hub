@@ -1,25 +1,28 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { FlagAction, FlagReferenceKind } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { FlagAction, FlagReferenceKind, FlagHistoryEventType, FlagHistorySource } from '@release-hub/db'
+import { Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { decryptToken } from '../../../../common/crypto/token-cipher'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import type { IRelease } from '../../../release/interfaces/release.interfaces'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
-import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
+import { IGithubTokenResolver } from '../../../integration/interfaces/github-token-resolver.abstract'
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
 import { IFlagBranchPresenceRepository } from '../../interfaces/flag-branch-presence.repository'
 import { IPullRequestFlagChangeRepository } from '../../interfaces/pull-request-flag-change.repository'
 import { IReleaseFlagDecisionRepository } from '../../interfaces/release-flag-decision.repository'
+import { IFlagHistoryRepository } from '../../interfaces/flag-history.repository'
+import type { ICreateFlagHistoryEventData } from '../../interfaces/flag-history.repository'
 import { IFlagRegistryParser } from '../../interfaces/flag-registry-parser.abstract'
 import type { IPerFlagCoveragePreparation, IReleaseFlagDecision } from '../../interfaces/flag-tracking.interfaces'
 import { TrackedFlagDetailType } from '../../types/tracked-flag-detail.type'
@@ -43,16 +46,18 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly gitHubClient: IGitHubClient,
-    private readonly githubConnectionRepository: IGithubConnectionRepository,
+    private readonly tokenResolver: IGithubTokenResolver,
     private readonly flagRegistryParser: IFlagRegistryParser,
     private readonly trackedFlagRepository: ITrackedFlagRepository,
     private readonly flagBranchPresenceRepository: IFlagBranchPresenceRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
     private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
+    private readonly flagHistoryRepository: IFlagHistoryRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -93,6 +98,7 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
         if (added.has(command.key)) {
           prChanges.push({
             pullRequestId: pr.id,
+            prNumber: pr.number,
             featureId: pr.featureId,
             action: FlagAction.added,
             kind: FlagReferenceKind.DEFINITION,
@@ -102,6 +108,7 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
         if (removed.has(command.key)) {
           prChanges.push({
             pullRequestId: pr.id,
+            prNumber: pr.number,
             featureId: pr.featureId,
             action: FlagAction.removed,
             kind: FlagReferenceKind.DEFINITION,
@@ -133,11 +140,23 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
       tx,
     )
 
+    const historyEvents: ICreateFlagHistoryEventData[] = []
+
     for (const { branch, present } of prepared.branchKeys) {
-      await this.flagBranchPresenceRepository.upsertPresence(
+      const { isNew } = await this.flagBranchPresenceRepository.upsertPresence(
         { trackedFlagId: trackedFlag.id, branch, present, headSha: null },
         tx,
       )
+      if (isNew) {
+        historyEvents.push({
+          projectId: prepared.projectId,
+          flagKey: prepared.key,
+          trackedFlagId: trackedFlag.id,
+          type: FlagHistoryEventType.first_seen_branch,
+          branchName: branch,
+          source: FlagHistorySource.system,
+        })
+      }
     }
 
     const presentBranches = prepared.branchKeys.filter((entry) => entry.present).map((entry) => entry.branch)
@@ -164,6 +183,19 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
         tx,
       )
 
+      historyEvents.push({
+        projectId: prepared.projectId,
+        flagKey: prepared.key,
+        trackedFlagId: trackedFlag.id,
+        type:
+          change.kind === FlagReferenceKind.DEFINITION
+            ? FlagHistoryEventType.detected_definition
+            : FlagHistoryEventType.detected_usage,
+        prNumber: change.prNumber,
+        detectedFile: change.detectedFile,
+        source: FlagHistorySource.system,
+      })
+
       if (change.kind === FlagReferenceKind.DEFINITION) {
         if (change.action === FlagAction.added) {
           await this.trackedFlagRepository.setAddedInPullRequest(
@@ -177,6 +209,8 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
         }
       }
     }
+
+    await this.flagHistoryRepository.createMany(historyEvents, tx)
 
     const flag = await this.trackedFlagRepository.findByProjectAndKeyWithDetails(prepared.projectId, prepared.key, tx)
     if (!flag) throw new NotFoundException('TrackedFlag')
@@ -201,18 +235,16 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
 
   private async resolveSource(command: RunFlagCoverageForFlagCommand): Promise<IResolvedPerFlagSource> {
     return this.db.$transaction(async (tx) => {
-      const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-      const ability = defineAbilityFor(memberships)
-
-      if (
-        !ability.can(Action.UPDATE, {
-          kind: Subject.PROJECT,
-          __type: Subject.PROJECT,
+      await authorizeProjectAction(
+        this.organizationRepository,
+        {
+          actorId: command.userId,
           projectId: command.projectId,
-        })
-      ) {
-        throw new ForbiddenException()
-      }
+          action: Action.UPDATE,
+          subjectKind: Subject.PROJECT,
+        },
+        tx,
+      )
 
       const config = await this.projectRepository.findFlagRegistryConfig(command.projectId, tx)
       if (!config) throw new NotFoundException('Project')
@@ -221,7 +253,7 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
         throw new AppException('Flag registry path is not configured for this project', ErrorCode.VALIDATION_ERROR)
       }
 
-      const accessToken = await this.resolveGitHubToken(command.userId, tx)
+      const accessToken = await this.tokenResolver.resolveForProject(command.projectId, command.userId, tx)
 
       const releases = await this.releaseRepository.findAllByProject(command.projectId, tx)
       const pullRequests: { id: string; number: number; featureId: string | null }[] = []
@@ -240,16 +272,5 @@ export class RunFlagCoverageForFlagHandler extends PreparedCommandHandler<
         pullRequests,
       }
     })
-  }
-
-  private async resolveGitHubToken(userId: string, tx: TxClient): Promise<string> {
-    const connection = await this.githubConnectionRepository.findByUserId(userId, tx)
-    if (!connection) {
-      throw new AppException(
-        'GitHub is not connected. Please connect your GitHub account in settings.',
-        ErrorCode.GITHUB_NOT_CONNECTED,
-      )
-    }
-    return decryptToken(connection.accessToken)
   }
 }

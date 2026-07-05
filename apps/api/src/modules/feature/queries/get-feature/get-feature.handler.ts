@@ -1,11 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import { NotFoundException } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import { FeatureDetailType } from '../../types/feature-detail.type'
@@ -16,7 +16,7 @@ import { GetFeatureQuery } from './get-feature.query'
 export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, FeatureDetailType> {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly featureRepository: IFeatureRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
   ) {
@@ -30,18 +30,11 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
       throw new NotFoundException()
     }
 
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.FEATURE,
-        __type: Subject.FEATURE,
-        projectId: feature.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.orgRepository,
+      { actorId: query.userId, projectId: feature.projectId, action: Action.READ, subjectKind: Subject.FEATURE },
+      tx,
+    )
 
     const [releases, prs, snapshots] = await Promise.all([
       this.featureRepository.findReleasesForFeature(query.featureId, tx),

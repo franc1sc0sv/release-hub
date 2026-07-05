@@ -1,24 +1,52 @@
 {
   "title": "Preferencias de notificaciones",
-  "columns": {
-    "notification": "Notificación",
+  "channels": {
     "inApp": "En la app",
     "email": "Correo",
-    "slack": "Slack",
-    "selectAllRow": "Seleccionar todo",
-    "selectAllAriaLabel": "Activar todas las notificaciones para {{channel}}"
+    "slack": "Slack"
+  },
+  "allNotifications": {
+    "label": "Todas las notificaciones",
+    "description": "Activa o desactiva todas las notificaciones de releases y flags a la vez.",
+    "toggleAriaLabel": "Activar todas las notificaciones para {{channel}}"
   },
   "groups": {
-    "releases": "Releases",
-    "flags": "Flags"
+    "releases": {
+      "label": "Releases"
+    },
+    "flags": {
+      "label": "Flags"
+    },
+    "enableAll": "Activar todo",
+    "enableAllAriaLabel": "Activar todas las notificaciones de {{group}} para {{channel}}"
   },
   "toggleAriaLabel": "Activar {{type}} vía {{channel}}",
+  "hints": {
+    "RELEASE_CREATED": "Se crea un borrador de release a partir de un diff de ramas",
+    "RELEASE_SHIPPED": "El pull request del release se abre y se fusiona",
+    "RELEASE_DEPLOYED": "El release llega a producción",
+    "FLAG_CREATED": "Un nuevo flag empieza a rastrearse",
+    "FLAG_DELETED": "Se elimina un flag rastreado",
+    "FLAG_ENABLED": "Un flag se activa en un entorno",
+    "FLAG_DISABLED": "Un flag se desactiva en un entorno",
+    "FLAG_VALUE_CHANGED": "Cambia el valor o la variación de un flag",
+    "FLAG_CONFLICT": "El estado de un flag no coincide entre entornos",
+    "FLAG_IN_PROGRESS_REMINDER": "Un flag lleva tiempo en progreso",
+    "FLAG_SHIP_OFF_REMINDER": "Un release ya lanzado sigue con su flag apagado",
+    "FLAG_STALENESS_ALERT": "Un flag totalmente liberado está listo para limpiarse",
+    "FLAG_DIGEST": "El resumen periódico por correo de la actividad de flags"
+  },
   "digest": {
+    "title": "Resumen por correo",
     "frequencyLabel": "Frecuencia del resumen",
     "description": "Con qué frecuencia se envía el correo de resumen de flags cuando está activado.",
     "sendTest": "Enviar resumen de prueba",
     "testSent": "Resumen de prueba enviado.",
     "testFailed": "No se pudo enviar el resumen de prueba. Inténtalo de nuevo."
+  },
+  "error": {
+    "heading": "No se pudieron cargar las preferencias",
+    "description": "Algo salió mal al cargar tus preferencias. Intenta recargar la página."
   },
   "bell": {
     "label": "Notificaciones",

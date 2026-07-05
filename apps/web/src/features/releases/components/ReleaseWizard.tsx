@@ -1,7 +1,7 @@
 import { useState, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLazyQuery, useMutation } from '@apollo/client/react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, generatePath } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import {
   AlertCircle,
@@ -92,8 +92,14 @@ export function ReleaseWizard() {
           },
         },
       })
-      if (data) {
-        navigate(ROUTES.RELEASE_DETAIL.replace(':releaseId', data.createRelease.id))
+      if (data && activeProject) {
+        navigate(
+          generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+            organizationId: activeProject.organizationId,
+            projectId: activeProject.id,
+            releaseId: data.createRelease.id,
+          }),
+        )
       }
     } catch {
       toast.error(t('wizard.createError'))

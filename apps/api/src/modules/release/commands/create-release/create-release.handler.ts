@@ -1,20 +1,22 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import type { IProject } from '../../../project/interfaces/project.interfaces'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
 import type { IGitHubMergedPr } from '../../../integration/interfaces/github-client.interface'
 import { ITicketSource } from '../../../integration/interfaces/ticket-source.abstract'
 import { ITicketLinkRepository } from '../../../integration/interfaces/ticket-link.repository'
-import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
+import { IGithubTokenResolver } from '../../../integration/interfaces/github-token-resolver.abstract'
 import { ILinearConnectionRepository } from '../../../linear-auth/interfaces/linear-connection.repository'
 import { decryptToken } from '../../../../common/crypto/token-cipher'
 import { resolveConfidence } from '../../../integration/clients/ticket-confidence'
@@ -47,13 +49,14 @@ export class CreateReleaseHandler extends PreparedCommandHandler<
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
     private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly commitRepository: ICommitRepository,
     private readonly gitHubClient: IGitHubClient,
     private readonly ticketSource: ITicketSource,
     private readonly ticketLinkRepository: ITicketLinkRepository,
-    private readonly githubConnectionRepository: IGithubConnectionRepository,
+    private readonly tokenResolver: IGithubTokenResolver,
     private readonly linearConnectionRepository: ILinearConnectionRepository,
   ) {
     super(db, eventEmitter)
@@ -166,23 +169,21 @@ export class CreateReleaseHandler extends PreparedCommandHandler<
 
   private async resolveSource(command: CreateReleaseCommand): Promise<IResolvedReleaseSource> {
     return this.db.$transaction(async (tx) => {
-      const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-      const ability = defineAbilityFor(memberships)
-
-      if (
-        !ability.can(Action.CREATE, {
-          kind: Subject.RELEASE,
-          __type: Subject.RELEASE,
+      await authorizeProjectAction(
+        this.organizationRepository,
+        {
+          actorId: command.userId,
           projectId: command.projectId,
-        })
-      ) {
-        throw new ForbiddenException()
-      }
+          action: Action.CREATE,
+          subjectKind: Subject.RELEASE,
+        },
+        tx,
+      )
 
       const project = await this.projectRepository.findById(command.projectId, tx)
       if (!project) throw new NotFoundException('Project')
 
-      const accessToken = await this.resolveGitHubToken(command.userId, tx)
+      const accessToken = await this.tokenResolver.resolveForProject(command.projectId, command.userId, tx)
       const linearCredential = await this.resolveLinearCredential(project, command.projectId, tx)
 
       return { repo: project.repo, accessToken, linearCredential }
@@ -217,17 +218,6 @@ export class CreateReleaseHandler extends PreparedCommandHandler<
       })
     }
     return links
-  }
-
-  private async resolveGitHubToken(userId: string, tx: TxClient): Promise<string> {
-    const connection = await this.githubConnectionRepository.findByUserId(userId, tx)
-    if (!connection) {
-      throw new AppException(
-        'GitHub is not connected. Please connect your GitHub account in settings.',
-        ErrorCode.GITHUB_NOT_CONNECTED,
-      )
-    }
-    return decryptToken(connection.accessToken)
   }
 
   private async resolveLinearCredential(

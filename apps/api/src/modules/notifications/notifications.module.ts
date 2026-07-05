@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
-import { ProjectModule } from '../project/project.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { ReleaseModule } from '../release/release.module'
 import { FlagHistoryModule } from '../flag-tracking/flag-history.module'
 import { NotificationsResolver } from './resolvers/notifications.resolver'
@@ -32,7 +32,7 @@ import { NotificationFlagWebhookTransitionHandler } from './events/flag-webhook-
 import { NotificationFlagConflictDetectedHandler } from './events/flag-conflict-detected.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, ReleaseModule, FlagHistoryModule],
+  imports: [CqrsModule, OrganizationModule, ReleaseModule, FlagHistoryModule],
   providers: [
     NotificationsResolver,
     { provide: INotificationPreferenceRepository, useClass: NotificationPreferenceRepository },

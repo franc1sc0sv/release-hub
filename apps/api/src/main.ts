@@ -1,9 +1,16 @@
 import 'reflect-metadata'
 import { config } from 'dotenv'
+import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { Logger } from '@nestjs/common'
 import type { IRawBodyRequest } from './modules/webhooks/interfaces/raw-body-request.interface'
-config({ path: resolve(__dirname, '../../../.env') })
+
+if (process.env.NODE_ENV !== 'production') {
+  const localEnvFile = [resolve(process.cwd(), '.env'), resolve(process.cwd(), '../../.env')].find(existsSync)
+  if (localEnvFile) {
+    config({ path: localEnvFile })
+  }
+}
 
 function captureRawBodyForWebhooks(req: IRawBodyRequest, _res: unknown, buffer: Buffer): void {
   if (req.originalUrl.startsWith('/webhooks/')) {

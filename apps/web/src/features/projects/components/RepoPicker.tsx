@@ -19,18 +19,18 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { LIST_PROJECTS } from '@/features/workspace/graphql/workspace.queries'
+import { useOrganization } from '@/context/organization.context'
 import { useGithubConnection } from '@/features/settings/hooks/use-github-connection'
-import {
-  GITHUB_REPOSITORIES,
-  CREATE_PROJECT,
-} from '@/features/onboarding/graphql/onboarding.operations'
+import { GITHUB_INSTALLATION_REPOSITORIES } from '@/features/organization/graphql/organization.operations'
+import { CREATE_PROJECT } from '@/features/onboarding/graphql/onboarding.operations'
 import type {
-  GithubRepositoriesQuery,
+  GithubInstallationRepositoriesQuery,
   CreateProjectMutation,
   CreateProjectMutationVariables,
 } from '@/generated/graphql'
 
-type GithubRepo = GithubRepositoriesQuery['githubRepositories'][number]
+type GithubRepo =
+  GithubInstallationRepositoriesQuery['githubInstallationRepositories'][number]
 type CreatedProject = CreateProjectMutation['createProject']
 
 interface RepoPickerProps {
@@ -44,11 +44,17 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
   const [projectName, setProjectName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const { data, loading: reposLoading, error: reposError } = useQuery(GITHUB_REPOSITORIES, {
-    fetchPolicy: 'cache-and-network',
-  })
-
+  const { activeOrg } = useOrganization()
   const { reconnect, reconnecting } = useGithubConnection()
+
+  const { data, loading: reposLoading, error: reposError } = useQuery(
+    GITHUB_INSTALLATION_REPOSITORIES,
+    {
+      variables: { organizationId: activeOrg?.id ?? '' },
+      skip: !activeOrg,
+      fetchPolicy: 'cache-and-network',
+    },
+  )
 
   const [createProject, { loading: creating }] = useMutation<
     CreateProjectMutation,
@@ -70,16 +76,22 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
   }
 
   function handleCreate(): void {
-    if (!selectedRepo) return
+    if (!selectedRepo || !activeOrg) return
     setError(null)
     createProject({
       variables: {
-        input: { repo: selectedRepo.fullName, name: projectName.trim() || selectedRepo.name },
+        input: {
+          repo: selectedRepo.fullName,
+          name: projectName.trim() || selectedRepo.name,
+          organizationId: activeOrg.id,
+          githubAuthMode: null,
+          githubInstallationId: null,
+        },
       },
     })
   }
 
-  const repos = data?.githubRepositories ?? []
+  const repos = data?.githubInstallationRepositories ?? []
 
   return (
     <motion.div
@@ -195,7 +207,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
             <GradientButton
               className="w-full"
               onClick={handleCreate}
-              disabled={!selectedRepo || creating || !projectName.trim()}
+              disabled={!selectedRepo || creating || !projectName.trim() || !activeOrg}
               aria-label={t('selectRepo.createButton')}
             >
               {creating && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}

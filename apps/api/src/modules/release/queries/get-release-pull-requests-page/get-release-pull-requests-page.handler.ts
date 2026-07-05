@@ -1,9 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
@@ -19,6 +21,7 @@ export class GetReleasePullRequestsPageHandler extends BaseQueryHandler<
   constructor(
     protected readonly db: IDatabaseService,
     private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
   ) {
@@ -29,21 +32,19 @@ export class GetReleasePullRequestsPageHandler extends BaseQueryHandler<
     query: GetReleasePullRequestsPageQuery,
     tx: TxClient,
   ): Promise<ReleasePullRequestsPageType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
     const release = await this.releaseRepository.findById(query.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.PULL_REQUEST,
-        __type: Subject.PULL_REQUEST,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: query.userId,
         projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.PULL_REQUEST,
+      },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(release.projectId, tx)
 

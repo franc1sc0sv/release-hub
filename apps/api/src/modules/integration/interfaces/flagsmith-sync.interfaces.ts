@@ -28,6 +28,7 @@ export interface IFlagsmithFlagMatrixFilters {
   sortDirection: SortDirection
   statuses: FlagDeploymentStatus[] | undefined
   activity: FlagActivityFilter | undefined
+  watchedEnvironments: string[]
   limit: number
   offset: number
 }

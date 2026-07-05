@@ -1,11 +1,13 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../interfaces/project.repository'
 import { ProjectType } from '../../types/project.type'
 import { toProjectType } from '../../types/project.mappers'
@@ -18,6 +20,7 @@ export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectComman
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
     private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -27,18 +30,16 @@ export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectComman
     tx: TxClient,
     events: IDomainEvent[],
   ): Promise<ProjectType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.MANAGE, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
+    await authorizeProjectAction(
+      this.orgRepository,
+      {
+        actorId: command.userId,
         projectId: command.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.MANAGE,
+        subjectKind: Subject.PROJECT,
+      },
+      tx,
+    )
 
     const existing = await this.projectRepository.findById(command.projectId, tx)
     if (!existing) throw new NotFoundException('Project')
@@ -49,6 +50,7 @@ export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectComman
         name: command.name,
         repo: command.repo,
         flagReminderIntervalDays: command.flagReminderIntervalDays,
+        conflictEnvironments: command.conflictEnvironments,
       },
       tx,
     )

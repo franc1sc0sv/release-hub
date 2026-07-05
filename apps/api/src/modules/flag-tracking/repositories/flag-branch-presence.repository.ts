@@ -3,6 +3,7 @@ import type { TxClient } from '@release-hub/db'
 import {
   IFlagBranchPresenceRepository,
   type IUpsertFlagBranchPresenceData,
+  type IUpsertFlagBranchPresenceResult,
 } from '../interfaces/flag-branch-presence.repository'
 import type { IFlagBranchPresence } from '../interfaces/flag-tracking.interfaces'
 
@@ -36,7 +37,15 @@ export class FlagBranchPresenceRepository extends IFlagBranchPresenceRepository 
     return toIFlagBranchPresence(row)
   }
 
-  upsertPresence = async (data: IUpsertFlagBranchPresenceData, tx: TxClient): Promise<IFlagBranchPresence> => {
+  upsertPresence = async (
+    data: IUpsertFlagBranchPresenceData,
+    tx: TxClient,
+  ): Promise<IUpsertFlagBranchPresenceResult> => {
+    const existing = await tx.flagBranchPresence.findUnique({
+      where: { trackedFlagId_branch: { trackedFlagId: data.trackedFlagId, branch: data.branch } },
+      select: { id: true },
+    })
+
     const row = await tx.flagBranchPresence.upsert({
       where: { trackedFlagId_branch: { trackedFlagId: data.trackedFlagId, branch: data.branch } },
       update: { present: data.present, headSha: data.headSha, lastConfirmedAt: new Date() },
@@ -47,7 +56,7 @@ export class FlagBranchPresenceRepository extends IFlagBranchPresenceRepository 
         headSha: data.headSha,
       },
     })
-    return toIFlagBranchPresence(row)
+    return { presence: toIFlagBranchPresence(row), isNew: existing === null }
   }
 
   markAbsentForMissingBranches = async (

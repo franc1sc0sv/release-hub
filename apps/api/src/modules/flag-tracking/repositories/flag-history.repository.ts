@@ -20,6 +20,9 @@ interface IFlagHistoryEventRow {
   newValue: string | null
   releaseId: string | null
   actorId: string | null
+  branchName: string | null
+  prNumber: number | null
+  detectedFile: string | null
   source: IFlagHistoryEvent['source']
   occurredAt: Date
   release: { name: string | null; compareRef: string } | null
@@ -41,6 +44,9 @@ function toIFlagHistoryEvent(row: IFlagHistoryEventRow): IFlagHistoryEvent {
     releaseName: row.release ? (row.release.name ?? row.release.compareRef) : null,
     actorId: row.actorId,
     actorName: row.actor?.name ?? null,
+    branchName: row.branchName,
+    prNumber: row.prNumber,
+    detectedFile: row.detectedFile,
     source: row.source,
     occurredAt: row.occurredAt,
   }
@@ -73,6 +79,9 @@ export class FlagHistoryRepository extends IFlagHistoryRepository {
         newValue: data.newValue ?? null,
         releaseId: data.releaseId ?? null,
         actorId: data.actorId ?? null,
+        branchName: data.branchName ?? null,
+        prNumber: data.prNumber ?? null,
+        detectedFile: data.detectedFile ?? null,
         source: data.source,
         occurredAt: data.occurredAt ?? new Date(),
       },
@@ -98,6 +107,9 @@ export class FlagHistoryRepository extends IFlagHistoryRepository {
         newValue: event.newValue ?? null,
         releaseId: event.releaseId ?? null,
         actorId: event.actorId ?? null,
+        branchName: event.branchName ?? null,
+        prNumber: event.prNumber ?? null,
+        detectedFile: event.detectedFile ?? null,
         source: event.source,
         occurredAt: event.occurredAt ?? new Date(),
       })),

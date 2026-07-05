@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
+import { OrganizationModule } from '../organization/organization.module'
 import { IAuthRepository } from './repositories/auth.repository.abstract'
 import { AuthRepository } from './repositories/auth.repository'
 import { AuthResolver } from './resolvers/auth.resolver'
@@ -22,6 +23,7 @@ import { JwtStrategy } from './strategies/jwt.strategy'
       secret: process.env.JWT_SECRET!,
     }),
     PassportModule,
+    OrganizationModule,
   ],
   providers: [
     AuthResolver,

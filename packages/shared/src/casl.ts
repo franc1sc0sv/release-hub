@@ -5,13 +5,17 @@ import {
   InferSubjects,
 } from '@casl/ability'
 
-export const ProjectRole = {
+export const OrgRole = {
   OWNER: 'owner',
   MEMBER: 'member',
   VIEWER: 'viewer',
 } as const
 
-export type ProjectRole = (typeof ProjectRole)[keyof typeof ProjectRole]
+export type OrgRole = (typeof OrgRole)[keyof typeof OrgRole]
+
+export const ProjectRole = OrgRole
+
+export type ProjectRole = OrgRole
 
 export const Action = {
   MANAGE: 'manage',
@@ -25,6 +29,7 @@ export type Action = (typeof Action)[keyof typeof Action]
 
 export const Subject = {
   USER: 'User',
+  ORGANIZATION: 'Organization',
   PROJECT: 'Project',
   RELEASE: 'Release',
   FEATURE: 'Feature',
@@ -40,38 +45,44 @@ export interface IUserSubject {
   __type: 'User'
 }
 
+export interface IOrganizationSubject {
+  __type: 'Organization'
+  organizationId: string
+}
+
 export interface IProjectSubject {
   __type: 'Project'
-  projectId: string
+  organizationId: string
 }
 
 export interface IReleaseSubject {
   __type: 'Release'
-  projectId: string
+  organizationId: string
 }
 
 export interface IFeatureSubject {
   __type: 'Feature'
-  projectId: string
+  organizationId: string
 }
 
 export interface IPullRequestSubject {
   __type: 'PullRequest'
-  projectId: string
+  organizationId: string
 }
 
 export interface IMembershipSubject {
   __type: 'Membership'
-  projectId: string
+  organizationId: string
 }
 
 export interface IInvitationSubject {
   __type: 'Invitation'
-  projectId: string
+  organizationId: string
 }
 
 type SubjectTypes = InferSubjects<
   | ({ kind: 'User' } & IUserSubject)
+  | ({ kind: 'Organization' } & IOrganizationSubject)
   | ({ kind: 'Project' } & IProjectSubject)
   | ({ kind: 'Release' } & IReleaseSubject)
   | ({ kind: 'Feature' } & IFeatureSubject)
@@ -82,10 +93,12 @@ type SubjectTypes = InferSubjects<
 
 export type AppAbility = MongoAbility<[Action, SubjectTypes | 'all']>
 
-export interface IProjectMembership {
-  projectId: string
-  role: ProjectRole
+export interface IOrgMembership {
+  organizationId: string
+  role: OrgRole
 }
+
+export type IProjectMembership = IOrgMembership
 
 const buildAbility = (builder: AbilityBuilder<AppAbility>): AppAbility =>
   builder.build({ detectSubjectType: (subject) => subject.kind })
@@ -96,6 +109,7 @@ export function defineGateAbility(): AppAbility {
 
   can(Action.READ, 'User')
   can(Action.UPDATE, 'User')
+  can(Action.MANAGE, 'Organization')
   can(Action.MANAGE, 'Project')
   can(Action.MANAGE, 'Release')
   can(Action.MANAGE, 'Feature')
@@ -106,7 +120,7 @@ export function defineGateAbility(): AppAbility {
   return buildAbility(builder)
 }
 
-export function defineAbilityFor(memberships: IProjectMembership[] = []): AppAbility {
+export function defineAbilityFor(memberships: IOrgMembership[] = []): AppAbility {
   const builder = new AbilityBuilder<AppAbility>(createMongoAbility)
   const { can } = builder
 
@@ -114,39 +128,42 @@ export function defineAbilityFor(memberships: IProjectMembership[] = []): AppAbi
   can(Action.UPDATE, 'Invitation')
 
   for (const membership of memberships) {
-    const { projectId, role: projectRole } = membership
+    const { organizationId, role } = membership
 
-    if (projectRole === ProjectRole.OWNER) {
-      can(Action.MANAGE, 'Project', { projectId })
-      can(Action.MANAGE, 'Release', { projectId })
-      can(Action.MANAGE, 'Feature', { projectId })
-      can(Action.MANAGE, 'PullRequest', { projectId })
-      can(Action.MANAGE, 'Membership', { projectId })
-      can(Action.MANAGE, 'Invitation', { projectId })
+    if (role === OrgRole.OWNER) {
+      can(Action.MANAGE, 'Organization', { organizationId })
+      can(Action.MANAGE, 'Project', { organizationId })
+      can(Action.MANAGE, 'Release', { organizationId })
+      can(Action.MANAGE, 'Feature', { organizationId })
+      can(Action.MANAGE, 'PullRequest', { organizationId })
+      can(Action.MANAGE, 'Membership', { organizationId })
+      can(Action.MANAGE, 'Invitation', { organizationId })
     }
 
-    if (projectRole === ProjectRole.MEMBER) {
-      can(Action.READ, 'Project', { projectId })
-      can(Action.CREATE, 'Release', { projectId })
-      can(Action.READ, 'Release', { projectId })
-      can(Action.UPDATE, 'Release', { projectId })
-      can(Action.DELETE, 'Release', { projectId })
-      can(Action.CREATE, 'Feature', { projectId })
-      can(Action.READ, 'Feature', { projectId })
-      can(Action.UPDATE, 'Feature', { projectId })
-      can(Action.DELETE, 'Feature', { projectId })
-      can(Action.READ, 'PullRequest', { projectId })
-      can(Action.UPDATE, 'PullRequest', { projectId })
-      can(Action.READ, 'Membership', { projectId })
-      can(Action.READ, 'Invitation', { projectId })
+    if (role === OrgRole.MEMBER) {
+      can(Action.READ, 'Organization', { organizationId })
+      can(Action.READ, 'Project', { organizationId })
+      can(Action.CREATE, 'Release', { organizationId })
+      can(Action.READ, 'Release', { organizationId })
+      can(Action.UPDATE, 'Release', { organizationId })
+      can(Action.DELETE, 'Release', { organizationId })
+      can(Action.CREATE, 'Feature', { organizationId })
+      can(Action.READ, 'Feature', { organizationId })
+      can(Action.UPDATE, 'Feature', { organizationId })
+      can(Action.DELETE, 'Feature', { organizationId })
+      can(Action.READ, 'PullRequest', { organizationId })
+      can(Action.UPDATE, 'PullRequest', { organizationId })
+      can(Action.READ, 'Membership', { organizationId })
+      can(Action.READ, 'Invitation', { organizationId })
     }
 
-    if (projectRole === ProjectRole.VIEWER) {
-      can(Action.READ, 'Project', { projectId })
-      can(Action.READ, 'Release', { projectId })
-      can(Action.READ, 'Feature', { projectId })
-      can(Action.READ, 'PullRequest', { projectId })
-      can(Action.READ, 'Membership', { projectId })
+    if (role === OrgRole.VIEWER) {
+      can(Action.READ, 'Organization', { organizationId })
+      can(Action.READ, 'Project', { organizationId })
+      can(Action.READ, 'Release', { organizationId })
+      can(Action.READ, 'Feature', { organizationId })
+      can(Action.READ, 'PullRequest', { organizationId })
+      can(Action.READ, 'Membership', { organizationId })
     }
   }
 

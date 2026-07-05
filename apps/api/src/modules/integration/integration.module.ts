@@ -3,9 +3,14 @@ import { CqrsModule } from '@nestjs/cqrs'
 import { ProjectModule } from '../project/project.module'
 import { LinearAuthModule } from '../linear-auth/linear-auth.module'
 import { FlagHistoryModule } from '../flag-tracking/flag-history.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { IntegrationResolver } from './resolvers/integration.resolver'
 import { IGitHubClient } from './interfaces/github-client.interface'
 import { GitHubClient } from './github.client'
+import { IGithubAppAuth } from './interfaces/github-app-auth.abstract'
+import { GithubAppAuthService } from './github-app-auth.service'
+import { IGithubTokenResolver } from './interfaces/github-token-resolver.abstract'
+import { GithubTokenResolverService } from './github-token-resolver.service'
 import { IFlagsmithClient } from './interfaces/flagsmith-client.abstract'
 import { FlagsmithClient } from './clients/flagsmith.client'
 import { ITicketSource } from './interfaces/ticket-source.abstract'
@@ -17,6 +22,7 @@ import { GithubConnectionRepository } from '../github-auth/repositories/github-c
 import { IFlagsmithFlagRepository } from './interfaces/flagsmith-flag.repository'
 import { FlagsmithFlagRepository } from './repositories/flagsmith-flag.repository'
 import { GetFlagsHandler } from './queries/get-flags/get-flags.handler'
+import { GetFlagsmithEnvironmentsHandler } from './queries/get-flagsmith-environments/get-flagsmith-environments.handler'
 import { CompareFlagsHandler } from './queries/compare-flags/compare-flags.handler'
 import { GetConnectionSettingsHandler } from './queries/get-connection-settings/get-connection-settings.handler'
 import { GetFlagsmithProjectsHandler } from './queries/get-flagsmith-projects/get-flagsmith-projects.handler'
@@ -31,16 +37,19 @@ import { HandleFlagsmithWebhookHandler } from './commands/handle-flagsmith-webho
 import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, LinearAuthModule, FlagHistoryModule],
+  imports: [CqrsModule, ProjectModule, LinearAuthModule, FlagHistoryModule, OrganizationModule],
   providers: [
     IntegrationResolver,
     { provide: IGitHubClient, useClass: GitHubClient },
+    { provide: IGithubAppAuth, useClass: GithubAppAuthService },
+    { provide: IGithubTokenResolver, useClass: GithubTokenResolverService },
     { provide: IFlagsmithClient, useClass: FlagsmithClient },
     { provide: ITicketSource, useClass: LinearTicketSource },
     { provide: ITicketLinkRepository, useClass: TicketLinkRepository },
     { provide: IGithubConnectionRepository, useClass: GithubConnectionRepository },
     { provide: IFlagsmithFlagRepository, useClass: FlagsmithFlagRepository },
     GetFlagsHandler,
+    GetFlagsmithEnvironmentsHandler,
     CompareFlagsHandler,
     GetConnectionSettingsHandler,
     GetFlagsmithProjectsHandler,
@@ -54,6 +63,13 @@ import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
     HandleFlagsmithWebhookHandler,
     FlagsmithConnectedHandler,
   ],
-  exports: [IGitHubClient, ITicketSource, ITicketLinkRepository, IFlagsmithFlagRepository],
+  exports: [
+    IGitHubClient,
+    IGithubAppAuth,
+    IGithubTokenResolver,
+    ITicketSource,
+    ITicketLinkRepository,
+    IFlagsmithFlagRepository,
+  ],
 })
 export class IntegrationModule {}

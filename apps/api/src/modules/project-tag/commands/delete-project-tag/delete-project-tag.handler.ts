@@ -1,12 +1,13 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectTagRepository } from '../../interfaces/project-tag.repository'
 import { DeleteProjectTagCommand } from './delete-project-tag.command'
 
@@ -15,7 +16,7 @@ export class DeleteProjectTagHandler extends BaseCommandHandler<DeleteProjectTag
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
-    private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly projectTagRepository: IProjectTagRepository,
   ) {
     super(db, eventEmitter)
@@ -29,18 +30,11 @@ export class DeleteProjectTagHandler extends BaseCommandHandler<DeleteProjectTag
     const tag = await this.projectTagRepository.findById(command.tagId, tx)
     if (!tag) throw new NotFoundException('ProjectTag')
 
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
-        projectId: tag.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.orgRepository,
+      { actorId: command.userId, projectId: tag.projectId, action: Action.UPDATE, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const features = await tx.feature.findMany({
       where: { projectId: tag.projectId, deletedAt: null, tags: { has: tag.name } },

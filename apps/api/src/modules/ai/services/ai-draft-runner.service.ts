@@ -10,6 +10,7 @@ import { IAiRepository } from '../interfaces/ai.repository'
 import { IAiProvider } from '../interfaces/ai-provider.abstract'
 import type { IAiFeatureContext } from '../interfaces/ai.repository'
 import type { IAiUsage } from '../interfaces/ai-provider.abstract'
+import { isAiEnabled } from '../../../common/config/ai-availability'
 
 const CONFIDENCE_THRESHOLD = 0.5
 const DRAFT_CONCURRENCY = 5
@@ -70,6 +71,17 @@ export class AiDraftRunner {
     projectId: string,
     { resume }: { resume: boolean },
   ): Promise<void> {
+    if (!isAiEnabled()) {
+      await this.db.$transaction((tx) =>
+        this.releaseRepository.updateAiDraftStatus(releaseId, AiDraftStatus.READY, tx),
+      )
+      this.logger.info(
+        { event: LogEvent.AI_DRAFT_COMPLETED, releaseId, projectId, status: AiDraftStatus.READY, reason: 'ai-disabled' },
+        LogEvent.AI_DRAFT_COMPLETED,
+      )
+      return
+    }
+
     await this.db.$transaction((tx) =>
       this.releaseRepository.updateAiDraftStatus(releaseId, AiDraftStatus.RUNNING, tx),
     )

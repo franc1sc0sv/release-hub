@@ -1,7 +1,11 @@
 import { Field, ObjectType } from '@nestjs/graphql'
+import { GithubAuthMode } from '../../../common/types/github-auth-mode.enum'
 
 @ObjectType()
 export class ConnectionSettingsType {
+  @Field(() => GithubAuthMode)
+  githubAuthMode: GithubAuthMode
+
   @Field(() => Boolean)
   githubConnected: boolean
 
@@ -26,6 +30,6 @@ export class ConnectionSettingsType {
   @Field(() => Boolean)
   githubWebhookSecretSet: boolean
 
-  @Field(() => String)
-  githubWebhookPath: string
+  @Field(() => String, { nullable: true })
+  githubWebhookPath: string | null
 }

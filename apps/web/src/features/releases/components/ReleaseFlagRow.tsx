@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
@@ -19,6 +19,7 @@ interface ReleaseFlagRowProps {
 export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: ReleaseFlagRowProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   const prLinks = Array.from(
     new Map(flag.changes.map((change) => [change.prNumber, change])).values(),
@@ -28,7 +29,11 @@ export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: Rel
     <div className="flex flex-wrap items-center gap-3 border-t border-border py-3 first:border-t-0 first:pt-0">
       <div className="min-w-0 flex-1 space-y-1">
         <Link
-          to={ROUTES.FLAG_DETAIL.replace(':flagKey', flag.key)}
+          to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+            organizationId: organizationId ?? '',
+            projectId: projectId ?? '',
+            flagKey: flag.key,
+          })}
           className="font-mono text-sm font-medium text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {flag.key}
@@ -36,7 +41,11 @@ export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: Rel
         <div className="flex flex-wrap items-center gap-2">
           {flag.feature && (
             <Link
-              to={ROUTES.FEATURES_DETAIL.replace(':id', flag.feature.id)}
+              to={generatePath(ROUTES.PROJECT_FEATURE_DETAIL, {
+                organizationId: organizationId ?? '',
+                projectId: projectId ?? '',
+                id: flag.feature.id,
+              })}
               className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {flag.feature.name}

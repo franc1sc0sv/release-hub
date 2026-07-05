@@ -22,6 +22,7 @@ import {
 import { GET_RELEASE_TREE, GET_COVERAGE } from '../graphql/releases.queries'
 import { AiDraftStatusValue } from '../constants/release-enums'
 import { FeatureKindValue } from '@/features/features/constants/feature-enums'
+import { isAiEnabled } from '@/lib/ai-availability'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
 
 type ReleaseNode = GetReleaseTreeQuery['getReleaseTree']['release']
@@ -36,6 +37,7 @@ interface DraftTabProps {
 export function DraftTab({ release, features, projectId }: DraftTabProps) {
   const { t } = useTranslation('releases')
   const reduceMotion = useReducedMotion()
+  const aiEnabled = isAiEnabled()
 
   const isDrafting =
     release.aiDraftStatus === AiDraftStatusValue.PENDING ||
@@ -124,6 +126,17 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
         <p className="text-sm text-destructive" role="alert">
           {t('draft.confirmError')}
         </p>
+      )}
+
+      {!aiEnabled && (
+        <motion.div
+          variants={slideUp}
+          className="flex items-center gap-2 rounded-[var(--radius-card)] border border-white/12 bg-white/4 px-4 py-3"
+          role="status"
+        >
+          <Layers className="size-4 shrink-0 text-indigo-400" aria-hidden />
+          <span className="text-sm text-muted-foreground">{t('draft.manualAssignHint')}</span>
+        </motion.div>
       )}
 
       <motion.div variants={slideUp}>

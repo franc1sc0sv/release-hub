@@ -52,11 +52,6 @@ export const RUN_FLAG_COVERAGE_FOR_FLAG = graphql(`
         action
         detectedFile
       }
-      events {
-        type
-        description
-        occurredAt
-      }
     }
   }
 `)

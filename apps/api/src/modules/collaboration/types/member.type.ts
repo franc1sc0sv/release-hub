@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
-import { ProjectRole } from '../../../common/types/project-role.enum'
+import { OrgRole } from '../../../common/types/org-role.enum'
 
 @ObjectType()
 export class MemberType {
@@ -10,10 +10,10 @@ export class MemberType {
   userId: string
 
   @Field(() => ID)
-  projectId: string
+  organizationId: string
 
-  @Field(() => ProjectRole)
-  role: ProjectRole
+  @Field(() => OrgRole)
+  role: OrgRole
 
   @Field(() => String)
   name: string

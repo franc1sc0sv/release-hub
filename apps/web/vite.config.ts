@@ -27,6 +27,7 @@ export default defineConfig({
   },
   server: {
     headers: crossOriginHeaders,
+    allowedHosts: ['.ngrok-free.app'],
   },
   preview: {
     headers: crossOriginHeaders,

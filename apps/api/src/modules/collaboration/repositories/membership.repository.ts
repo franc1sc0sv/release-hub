@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { ProjectRole } from '@release-hub/shared'
+import { OrgRole } from '@release-hub/db'
 import { IMembershipRepository } from '../interfaces/collaboration.repository'
 import type { IMembership, IMemberProfile, IUpdateMembershipData } from '../interfaces/collaboration.interfaces'
 
 @Injectable()
 export class MembershipRepository extends IMembershipRepository {
   findById = async (id: string, tx: TxClient): Promise<IMembership | null> => {
-    const row = await tx.membership.findUnique({ where: { id } })
+    const row = await tx.organizationMembership.findUnique({ where: { id } })
     if (!row) return null
     return this.toIMembership(row)
   }
 
   findProfileById = async (id: string, tx: TxClient): Promise<IMemberProfile | null> => {
-    const row = await tx.membership.findUnique({
+    const row = await tx.organizationMembership.findUnique({
       where: { id },
       include: { user: { select: { name: true, email: true, avatarUrl: true } } },
     })
@@ -21,7 +21,7 @@ export class MembershipRepository extends IMembershipRepository {
     return {
       id: row.id,
       userId: row.userId,
-      projectId: row.projectId,
+      organizationId: row.organizationId,
       role: row.role,
       name: row.user.name,
       email: row.user.email,
@@ -31,38 +31,40 @@ export class MembershipRepository extends IMembershipRepository {
     }
   }
 
-  findByProjectAndUser = async (
-    projectId: string,
+  findByOrgAndUser = async (
+    organizationId: string,
     userId: string,
     tx: TxClient,
   ): Promise<IMembership | null> => {
-    const row = await tx.membership.findUnique({ where: { userId_projectId: { userId, projectId } } })
-    if (!row) return null
-    return this.toIMembership(row)
-  }
-
-  findByProjectAndEmail = async (
-    projectId: string,
-    email: string,
-    tx: TxClient,
-  ): Promise<IMembership | null> => {
-    const row = await tx.membership.findFirst({
-      where: { projectId, user: { email: { equals: email, mode: 'insensitive' }, deletedAt: null } },
+    const row = await tx.organizationMembership.findUnique({
+      where: { userId_organizationId: { userId, organizationId } },
     })
     if (!row) return null
     return this.toIMembership(row)
   }
 
-  findAllByProject = async (projectId: string, tx: TxClient): Promise<IMemberProfile[]> => {
-    const rows = await tx.membership.findMany({
-      where: { projectId },
+  findByOrgAndEmail = async (
+    organizationId: string,
+    email: string,
+    tx: TxClient,
+  ): Promise<IMembership | null> => {
+    const row = await tx.organizationMembership.findFirst({
+      where: { organizationId, user: { email: { equals: email, mode: 'insensitive' }, deletedAt: null } },
+    })
+    if (!row) return null
+    return this.toIMembership(row)
+  }
+
+  findAllByOrganization = async (organizationId: string, tx: TxClient): Promise<IMemberProfile[]> => {
+    const rows = await tx.organizationMembership.findMany({
+      where: { organizationId },
       include: { user: { select: { name: true, email: true, avatarUrl: true } } },
       orderBy: { createdAt: 'asc' },
     })
     return rows.map((row) => ({
       id: row.id,
       userId: row.userId,
-      projectId: row.projectId,
+      organizationId: row.organizationId,
       role: row.role,
       name: row.user.name,
       email: row.user.email,
@@ -72,41 +74,41 @@ export class MembershipRepository extends IMembershipRepository {
     }))
   }
 
-  countOwners = async (projectId: string, tx: TxClient): Promise<number> => {
-    return tx.membership.count({ where: { projectId, role: ProjectRole.OWNER } })
+  countOwners = async (organizationId: string, tx: TxClient): Promise<number> => {
+    return tx.organizationMembership.count({ where: { organizationId, role: OrgRole.owner } })
   }
 
   create = async (
     userId: string,
-    projectId: string,
-    role: ProjectRole,
+    organizationId: string,
+    role: OrgRole,
     tx: TxClient,
   ): Promise<IMembership> => {
-    const row = await tx.membership.create({ data: { userId, projectId, role } })
+    const row = await tx.organizationMembership.create({ data: { userId, organizationId, role } })
     return this.toIMembership(row)
   }
 
   update = async (id: string, data: IUpdateMembershipData, tx: TxClient): Promise<IMembership> => {
-    const row = await tx.membership.update({ where: { id }, data: { role: data.role } })
+    const row = await tx.organizationMembership.update({ where: { id }, data: { role: data.role } })
     return this.toIMembership(row)
   }
 
   delete = async (id: string, tx: TxClient): Promise<void> => {
-    await tx.membership.delete({ where: { id } })
+    await tx.organizationMembership.delete({ where: { id } })
   }
 
   private toIMembership(row: {
     id: string
     userId: string
-    projectId: string
-    role: ProjectRole
+    organizationId: string
+    role: OrgRole
     createdAt: Date
     updatedAt: Date
   }): IMembership {
     return {
       id: row.id,
       userId: row.userId,
-      projectId: row.projectId,
+      organizationId: row.organizationId,
       role: row.role,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

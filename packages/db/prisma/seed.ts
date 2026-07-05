@@ -61,6 +61,12 @@ async function seedUsers() {
 }
 
 async function seedProjects(adminId: string, aliceId: string, bobId: string, carolId: string) {
+  const org = await prisma.organization.upsert({
+    where: { id: 'seed-org-purco' },
+    update: {},
+    create: { id: 'seed-org-purco', name: 'PurCo', slug: 'purco' },
+  })
+
   const purco = await prisma.project.upsert({
     where: { id: 'seed-project-purco' },
     update: {},
@@ -68,6 +74,7 @@ async function seedProjects(adminId: string, aliceId: string, bobId: string, car
       id: 'seed-project-purco',
       name: 'PurCo Platform',
       repo: 'purco-org/platform',
+      organizationId: org.id,
       flagsmithEnabled: false,
       linearEnabled: false,
     },
@@ -80,46 +87,26 @@ async function seedProjects(adminId: string, aliceId: string, bobId: string, car
       id: 'seed-project-sdi',
       name: 'SDI Services',
       repo: 'sdi-org/services',
+      organizationId: org.id,
       flagsmithEnabled: false,
       linearEnabled: false,
     },
   })
 
-  await prisma.membership.upsert({
-    where: { userId_projectId: { userId: adminId, projectId: purco.id } },
-    update: {},
-    create: { userId: adminId, projectId: purco.id, role: 'owner' },
-  })
+  const orgMembers: Array<{ userId: string; role: 'owner' | 'member' | 'viewer' }> = [
+    { userId: adminId, role: 'owner' },
+    { userId: aliceId, role: 'member' },
+    { userId: bobId, role: 'member' },
+    { userId: carolId, role: 'viewer' },
+  ]
 
-  await prisma.membership.upsert({
-    where: { userId_projectId: { userId: aliceId, projectId: purco.id } },
-    update: {},
-    create: { userId: aliceId, projectId: purco.id, role: 'member' },
-  })
-
-  await prisma.membership.upsert({
-    where: { userId_projectId: { userId: bobId, projectId: purco.id } },
-    update: {},
-    create: { userId: bobId, projectId: purco.id, role: 'member' },
-  })
-
-  await prisma.membership.upsert({
-    where: { userId_projectId: { userId: carolId, projectId: purco.id } },
-    update: {},
-    create: { userId: carolId, projectId: purco.id, role: 'viewer' },
-  })
-
-  await prisma.membership.upsert({
-    where: { userId_projectId: { userId: adminId, projectId: sdi.id } },
-    update: {},
-    create: { userId: adminId, projectId: sdi.id, role: 'owner' },
-  })
-
-  await prisma.membership.upsert({
-    where: { userId_projectId: { userId: aliceId, projectId: sdi.id } },
-    update: {},
-    create: { userId: aliceId, projectId: sdi.id, role: 'member' },
-  })
+  for (const member of orgMembers) {
+    await prisma.organizationMembership.upsert({
+      where: { userId_organizationId: { userId: member.userId, organizationId: org.id } },
+      update: {},
+      create: { userId: member.userId, organizationId: org.id, role: member.role },
+    })
+  }
 
   return { purco, sdi }
 }

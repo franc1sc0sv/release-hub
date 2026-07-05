@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
+import { GithubAuthMode, GithubInstallationStatus } from '@release-hub/db'
 import { IWebhookProjectRepository } from '../interfaces/webhook-project.repository'
 import type { IWebhookProjectSecrets } from '../interfaces/webhook-project.interfaces'
 
@@ -15,5 +16,28 @@ export class WebhookProjectRepository extends IWebhookProjectRepository {
       flagsmithWebhookSecret: row.flagsmithWebhookSecret,
       githubWebhookSecret: row.githubWebhookSecret,
     }
+  }
+
+  findProjectByRepoAndInstallation = async (
+    fullName: string,
+    installationId: number,
+    tx: TxClient,
+  ): Promise<string | null> => {
+    const installation = await tx.githubInstallation.findFirst({
+      where: { installationId: BigInt(installationId), status: GithubInstallationStatus.active },
+      select: { organizationId: true },
+    })
+    if (!installation?.organizationId) return null
+
+    const project = await tx.project.findFirst({
+      where: {
+        repo: fullName,
+        organizationId: installation.organizationId,
+        githubAuthMode: GithubAuthMode.installation,
+        deletedAt: null,
+      },
+      select: { id: true },
+    })
+    return project?.id ?? null
   }
 }

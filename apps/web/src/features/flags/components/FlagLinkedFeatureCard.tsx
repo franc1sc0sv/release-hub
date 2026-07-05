@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { ChevronRight, Layers } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,6 +14,7 @@ interface FlagLinkedFeatureCardProps {
 
 export function FlagLinkedFeatureCard({ feature }: FlagLinkedFeatureCardProps) {
   const { t } = useTranslation('flags')
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   return (
     <GlassCard>
@@ -25,7 +26,11 @@ export function FlagLinkedFeatureCard({ feature }: FlagLinkedFeatureCardProps) {
       <CardContent>
         {feature ? (
           <Link
-            to={ROUTES.FEATURES_DETAIL.replace(':id', feature.id)}
+            to={generatePath(ROUTES.PROJECT_FEATURE_DETAIL, {
+              organizationId: organizationId ?? '',
+              projectId: projectId ?? '',
+              id: feature.id,
+            })}
             className="flex items-center gap-3 rounded-[var(--radius-button)] py-1 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20">

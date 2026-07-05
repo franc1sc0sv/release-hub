@@ -168,6 +168,11 @@ type CommitType {
   sha: String!
 }
 
+input CompleteGithubInstallationInput {
+  installationId: String!
+  state: String!
+}
+
 input ConfirmReleaseInput {
   releaseId: ID!
 }
@@ -185,8 +190,9 @@ type ConnectionSettingsType {
   flagsmithUrl: String
   flagsmithWebhookPath: String!
   flagsmithWebhookSecretSet: Boolean!
+  githubAuthMode: GithubAuthMode!
   githubConnected: Boolean!
-  githubWebhookPath: String!
+  githubWebhookPath: String
   githubWebhookSecretSet: Boolean!
   linearConnected: Boolean!
 }
@@ -210,8 +216,15 @@ input CreateGithubBranchInput {
   projectId: ID!
 }
 
-input CreateProjectInput {
+input CreateOrganizationInput {
   name: String!
+}
+
+input CreateProjectInput {
+  githubAuthMode: GithubAuthMode
+  githubInstallationId: String
+  name: String!
+  organizationId: ID!
   repo: String!
 }
 
@@ -400,10 +413,13 @@ type FlagEnvironmentStateType {
 
 type FlagHistoryEventEntryType {
   actorName: String
+  branchName: String
+  detectedFile: String
   environmentName: String
   id: ID!
   newValue: String
   occurredAt: DateTime!
+  prNumber: Int
   previousValue: String
   releaseId: ID
   releaseName: String
@@ -417,6 +433,9 @@ enum FlagHistoryEventType {
   DECISION_ENABLE_IN_RELEASE
   DECISION_IN_PROGRESS
   DECISION_SHIP_OFF
+  DETECTED_DEFINITION
+  DETECTED_USAGE
+  FIRST_SEEN_BRANCH
   FLAG_CREATED
   FLAG_DELETED
   FLAG_DISABLED
@@ -515,6 +534,11 @@ input GetFlagsInput {
   statuses: [FlagDeploymentStatus!]
 }
 
+enum GithubAuthMode {
+  installation
+  oauth
+}
+
 type GithubBranchSearchItemType {
   name: String!
   protected: Boolean!
@@ -534,6 +558,11 @@ type GithubBranchType {
 type GithubConnectionStatus {
   connected: Boolean!
   githubLogin: String
+}
+
+type GithubInstallResultType {
+  connected: Boolean!
+  organizationId: ID!
 }
 
 type GithubRepositoryType {
@@ -573,16 +602,16 @@ type InvitationType {
   expiresAt: DateTime!
   id: ID!
   invitedById: ID!
-  projectId: ID!
-  role: ProjectRole!
+  organizationId: ID!
+  role: OrgRole!
   status: InvitationStatus!
   updatedAt: DateTime!
 }
 
 input InviteMemberInput {
   email: String!
-  projectId: ID!
-  role: ProjectRole!
+  organizationId: ID!
+  role: OrgRole!
 }
 
 type LinearConnectionStatus {
@@ -617,8 +646,8 @@ type MemberType {
   email: String!
   id: ID!
   name: String!
-  projectId: ID!
-  role: ProjectRole!
+  organizationId: ID!
+  role: OrgRole!
   updatedAt: DateTime!
   userId: ID!
 }
@@ -628,15 +657,18 @@ type Mutation {
   acceptSuggestedFeature(input: AcceptSuggestedFeatureInput!): FeatureType!
   assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
   blockBranch(input: BlockBranchInput!): BlockedBranchType!
+  completeGithubInstallation(input: CompleteGithubInstallationInput!): GithubInstallResultType!
   confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
   confirmReleaseAdditions(releaseId: ID!): ReleaseObjectType!
   createFeature(input: CreateFeatureInput!): FeatureType!
   createGithubBranch(input: CreateGithubBranchInput!): GithubBranchType!
+  createOrganization(input: CreateOrganizationInput!): OrganizationType!
   createProject(input: CreateProjectInput!): ProjectType!
   createProjectTag(input: CreateProjectTagInput!): ProjectTagType!
   createRelease(input: CreateReleaseInput!): ReleaseObjectType!
   deleteFeature(id: ID!): Boolean!
   deleteGithubBranches(input: DeleteGithubBranchesInput!): [DeleteBranchOutcomeType!]!
+  deleteOrganization(organizationId: ID!): Boolean!
   deleteProject(id: ID!): Boolean!
   deleteProjectTag(input: DeleteProjectTagInput!): Boolean!
   deleteRelease(releaseId: ID!): ReleaseObjectType!
@@ -681,6 +713,7 @@ type Mutation {
   updateConnectionSettings(input: UpdateConnectionSettingsInput!): ConnectionSettingsType!
   updateMemberRole(input: UpdateMemberRoleInput!): MemberType!
   updateNotificationPreference(input: UpdateNotificationPreferenceInput!): NotificationPreferenceEntryType!
+  updateOrganization(input: UpdateOrganizationInput!): OrganizationType!
   updateProject(input: UpdateProjectInput!): ProjectType!
   updateRelease(input: UpdateReleaseInput!): ReleaseObjectType!
   updateSlackNotificationSettings(notifyOnCreated: Boolean!, notifyOnDeployed: Boolean!, notifyOnShipped: Boolean!, projectId: ID!): SlackConnectionStatus!
@@ -740,6 +773,32 @@ type NotificationsPageType {
   totalCount: Int!
 }
 
+enum OrgRole {
+  member
+  owner
+  viewer
+}
+
+type OrganizationMemberType {
+  avatarUrl: String
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+  organizationId: ID!
+  role: OrgRole!
+  updatedAt: DateTime!
+  userId: ID!
+}
+
+type OrganizationType {
+  githubConnected: Boolean!
+  id: ID!
+  name: String!
+  role: OrgRole!
+  slug: String
+}
+
 input PrAssignmentInput {
   featureId: ID
   pullRequestId: ID!
@@ -752,12 +811,6 @@ type ProjectIntegrationsType {
   slack: Boolean!
 }
 
-enum ProjectRole {
-  MEMBER
-  OWNER
-  VIEWER
-}
-
 type ProjectTagType {
   color: String
   createdAt: DateTime!
@@ -766,12 +819,15 @@ type ProjectTagType {
 }
 
 type ProjectType {
+  conflictEnvironments: [String!]!
   connectionHealth: ConnectionHealthType!
   createdAt: DateTime!
   flagReminderIntervalDays: Int!
+  githubAuthMode: GithubAuthMode!
   id: ID!
   integrations: ProjectIntegrationsType!
   name: String!
+  organizationId: ID!
   ownerId: String!
   repo: String!
   updatedAt: DateTime!
@@ -809,11 +865,13 @@ type Query {
   flagDetail(key: String!, projectId: ID!): FlagDetailType
   flagHistory(input: GetFlagHistoryInput!): FlagHistoryPageType!
   flagRegistry(projectId: ID!): FlagRegistryConfigType!
+  flagsmithEnvironments(projectId: ID!): [String!]!
   flagsmithProjects(apiKey: String!, projectId: ID!, url: String!): [FlagsmithProjectType!]!
   getConnectionSettings(projectId: ID!): ConnectionSettingsType!
   getCoverage(releaseId: ID!): CoverageType!
   getFeature(id: ID!): FeatureDetailType!
   getFlags(input: GetFlagsInput!): FlagsResultType!
+  getOrganization(organizationId: ID!): OrganizationType!
   getProject(id: ID!): ProjectType!
   getRelease(id: ID!): ReleaseObjectType!
   getReleaseTree(id: ID!): ReleaseTreeType!
@@ -821,15 +879,19 @@ type Query {
   githubAuthorizeUrl: String!
   githubBranches(projectId: ID!): [GithubBranchType!]!
   githubConnection: GithubConnectionStatus!
+  githubInstallUrl(organizationId: String, projectId: String): String!
+  githubInstallationRepositories(organizationId: ID!): [GithubRepositoryType!]!
   githubRepositories: [GithubRepositoryType!]!
   inProgressFlagReminders(excludeReleaseId: ID, projectId: ID!): [InProgressFlagReminderType!]!
   linearAuthorizeUrl(projectId: ID!): String!
   linearConnection(projectId: ID!): LinearConnectionStatus!
   listFeaturesPage(input: ListFeaturesPageInput!): FeaturePageType!
-  listInvitations(projectId: ID!): [InvitationType!]!
-  listMembers(projectId: ID!): [MemberType!]!
+  listInvitations(organizationId: ID!): [InvitationType!]!
+  listMembers(organizationId: ID!): [MemberType!]!
+  listOrgMembers(organizationId: ID!): [OrganizationMemberType!]!
   listProjects: [ProjectType!]!
   me: UserProfileType!
+  myOrganizations: [OrganizationType!]!
   notificationPreferences(projectId: ID!): [NotificationPreferenceEntryType!]!
   notifications(input: NotificationsPageInput!): NotificationsPageType!
   projectTags(projectId: ID!): [ProjectTagType!]!
@@ -1089,19 +1151,12 @@ type TrackedFlagDeliveryType {
 type TrackedFlagDetailType {
   branchPresences: [FlagBranchPresenceDetailType!]!
   delivery: TrackedFlagDeliveryType!
-  events: [TrackedFlagEventType!]!
   feature: TrackedFlagFeatureType
   id: ID!
   key: String!
   presentInCode: Boolean!
   pullRequestChanges: [TrackedFlagPullRequestChangeType!]!
   releases: [TrackedFlagReleaseType!]!
-}
-
-type TrackedFlagEventType {
-  description: String!
-  occurredAt: DateTime!
-  type: String!
 }
 
 type TrackedFlagFeatureType {
@@ -1151,7 +1206,7 @@ input UpdateConnectionSettingsInput {
 
 input UpdateMemberRoleInput {
   membershipId: ID!
-  role: ProjectRole!
+  role: OrgRole!
 }
 
 input UpdateNotificationPreferenceInput {
@@ -1162,7 +1217,13 @@ input UpdateNotificationPreferenceInput {
   projectId: ID!
 }
 
+input UpdateOrganizationInput {
+  name: String!
+  organizationId: ID!
+}
+
 input UpdateProjectInput {
+  conflictEnvironments: [String!]
   flagReminderIntervalDays: Int
   id: ID!
   name: String

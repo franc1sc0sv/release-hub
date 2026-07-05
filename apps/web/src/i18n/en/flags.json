@@ -153,15 +153,6 @@
       "empty": "Not connected to Flagsmith yet.",
       "updated": "Updated {{time}}"
     },
-    "branches": {
-      "title": "Branch presence",
-      "present": "Present",
-      "absent": "Absent",
-      "firstSeen": "First seen {{time}}",
-      "lastConfirmed": "Confirmed {{time}}",
-      "rescan": "Re-scan",
-      "empty": "Not detected in any branch yet."
-    },
     "linkedFeature": {
       "title": "Linked feature",
       "empty": "Not linked to a feature yet."
@@ -170,18 +161,9 @@
       "title": "Appears in releases",
       "empty": "Not part of any release yet."
     },
-    "pullRequests": {
-      "title": "Changed in PRs",
-      "empty": "No pull request changes detected yet.",
-      "openGitHub": "Open PR #{{number}} on GitHub: {{title}}"
-    },
-    "decisionTimeline": {
-      "title": "Decision timeline",
-      "empty": "No release decisions made yet."
-    },
     "history": {
-      "title": "History",
-      "empty": "History will appear here as events occur.",
+      "title": "Timeline",
+      "empty": "Activity will appear here as events occur.",
       "event": {
         "valueChange": "{{previous}} → {{next}}"
       }

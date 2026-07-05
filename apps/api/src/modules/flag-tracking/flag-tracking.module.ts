@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { ProjectModule } from '../project/project.module'
 import { IntegrationModule } from '../integration/integration.module'
-import { GithubAuthModule } from '../github-auth/github-auth.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { ReleaseModule } from '../release/release.module'
 import { FlagHistoryModule } from './flag-history.module'
 import { FlagTrackingResolver } from './resolvers/flag-tracking.resolver'
@@ -31,7 +31,7 @@ import { GetFlagDetailHandler } from './queries/get-flag-detail/get-flag-detail.
     CqrsModule,
     ProjectModule,
     IntegrationModule,
-    GithubAuthModule,
+    OrganizationModule,
     FlagHistoryModule,
     forwardRef(() => ReleaseModule),
   ],

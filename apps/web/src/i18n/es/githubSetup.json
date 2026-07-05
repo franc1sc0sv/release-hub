@@ -1,0 +1,34 @@
+{
+  "title": "Configuración de GitHub",
+  "processing": {
+    "heading": "Terminando la configuración…",
+    "description": "Estamos conectando tu instalación de GitHub con Release Hub. Esto solo tomará un momento."
+  },
+  "success": {
+    "heading": "GitHub conectado",
+    "description": "La GitHub App está instalada y tu organización está lista para usarse.",
+    "ctaSettings": "Ir a configuración de la organización",
+    "ctaWorkspace": "Ir al espacio de trabajo"
+  },
+  "error": {
+    "heading": "Algo salió mal",
+    "description": "No pudimos completar la instalación de GitHub. Por favor intenta de nuevo.",
+    "retry": "Intentar la configuración de nuevo",
+    "workspace": "Ir al espacio de trabajo"
+  },
+  "signIn": {
+    "heading": "Inicia sesión para continuar",
+    "description": "Inicia sesión en tu cuenta de Release Hub para terminar de conectar GitHub.",
+    "cta": "Iniciar sesión"
+  },
+  "invalid": {
+    "heading": "Enlace de configuración inválido",
+    "description": "Este enlace de configuración de GitHub no tiene la información necesaria. Por favor reinicia la instalación desde tu espacio de trabajo.",
+    "workspace": "Ir al espacio de trabajo"
+  },
+  "pending": {
+    "heading": "Aprobación pendiente",
+    "description": "Tu solicitud de instalación de GitHub fue enviada a los administradores de GitHub de la organización. Tendrás acceso una vez que sea aprobada.",
+    "workspace": "Ir al espacio de trabajo"
+  }
+}

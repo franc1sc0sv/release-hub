@@ -1,9 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { ILinearConnectionRepository } from '../../../linear-auth/interfaces/linear-connection.repository'
 import { decryptToken } from '../../../../common/crypto/token-cipher'
@@ -20,6 +22,7 @@ export class EnrichPrTicketsHandler extends BaseQueryHandler<
 > {
   constructor(
     protected readonly db: IDatabaseService,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly ticketSource: ITicketSource,
     private readonly ticketLinkRepository: ITicketLinkRepository,
@@ -32,17 +35,11 @@ export class EnrichPrTicketsHandler extends BaseQueryHandler<
     query: EnrichPrTicketsQuery,
     tx: TxClient,
   ): Promise<ITicketEnrichmentResult[]> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    const pullRequestSubject = {
-      kind: Subject.PULL_REQUEST,
-      __type: Subject.PULL_REQUEST,
-      projectId: query.projectId,
-    }
-    if (!ability.can(Action.READ, pullRequestSubject)) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: query.userId, projectId: query.projectId, action: Action.READ, subjectKind: Subject.PULL_REQUEST },
+      tx,
+    )
 
     const project = await this.projectRepository.findById(query.projectId, tx)
     if (!project) throw new NotFoundException('Project')

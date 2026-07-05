@@ -1,20 +1,21 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
 import { FlagAction, FlagReferenceKind } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { decryptToken } from '../../../../common/crypto/token-cipher'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
-import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
+import { IGithubTokenResolver } from '../../../integration/interfaces/github-token-resolver.abstract'
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
 import { IPullRequestFlagChangeRepository } from '../../interfaces/pull-request-flag-change.repository'
 import { IFlagRegistryParser } from '../../interfaces/flag-registry-parser.abstract'
@@ -40,11 +41,12 @@ export class ScanReleasePullRequestsHandler extends PreparedCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly gitHubClient: IGitHubClient,
-    private readonly githubConnectionRepository: IGithubConnectionRepository,
+    private readonly tokenResolver: IGithubTokenResolver,
     private readonly flagRegistryParser: IFlagRegistryParser,
     private readonly trackedFlagRepository: ITrackedFlagRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
@@ -168,18 +170,16 @@ export class ScanReleasePullRequestsHandler extends PreparedCommandHandler<
       const release = await this.releaseRepository.findById(command.releaseId, tx)
       if (!release) throw new NotFoundException('Release')
 
-      const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-      const ability = defineAbilityFor(memberships)
-
-      if (
-        !ability.can(Action.UPDATE, {
-          kind: Subject.RELEASE,
-          __type: Subject.RELEASE,
+      await authorizeProjectAction(
+        this.organizationRepository,
+        {
+          actorId: command.userId,
           projectId: release.projectId,
-        })
-      ) {
-        throw new ForbiddenException()
-      }
+          action: Action.UPDATE,
+          subjectKind: Subject.RELEASE,
+        },
+        tx,
+      )
 
       const config = await this.projectRepository.findFlagRegistryConfig(release.projectId, tx)
       if (!config) throw new NotFoundException('Project')
@@ -188,7 +188,7 @@ export class ScanReleasePullRequestsHandler extends PreparedCommandHandler<
         throw new AppException('Flag registry path is not configured for this project', ErrorCode.VALIDATION_ERROR)
       }
 
-      const accessToken = await this.resolveGitHubToken(command.userId, tx)
+      const accessToken = await this.tokenResolver.resolveForProject(release.projectId, command.userId, tx)
 
       const prs = await this.pullRequestRepository.findAllByRelease(command.releaseId, tx)
 
@@ -200,16 +200,5 @@ export class ScanReleasePullRequestsHandler extends PreparedCommandHandler<
         pullRequests: prs.map((pr) => ({ id: pr.id, number: pr.number, featureId: pr.featureId })),
       }
     })
-  }
-
-  private async resolveGitHubToken(userId: string, tx: TxClient): Promise<string> {
-    const connection = await this.githubConnectionRepository.findByUserId(userId, tx)
-    if (!connection) {
-      throw new AppException(
-        'GitHub is not connected. Please connect your GitHub account in settings.',
-        ErrorCode.GITHUB_NOT_CONNECTED,
-      )
-    }
-    return decryptToken(connection.accessToken)
   }
 }

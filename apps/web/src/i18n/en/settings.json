@@ -6,17 +6,15 @@
     "notifications": "Notifications",
     "flagTracking": "Feature flag tracking",
     "tags": "Tag taxonomy",
-    "members": "Members",
     "project": "Project"
   },
+  "descriptions": {
+    "connections": "Integrations that power branch diffs, flag parity, and notifications.",
+    "notifications": "Choose which release and flag events reach you, and where they land.",
+    "flagTracking": "Ship-off reminders and the code-scan flag registry.",
+    "tags": "The tag taxonomy that groups features in every release summary."
+  },
   "connections": {
-    "github": {
-      "label": "GitHub",
-      "description": "Required — repository access and branch diff",
-      "connected": "Connected",
-      "disconnected": "Not connected",
-      "connect": "Connect GitHub"
-    },
     "flagsmith": {
       "label": "Flagsmith",
       "description": "Optional — feature flag matrix and parity",
@@ -58,8 +56,6 @@
     "reconnect": "Reconnect",
     "readOnly": "Managed via GitHub App",
     "webhook": {
-      "githubLabel": "GitHub webhook",
-      "githubDescription": "Powers automatic deployed-status detection for releases in this project.",
       "flagsmithLabel": "Flagsmith webhook",
       "flagsmithDescription": "Keeps the flag matrix in sync whenever a flag changes in Flagsmith.",
       "copy": "Copy webhook URL",
@@ -126,6 +122,17 @@
       "save": "Save",
       "saveSuccess": "Reminder interval saved.",
       "saveError": "Couldn't save the reminder interval. Please try again."
+    },
+    "conflictEnvironments": {
+      "title": "Conflict environments",
+      "description": "Choose which environments count when detecting flag conflicts. Environments left unselected are ignored.",
+      "loading": "Loading environments...",
+      "empty": "No environments found. Connect Flagsmith to see available environments.",
+      "allWatched": "All environments are watched. Select specific environments to limit conflict detection to only those.",
+      "filtered": "Conflicts are only flagged in the selected environments.",
+      "save": "Save",
+      "saveSuccess": "Conflict environments saved.",
+      "saveError": "Couldn't save conflict environments. Please try again."
     }
   },
   "tags": {

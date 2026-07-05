@@ -1,10 +1,10 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import type { IRelease } from '../../../release/interfaces/release.interfaces'
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
@@ -19,7 +19,7 @@ import { GetTrackedFlagDetailQuery } from './get-tracked-flag-detail.query'
 export class GetTrackedFlagDetailHandler extends BaseQueryHandler<GetTrackedFlagDetailQuery, TrackedFlagDetailType | null> {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly trackedFlagRepository: ITrackedFlagRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
@@ -29,18 +29,11 @@ export class GetTrackedFlagDetailHandler extends BaseQueryHandler<GetTrackedFlag
   }
 
   protected async handle(query: GetTrackedFlagDetailQuery, tx: TxClient): Promise<TrackedFlagDetailType | null> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
-        projectId: query.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: query.userId, projectId: query.projectId, action: Action.READ, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const flag = await this.trackedFlagRepository.findByProjectAndKeyWithDetails(query.projectId, query.key, tx)
     if (!flag) return null

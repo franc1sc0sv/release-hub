@@ -1,11 +1,11 @@
 import { graphql } from '@/generated/gql'
 
 export const LIST_MEMBERS = graphql(`
-  query ListMembers($projectId: ID!) {
-    listMembers(projectId: $projectId) {
+  query ListMembers($organizationId: ID!) {
+    listMembers(organizationId: $organizationId) {
       id
       userId
-      projectId
+      organizationId
       role
       name
       email
@@ -17,11 +17,11 @@ export const LIST_MEMBERS = graphql(`
 `)
 
 export const LIST_INVITATIONS = graphql(`
-  query ListInvitations($projectId: ID!) {
-    listInvitations(projectId: $projectId) {
+  query ListInvitations($organizationId: ID!) {
+    listInvitations(organizationId: $organizationId) {
       id
       email
-      projectId
+      organizationId
       role
       status
       expiresAt
@@ -37,7 +37,7 @@ export const INVITE_MEMBER = graphql(`
     inviteMember(input: $input) {
       id
       email
-      projectId
+      organizationId
       role
       status
       expiresAt
@@ -53,7 +53,7 @@ export const UPDATE_MEMBER_ROLE = graphql(`
     updateMemberRole(input: $input) {
       id
       userId
-      projectId
+      organizationId
       role
       name
       email
@@ -81,7 +81,7 @@ export const ACCEPT_INVITATION = graphql(`
     acceptInvitation(token: $token) {
       id
       userId
-      projectId
+      organizationId
       role
       name
       email

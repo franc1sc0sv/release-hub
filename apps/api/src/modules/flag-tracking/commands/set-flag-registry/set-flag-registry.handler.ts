@@ -1,10 +1,11 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { FlagRegistryConfigType } from '../../types/flag-registry-config.type'
 import { SetFlagRegistryCommand } from './set-flag-registry.command'
@@ -14,24 +15,18 @@ export class SetFlagRegistryHandler extends BaseCommandHandler<SetFlagRegistryCo
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
   ) {
     super(db, eventEmitter)
   }
 
   protected async handle(command: SetFlagRegistryCommand, tx: TxClient): Promise<FlagRegistryConfigType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
-        projectId: command.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: command.userId, projectId: command.projectId, action: Action.UPDATE, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
     const result = await this.projectRepository.updateFlagRegistry(
       command.projectId,

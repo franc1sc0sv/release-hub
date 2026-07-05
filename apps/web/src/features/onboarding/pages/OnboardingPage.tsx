@@ -1,25 +1,17 @@
 import { Navigate } from 'react-router-dom'
-import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
-import { ROUTES } from '@/lib/routes'
-import { useProject } from '@/context/project.context'
-import { GITHUB_CONNECTION } from '@/features/settings/graphql/settings.operations'
-import { ConnectGithubStage } from '@/features/onboarding/components/ConnectGithubStage'
-import { SelectRepoStage } from '@/features/onboarding/components/SelectRepoStage'
+import { useOrganization } from '@/context/organization.context'
+import { CreateOrgStage } from '@/features/onboarding/components/CreateOrgStage'
+import { InstallAppStage } from '@/features/onboarding/components/InstallAppStage'
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function OnboardingPage() {
   const { t } = useTranslation('onboarding')
-  const { projects, loading: projectsLoading } = useProject()
-  const { data: githubData, loading: githubLoading } = useQuery(GITHUB_CONNECTION, {
-    fetchPolicy: 'cache-and-network',
-  })
+  const { organizations, activeOrg, loading } = useOrganization()
 
-  const isLoading = projectsLoading || githubLoading
-
-  if (isLoading) {
+  if (loading && organizations.length === 0) {
     return (
       <main className="relative flex min-h-svh flex-col items-center justify-center gap-3 overflow-hidden bg-background">
         <div
@@ -35,11 +27,11 @@ export default function OnboardingPage() {
     )
   }
 
-  if (projects.length >= 1) {
-    return <Navigate to={ROUTES.WORKSPACE} replace />
+  if (activeOrg?.githubConnected) {
+    return <Navigate to="/" replace />
   }
 
-  const githubConnected = githubData?.githubConnection.connected ?? false
+  const needsOrg = organizations.length === 0
 
   return (
     <main className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-6">
@@ -49,8 +41,8 @@ export default function OnboardingPage() {
       />
       <ThemeToggle />
       <div className="relative z-10 flex w-full flex-col items-center gap-8">
-        <OnboardingProgress currentStep={githubConnected ? 'selectRepo' : 'connectGithub'} />
-        {githubConnected ? <SelectRepoStage /> : <ConnectGithubStage />}
+        <OnboardingProgress currentStep={needsOrg ? 'createOrg' : 'installApp'} />
+        {needsOrg ? <CreateOrgStage /> : <InstallAppStage />}
       </div>
     </main>
   )

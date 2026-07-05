@@ -228,6 +228,7 @@
       "descriptionPlaceholder": "Describe what this feature does…"
     },
     "prsByFeature": "Pull requests by feature",
+    "manualAssignHint": "AI is unavailable in this environment — assign each pull request to a feature manually below.",
     "noFeatures": "No features found for this release. Add some merged pull requests first.",
     "defaultFeature": "Default",
     "assignTo": "Feature",
@@ -267,6 +268,7 @@
   "prSummary": {
     "title": "AI summary",
     "empty": "No summary yet",
+    "add": "Add summary",
     "generate": "Generate",
     "regenerate": "Regenerate",
     "edit": "Edit",

@@ -37,6 +37,7 @@ export abstract class IFlagsmithFlagRepository {
     { flagId: string; environmentId: string } | null
   >
   abstract findFlagDetailByKey: RepositoryMethod<[projectId: string, key: string], IFlagsmithFlagDetail | null>
+  abstract findEnvironmentNames: RepositoryMethod<[projectId: string], string[]>
   abstract createSyncRun: RepositoryMethod<[data: ICreateFlagsmithSyncRunData], IFlagsmithSyncRun>
   abstract completeSyncRun: RepositoryMethod<[id: string, data: ICompleteFlagsmithSyncRunData], void>
   abstract failSyncRun: RepositoryMethod<[id: string, error: string], void>

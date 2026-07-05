@@ -15,6 +15,7 @@ import { UpdateConnectionSettingsInput } from '../types/update-connection-settin
 import { GetFlagsInput } from '../types/get-flags.input'
 import { RepoFileSearchInput } from '../queries/repo-file-search/repo-file-search.input'
 import { GetFlagsQuery } from '../queries/get-flags/get-flags.query'
+import { GetFlagsmithEnvironmentsQuery } from '../queries/get-flagsmith-environments/get-flagsmith-environments.query'
 import { CompareFlagsQuery } from '../queries/compare-flags/compare-flags.query'
 import { GetConnectionSettingsQuery } from '../queries/get-connection-settings/get-connection-settings.query'
 import { GetFlagsmithProjectsQuery } from '../queries/get-flagsmith-projects/get-flagsmith-projects.query'
@@ -56,6 +57,15 @@ export class IntegrationResolver {
         input.offset ?? 0,
       ),
     )
+  }
+
+  @Query(() => [String])
+  @Can(Action.READ, Subject.PROJECT)
+  flagsmithEnvironments(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<string[]> {
+    return this.queryBus.execute(new GetFlagsmithEnvironmentsQuery(projectId, user.id))
   }
 
   @Query(() => FlagComparisonResultType)

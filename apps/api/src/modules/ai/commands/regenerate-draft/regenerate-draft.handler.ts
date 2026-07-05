@@ -3,9 +3,10 @@ import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { ILogger } from '../../../../common/logging/logging.abstract'
 import { LogEvent } from '../../../../common/logging/log-event.enum'
 import { AiDraftStatus } from '../../../../common/types/ai-draft-status.enum'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { NotFoundException } from '../../../../common/errors'
+import { Action, Subject } from '@release-hub/shared'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { AiDraftRunner } from '../../services/ai-draft-runner.service'
 import { ReleaseObjectType } from '../../../release/types/release.type'
@@ -17,31 +18,29 @@ export class RegenerateDraftHandler implements ICommandHandler<RegenerateDraftCo
   constructor(
     private readonly db: IDatabaseService,
     private readonly logger: ILogger,
-    private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly draftRunner: AiDraftRunner,
   ) {}
 
   async execute(command: RegenerateDraftCommand): Promise<ReleaseObjectType> {
-    const [memberships, release] = await this.db.$transaction((tx) =>
-      Promise.all([
-        this.projectRepository.findMembershipsForUser(command.userId, tx),
-        this.releaseRepository.findById(command.releaseId, tx),
-      ]),
-    )
+    const release = await this.db.$transaction(async (tx) => {
+      const release = await this.releaseRepository.findById(command.releaseId, tx)
+      if (!release) throw new NotFoundException('Release')
 
-    if (!release) throw new NotFoundException('Release')
+      await authorizeProjectAction(
+        this.orgRepository,
+        {
+          actorId: command.userId,
+          projectId: release.projectId,
+          action: Action.UPDATE,
+          subjectKind: Subject.RELEASE,
+        },
+        tx,
+      )
 
-    const ability = defineAbilityFor(memberships)
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
-        projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+      return release
+    })
 
     this.logger.info(
       {

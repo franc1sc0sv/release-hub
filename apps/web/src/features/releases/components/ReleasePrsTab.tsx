@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { GitMerge, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -39,6 +39,7 @@ function flattenPrs(features: FeatureNodes): FlattenedPr[] {
 export function ReleasePrsTab({ features }: ReleasePrsTabProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
   const [search, setSearch] = useState('')
 
   const flattenedPrs = flattenPrs(features)
@@ -138,7 +139,11 @@ export function ReleasePrsTab({ features }: ReleasePrsTabProps) {
                           className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2 py-0.5"
                         >
                           <Link
-                            to={ROUTES.FLAG_DETAIL.replace(':flagKey', change.flagKey)}
+                            to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+                              organizationId: organizationId ?? '',
+                              projectId: projectId ?? '',
+                              flagKey: change.flagKey,
+                            })}
                             className="font-mono text-xs text-foreground/70 underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             {change.flagKey}

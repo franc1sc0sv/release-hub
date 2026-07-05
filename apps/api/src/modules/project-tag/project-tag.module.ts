@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { ProjectModule } from '../project/project.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { ProjectTagResolver } from './resolvers/project-tag.resolver'
 import { IProjectTagRepository } from './interfaces/project-tag.repository'
 import { ProjectTagRepository } from './repositories/project-tag.repository'
@@ -9,7 +10,7 @@ import { CreateProjectTagHandler } from './commands/create-project-tag/create-pr
 import { DeleteProjectTagHandler } from './commands/delete-project-tag/delete-project-tag.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule],
+  imports: [CqrsModule, ProjectModule, OrganizationModule],
   providers: [
     ProjectTagResolver,
     { provide: IProjectTagRepository, useClass: ProjectTagRepository },

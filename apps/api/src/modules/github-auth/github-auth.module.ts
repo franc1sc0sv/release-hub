@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { JwtModule } from '@nestjs/jwt'
 import { IntegrationModule } from '../integration/integration.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { ProjectModule } from '../project/project.module'
 import { IGithubConnectionRepository } from './interfaces/github-connection.repository'
 import { GithubConnectionRepository } from './repositories/github-connection.repository'
@@ -24,6 +25,7 @@ import { CompareRefsHandler } from './queries/compare-refs/compare-refs.handler'
       secret: process.env.JWT_SECRET!,
     }),
     IntegrationModule,
+    OrganizationModule,
     ProjectModule,
   ],
   controllers: [GithubAuthController],

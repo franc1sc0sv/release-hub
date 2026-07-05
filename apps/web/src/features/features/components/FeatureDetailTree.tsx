@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { format } from 'date-fns'
 import { ChevronDown, GitBranch, GitMerge } from 'lucide-react'
@@ -52,6 +52,7 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
   const { t } = useTranslation('releases')
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   const formattedDate = format(new Date(pr.mergedAt), 'MMM d, yyyy')
 
@@ -62,7 +63,11 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
     : t('builder.pr.expandCommits')
 
   const prLink = pr.releaseId
-    ? `${ROUTES.RELEASE_DETAIL.replace(':releaseId', pr.releaseId)}?section=prs`
+    ? `${generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+        organizationId: organizationId ?? '',
+        projectId: projectId ?? '',
+        releaseId: pr.releaseId,
+      })}?section=prs`
     : null
 
   return (
@@ -175,6 +180,7 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
   const enumLabels = useEnumLabels()
   const [open, setOpen] = useState(true)
   const reduceMotion = useReducedMotion()
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   const formattedDate = format(new Date(release.createdAt), 'MMM d, yyyy')
 
@@ -191,7 +197,11 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <Link
-              to={ROUTES.RELEASE_DETAIL.replace(':releaseId', release.id)}
+              to={generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+                organizationId: organizationId ?? '',
+                projectId: projectId ?? '',
+                releaseId: release.id,
+              })}
               className="font-display font-semibold text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[var(--radius-button)]"
             >
               {t('tree.releaseHeading', { name: release.name })}

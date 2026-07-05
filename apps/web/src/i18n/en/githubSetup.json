@@ -1,0 +1,34 @@
+{
+  "title": "GitHub setup",
+  "processing": {
+    "heading": "Finishing setup…",
+    "description": "We're connecting your GitHub installation to Release Hub. This only takes a moment."
+  },
+  "success": {
+    "heading": "GitHub connected",
+    "description": "The GitHub App is installed and your organization is ready to use.",
+    "ctaSettings": "Go to organization settings",
+    "ctaWorkspace": "Go to workspace"
+  },
+  "error": {
+    "heading": "Something went wrong",
+    "description": "We couldn't complete the GitHub installation. Please try again.",
+    "retry": "Try setup again",
+    "workspace": "Go to workspace"
+  },
+  "signIn": {
+    "heading": "Sign in to continue",
+    "description": "Sign in to your Release Hub account to finish connecting GitHub.",
+    "cta": "Sign in"
+  },
+  "invalid": {
+    "heading": "Invalid setup link",
+    "description": "This GitHub setup link is missing required information. Please restart the installation from your workspace.",
+    "workspace": "Go to workspace"
+  },
+  "pending": {
+    "heading": "Approval pending",
+    "description": "Your GitHub installation request was sent to the organization's GitHub admins. You'll get access once it's approved.",
+    "workspace": "Go to workspace"
+  }
+}

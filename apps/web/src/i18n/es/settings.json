@@ -6,17 +6,15 @@
     "notifications": "Notificaciones",
     "flagTracking": "Seguimiento de feature flags",
     "tags": "Taxonomía de etiquetas",
-    "members": "Miembros",
     "project": "Proyecto"
   },
+  "descriptions": {
+    "connections": "Integraciones para diffs de ramas, paridad de flags y notificaciones.",
+    "notifications": "Elige qué eventos de releases y flags recibes, y dónde llegan.",
+    "flagTracking": "Recordatorios de apagado y el registro de flags del escaneo de código.",
+    "tags": "La taxonomía de etiquetas que agrupa las features en cada resumen de release."
+  },
   "connections": {
-    "github": {
-      "label": "GitHub",
-      "description": "Requerido — acceso al repositorio y diff de ramas",
-      "connected": "Conectado",
-      "disconnected": "No conectado",
-      "connect": "Conectar GitHub"
-    },
     "flagsmith": {
       "label": "Flagsmith",
       "description": "Opcional — matriz de feature flags y paridad",
@@ -58,8 +56,6 @@
     "reconnect": "Reconectar",
     "readOnly": "Gestionado vía GitHub App",
     "webhook": {
-      "githubLabel": "Webhook de GitHub",
-      "githubDescription": "Habilita la detección automática del estado de despliegue de los releases en este proyecto.",
       "flagsmithLabel": "Webhook de Flagsmith",
       "flagsmithDescription": "Mantiene la matriz de flags sincronizada cada vez que cambia un flag en Flagsmith.",
       "copy": "Copiar URL del webhook",
@@ -126,6 +122,17 @@
       "save": "Guardar",
       "saveSuccess": "Intervalo de recordatorio guardado.",
       "saveError": "No se pudo guardar el intervalo de recordatorio. Inténtalo de nuevo."
+    },
+    "conflictEnvironments": {
+      "title": "Entornos de conflicto",
+      "description": "Elige qué entornos cuentan al detectar conflictos de flags. Los entornos no seleccionados se ignoran.",
+      "loading": "Cargando entornos...",
+      "empty": "No se encontraron entornos. Conecta Flagsmith para ver los entornos disponibles.",
+      "allWatched": "Se vigilan todos los entornos. Selecciona entornos específicos para limitar la detección de conflictos solo a esos.",
+      "filtered": "Los conflictos solo se marcan en los entornos seleccionados.",
+      "save": "Guardar",
+      "saveSuccess": "Entornos de conflicto guardados.",
+      "saveError": "No se pudieron guardar los entornos de conflicto. Inténtalo de nuevo."
     }
   },
   "tags": {

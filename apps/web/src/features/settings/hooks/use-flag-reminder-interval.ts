@@ -12,7 +12,13 @@ export function useFlagReminderInterval(projectId: string) {
   function saveReminderInterval(days: number) {
     return updateProject({
       variables: {
-        input: { id: projectId, flagReminderIntervalDays: days, name: undefined, repo: undefined },
+        input: {
+          id: projectId,
+          flagReminderIntervalDays: days,
+          name: undefined,
+          repo: undefined,
+          conflictEnvironments: undefined,
+        },
       },
     })
   }

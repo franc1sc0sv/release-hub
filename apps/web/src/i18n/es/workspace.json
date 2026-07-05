@@ -33,6 +33,12 @@
     "description": "Conecta un repositorio para empezar a gestionar releases.",
     "cta": "Conectar repositorio"
   },
+  "connectGithub": {
+    "heading": "Conecta GitHub para comenzar",
+    "description": "Esta organización necesita la GitHub App instalada antes de poder crear un proyecto. Instálala para otorgar acceso a tus repositorios.",
+    "cta": "Conectar GitHub",
+    "retake": "Repetir la configuración"
+  },
   "loading": "Cargando espacio de trabajo...",
   "connectionHealth": {
     "title": "Estado de conexiones",

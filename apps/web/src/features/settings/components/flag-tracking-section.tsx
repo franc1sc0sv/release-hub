@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Flag, Loader2 } from 'lucide-react'
+import { Check, Flag, Loader2 } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,6 +13,7 @@ import { Action, Subject } from '@release-hub/shared'
 import { staggerContainer, slideUp } from '@/lib/animations'
 import { useFlagRegistry } from '../hooks/use-flag-registry'
 import { useFlagReminderInterval } from '../hooks/use-flag-reminder-interval'
+import { useConflictEnvironments } from '../hooks/use-conflict-environments'
 import { RepoFileCombobox } from './repo-file-combobox'
 
 interface FlagTrackingSectionProps {
@@ -65,6 +66,21 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
     setReminderIntervalInput(String(flagReminderIntervalDays))
   }, [flagReminderIntervalDays])
 
+  const {
+    environments: conflictEnvironmentOptions,
+    conflictEnvironments,
+    loading: loadingConflictEnvironments,
+    saving: savingConflictEnvironments,
+    saveConflictEnvironments,
+  } = useConflictEnvironments(projectId)
+
+  const [selectedConflictEnvironments, setSelectedConflictEnvironments] = useState<string[]>([])
+
+  useEffect(() => {
+    if (conflictEnvironments === undefined) return
+    setSelectedConflictEnvironments(conflictEnvironments)
+  }, [conflictEnvironments])
+
   const containerVariants = reduceMotion ? undefined : staggerContainer
   const itemVariants = reduceMotion ? undefined : slideUp
 
@@ -80,6 +96,21 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
       toast.success(t('flagTracking.reminderInterval.saveSuccess'))
     } catch {
       toast.error(t('flagTracking.reminderInterval.saveError'))
+    }
+  }
+
+  function toggleConflictEnvironment(env: string): void {
+    setSelectedConflictEnvironments((prev) =>
+      prev.includes(env) ? prev.filter((e) => e !== env) : [...prev, env],
+    )
+  }
+
+  async function handleSaveConflictEnvironments(): Promise<void> {
+    try {
+      await saveConflictEnvironments(selectedConflictEnvironments)
+      toast.success(t('flagTracking.conflictEnvironments.saveSuccess'))
+    } catch {
+      toast.error(t('flagTracking.conflictEnvironments.saveError'))
     }
   }
 
@@ -227,6 +258,90 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
               </>
             )}
           </Can>
+        </motion.div>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mt-4 space-y-2 border-t border-border/60 pt-4"
+        >
+          <motion.div variants={itemVariants} className="space-y-1">
+            <Label>{t('flagTracking.conflictEnvironments.title')}</Label>
+            <p className="text-xs text-muted-foreground">
+              {t('flagTracking.conflictEnvironments.description')}
+            </p>
+          </motion.div>
+
+          {loadingConflictEnvironments ? (
+            <motion.p
+              variants={itemVariants}
+              className="flex items-center gap-2 text-xs text-muted-foreground"
+            >
+              <Loader2 className="size-3.5 animate-spin" aria-hidden />
+              {t('flagTracking.conflictEnvironments.loading')}
+            </motion.p>
+          ) : conflictEnvironmentOptions.length === 0 ? (
+            <motion.p variants={itemVariants} className="text-xs text-muted-foreground">
+              {t('flagTracking.conflictEnvironments.empty')}
+            </motion.p>
+          ) : (
+            <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
+              {(allowed) => (
+                <>
+                  <motion.div
+                    variants={itemVariants}
+                    role="group"
+                    aria-label={t('flagTracking.conflictEnvironments.title')}
+                    className="flex flex-wrap gap-2"
+                  >
+                    {conflictEnvironmentOptions.map((env) => {
+                      const isSelected = selectedConflictEnvironments.includes(env)
+                      return (
+                        <Button
+                          key={env}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          aria-pressed={isSelected}
+                          disabled={!allowed || savingConflictEnvironments}
+                          onClick={() => toggleConflictEnvironment(env)}
+                          className={[
+                            'gap-1.5 rounded-full font-mono text-xs transition-colors',
+                            isSelected
+                              ? 'border-brand-indigo-bright bg-brand-indigo-bright/10 text-brand-indigo-bright hover:bg-brand-indigo-bright/20'
+                              : 'text-muted-foreground',
+                          ].join(' ')}
+                        >
+                          {isSelected && <Check className="size-3.5" aria-hidden />}
+                          {env}
+                        </Button>
+                      )
+                    })}
+                  </motion.div>
+                  <motion.p variants={itemVariants} className="text-xs text-muted-foreground">
+                    {selectedConflictEnvironments.length === 0
+                      ? t('flagTracking.conflictEnvironments.allWatched')
+                      : t('flagTracking.conflictEnvironments.filtered')}
+                  </motion.p>
+                  {allowed && (
+                    <motion.div variants={itemVariants}>
+                      <Button
+                        type="button"
+                        onClick={() => void handleSaveConflictEnvironments()}
+                        disabled={savingConflictEnvironments}
+                      >
+                        {savingConflictEnvironments && (
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                        )}
+                        {t('flagTracking.conflictEnvironments.save')}
+                      </Button>
+                    </motion.div>
+                  )}
+                </>
+              )}
+            </Can>
+          )}
         </motion.div>
       </CardContent>
     </GlassCard>

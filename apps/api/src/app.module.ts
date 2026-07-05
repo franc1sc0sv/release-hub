@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common'
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
+import { ConfigModule } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { CqrsModule } from '@nestjs/cqrs'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { ScheduleModule } from '@nestjs/schedule'
 import { join } from 'path'
+import { validateEnv } from './common/config/env.validation'
+import { HealthModule } from './modules/health/health.module'
 import { LoggingModule } from './common/logging/logging.module'
 import { LoggingInterceptor } from './common/logging/logging.interceptor'
 import { DatabaseModule } from './common/database/database.module'
@@ -13,6 +16,7 @@ import { EventModule } from './common/events/event.module'
 import { MailModule } from './common/mail/mail.module'
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard'
 import { AuthModule } from './modules/auth/auth.module'
+import { OrganizationModule } from './modules/organization/organization.module'
 import { ProjectModule } from './modules/project/project.module'
 import { ReleaseModule } from './modules/release/release.module'
 import { FeatureModule } from './modules/feature/feature.module'
@@ -21,6 +25,7 @@ import { CollaborationModule } from './modules/collaboration/collaboration.modul
 import { IntegrationModule } from './modules/integration/integration.module'
 import { ProjectTagModule } from './modules/project-tag/project-tag.module'
 import { GithubAuthModule } from './modules/github-auth/github-auth.module'
+import { GithubAppModule } from './modules/github-app/github-app.module'
 import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
 import { FlagTrackingModule } from './modules/flag-tracking/flag-tracking.module'
 import { WebhooksModule } from './modules/webhooks/webhooks.module'
@@ -30,6 +35,12 @@ import { RepoOpsModule } from './modules/repo-ops/repo-ops.module'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      ignoreEnvFile: true,
+      validate: validateEnv,
+    }),
     LoggingModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -65,6 +76,7 @@ import { RepoOpsModule } from './modules/repo-ops/repo-ops.module'
     EventModule,
     MailModule,
     AuthModule,
+    OrganizationModule,
     ProjectModule,
     ReleaseModule,
     FeatureModule,
@@ -73,12 +85,14 @@ import { RepoOpsModule } from './modules/repo-ops/repo-ops.module'
     IntegrationModule,
     ProjectTagModule,
     GithubAuthModule,
+    GithubAppModule,
     LinearAuthModule,
     FlagTrackingModule,
     WebhooksModule,
     SlackAuthModule,
     NotificationsModule,
     RepoOpsModule,
+    HealthModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: GqlThrottlerGuard },

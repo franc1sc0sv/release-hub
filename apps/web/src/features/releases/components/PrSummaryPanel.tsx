@@ -5,6 +5,8 @@ import { Bot, Check, Loader2, Pencil, RefreshCcw, Sparkles, X } from 'lucide-rea
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { DisabledTooltip } from '@/components/DisabledTooltip'
+import { isAiEnabled } from '@/lib/ai-availability'
 import { GENERATE_PR_SUMMARY, SAVE_PR_SUMMARY } from '../graphql/releases.mutations'
 
 interface PrSummaryPanelProps {
@@ -17,6 +19,8 @@ interface PrSummaryPanelProps {
 
 export function PrSummaryPanel({ pr }: PrSummaryPanelProps) {
   const { t } = useTranslation('releases')
+  const { t: tAi } = useTranslation('ai')
+  const aiEnabled = isAiEnabled()
   const [editing, setEditing] = useState(false)
   const [draftText, setDraftText] = useState(pr.summary ?? '')
 
@@ -122,32 +126,47 @@ export function PrSummaryPanel({ pr }: PrSummaryPanelProps) {
           )}
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2.5 text-xs"
-              onClick={handleGenerate}
-              disabled={generating}
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="mr-1 size-3 animate-spin" aria-hidden />
-                  {pr.summary ? t('prSummary.regenerate') : t('prSummary.generate')}
-                </>
-              ) : pr.summary ? (
-                <>
-                  <RefreshCcw className="mr-1 size-3" aria-hidden />
-                  {t('prSummary.regenerate')}
-                </>
-              ) : (
-                <>
+            {aiEnabled ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2.5 text-xs"
+                onClick={handleGenerate}
+                disabled={generating}
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="mr-1 size-3 animate-spin" aria-hidden />
+                    {pr.summary ? t('prSummary.regenerate') : t('prSummary.generate')}
+                  </>
+                ) : pr.summary ? (
+                  <>
+                    <RefreshCcw className="mr-1 size-3" aria-hidden />
+                    {t('prSummary.regenerate')}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-1 size-3" aria-hidden />
+                    {t('prSummary.generate')}
+                  </>
+                )}
+              </Button>
+            ) : (
+              <DisabledTooltip tooltip={tAi('unavailable.tooltip')}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-disabled
+                  tabIndex={-1}
+                  className="pointer-events-none h-6 px-2.5 text-xs opacity-50"
+                >
                   <Sparkles className="mr-1 size-3" aria-hidden />
-                  {t('prSummary.generate')}
-                </>
-              )}
-            </Button>
+                  {pr.summary ? t('prSummary.regenerate') : t('prSummary.generate')}
+                </Button>
+              </DisabledTooltip>
+            )}
 
-            {pr.summary && (
+            {(pr.summary || !aiEnabled) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -155,7 +174,7 @@ export function PrSummaryPanel({ pr }: PrSummaryPanelProps) {
                 onClick={handleStartEdit}
               >
                 <Pencil className="mr-1 size-3" aria-hidden />
-                {t('prSummary.edit')}
+                {pr.summary ? t('prSummary.edit') : t('prSummary.add')}
               </Button>
             )}
           </div>

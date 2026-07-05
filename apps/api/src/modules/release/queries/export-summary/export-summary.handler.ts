@@ -1,13 +1,14 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
 import PDFDocument from 'pdfkit'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { htmlToMarkdown, stripInlineMarkdown } from '../../../../common/text/html-to-markdown'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { ExportResultType } from '../../types/export-result.type'
@@ -18,28 +19,26 @@ import { ExportSummaryQuery } from './export-summary.query'
 export class ExportSummaryHandler extends BaseQueryHandler<ExportSummaryQuery, ExportResultType> {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
   ) {
     super(db)
   }
 
   protected async handle(query: ExportSummaryQuery, tx: TxClient): Promise<ExportResultType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
     const release = await this.releaseRepository.findById(query.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: query.userId,
         projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.RELEASE,
+      },
+      tx,
+    )
 
     if (!release.summary) {
       throw new AppException('No summary exists for this release', ErrorCode.NOT_FOUND)

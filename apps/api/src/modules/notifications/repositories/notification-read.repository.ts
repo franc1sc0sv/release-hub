@@ -40,8 +40,8 @@ export class NotificationReadRepository extends INotificationReadRepository {
     projectId: string,
     tx: TxClient,
   ): Promise<IProjectMemberForNotification[]> => {
-    const rows = await tx.membership.findMany({
-      where: { projectId, user: { deletedAt: null } },
+    const rows = await tx.organizationMembership.findMany({
+      where: { organization: { projects: { some: { id: projectId } } }, user: { deletedAt: null } },
       select: { user: { select: { id: true, email: true, name: true } } },
     })
     return rows.map((row) => ({ userId: row.user.id, email: row.user.email, name: row.user.name }))

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, generatePath } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { AlertCircle, ArrowRight, Loader2, Rocket } from 'lucide-react'
 import { PageShell } from '@/components/nebula/PageShell'
@@ -27,13 +27,18 @@ type ReleaseItem = GetReleasesPageQuery['getReleasesPage']['items'][number]
 
 interface ReleaseRowProps {
   release: ReleaseItem
+  organizationId: string
   projectId: string
 }
 
-function ReleaseRow({ release, projectId }: ReleaseRowProps) {
+function ReleaseRow({ release, organizationId, projectId }: ReleaseRowProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
-  const detailPath = ROUTES.RELEASE_DETAIL.replace(':releaseId', release.id)
+  const detailPath = generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+    organizationId,
+    projectId,
+    releaseId: release.id,
+  })
 
   const statusLabel = enumLabels.releaseStatus(release.status)
 
@@ -114,6 +119,7 @@ export default function ReleasesPage() {
   })
 
   const projectId = activeProject?.id ?? ''
+  const organizationId = activeProject?.organizationId ?? ''
 
   const body = (() => {
     if (loadingInitial) {
@@ -165,7 +171,12 @@ export default function ReleasesPage() {
         role="list"
       >
         {items.map((release) => (
-          <ReleaseRow key={release.id} release={release} projectId={projectId} />
+          <ReleaseRow
+            key={release.id}
+            release={release}
+            organizationId={organizationId}
+            projectId={projectId}
+          />
         ))}
       </motion.ul>
     )
@@ -177,7 +188,11 @@ export default function ReleasesPage() {
       title={t('title')}
       actions={
         <Can I={Action.CREATE} a={Subject.RELEASE}>
-          <GradientButton onClick={() => navigate(ROUTES.RELEASE_BUILDER)}>
+          <GradientButton
+            onClick={() =>
+              navigate(generatePath(ROUTES.PROJECT_RELEASE_BUILDER, { organizationId, projectId }))
+            }
+          >
             <Rocket className="mr-2 size-4" />
             {t('new')}
           </GradientButton>

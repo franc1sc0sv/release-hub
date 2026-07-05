@@ -1,10 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
@@ -18,7 +19,7 @@ import { GetReleaseFlagsQuery } from './get-release-flags.query'
 export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuery, ReleaseFlagType[]> {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly trackedFlagRepository: ITrackedFlagRepository,
@@ -32,18 +33,11 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
     const release = await this.releaseRepository.findById(query.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
-        projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+    await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: query.userId, projectId: release.projectId, action: Action.READ, subjectKind: Subject.RELEASE },
+      tx,
+    )
 
     const prs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
     const prIds = prs.map((pr) => pr.id)

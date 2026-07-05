@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, generatePath } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import {
@@ -188,7 +188,18 @@ export default function FlagsPage() {
           heading={t('notConnected.heading')}
           description={t('notConnected.description')}
           action={
-            <Button variant="outline" onClick={() => navigate(ROUTES.SETTINGS)}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                activeProject &&
+                navigate(
+                  generatePath(ROUTES.PROJECT_SETTINGS, {
+                    organizationId: activeProject.organizationId,
+                    projectId: activeProject.id,
+                  }),
+                )
+              }
+            >
               {t('notConnected.cta')}
             </Button>
           }

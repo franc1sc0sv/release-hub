@@ -1,14 +1,15 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { IFeatureRepository } from '../../../feature/interfaces/feature.repository'
@@ -25,7 +26,7 @@ export class ConfirmReleaseAdditionsHandler extends BaseCommandHandler<
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly featureRepository: IFeatureRepository,
@@ -39,21 +40,19 @@ export class ConfirmReleaseAdditionsHandler extends BaseCommandHandler<
     tx: TxClient,
     events: IDomainEvent[],
   ): Promise<ReleaseObjectType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
     const release = await this.releaseRepository.findById(command.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: command.userId,
         projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.UPDATE,
+        subjectKind: Subject.RELEASE,
+      },
+      tx,
+    )
 
     const pendingPrs = await this.pullRequestRepository.findPendingAdditionsByRelease(
       command.releaseId,

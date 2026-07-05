@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { IntegrationModule } from '../integration/integration.module'
 import { ProjectModule } from '../project/project.module'
-import { GithubAuthModule } from '../github-auth/github-auth.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { LinearAuthModule } from '../linear-auth/linear-auth.module'
 import { FlagTrackingModule } from '../flag-tracking/flag-tracking.module'
 
@@ -43,7 +43,7 @@ import { HandleGithubDeploymentWebhookHandler } from './commands/handle-github-d
     CqrsModule,
     IntegrationModule,
     ProjectModule,
-    GithubAuthModule,
+    OrganizationModule,
     LinearAuthModule,
     forwardRef(() => FlagTrackingModule),
   ],

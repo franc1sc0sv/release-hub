@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client/react'
 import { FolderOpen, Rocket, LayoutList, Flag, GitBranch, Settings } from 'lucide-react'
 import {
@@ -42,6 +42,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t } = useTranslation('palette')
   const navigate = useNavigate()
   const { activeProject } = useProject()
+  const { organizationId } = useParams<{ organizationId: string }>()
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebouncedValue(search, DEBOUNCE_MS)
 
@@ -50,18 +51,43 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   }, [open])
 
   const canSearch = debouncedSearch.trim().length >= SEARCH_MIN_LENGTH
+  const orgId = organizationId ?? ''
   const projectId = activeProject?.id ?? ''
 
   const navigationItems = useMemo(
     () => [
-      { to: ROUTES.WORKSPACE, labelKey: 'nav.workspace', icon: FolderOpen },
-      { to: ROUTES.RELEASES, labelKey: 'nav.releases', icon: Rocket },
-      { to: ROUTES.FEATURES, labelKey: 'nav.features', icon: LayoutList },
-      { to: ROUTES.FLAGS, labelKey: 'nav.flags', icon: Flag },
-      { to: ROUTES.REPO_OPS, labelKey: 'nav.repoOps', icon: GitBranch },
-      { to: ROUTES.SETTINGS, labelKey: 'nav.settings', icon: Settings },
+      {
+        to: generatePath(ROUTES.ORG_ROOT, { organizationId: orgId }),
+        labelKey: 'nav.workspace',
+        icon: FolderOpen,
+      },
+      {
+        to: generatePath(ROUTES.PROJECT_RELEASES, { organizationId: orgId, projectId }),
+        labelKey: 'nav.releases',
+        icon: Rocket,
+      },
+      {
+        to: generatePath(ROUTES.PROJECT_FEATURES, { organizationId: orgId, projectId }),
+        labelKey: 'nav.features',
+        icon: LayoutList,
+      },
+      {
+        to: generatePath(ROUTES.PROJECT_FLAGS, { organizationId: orgId, projectId }),
+        labelKey: 'nav.flags',
+        icon: Flag,
+      },
+      {
+        to: generatePath(ROUTES.PROJECT_REPO_OPS, { organizationId: orgId, projectId }),
+        labelKey: 'nav.repoOps',
+        icon: GitBranch,
+      },
+      {
+        to: generatePath(ROUTES.PROJECT_SETTINGS, { organizationId: orgId, projectId }),
+        labelKey: 'nav.settings',
+        icon: Settings,
+      },
     ],
-    [],
+    [orgId, projectId],
   )
 
   const { data: releasesData, loading: releasesLoading } = useQuery(GET_RELEASES_PAGE, {
@@ -136,7 +162,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               {releases.map((release) => (
                 <CommandItem
                   key={release.id}
-                  onSelect={() => goTo(ROUTES.RELEASE_DETAIL.replace(':releaseId', release.id))}
+                  onSelect={() =>
+                    goTo(
+                      generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+                        organizationId: orgId,
+                        projectId,
+                        releaseId: release.id,
+                      }),
+                    )
+                  }
                 >
                   <Rocket className="size-4" aria-hidden />
                   <span>{release.name ?? `${release.baseRef} → ${release.compareRef}`}</span>
@@ -153,7 +187,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               {features.map((feature) => (
                 <CommandItem
                   key={feature.id}
-                  onSelect={() => goTo(ROUTES.FEATURES_DETAIL.replace(':id', feature.id))}
+                  onSelect={() =>
+                    goTo(
+                      generatePath(ROUTES.PROJECT_FEATURE_DETAIL, {
+                        organizationId: orgId,
+                        projectId,
+                        id: feature.id,
+                      }),
+                    )
+                  }
                 >
                   <LayoutList className="size-4" aria-hidden />
                   <span>{feature.name}</span>
@@ -170,7 +212,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               {flags.map((flag) => (
                 <CommandItem
                   key={flag.key}
-                  onSelect={() => goTo(ROUTES.FLAG_DETAIL.replace(':flagKey', flag.key))}
+                  onSelect={() =>
+                    goTo(
+                      generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+                        organizationId: orgId,
+                        projectId,
+                        flagKey: flag.key,
+                      }),
+                    )
+                  }
                 >
                   <Flag className="size-4" aria-hidden />
                   <span>{flag.key}</span>

@@ -1,10 +1,11 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import type { ICoverage } from '../../interfaces/release.interfaces'
@@ -15,7 +16,7 @@ export class GetCoverageHandler extends BaseQueryHandler<GetCoverageQuery, ICove
   constructor(
     protected readonly db: IDatabaseService,
     private readonly releaseRepository: IReleaseRepository,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
   ) {
     super(db)
@@ -25,18 +26,16 @@ export class GetCoverageHandler extends BaseQueryHandler<GetCoverageQuery, ICove
     const release = await this.releaseRepository.findById(query.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: query.userId,
         projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.RELEASE,
+      },
+      tx,
+    )
 
     const prs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
     const total = prs.length

@@ -6,7 +6,7 @@ export function toMemberType(profile: IMemberProfile): MemberType {
   const out = new MemberType()
   out.id = profile.id
   out.userId = profile.userId
-  out.projectId = profile.projectId
+  out.organizationId = profile.organizationId
   out.role = profile.role
   out.name = profile.name
   out.email = profile.email
@@ -20,7 +20,7 @@ export function toInvitationType(invitation: IInvitation): InvitationType {
   const out = new InvitationType()
   out.id = invitation.id
   out.email = invitation.email
-  out.projectId = invitation.projectId
+  out.organizationId = invitation.organizationId
   out.role = invitation.role
   out.status = invitation.status
   out.expiresAt = invitation.expiresAt

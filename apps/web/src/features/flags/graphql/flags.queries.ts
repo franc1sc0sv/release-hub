@@ -84,32 +84,12 @@ export const GET_FLAG_DETAIL = graphql(`
           id
           name
         }
-        branchPresences {
-          branch
-          present
-          firstSeenAt
-          lastConfirmedAt
-        }
         releases {
           releaseId
           version
           status
           date
           decision
-        }
-        pullRequestChanges {
-          prNumber
-          prTitle
-          prAuthor
-          prMergedAt
-          kind
-          action
-          detectedFile
-        }
-        events {
-          type
-          description
-          occurredAt
         }
       }
     }
@@ -131,6 +111,9 @@ export const GET_FLAG_HISTORY = graphql(`
         actorName
         source
         occurredAt
+        branchName
+        prNumber
+        detectedFile
       }
     }
   }

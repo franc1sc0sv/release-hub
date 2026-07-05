@@ -46,7 +46,14 @@ export class ProjectResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ProjectType> {
     return this.commandBus.execute(
-      new CreateProjectCommand(user.id, input.name, input.repo),
+      new CreateProjectCommand(
+        user.id,
+        input.organizationId,
+        input.name,
+        input.repo,
+        input.githubAuthMode,
+        input.githubInstallationId,
+      ),
     )
   }
 
@@ -57,7 +64,14 @@ export class ProjectResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ProjectType> {
     return this.commandBus.execute(
-      new UpdateProjectCommand(user.id, input.id, input.name, input.repo, input.flagReminderIntervalDays),
+      new UpdateProjectCommand(
+        user.id,
+        input.id,
+        input.name,
+        input.repo,
+        input.flagReminderIntervalDays,
+        input.conflictEnvironments,
+      ),
     )
   }
 

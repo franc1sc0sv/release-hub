@@ -13,6 +13,9 @@ export const FlagHistoryEventType = {
   REMINDER_SENT: 'reminder_sent',
   SYNC_COMPLETED: 'sync_completed',
   COVERAGE_SCAN: 'coverage_scan',
+  DETECTED_DEFINITION: 'detected_definition',
+  DETECTED_USAGE: 'detected_usage',
+  FIRST_SEEN_BRANCH: 'first_seen_branch',
 } as const
 
 export type FlagHistoryEventType = (typeof FlagHistoryEventType)[keyof typeof FlagHistoryEventType]

@@ -1,9 +1,9 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import { NotFoundException } from '@nestjs/common'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { IAiRepository } from '../../interfaces/ai.repository'
 import { IAiProvider } from '../../interfaces/ai-provider.abstract'
@@ -15,7 +15,7 @@ import { GeneratePrSummaryCommand } from './generate-pr-summary.command'
 export class GeneratePrSummaryHandler {
   constructor(
     private readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly orgRepository: IOrganizationRepository,
     private readonly aiRepository: IAiRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly aiProvider: IAiProvider,
@@ -27,20 +27,18 @@ export class GeneratePrSummaryHandler {
     )
     if (!prContext) throw new NotFoundException('PullRequest')
 
-    const memberships = await this.db.$transaction((tx) =>
-      this.projectRepository.findMembershipsForUser(command.userId, tx),
+    await this.db.$transaction((tx) =>
+      authorizeProjectAction(
+        this.orgRepository,
+        {
+          actorId: command.userId,
+          projectId: prContext.projectId,
+          action: Action.UPDATE,
+          subjectKind: Subject.PULL_REQUEST,
+        },
+        tx,
+      ),
     )
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.PULL_REQUEST,
-        __type: Subject.PULL_REQUEST,
-        projectId: prContext.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
 
     const result = await this.aiProvider.summarizePullRequest({
       prTitle: prContext.title,

@@ -1,11 +1,11 @@
-import type { ProjectRole } from '../../../common/types/project-role.enum'
+import type { OrgRole } from '@release-hub/shared'
 import type { InvitationStatus } from '../../../common/types/invitation-status.enum'
 
 export interface IMembership {
   id: string
   userId: string
-  projectId: string
-  role: ProjectRole
+  organizationId: string
+  role: OrgRole
   createdAt: Date
   updatedAt: Date
 }
@@ -13,8 +13,8 @@ export interface IMembership {
 export interface IMemberProfile {
   id: string
   userId: string
-  projectId: string
-  role: ProjectRole
+  organizationId: string
+  role: OrgRole
   name: string
   email: string
   avatarUrl: string | null
@@ -25,8 +25,8 @@ export interface IMemberProfile {
 export interface IInvitation {
   id: string
   email: string
-  projectId: string
-  role: ProjectRole
+  organizationId: string
+  role: OrgRole
   status: InvitationStatus
   token: string
   expiresAt: Date
@@ -37,8 +37,8 @@ export interface IInvitation {
 
 export interface ICreateInvitationData {
   email: string
-  projectId: string
-  role: ProjectRole
+  organizationId: string
+  role: OrgRole
   invitedById: string
   token: string
   expiresAt: Date
@@ -46,10 +46,10 @@ export interface ICreateInvitationData {
 
 export interface IInvitationEmailContext {
   inviterName: string
-  projectName: string
+  organizationName: string
   acceptToken: string
 }
 
 export interface IUpdateMembershipData {
-  role: ProjectRole
+  role: OrgRole
 }

@@ -66,7 +66,7 @@ export function NotificationsSheetContent({
   return (
     <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
       <SheetHeader className="border-b border-border/60">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 pr-9">
           <SheetTitle>{t('sheet.title')}</SheetTitle>
           <Button
             type="button"

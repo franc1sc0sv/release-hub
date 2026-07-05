@@ -1,11 +1,13 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { FlagDeploymentStatus } from '../../../../common/types/flag-deployment-status.enum'
 import { computeFlagDeploymentStatus } from '../../../../common/types/flag-deployment-status.util'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import type { IRelease } from '../../../release/interfaces/release.interfaces'
@@ -27,6 +29,7 @@ import { GetFlagDetailQuery } from './get-flag-detail.query'
 export class GetFlagDetailHandler extends BaseQueryHandler<GetFlagDetailQuery, FlagDetailType | null> {
   constructor(
     protected readonly db: IDatabaseService,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
@@ -38,12 +41,14 @@ export class GetFlagDetailHandler extends BaseQueryHandler<GetFlagDetailQuery, F
   }
 
   protected async handle(query: GetFlagDetailQuery, tx: TxClient): Promise<FlagDetailType | null> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
+    await authorizeProjectAction(
+      this.organizationRepository,
+      { actorId: query.userId, projectId: query.projectId, action: Action.READ, subjectKind: Subject.PROJECT },
+      tx,
+    )
 
-    if (!ability.can(Action.READ, { kind: Subject.PROJECT, __type: Subject.PROJECT, projectId: query.projectId })) {
-      throw new ForbiddenException()
-    }
+    const project = await this.projectRepository.findById(query.projectId, tx)
+    if (!project) throw new NotFoundException('Project')
 
     const flagsmithDetail = await this.flagsmithFlagRepository.findFlagDetailByKey(query.projectId, query.key, tx)
     const trackedFlag = await this.trackedFlagRepository.findByProjectAndKeyWithDetails(
@@ -78,7 +83,12 @@ export class GetFlagDetailHandler extends BaseQueryHandler<GetFlagDetailQuery, F
       latestDecision = await this.releaseFlagDecisionRepository.findLatestForTrackedFlag(trackedFlag.id, tx)
     }
 
-    const anyDisabled = flagsmithDetail?.environments.some((env) => !env.enabled) ?? false
+    const watchedEnvironments = project.conflictEnvironments
+    const relevantEnvironments =
+      watchedEnvironments.length > 0
+        ? (flagsmithDetail?.environments.filter((env) => watchedEnvironments.includes(env.name)) ?? [])
+        : (flagsmithDetail?.environments ?? [])
+    const anyDisabled = relevantEnvironments.some((env) => !env.enabled)
     const deploymentStatus = computeFlagDeploymentStatus(latestDecision?.decision ?? null, anyDisabled)
     const hasConflict = deploymentStatus === FlagDeploymentStatus.CONFLICT
 

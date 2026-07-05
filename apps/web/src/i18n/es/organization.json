@@ -1,0 +1,76 @@
+{
+  "title": "Organización",
+  "subtitle": "Configuración de la organización",
+  "switcher": {
+    "label": "Cambiar de organización",
+    "eyebrow": "Organización",
+    "noOrganizations": "Sin organización",
+    "createOrganization": "Crear organización",
+    "active": "Organización activa",
+    "connected": "GitHub conectado",
+    "notConnected": "GitHub no conectado"
+  },
+  "create": {
+    "title": "Crear organización",
+    "description": "Las organizaciones agrupan tus repositorios, miembros y releases.",
+    "nameLabel": "Nombre de la organización",
+    "namePlaceholder": "Acme Inc.",
+    "submit": "Crear",
+    "creating": "Creando...",
+    "cancel": "Cancelar",
+    "error": "No se pudo crear la organización. Inténtalo de nuevo."
+  },
+  "settingsNav": {
+    "general": "General",
+    "members": "Miembros"
+  },
+  "settingsNavDescriptions": {
+    "general": "Nombre de la organización y acciones de la zona de peligro.",
+    "members": "Administra quién tiene acceso a esta organización."
+  },
+  "integrationsNav": {
+    "title": "Integraciones",
+    "github": "GitHub"
+  },
+  "integrationsNavDescriptions": {
+    "github": "Instala la App de GitHub y revisa los repositorios a los que puede acceder."
+  },
+  "general": {
+    "title": "General",
+    "nameLabel": "Nombre de la organización",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "renameSuccess": "Nombre de la organización actualizado.",
+    "readOnly": "Solo los propietarios pueden cambiar esta configuración."
+  },
+  "github": {
+    "title": "GitHub",
+    "connected": "App de GitHub instalada",
+    "notConnected": "App de GitHub no instalada",
+    "install": "Instalar la App de GitHub",
+    "manage": "Administrar la App de GitHub",
+    "description": "Instala la App de GitHub para que esta organización pueda leer repositorios y detectar diferencias entre ramas.",
+    "reposTitle": "Repositorios accesibles",
+    "reposEmpty": "Aún no hay repositorios accesibles. Administra la instalación para otorgar acceso.",
+    "private": "Privado",
+    "reposPrev": "Anterior",
+    "reposNext": "Siguiente",
+    "reposPageIndicator": "Página {{page}} de {{total}}"
+  },
+  "danger": {
+    "title": "Zona de peligro",
+    "description": "Eliminar una organización es permanente y elimina todos sus proyectos, miembros y releases.",
+    "delete": "Eliminar organización",
+    "cancel": "Cancelar",
+    "confirmTitle": "¿Eliminar {{name}}?",
+    "confirmDescription": "Esta acción no se puede deshacer. Se eliminarán todos los proyectos, releases y miembros de esta organización.",
+    "deleteSuccess": "Organización eliminada."
+  },
+  "empty": {
+    "heading": "Ninguna organización seleccionada",
+    "description": "Crea o selecciona una organización para administrar su configuración."
+  },
+  "overview": {
+    "description": "Gestiona los proyectos, releases y funcionalidades de esta organización."
+  }
+}

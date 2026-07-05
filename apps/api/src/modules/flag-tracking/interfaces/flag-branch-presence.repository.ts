@@ -8,9 +8,14 @@ export interface IUpsertFlagBranchPresenceData {
   headSha: string | null
 }
 
+export interface IUpsertFlagBranchPresenceResult {
+  presence: IFlagBranchPresence
+  isNew: boolean
+}
+
 export abstract class IFlagBranchPresenceRepository implements IBaseRepository<IFlagBranchPresence> {
   abstract findById: RepositoryMethod<[id: string], IFlagBranchPresence | null>
-  abstract upsertPresence: RepositoryMethod<[data: IUpsertFlagBranchPresenceData], IFlagBranchPresence>
+  abstract upsertPresence: RepositoryMethod<[data: IUpsertFlagBranchPresenceData], IUpsertFlagBranchPresenceResult>
   abstract markAbsentForMissingBranches: RepositoryMethod<
     [trackedFlagId: string, presentBranches: string[]],
     void

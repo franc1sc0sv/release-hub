@@ -33,8 +33,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { Can } from '@/context/ability.context'
+import { useOrganization } from '@/context/organization.context'
 import { Action, Subject } from '@release-hub/shared'
-import type { ProjectRole } from '@/generated/graphql'
+import type { OrgRole } from '@/generated/graphql'
 import {
   LIST_MEMBERS,
   LIST_INVITATIONS,
@@ -43,7 +44,7 @@ import {
   REMOVE_MEMBER,
   REVOKE_INVITATION,
 } from '../graphql/collaboration.operations'
-import { GqlInvitationStatus, GqlProjectRole, PROJECT_ROLES } from '../constants'
+import { GqlInvitationStatus, GqlOrgRole, ORG_ROLES } from '../constants'
 import { staggerContainer, slideUp } from '@/lib/animations'
 
 function memberInitials(name: string): string {
@@ -55,31 +56,31 @@ function memberInitials(name: string): string {
     .toUpperCase()
 }
 
-interface MembersSectionProps {
-  projectId: string
-}
-
-export function MembersSection({ projectId }: MembersSectionProps) {
+export function MembersSection() {
   const { t } = useTranslation('collaboration')
   const enumLabels = useEnumLabels()
   const reduceMotion = useReducedMotion()
+  const { activeOrg } = useOrganization()
+  const organizationId = activeOrg?.id ?? ''
 
   const { data: membersData, loading: membersLoading, error: membersError } = useQuery(LIST_MEMBERS, {
-    variables: { projectId },
+    variables: { organizationId },
+    skip: !organizationId,
     fetchPolicy: 'cache-and-network',
   })
 
   const { data: invitationsData, loading: invitationsLoading } = useQuery(LIST_INVITATIONS, {
-    variables: { projectId },
+    variables: { organizationId },
+    skip: !organizationId,
     fetchPolicy: 'cache-and-network',
   })
 
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<ProjectRole>(GqlProjectRole.MEMBER)
+  const [inviteRole, setInviteRole] = useState<OrgRole>(GqlOrgRole.MEMBER)
   const [inviteError, setInviteError] = useState<string | null>(null)
 
   const [inviteMember, { loading: inviting }] = useMutation(INVITE_MEMBER, {
-    refetchQueries: [{ query: LIST_INVITATIONS, variables: { projectId } }],
+    refetchQueries: [{ query: LIST_INVITATIONS, variables: { organizationId } }],
     onCompleted() {
       setInviteEmail('')
       setInviteError(null)
@@ -90,22 +91,22 @@ export function MembersSection({ projectId }: MembersSectionProps) {
   })
 
   const [updateRole] = useMutation(UPDATE_MEMBER_ROLE, {
-    refetchQueries: [{ query: LIST_MEMBERS, variables: { projectId } }],
+    refetchQueries: [{ query: LIST_MEMBERS, variables: { organizationId } }],
   })
 
   const [removeMember] = useMutation(REMOVE_MEMBER, {
-    refetchQueries: [{ query: LIST_MEMBERS, variables: { projectId } }],
+    refetchQueries: [{ query: LIST_MEMBERS, variables: { organizationId } }],
   })
 
   const [revokeInvitation] = useMutation(REVOKE_INVITATION, {
-    refetchQueries: [{ query: LIST_INVITATIONS, variables: { projectId } }],
+    refetchQueries: [{ query: LIST_INVITATIONS, variables: { organizationId } }],
   })
 
   function handleInvite(e: FormEvent<HTMLFormElement>): void {
     e.preventDefault()
     setInviteError(null)
-    if (!inviteEmail.includes('@')) return
-    inviteMember({ variables: { input: { email: inviteEmail, projectId, role: inviteRole } } })
+    if (!organizationId || !inviteEmail.includes('@')) return
+    inviteMember({ variables: { input: { email: inviteEmail, organizationId, role: inviteRole } } })
   }
 
   const members = membersData?.listMembers ?? []
@@ -137,14 +138,14 @@ export function MembersSection({ projectId }: MembersSectionProps) {
                   required
                 />
               </div>
-              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as ProjectRole)}>
+              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as OrgRole)}>
                 <SelectTrigger className="w-36">
-                  <SelectValue>{(value: string) => value ? enumLabels.projectRole(value as ProjectRole) : null}</SelectValue>
+                  <SelectValue>{(value: string) => value ? enumLabels.orgRole(value as OrgRole) : null}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {PROJECT_ROLES.map((role) => (
+                  {ORG_ROLES.map((role) => (
                     <SelectItem key={role} value={role}>
-                      {enumLabels.projectRole(role)}
+                      {enumLabels.orgRole(role)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -226,17 +227,17 @@ export function MembersSection({ projectId }: MembersSectionProps) {
                         value={member.role}
                         onValueChange={(v) =>
                           updateRole({
-                            variables: { input: { membershipId: member.id, role: v as ProjectRole } },
+                            variables: { input: { membershipId: member.id, role: v as OrgRole } },
                           })
                         }
                       >
                         <SelectTrigger size="sm" className="w-28">
-                          <SelectValue>{(value: string) => value ? enumLabels.projectRole(value as ProjectRole) : null}</SelectValue>
+                          <SelectValue>{(value: string) => value ? enumLabels.orgRole(value as OrgRole) : null}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {PROJECT_ROLES.map((role) => (
+                          {ORG_ROLES.map((role) => (
                             <SelectItem key={role} value={role}>
-                              {enumLabels.projectRole(role)}
+                              {enumLabels.orgRole(role)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -244,7 +245,7 @@ export function MembersSection({ projectId }: MembersSectionProps) {
                     </Can>
                     <Can not I={Action.MANAGE} a={Subject.MEMBERSHIP}>
                       <Badge variant="outline" className="rounded-full">
-                        {enumLabels.projectRole(member.role)}
+                        {enumLabels.orgRole(member.role)}
                       </Badge>
                     </Can>
                     <Can I={Action.MANAGE} a={Subject.MEMBERSHIP}>
@@ -319,7 +320,7 @@ export function MembersSection({ projectId }: MembersSectionProps) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">{inv.email}</p>
                       <p className="text-xs text-muted-foreground">
-                        {enumLabels.projectRole(inv.role)}
+                        {enumLabels.orgRole(inv.role)}
                         {' · '}
                         {enumLabels.invitationStatus(inv.status)}
                       </p>

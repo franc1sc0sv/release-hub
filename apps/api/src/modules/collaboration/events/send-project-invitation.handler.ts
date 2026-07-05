@@ -18,7 +18,7 @@ export class SendProjectInvitationHandler {
       await this.mailService.sendProjectInvitation(
         event.to,
         event.inviterName,
-        event.projectName,
+        event.organizationName,
         acceptUrl,
       )
     } catch (error) {

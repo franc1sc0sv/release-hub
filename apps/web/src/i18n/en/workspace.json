@@ -33,6 +33,12 @@
     "description": "Connect a repository to start tracking releases.",
     "cta": "Connect repository"
   },
+  "connectGithub": {
+    "heading": "Connect GitHub to get started",
+    "description": "This organization needs the GitHub App installed before you can create a project. Install it to grant access to your repositories.",
+    "cta": "Connect GitHub",
+    "retake": "Go through setup again"
+  },
   "loading": "Loading workspace...",
   "connectionHealth": {
     "title": "Connection health",

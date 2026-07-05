@@ -1,10 +1,10 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeOrgAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IMembershipRepository } from '../../interfaces/collaboration.repository'
 import type { IMemberProfile } from '../../interfaces/collaboration.interfaces'
 import { ListMembersQuery } from './list-members.query'
@@ -13,20 +13,24 @@ import { ListMembersQuery } from './list-members.query'
 export class ListMembersHandler extends BaseQueryHandler<ListMembersQuery, IMemberProfile[]> {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly membershipRepository: IMembershipRepository,
   ) {
     super(db)
   }
 
   protected async handle(query: ListMembersQuery, tx: TxClient): Promise<IMemberProfile[]> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.actorId, tx)
-    const ability = defineAbilityFor(memberships)
+    await authorizeOrgAction(
+      this.organizationRepository,
+      {
+        actorId: query.actorId,
+        organizationId: query.organizationId,
+        action: Action.READ,
+        subjectKind: Subject.MEMBERSHIP,
+      },
+      tx,
+    )
 
-    if (!ability.can(Action.READ, { kind: Subject.MEMBERSHIP, __type: Subject.MEMBERSHIP, projectId: query.projectId })) {
-      throw new ForbiddenException()
-    }
-
-    return this.membershipRepository.findAllByProject(query.projectId, tx)
+    return this.membershipRepository.findAllByOrganization(query.organizationId, tx)
   }
 }

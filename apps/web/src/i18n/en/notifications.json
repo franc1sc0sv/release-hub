@@ -1,24 +1,52 @@
 {
   "title": "Notification preferences",
-  "columns": {
-    "notification": "Notification",
-    "inApp": "In-App",
+  "channels": {
+    "inApp": "In-app",
     "email": "Email",
-    "slack": "Slack",
-    "selectAllRow": "Select all",
-    "selectAllAriaLabel": "Toggle all notifications for {{channel}}"
+    "slack": "Slack"
+  },
+  "allNotifications": {
+    "label": "All notifications",
+    "description": "Turn every release and flag notification on or off at once.",
+    "toggleAriaLabel": "Toggle all notifications for {{channel}}"
   },
   "groups": {
-    "releases": "Releases",
-    "flags": "Flags"
+    "releases": {
+      "label": "Releases"
+    },
+    "flags": {
+      "label": "Flags"
+    },
+    "enableAll": "Enable all",
+    "enableAllAriaLabel": "Toggle every {{group}} notification for {{channel}}"
   },
   "toggleAriaLabel": "Toggle {{type}} via {{channel}}",
+  "hints": {
+    "RELEASE_CREATED": "A release draft is created from a branch diff",
+    "RELEASE_SHIPPED": "A release's pull request opens and merges",
+    "RELEASE_DEPLOYED": "A release reaches production",
+    "FLAG_CREATED": "A new feature flag starts being tracked",
+    "FLAG_DELETED": "A tracked flag is removed",
+    "FLAG_ENABLED": "A flag turns on in an environment",
+    "FLAG_DISABLED": "A flag turns off in an environment",
+    "FLAG_VALUE_CHANGED": "A flag's value or variation changes",
+    "FLAG_CONFLICT": "A flag's state disagrees between environments",
+    "FLAG_IN_PROGRESS_REMINDER": "A flag has stayed in progress for a while",
+    "FLAG_SHIP_OFF_REMINDER": "A shipped release still has its flag turned off",
+    "FLAG_STALENESS_ALERT": "A fully released flag is ready to be cleaned up",
+    "FLAG_DIGEST": "The periodic email summary of flag activity"
+  },
   "digest": {
+    "title": "Email digest",
     "frequencyLabel": "Digest frequency",
     "description": "How often the flag digest email is sent when enabled.",
     "sendTest": "Send test digest",
     "testSent": "Test digest sent.",
     "testFailed": "Couldn't send the test digest. Please try again."
+  },
+  "error": {
+    "heading": "Couldn't load notification preferences",
+    "description": "Something went wrong loading your preferences. Try refreshing the page."
   },
   "bell": {
     "label": "Notifications",

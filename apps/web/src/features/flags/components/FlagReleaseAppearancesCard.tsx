@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { ChevronRight } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -19,12 +19,17 @@ interface FlagReleaseRowProps {
 
 function FlagReleaseRow({ release }: FlagReleaseRowProps) {
   const enumLabels = useEnumLabels()
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   return (
     <li>
       <Link
         to={{
-          pathname: ROUTES.RELEASE_DETAIL.replace(':releaseId', release.releaseId),
+          pathname: generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
+            organizationId: organizationId ?? '',
+            projectId: projectId ?? '',
+            releaseId: release.releaseId,
+          }),
           search: '?section=flags',
         }}
         className="flex items-center gap-3 rounded-[var(--radius-button)] border-t border-border py-3 first:border-t-0 first:pt-0 transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

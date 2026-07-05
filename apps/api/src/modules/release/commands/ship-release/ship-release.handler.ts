@@ -1,19 +1,20 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
+import { NotFoundException } from '../../../../common/errors'
 import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { ReleaseStatus } from '../../../../common/types/release-status.enum'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
 import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
-import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
-import { decryptToken } from '../../../../common/crypto/token-cipher'
+import { IGithubTokenResolver } from '../../../integration/interfaces/github-token-resolver.abstract'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { ReleaseObjectType } from '../../types/release.type'
@@ -30,11 +31,12 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
     private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly gitHubClient: IGitHubClient,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
-    private readonly githubConnectionRepository: IGithubConnectionRepository,
+    private readonly tokenResolver: IGithubTokenResolver,
   ) {
     super(db, eventEmitter)
   }
@@ -44,21 +46,19 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
     tx: TxClient,
     events: IDomainEvent[],
   ): Promise<ReleaseObjectType> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
     const release = await this.releaseRepository.findById(command.releaseId, tx)
     if (!release) throw new NotFoundException('Release')
 
-    if (
-      !ability.can(Action.UPDATE, {
-        kind: Subject.RELEASE,
-        __type: Subject.RELEASE,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: command.userId,
         projectId: release.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.UPDATE,
+        subjectKind: Subject.RELEASE,
+      },
+      tx,
+    )
 
     if (release.status !== ReleaseStatus.DRAFT) {
       throw new AppException('Release has already been shipped', ErrorCode.VALIDATION_ERROR)
@@ -71,7 +71,7 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
     const project = await this.projectRepository.findById(release.projectId, tx)
     if (!project) throw new NotFoundException('Project')
 
-    const accessToken = await this.resolveAccessToken(command.userId, tx)
+    const accessToken = await this.tokenResolver.resolveForProject(release.projectId, command.userId, tx)
 
     const prs = await this.pullRequestRepository.findAllByRelease(command.releaseId, tx)
     const total = prs.length
@@ -139,16 +139,5 @@ export class ShipReleaseHandler extends BaseCommandHandler<ShipReleaseCommand, R
     )
 
     return toReleaseObjectType(updated)
-  }
-
-  private async resolveAccessToken(userId: string, tx: TxClient): Promise<string> {
-    const connection = await this.githubConnectionRepository.findByUserId(userId, tx)
-    if (!connection) {
-      throw new AppException(
-        'GitHub is not connected. Please connect your GitHub account in settings.',
-        ErrorCode.GITHUB_NOT_CONNECTED,
-      )
-    }
-    return decryptToken(connection.accessToken)
   }
 }

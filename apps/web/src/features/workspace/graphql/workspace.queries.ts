@@ -6,6 +6,7 @@ export const LIST_PROJECTS = graphql(`
       id
       name
       repo
+      organizationId
       connectionHealth {
         github
         linear

@@ -50,7 +50,13 @@ export interface IRunFlagCoveragePreparation {
   unionKeys: string[]
   defaultBranchKeys: string[]
   branchKeys: { branch: string; keys: string[] }[]
-  prRegistryDiffs: { pullRequestId: string; featureId: string | null; added: string[]; removed: string[] }[]
+  prRegistryDiffs: {
+    pullRequestId: string
+    prNumber: number
+    featureId: string | null
+    added: string[]
+    removed: string[]
+  }[]
 }
 
 export interface IPullRequestFlagChangeWithPullRequest extends IPullRequestFlagChange {
@@ -110,6 +116,7 @@ export interface IPerFlagCoveragePreparation {
   branchKeys: { branch: string; present: boolean }[]
   prChanges: {
     pullRequestId: string
+    prNumber: number
     featureId: string | null
     action: FlagAction
     kind: FlagReferenceKind

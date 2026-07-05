@@ -128,7 +128,7 @@ export function LoginPage() {
       })
       if (meResult.data) setUser(meResult.data.me)
       const rawReturnTo = searchParams.get('returnTo')
-      const safeReturnTo = isSafeRedirect(rawReturnTo) ? rawReturnTo : ROUTES.WORKSPACE
+      const safeReturnTo = isSafeRedirect(rawReturnTo) ? rawReturnTo : '/'
       navigate(safeReturnTo)
     } catch {
       setPasswordError(true)

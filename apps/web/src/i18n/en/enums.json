@@ -57,7 +57,10 @@
     "CONFLICT_DETECTED": "Conflict detected",
     "REMINDER_SENT": "Reminder sent",
     "SYNC_COMPLETED": "Sync completed",
-    "COVERAGE_SCAN": "Coverage scan"
+    "COVERAGE_SCAN": "Coverage scan",
+    "DETECTED_DEFINITION": "Detected in code (definition)",
+    "DETECTED_USAGE": "Detected in code (usage)",
+    "FIRST_SEEN_BRANCH": "First seen on branch"
   },
   "flagHistorySource": {
     "WEBHOOK": "Webhook",
@@ -74,10 +77,10 @@
     "LINEAR": "Linear",
     "JIRA": "Jira"
   },
-  "projectRole": {
-    "OWNER": "Owner",
-    "MEMBER": "Member",
-    "VIEWER": "Viewer"
+  "orgRole": {
+    "owner": "Owner",
+    "member": "Member",
+    "viewer": "Viewer"
   },
   "invitationStatus": {
     "PENDING": "Pending",

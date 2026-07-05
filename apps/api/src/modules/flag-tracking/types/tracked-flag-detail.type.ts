@@ -72,18 +72,6 @@ export class TrackedFlagDeliveryType {
 }
 
 @ObjectType()
-export class TrackedFlagEventType {
-  @Field(() => String)
-  type: string
-
-  @Field(() => Date)
-  occurredAt: Date
-
-  @Field(() => String)
-  description: string
-}
-
-@ObjectType()
 export class TrackedFlagDetailType {
   @Field(() => ID)
   id: string
@@ -108,7 +96,4 @@ export class TrackedFlagDetailType {
 
   @Field(() => TrackedFlagDeliveryType)
   delivery: TrackedFlagDeliveryType
-
-  @Field(() => [TrackedFlagEventType])
-  events: TrackedFlagEventType[]
 }

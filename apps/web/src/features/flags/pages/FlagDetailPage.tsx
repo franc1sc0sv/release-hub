@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
@@ -15,16 +15,13 @@ import { useProject } from '@/context/project.context'
 import { FlagStatusHero } from '../components/FlagStatusHero'
 import { FlagConflictBanner } from '../components/FlagConflictBanner'
 import { FlagEnvironmentsCard } from '../components/FlagEnvironmentsCard'
-import { FlagBranchPresenceSection } from '../components/FlagBranchPresenceSection'
 import { FlagLinkedFeatureCard } from '../components/FlagLinkedFeatureCard'
 import { FlagReleaseAppearancesCard } from '../components/FlagReleaseAppearancesCard'
-import { FlagPullRequestChangesCard } from '../components/FlagPullRequestChangesCard'
-import { FlagDecisionTimeline } from '../components/FlagDecisionTimeline'
 import { FlagHistoryTimeline } from '../components/FlagHistoryTimeline'
 import { FlagDetailSkeleton } from '../components/FlagDetailSkeleton'
 
 export default function FlagDetailPage() {
-  const { flagKey } = useParams<{ flagKey: string }>()
+  const { organizationId, flagKey } = useParams<{ organizationId: string; flagKey: string }>()
   const { t } = useTranslation('flags')
   const reduceMotion = useReducedMotion()
   const { activeProject } = useProject()
@@ -62,7 +59,10 @@ export default function FlagDetailPage() {
           className="flex items-center gap-2 font-mono text-xs text-muted-foreground"
         >
           <Link
-            to={ROUTES.FLAGS}
+            to={generatePath(ROUTES.PROJECT_FLAGS, {
+              organizationId: organizationId ?? '',
+              projectId,
+            })}
             className="rounded-[var(--radius-button)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {t('detail.breadcrumb.flags')}
@@ -134,22 +134,7 @@ export default function FlagDetailPage() {
               variants={slideUp}
               className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[2fr_1fr]"
             >
-              <div className="space-y-4">
-                <FlagEnvironmentsCard environments={flagDetail.flagsmith.environments} />
-                <FlagBranchPresenceSection
-                  branches={tracked?.branchPresences ?? []}
-                  onRescan={() => void handleRescan()}
-                  rescanning={rescanning}
-                />
-                <FlagPullRequestChangesCard
-                  changes={tracked?.pullRequestChanges ?? []}
-                  repo={activeProject?.repo ?? null}
-                />
-                <FlagDecisionTimeline
-                  releases={tracked?.releases ?? []}
-                  events={tracked?.events ?? []}
-                />
-              </div>
+              <FlagEnvironmentsCard environments={flagDetail.flagsmith.environments} />
 
               <div className="space-y-4">
                 <FlagLinkedFeatureCard feature={tracked?.feature ?? null} />

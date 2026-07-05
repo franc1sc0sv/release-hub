@@ -6,7 +6,6 @@ import type { IDomainEvent } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { NotFoundException, ForbiddenException, ConflictException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IMembershipRepository, IInvitationRepository } from '../../interfaces/collaboration.repository'
 import type { IMemberProfile } from '../../interfaces/collaboration.interfaces'
 import { InvitationStatus } from '../../../../common/types/invitation-status.enum'
@@ -17,7 +16,6 @@ export class AcceptInvitationHandler extends BaseCommandHandler<AcceptInvitation
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
-    private readonly projectRepository: IProjectRepository,
     private readonly membershipRepository: IMembershipRepository,
     private readonly invitationRepository: IInvitationRepository,
   ) {
@@ -32,9 +30,8 @@ export class AcceptInvitationHandler extends BaseCommandHandler<AcceptInvitation
     const invitation = await this.invitationRepository.findByToken(command.token, tx)
     if (!invitation) throw new NotFoundException('Invitation')
 
-    const memberships = await this.projectRepository.findMembershipsForUser(command.actorId, tx)
-    const ability = defineAbilityFor(memberships)
-    if (!ability.can(Action.UPDATE, { kind: Subject.INVITATION, __type: Subject.INVITATION, projectId: invitation.projectId })) {
+    const ability = defineAbilityFor()
+    if (!ability.can(Action.UPDATE, { kind: Subject.INVITATION, __type: Subject.INVITATION, organizationId: invitation.organizationId })) {
       throw new ForbiddenException()
     }
 
@@ -43,8 +40,8 @@ export class AcceptInvitationHandler extends BaseCommandHandler<AcceptInvitation
     }
 
     if (invitation.status === InvitationStatus.ACCEPTED) {
-      const accepted = await this.membershipRepository.findByProjectAndUser(
-        invitation.projectId,
+      const accepted = await this.membershipRepository.findByOrgAndUser(
+        invitation.organizationId,
         command.actorId,
         tx,
       )
@@ -67,8 +64,8 @@ export class AcceptInvitationHandler extends BaseCommandHandler<AcceptInvitation
       throw new ConflictException('Invitation has expired')
     }
 
-    const existing = await this.membershipRepository.findByProjectAndUser(
-      invitation.projectId,
+    const existing = await this.membershipRepository.findByOrgAndUser(
+      invitation.organizationId,
       command.actorId,
       tx,
     )
@@ -77,7 +74,7 @@ export class AcceptInvitationHandler extends BaseCommandHandler<AcceptInvitation
       existing ??
       (await this.membershipRepository.create(
         command.actorId,
-        invitation.projectId,
+        invitation.organizationId,
         invitation.role,
         tx,
       ))

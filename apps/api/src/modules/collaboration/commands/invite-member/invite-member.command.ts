@@ -1,10 +1,10 @@
-import type { ProjectRole } from '../../../../common/types/project-role.enum'
+import type { OrgRole } from '@release-hub/shared'
 
 export class InviteMemberCommand {
   constructor(
     readonly actorId: string,
-    readonly projectId: string,
+    readonly organizationId: string,
     readonly email: string,
-    readonly role: ProjectRole,
+    readonly role: OrgRole,
   ) {}
 }

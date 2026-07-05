@@ -1,0 +1,76 @@
+{
+  "title": "Organization",
+  "subtitle": "Organization settings",
+  "switcher": {
+    "label": "Switch organization",
+    "eyebrow": "Organization",
+    "noOrganizations": "No organization",
+    "createOrganization": "Create organization",
+    "active": "Active organization",
+    "connected": "GitHub connected",
+    "notConnected": "GitHub not connected"
+  },
+  "create": {
+    "title": "Create organization",
+    "description": "Organizations group your repositories, members, and releases.",
+    "nameLabel": "Organization name",
+    "namePlaceholder": "Acme Inc.",
+    "submit": "Create",
+    "creating": "Creating...",
+    "cancel": "Cancel",
+    "error": "Could not create the organization. Please try again."
+  },
+  "settingsNav": {
+    "general": "General",
+    "members": "Members"
+  },
+  "settingsNavDescriptions": {
+    "general": "Organization name and danger zone actions.",
+    "members": "Manage who has access to this organization."
+  },
+  "integrationsNav": {
+    "title": "Integrations",
+    "github": "GitHub"
+  },
+  "integrationsNavDescriptions": {
+    "github": "Install the GitHub App and review the repositories it can access."
+  },
+  "general": {
+    "title": "General",
+    "nameLabel": "Organization name",
+    "save": "Save",
+    "saving": "Saving...",
+    "renameSuccess": "Organization name updated.",
+    "readOnly": "Only owners can change these settings."
+  },
+  "github": {
+    "title": "GitHub",
+    "connected": "GitHub App installed",
+    "notConnected": "GitHub App not installed",
+    "install": "Install GitHub App",
+    "manage": "Manage GitHub App",
+    "description": "Install the GitHub App so this organization can read repositories and detect branch diffs.",
+    "reposTitle": "Accessible repositories",
+    "reposEmpty": "No repositories are accessible yet. Manage the installation to grant access.",
+    "private": "Private",
+    "reposPrev": "Previous",
+    "reposNext": "Next",
+    "reposPageIndicator": "Page {{page}} of {{total}}"
+  },
+  "danger": {
+    "title": "Danger zone",
+    "description": "Deleting an organization is permanent and removes all of its projects, members, and releases.",
+    "delete": "Delete organization",
+    "cancel": "Cancel",
+    "confirmTitle": "Delete {{name}}?",
+    "confirmDescription": "This action cannot be undone. All projects, releases, and members in this organization will be removed.",
+    "deleteSuccess": "Organization deleted."
+  },
+  "empty": {
+    "heading": "No organization selected",
+    "description": "Create or select an organization to manage its settings."
+  },
+  "overview": {
+    "description": "Manage the projects, releases, and features in this organization."
+  }
+}

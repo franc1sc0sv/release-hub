@@ -1,13 +1,12 @@
 import { QueryHandler, type IQueryHandler } from '@nestjs/cqrs'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException, NotFoundException } from '../../../../common/errors'
-import { AppException } from '../../../../common/errors/app.exception'
-import { ErrorCode } from '../../../../common/errors/error-codes.enum'
-import { decryptToken } from '../../../../common/crypto/token-cipher'
+import { NotFoundException } from '../../../../common/errors'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
-import { IGithubConnectionRepository } from '../../../github-auth/interfaces/github-connection.repository'
 import { IGitHubClient } from '../../../integration/interfaces/github-client.interface'
+import { IGithubTokenResolver } from '../../../integration/interfaces/github-token-resolver.abstract'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { fetchBranchCommitDetails } from '../../utils/fetch-branch-commit-details.util'
 import { GetBranchAuthorsQuery } from './get-branch-authors.query'
 
@@ -22,7 +21,8 @@ export class GetBranchAuthorsHandler implements IQueryHandler<GetBranchAuthorsQu
     private readonly db: IDatabaseService,
     private readonly projectRepository: IProjectRepository,
     private readonly gitHubClient: IGitHubClient,
-    private readonly githubConnectionRepository: IGithubConnectionRepository,
+    private readonly tokenResolver: IGithubTokenResolver,
+    private readonly organizationRepository: IOrganizationRepository,
   ) {}
 
   async execute(query: GetBranchAuthorsQuery): Promise<string[]> {
@@ -49,33 +49,25 @@ export class GetBranchAuthorsHandler implements IQueryHandler<GetBranchAuthorsQu
 
   private async resolveSource(query: GetBranchAuthorsQuery): Promise<IResolvedBranchAuthorsSource> {
     return this.db.$query(async (tx) => {
-      const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-      const ability = defineAbilityFor(memberships)
-
-      if (
-        !ability.can(Action.READ, {
-          kind: Subject.PROJECT,
-          __type: Subject.PROJECT,
+      await authorizeProjectAction(
+        this.organizationRepository,
+        {
+          actorId: query.userId,
           projectId: query.projectId,
-        })
-      ) {
-        throw new ForbiddenException()
-      }
+          action: Action.READ,
+          subjectKind: Subject.PROJECT,
+        },
+        tx,
+      )
 
       const project = await this.projectRepository.findById(query.projectId, tx)
       if (!project) throw new NotFoundException('Project')
 
-      const connection = await this.githubConnectionRepository.findByUserId(query.userId, tx)
-      if (!connection) {
-        throw new AppException(
-          'GitHub is not connected. Please connect your GitHub account in settings.',
-          ErrorCode.GITHUB_NOT_CONNECTED,
-        )
-      }
+      const accessToken = await this.tokenResolver.resolveForProject(query.projectId, query.userId, tx)
 
       return {
         repo: project.repo,
-        accessToken: decryptToken(connection.accessToken),
+        accessToken,
       }
     })
   }

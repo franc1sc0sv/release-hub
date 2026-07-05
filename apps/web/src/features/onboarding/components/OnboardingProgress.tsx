@@ -2,13 +2,13 @@ import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type OnboardingStep = 'connectGithub' | 'selectRepo'
+type OnboardingStep = 'createOrg' | 'installApp'
 
 interface OnboardingProgressProps {
   currentStep: OnboardingStep
 }
 
-const STEP_ORDER: readonly OnboardingStep[] = ['connectGithub', 'selectRepo']
+const STEP_ORDER: readonly OnboardingStep[] = ['createOrg', 'installApp']
 
 export function OnboardingProgress({ currentStep }: OnboardingProgressProps) {
   const { t } = useTranslation('onboarding')

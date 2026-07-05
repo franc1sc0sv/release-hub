@@ -15,11 +15,11 @@ import { ListMembersHandler } from './queries/list-members/list-members.handler'
 import { ListInvitationsHandler } from './queries/list-invitations/list-invitations.handler'
 import { SendProjectInvitationHandler } from './events/send-project-invitation.handler'
 import { MailModule } from '../../common/mail/mail.module'
-import { ProjectModule } from '../project/project.module'
+import { OrganizationModule } from '../organization/organization.module'
 import { AuthModule } from '../auth/auth.module'
 
 @Module({
-  imports: [CqrsModule, MailModule, ProjectModule, AuthModule],
+  imports: [CqrsModule, MailModule, OrganizationModule, AuthModule],
   providers: [
     CollaborationResolver,
     AcceptInvitationResolver,

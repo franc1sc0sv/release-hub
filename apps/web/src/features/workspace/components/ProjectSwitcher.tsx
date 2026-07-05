@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { ChevronsUpDown, Check, FolderOpen, Plus } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useNavigate } from 'react-router-dom'
+import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useProject } from '@/context/project.context'
 import {
@@ -21,7 +21,9 @@ import { ROUTES } from '@/lib/routes'
 
 export function ProjectSwitcher() {
   const { t } = useTranslation('workspace')
-  const { projects, activeProject, setActiveProjectId, loading } = useProject()
+  const { projects, activeProject, loading } = useProject()
+  const params = useParams<{ organizationId: string }>()
+  const organizationId = params.organizationId!
   const reducedMotion = useReducedMotion()
   const navigate = useNavigate()
 
@@ -108,7 +110,11 @@ export function ProjectSwitcher() {
                   'rounded-lg px-2 py-2 cursor-pointer',
                   isActive && 'bg-accent',
                 )}
-                onClick={() => setActiveProjectId(project.id)}
+                onClick={() =>
+                  navigate(
+                    generatePath(ROUTES.PROJECT_ROOT, { organizationId, projectId: project.id }),
+                  )
+                }
               >
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className={cn('text-sm font-medium truncate', isActive && 'text-primary')}>
@@ -132,7 +138,7 @@ export function ProjectSwitcher() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="rounded-lg px-2 py-2 cursor-pointer gap-2"
-          onClick={() => navigate(ROUTES.PROJECT_CREATE)}
+          onClick={() => navigate(generatePath(ROUTES.PROJECT_CREATE, { organizationId }))}
         >
           <Plus className="size-4 text-muted-foreground" aria-hidden />
           <span className="text-sm font-medium">{t('projectSwitcher.createProject')}</span>

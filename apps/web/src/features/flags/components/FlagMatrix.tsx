@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, generatePath, useParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { format } from 'date-fns'
@@ -90,6 +90,7 @@ const FlagRow = memo(function FlagRow({
   onLabel,
   offLabel,
 }: FlagRowProps) {
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
   const formattedDate = flag.createdAt
     ? format(new Date(flag.createdAt), 'MMM d, yyyy')
     : null
@@ -107,7 +108,11 @@ const FlagRow = memo(function FlagRow({
       <TableCell className="pl-6">
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            to={ROUTES.FLAG_DETAIL.replace(':flagKey', flag.key)}
+            to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+              organizationId: organizationId ?? '',
+              projectId: projectId ?? '',
+              flagKey: flag.key,
+            })}
             className="font-mono text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {flag.key}

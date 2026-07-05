@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowLeft, AlertCircle, Loader2, GitBranch } from 'lucide-react'
@@ -18,11 +18,19 @@ import { FeatureStateControl } from '../components/FeatureStateControl'
 import type { FeatureKind } from '@/generated/graphql'
 
 export default function FeatureDetailPage() {
-  const { id } = useParams<{ id: string }>()
+  const { organizationId, projectId, id } = useParams<{
+    organizationId: string
+    projectId: string
+    id: string
+  }>()
   const { t } = useTranslation('features')
   const enumLabels = useEnumLabels()
   const reduceMotion = useReducedMotion()
   const { detail, loading, error } = useFeature(id)
+  const featuresPath = generatePath(ROUTES.PROJECT_FEATURES, {
+    organizationId: organizationId ?? '',
+    projectId: projectId ?? '',
+  })
 
   if (loading) {
     return (
@@ -58,7 +66,7 @@ export default function FeatureDetailPage() {
           description={t('detail.notFoundDescription')}
           action={
             <Link
-              to={ROUTES.FEATURES}
+              to={featuresPath}
               className="rounded-[var(--radius-button)] border border-white/20 bg-white/5 px-4 py-2 text-sm text-foreground/80 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {t('back')}
@@ -82,7 +90,7 @@ export default function FeatureDetailPage() {
       >
         <motion.div variants={slideUp}>
           <Link
-            to={ROUTES.FEATURES}
+            to={featuresPath}
             className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] px-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ArrowLeft className="size-3.5" aria-hidden />

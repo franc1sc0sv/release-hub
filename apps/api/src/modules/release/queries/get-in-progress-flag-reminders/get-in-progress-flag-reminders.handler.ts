@@ -1,10 +1,10 @@
 import { QueryHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseQueryHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
-import { ForbiddenException } from '../../../../common/errors'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseFlagDecisionRepository } from '../../../flag-tracking/interfaces/release-flag-decision.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { InProgressFlagReminderType } from '../../types/in-progress-flag-reminder.type'
@@ -17,7 +17,7 @@ export class GetInProgressFlagRemindersHandler extends BaseQueryHandler<
 > {
   constructor(
     protected readonly db: IDatabaseService,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
     private readonly releaseRepository: IReleaseRepository,
   ) {
@@ -28,18 +28,16 @@ export class GetInProgressFlagRemindersHandler extends BaseQueryHandler<
     query: GetInProgressFlagRemindersQuery,
     tx: TxClient,
   ): Promise<InProgressFlagReminderType[]> {
-    const memberships = await this.projectRepository.findMembershipsForUser(query.userId, tx)
-    const ability = defineAbilityFor(memberships)
-
-    if (
-      !ability.can(Action.READ, {
-        kind: Subject.PROJECT,
-        __type: Subject.PROJECT,
+    await authorizeProjectAction(
+      this.organizationRepository,
+      {
+        actorId: query.userId,
         projectId: query.projectId,
-      })
-    ) {
-      throw new ForbiddenException()
-    }
+        action: Action.READ,
+        subjectKind: Subject.PROJECT,
+      },
+      tx,
+    )
 
     const decisions = await this.releaseFlagDecisionRepository.findLatestInProgressForProject(
       query.projectId,

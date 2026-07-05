@@ -1,14 +1,15 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import { randomUUID } from 'node:crypto'
 import type { TxClient } from '@release-hub/db'
-import { defineAbilityFor, Action, Subject } from '@release-hub/shared'
+import { Action, Subject } from '@release-hub/shared'
 import { BaseCommandHandler } from '../../../../common/cqrs'
 import type { IDomainEvent } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
-import { ForbiddenException, ConflictException, NotFoundException } from '../../../../common/errors'
+import { ConflictException, NotFoundException } from '../../../../common/errors'
+import { authorizeOrgAction } from '../../../../common/authz/authorize-org-action'
 import { IAuthRepository } from '../../../auth/repositories/auth.repository.abstract'
-import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IMembershipRepository } from '../../interfaces/collaboration.repository'
 import { IInvitationRepository } from '../../interfaces/collaboration.repository'
 import type { IInvitation } from '../../interfaces/collaboration.interfaces'
@@ -22,7 +23,7 @@ export class InviteMemberHandler extends BaseCommandHandler<InviteMemberCommand,
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
     private readonly authRepository: IAuthRepository,
-    private readonly projectRepository: IProjectRepository,
+    private readonly organizationRepository: IOrganizationRepository,
     private readonly membershipRepository: IMembershipRepository,
     private readonly invitationRepository: IInvitationRepository,
   ) {
@@ -34,30 +35,34 @@ export class InviteMemberHandler extends BaseCommandHandler<InviteMemberCommand,
     tx: TxClient,
     events: IDomainEvent[],
   ): Promise<IInvitation> {
-    const memberships = await this.projectRepository.findMembershipsForUser(command.actorId, tx)
-    const ability = defineAbilityFor(memberships)
+    await authorizeOrgAction(
+      this.organizationRepository,
+      {
+        actorId: command.actorId,
+        organizationId: command.organizationId,
+        action: Action.CREATE,
+        subjectKind: Subject.INVITATION,
+      },
+      tx,
+    )
 
-    if (!ability.can(Action.CREATE, { kind: Subject.INVITATION, __type: Subject.INVITATION, projectId: command.projectId })) {
-      throw new ForbiddenException()
-    }
-
-    const project = await this.projectRepository.findById(command.projectId, tx)
-    if (!project) throw new NotFoundException('Project')
+    const organization = await this.organizationRepository.findById(command.organizationId, tx)
+    if (!organization) throw new NotFoundException('Organization')
 
     const actor = await this.authRepository.findById(command.actorId, tx)
     if (!actor) throw new NotFoundException('User')
 
-    const existingMember = await this.membershipRepository.findByProjectAndEmail(
-      command.projectId,
+    const existingMember = await this.membershipRepository.findByOrgAndEmail(
+      command.organizationId,
       command.email,
       tx,
     )
     if (existingMember) {
-      throw new ConflictException('User is already a member of this project')
+      throw new ConflictException('User is already a member of this organization')
     }
 
-    const existingInvitation = await this.invitationRepository.findPendingByProjectAndEmail(
-      command.projectId,
+    const existingInvitation = await this.invitationRepository.findPendingByOrgAndEmail(
+      command.organizationId,
       command.email,
       tx,
     )
@@ -72,7 +77,7 @@ export class InviteMemberHandler extends BaseCommandHandler<InviteMemberCommand,
     const invitation = await this.invitationRepository.create(
       {
         email: command.email,
-        projectId: command.projectId,
+        organizationId: command.organizationId,
         role: command.role,
         invitedById: command.actorId,
         token,
@@ -81,7 +86,7 @@ export class InviteMemberHandler extends BaseCommandHandler<InviteMemberCommand,
       tx,
     )
 
-    events.push(new ProjectInvitationSentEvent(command.email, actor.name, project.name, token))
+    events.push(new ProjectInvitationSentEvent(command.email, actor.name, organization.name, token))
 
     return invitation
   }
