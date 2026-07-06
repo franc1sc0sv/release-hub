@@ -1,7 +1,7 @@
-import { Controller, Get, Logger, Query, Req, Res } from '@nestjs/common'
+import { Controller, Get, Logger, Query, Res } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
 import { JwtService } from '@nestjs/jwt'
-import type { Request, Response } from 'express'
+import type { Response } from 'express'
 import { encryptToken } from '../../../common/crypto/token-cipher'
 import { ConnectLinearCommand } from '../commands/connect-linear/connect-linear.command'
 
@@ -42,25 +42,12 @@ export class LinearAuthController {
   async callback(
     @Query('code') code: string,
     @Query('state') state: string,
-    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     const webAppUrl = process.env.WEB_APP_URL ?? 'http://localhost:5173'
     const errorRedirect = `${webAppUrl}/settings?linear=error`
 
     try {
-      const cookieState = req.cookies['linear_oauth_state'] as string | undefined
-      if (!cookieState || cookieState !== this.extractNonce(state)) {
-        this.logger.warn(
-          `linear callback: state cookie check failed (cookiePresent=${cookieState != null})`,
-        )
-        res.clearCookie('linear_oauth_state', { path: '/' })
-        res.redirect(errorRedirect)
-        return
-      }
-
-      res.clearCookie('linear_oauth_state', { path: '/' })
-
       const payload = this.jwtService.verify<ILinearStatePayload>(state)
       const userId = payload.sub
       const projectId = payload.projectId
@@ -138,17 +125,7 @@ export class LinearAuthController {
       this.logger.error(
         `linear callback: unexpected error: ${error instanceof Error ? error.message : String(error)}`,
       )
-      res.clearCookie('linear_oauth_state', { path: '/' })
       res.redirect(errorRedirect)
-    }
-  }
-
-  private extractNonce(signedState: string): string | undefined {
-    try {
-      const payload = this.jwtService.verify<ILinearStatePayload>(signedState)
-      return payload.nonce
-    } catch {
-      return undefined
     }
   }
 }
