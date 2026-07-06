@@ -1,27 +1,23 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate, generatePath } from 'react-router-dom'
-import { useQuery } from '@apollo/client/react'
 import { m, useReducedMotion } from 'motion/react'
 import { Github, Loader2 } from 'lucide-react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { GITHUB_CONNECTION } from '@/features/settings/graphql/settings.operations'
 import { slideUp } from '@/lib/animations'
 import { ROUTES } from '@/lib/routes'
 import { useProject } from '@/context/project.context'
+import { useOrganization } from '@/context/organization.context'
 import { ReleaseWizard } from '../components/ReleaseWizard'
 
 export default function ReleaseBuilderPage() {
   const { t } = useTranslation('releases')
   const reduceMotion = useReducedMotion()
 
-  const { data: githubData, loading: githubLoading } = useQuery(GITHUB_CONNECTION, {
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const githubConnected = githubData?.githubConnection.connected ?? false
+  const { activeOrg, loading: githubLoading } = useOrganization()
+  const githubConnected = activeOrg?.githubConnected ?? false
 
   return (
     <NebulaBackground className="p-6">
