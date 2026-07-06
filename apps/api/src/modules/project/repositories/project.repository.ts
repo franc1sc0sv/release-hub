@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { DEFAULT_FEATURES, OrgRole, GithubAuthMode, GithubInstallationStatus } from '@release-hub/db'
+import { DEFAULT_FEATURES, OrgRole, GithubInstallationStatus } from '@release-hub/db'
 import { IProjectRepository } from '../interfaces/project.repository'
 import type {
   IProject,
@@ -117,7 +117,6 @@ export class ProjectRepository extends IProjectRepository {
         name: data.name,
         repo: data.repo,
         organizationId: data.organizationId,
-        ...(data.githubAuthMode != null && { githubAuthMode: data.githubAuthMode }),
         ...(data.githubInstallationId != null && { githubInstallationId: data.githubInstallationId }),
       },
       include: {
@@ -222,13 +221,12 @@ export class ProjectRepository extends IProjectRepository {
 
   setInstallationMode = async (
     id: string,
-    mode: GithubAuthMode,
     installationId: string,
     tx: TxClient,
   ): Promise<void> => {
     await tx.project.update({
       where: { id },
-      data: { githubAuthMode: mode, githubInstallationId: installationId },
+      data: { githubInstallationId: installationId },
     })
   }
 
@@ -292,7 +290,6 @@ export class ProjectRepository extends IProjectRepository {
       organizationId: string
       name: string
       repo: string
-      githubAuthMode: GithubAuthMode
       githubInstallationId: string | null
       linearEnabled: boolean
       flagsmithEnabled: boolean
@@ -313,7 +310,6 @@ export class ProjectRepository extends IProjectRepository {
       organizationId: row.organizationId,
       name: row.name,
       repo: row.repo,
-      githubAuthMode: row.githubAuthMode,
       githubInstallationId: row.githubInstallationId,
       linearEnabled: row.linearEnabled,
       flagsmithEnabled: row.flagsmithEnabled,
@@ -321,9 +317,7 @@ export class ProjectRepository extends IProjectRepository {
       flagReminderIntervalDays: row.flagReminderIntervalDays,
       conflictEnvironments: row.conflictEnvironments,
       integrations: {
-        github:
-          orgHasActiveInstallation ||
-          (row.githubAuthMode === GithubAuthMode.installation && row.githubInstallationId !== null),
+        github: orgHasActiveInstallation || row.githubInstallationId !== null,
         linear: row.linearEnabled,
         flagsmith: row.flagsmithEnabled,
         slack: row.slackEnabled,

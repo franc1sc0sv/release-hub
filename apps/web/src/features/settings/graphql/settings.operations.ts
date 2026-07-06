@@ -4,7 +4,6 @@ export const GET_CONNECTION_SETTINGS = graphql(`
   query GetConnectionSettings($projectId: ID!) {
     getConnectionSettings(projectId: $projectId) {
       githubConnected
-      githubAuthMode
       flagsmithConnected
       flagsmithUrl
       flagsmithProjectId
@@ -64,21 +63,6 @@ export const DELETE_PROJECT_TAG = graphql(`
   }
 `)
 
-export const GITHUB_CONNECTION = graphql(`
-  query GithubConnection {
-    githubConnection {
-      connected
-      githubLogin
-    }
-  }
-`)
-
-export const GITHUB_AUTHORIZE_URL = graphql(`
-  query GithubAuthorizeUrl {
-    githubAuthorizeUrl
-  }
-`)
-
 export const GITHUB_INSTALL_URL = graphql(`
   query GithubInstallUrl($projectId: String, $organizationId: String) {
     githubInstallUrl(projectId: $projectId, organizationId: $organizationId)
@@ -91,18 +75,6 @@ export const COMPLETE_GITHUB_INSTALLATION = graphql(`
       organizationId
       connected
     }
-  }
-`)
-
-export const DISCONNECT_GITHUB = graphql(`
-  mutation DisconnectGithub {
-    disconnectGithub
-  }
-`)
-
-export const REAUTHORIZE_GITHUB = graphql(`
-  mutation ReauthorizeGithub {
-    reauthorizeGithub
   }
 `)
 

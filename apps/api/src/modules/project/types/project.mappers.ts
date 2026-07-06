@@ -32,7 +32,6 @@ export function toProjectType(project: IProject): ProjectType {
   type.organizationId = project.organizationId
   type.name = project.name
   type.repo = project.repo
-  type.githubAuthMode = project.githubAuthMode
   type.integrations = integrations
   type.connectionHealth = toConnectionHealth(project)
   type.flagReminderIntervalDays = project.flagReminderIntervalDays

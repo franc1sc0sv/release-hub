@@ -1,6 +1,6 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import type { TxClient } from '@release-hub/db'
-import { GithubAuthMode, GithubInstallationStatus } from '@release-hub/db'
+import { GithubInstallationStatus } from '@release-hub/db'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import type { IDomainEvent } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
@@ -82,7 +82,6 @@ export class LinkGithubInstallationHandler extends PreparedCommandHandler<
 
     await this.projectRepository.setInstallationMode(
       command.projectId,
-      GithubAuthMode.installation,
       String(command.installationId),
       tx,
     )

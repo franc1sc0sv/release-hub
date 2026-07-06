@@ -1,66 +1,30 @@
-import { useQuery, useMutation, useApolloClient } from '@apollo/client/react'
-import {
-  GITHUB_CONNECTION,
-  GITHUB_AUTHORIZE_URL,
-  GITHUB_INSTALL_URL,
-  DISCONNECT_GITHUB,
-  REAUTHORIZE_GITHUB,
-} from '../graphql/settings.operations'
+import { useState } from 'react'
+import { useApolloClient } from '@apollo/client/react'
+import { GITHUB_INSTALL_URL } from '../graphql/settings.operations'
 
 export function useGithubConnection() {
   const client = useApolloClient()
-
-  const { data, loading } = useQuery(GITHUB_CONNECTION, {
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const [disconnect, { loading: disconnecting }] = useMutation(DISCONNECT_GITHUB, {
-    refetchQueries: [{ query: GITHUB_CONNECTION }],
-  })
-
-  const [reauthorize, { loading: reconnecting }] = useMutation(REAUTHORIZE_GITHUB)
-
-  async function redirectToAuthorize(): Promise<void> {
-    const result = await client.query({
-      query: GITHUB_AUTHORIZE_URL,
-      fetchPolicy: 'network-only',
-    })
-    const url = result.data?.githubAuthorizeUrl
-    if (url) {
-      window.location.href = url
-    }
-  }
+  const [loading, setLoading] = useState(false)
 
   async function installViaApp(opts?: { projectId?: string; organizationId?: string }): Promise<void> {
-    const result = await client.query({
-      query: GITHUB_INSTALL_URL,
-      variables: { projectId: opts?.projectId ?? null, organizationId: opts?.organizationId ?? null },
-      fetchPolicy: 'network-only',
-    })
-    const url = result.data?.githubInstallUrl
-    if (url) {
-      window.location.href = url
+    setLoading(true)
+    try {
+      const result = await client.query({
+        query: GITHUB_INSTALL_URL,
+        variables: { projectId: opts?.projectId ?? null, organizationId: opts?.organizationId ?? null },
+        fetchPolicy: 'network-only',
+      })
+      const url = result.data?.githubInstallUrl
+      if (url) {
+        window.location.href = url
+      }
+    } finally {
+      setLoading(false)
     }
-  }
-
-  async function connect(): Promise<void> {
-    await redirectToAuthorize()
-  }
-
-  async function reconnect(): Promise<void> {
-    await reauthorize()
-    await redirectToAuthorize()
   }
 
   return {
-    connected: data?.githubConnection.connected ?? false,
-    githubLogin: data?.githubConnection.githubLogin ?? null,
     loading,
-    disconnecting,
-    reconnecting,
-    connect,
     installViaApp,
-    reconnect,
-    disconnectGithub: () => disconnect(),
   }
 }

@@ -1,5 +1,3 @@
-import type { GithubAuthMode } from '@release-hub/db'
-
 export interface IProjectIntegrations {
   github: boolean
   linear: boolean
@@ -13,7 +11,6 @@ export interface IProject {
   name: string
   repo: string
   integrations: IProjectIntegrations
-  githubAuthMode: GithubAuthMode
   githubInstallationId: string | null
   linearEnabled: boolean
   flagsmithEnabled: boolean
@@ -33,7 +30,6 @@ export interface ICreateProjectData {
   name: string
   repo: string
   organizationId: string
-  githubAuthMode?: GithubAuthMode
   githubInstallationId?: string
 }
 

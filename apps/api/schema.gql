@@ -190,7 +190,6 @@ type ConnectionSettingsType {
   flagsmithUrl: String
   flagsmithWebhookPath: String!
   flagsmithWebhookSecretSet: Boolean!
-  githubAuthMode: GithubAuthMode!
   githubConnected: Boolean!
   githubWebhookPath: String
   githubWebhookSecretSet: Boolean!
@@ -221,7 +220,6 @@ input CreateOrganizationInput {
 }
 
 input CreateProjectInput {
-  githubAuthMode: GithubAuthMode
   githubInstallationId: String
   name: String!
   organizationId: ID!
@@ -534,11 +532,6 @@ input GetFlagsInput {
   statuses: [FlagDeploymentStatus!]
 }
 
-enum GithubAuthMode {
-  installation
-  oauth
-}
-
 type GithubBranchSearchItemType {
   name: String!
   protected: Boolean!
@@ -553,11 +546,6 @@ type GithubBranchType {
   commitSha: String!
   name: String!
   protected: Boolean!
-}
-
-type GithubConnectionStatus {
-  connected: Boolean!
-  githubLogin: String
 }
 
 type GithubInstallResultType {
@@ -672,7 +660,6 @@ type Mutation {
   deleteProject(id: ID!): Boolean!
   deleteProjectTag(input: DeleteProjectTagInput!): Boolean!
   deleteRelease(releaseId: ID!): ReleaseObjectType!
-  disconnectGithub: Boolean!
   disconnectLinear(projectId: ID!): Boolean!
   disconnectSlack(projectId: ID!): Boolean!
   generatePrSummary(prId: ID!): PullRequestType!
@@ -682,7 +669,6 @@ type Mutation {
   logout(input: LogoutInput!): Boolean!
   markAllNotificationsRead: Boolean!
   markNotificationRead(id: ID!): Boolean!
-  reauthorizeGithub: Boolean!
   refreshToken(input: RefreshTokenInput!): AuthTokensType!
   regenerateDraft(releaseId: ID!, resume: Boolean! = true): ReleaseObjectType!
   register(input: RegisterInput!): AuthTokensType!
@@ -823,7 +809,6 @@ type ProjectType {
   connectionHealth: ConnectionHealthType!
   createdAt: DateTime!
   flagReminderIntervalDays: Int!
-  githubAuthMode: GithubAuthMode!
   id: ID!
   integrations: ProjectIntegrationsType!
   name: String!
@@ -876,12 +861,9 @@ type Query {
   getRelease(id: ID!): ReleaseObjectType!
   getReleaseTree(id: ID!): ReleaseTreeType!
   getReleasesPage(limit: Float! = 20, offset: Float! = 0, projectId: ID!, search: String): ReleasesPageType!
-  githubAuthorizeUrl: String!
   githubBranches(projectId: ID!): [GithubBranchType!]!
-  githubConnection: GithubConnectionStatus!
   githubInstallUrl(organizationId: String, projectId: String): String!
   githubInstallationRepositories(organizationId: ID!): [GithubRepositoryType!]!
-  githubRepositories: [GithubRepositoryType!]!
   inProgressFlagReminders(excludeReleaseId: ID, projectId: ID!): [InProgressFlagReminderType!]!
   linearAuthorizeUrl(projectId: ID!): String!
   linearConnection(projectId: ID!): LinearConnectionStatus!

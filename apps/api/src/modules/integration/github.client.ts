@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Octokit } from '@octokit/rest'
 import { AppException } from '../../common/errors/app.exception'
 import { ErrorCode } from '../../common/errors/error-codes.enum'
@@ -56,8 +56,6 @@ const BRANCH_COMMIT_GRAPHQL_CHUNK_SIZE = 50
 
 @Injectable()
 export class GitHubClient extends IGitHubClient {
-  private readonly logger = new Logger(GitHubClient.name)
-
   private readonly branchesCache = new Map<string, ICacheEntry<IGitHubBranch[]>>()
   private readonly mergedHeadsCache = new Map<string, ICacheEntry<IGitHubMergedPullRequestHead[]>>()
   private readonly openHeadsCache = new Map<string, ICacheEntry<IGitHubOpenPullRequestHead[]>>()
@@ -105,24 +103,6 @@ export class GitHubClient extends IGitHubClient {
     this.mergedHeadsCache.delete(repo)
     this.openHeadsCache.delete(repo)
     this.branchCommitCache.delete(repo)
-  }
-
-  async revokeAuthorization(accessToken: string): Promise<void> {
-    const clientId = process.env.GITHUB_APP_CLIENT_ID
-    const clientSecret = process.env.GITHUB_APP_CLIENT_SECRET
-    if (!clientId || !clientSecret) return
-    const octokit = new Octokit()
-    try {
-      await octokit.request('DELETE /applications/{client_id}/grant', {
-        client_id: clientId,
-        access_token: accessToken,
-        headers: {
-          authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-        },
-      })
-    } catch (error) {
-      this.logger.warn('GitHub grant revocation failed — proceeding with re-authorization', { error })
-    }
   }
 
   async compareMergedPullRequests(

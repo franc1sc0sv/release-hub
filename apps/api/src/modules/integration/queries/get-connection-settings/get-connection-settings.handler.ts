@@ -45,7 +45,6 @@ export class GetConnectionSettingsHandler extends BaseQueryHandler<
 
     return toConnectionSettings({
       projectId: query.projectId,
-      githubAuthMode: project.githubAuthMode,
       githubInstallationId: project.githubInstallationId,
       linearEnabled: project.linearEnabled,
       flagsmithEnabled: project.flagsmithEnabled,

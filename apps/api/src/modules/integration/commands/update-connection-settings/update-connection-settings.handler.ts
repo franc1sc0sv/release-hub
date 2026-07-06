@@ -60,7 +60,6 @@ export class UpdateConnectionSettingsHandler extends BaseCommandHandler<
 
     const settings = toConnectionSettings({
       projectId: command.projectId,
-      githubAuthMode: updated.githubAuthMode,
       githubInstallationId: updated.githubInstallationId,
       linearEnabled: updated.linearEnabled,
       flagsmithEnabled: updated.flagsmithEnabled,

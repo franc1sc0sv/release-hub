@@ -214,7 +214,6 @@ export type ConnectionSettingsType = {
   flagsmithUrl: Maybe<Scalars['String']['output']>;
   flagsmithWebhookPath: Scalars['String']['output'];
   flagsmithWebhookSecretSet: Scalars['Boolean']['output'];
-  githubAuthMode: GithubAuthMode;
   githubConnected: Scalars['Boolean']['output'];
   githubWebhookPath: Maybe<Scalars['String']['output']>;
   githubWebhookSecretSet: Scalars['Boolean']['output'];
@@ -246,7 +245,6 @@ export type CreateOrganizationInput = {
 };
 
 export type CreateProjectInput = {
-  githubAuthMode: InputMaybe<GithubAuthMode>;
   githubInstallationId: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   organizationId: Scalars['ID']['input'];
@@ -566,10 +564,6 @@ export type GetFlagsInput = {
   statuses: InputMaybe<Array<FlagDeploymentStatus>>;
 };
 
-export type GithubAuthMode =
-  | 'installation'
-  | 'oauth';
-
 export type GithubBranchSearchItemType = {
   __typename?: 'GithubBranchSearchItemType';
   name: Scalars['String']['output'];
@@ -587,12 +581,6 @@ export type GithubBranchType = {
   commitSha: Scalars['String']['output'];
   name: Scalars['String']['output'];
   protected: Scalars['Boolean']['output'];
-};
-
-export type GithubConnectionStatus = {
-  __typename?: 'GithubConnectionStatus';
-  connected: Scalars['Boolean']['output'];
-  githubLogin: Maybe<Scalars['String']['output']>;
 };
 
 export type GithubInstallResultType = {
@@ -712,7 +700,6 @@ export type Mutation = {
   deleteProject: Scalars['Boolean']['output'];
   deleteProjectTag: Scalars['Boolean']['output'];
   deleteRelease: ReleaseObjectType;
-  disconnectGithub: Scalars['Boolean']['output'];
   disconnectLinear: Scalars['Boolean']['output'];
   disconnectSlack: Scalars['Boolean']['output'];
   generatePrSummary: PullRequestType;
@@ -722,7 +709,6 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   markAllNotificationsRead: Scalars['Boolean']['output'];
   markNotificationRead: Scalars['Boolean']['output'];
-  reauthorizeGithub: Scalars['Boolean']['output'];
   refreshToken: AuthTokensType;
   regenerateDraft: ReleaseObjectType;
   register: AuthTokensType;
@@ -1180,7 +1166,6 @@ export type ProjectType = {
   connectionHealth: ConnectionHealthType;
   createdAt: Scalars['DateTime']['output'];
   flagReminderIntervalDays: Scalars['Int']['output'];
-  githubAuthMode: GithubAuthMode;
   id: Scalars['ID']['output'];
   integrations: ProjectIntegrationsType;
   name: Scalars['String']['output'];
@@ -1235,12 +1220,9 @@ export type Query = {
   getRelease: ReleaseObjectType;
   getReleaseTree: ReleaseTreeType;
   getReleasesPage: ReleasesPageType;
-  githubAuthorizeUrl: Scalars['String']['output'];
   githubBranches: Array<GithubBranchType>;
-  githubConnection: GithubConnectionStatus;
   githubInstallUrl: Scalars['String']['output'];
   githubInstallationRepositories: Array<GithubRepositoryType>;
-  githubRepositories: Array<GithubRepositoryType>;
   inProgressFlagReminders: Array<InProgressFlagReminderType>;
   linearAuthorizeUrl: Scalars['String']['output'];
   linearConnection: LinearConnectionStatus;
@@ -2381,7 +2363,7 @@ export type GetConnectionSettingsQueryVariables = Exact<{
 }>;
 
 
-export type GetConnectionSettingsQuery = { __typename?: 'Query', getConnectionSettings: { __typename?: 'ConnectionSettingsType', githubConnected: boolean, githubAuthMode: GithubAuthMode, flagsmithConnected: boolean, flagsmithUrl: string | null, flagsmithProjectId: string | null, linearConnected: boolean, flagsmithWebhookPath: string, flagsmithWebhookSecretSet: boolean } };
+export type GetConnectionSettingsQuery = { __typename?: 'Query', getConnectionSettings: { __typename?: 'ConnectionSettingsType', githubConnected: boolean, flagsmithConnected: boolean, flagsmithUrl: string | null, flagsmithProjectId: string | null, linearConnected: boolean, flagsmithWebhookPath: string, flagsmithWebhookSecretSet: boolean } };
 
 export type FlagsmithProjectsQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -2420,16 +2402,6 @@ export type DeleteProjectTagMutationVariables = Exact<{
 
 export type DeleteProjectTagMutation = { __typename?: 'Mutation', deleteProjectTag: boolean };
 
-export type GithubConnectionQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GithubConnectionQuery = { __typename?: 'Query', githubConnection: { __typename?: 'GithubConnectionStatus', connected: boolean, githubLogin: string | null } };
-
-export type GithubAuthorizeUrlQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GithubAuthorizeUrlQuery = { __typename?: 'Query', githubAuthorizeUrl: string };
-
 export type GithubInstallUrlQueryVariables = Exact<{
   projectId: InputMaybe<Scalars['String']['input']>;
   organizationId: InputMaybe<Scalars['String']['input']>;
@@ -2444,16 +2416,6 @@ export type CompleteGithubInstallationMutationVariables = Exact<{
 
 
 export type CompleteGithubInstallationMutation = { __typename?: 'Mutation', completeGithubInstallation: { __typename?: 'GithubInstallResultType', organizationId: string, connected: boolean } };
-
-export type DisconnectGithubMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type DisconnectGithubMutation = { __typename?: 'Mutation', disconnectGithub: boolean };
-
-export type ReauthorizeGithubMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ReauthorizeGithubMutation = { __typename?: 'Mutation', reauthorizeGithub: boolean };
 
 export type LinearConnectionQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -2707,18 +2669,14 @@ export const DeleteGithubBranchesDocument = {"kind":"Document","definitions":[{"
 export const GetBranchCleanupPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchCleanupPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"BranchCleanupPageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchCleanupPage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"isDefault"}},{"kind":"Field","name":{"kind":"Name","value":"githubProtected"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorLogin"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorName"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"openPullRequestNumber"}},{"kind":"Field","name":{"kind":"Name","value":"openPullRequestUrl"}},{"kind":"Field","name":{"kind":"Name","value":"blockReasons"}},{"kind":"Field","name":{"kind":"Name","value":"deletable"}},{"kind":"Field","name":{"kind":"Name","value":"overridable"}},{"kind":"Field","name":{"kind":"Name","value":"signals"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mergedViaPr"}},{"kind":"Field","name":{"kind":"Name","value":"noOpenPr"}},{"kind":"Field","name":{"kind":"Name","value":"unreferencedByReleases"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetBranchCleanupPageQuery, GetBranchCleanupPageQueryVariables>;
 export const GetBranchAuthorsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchAuthors"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchAuthors"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<GetBranchAuthorsQuery, GetBranchAuthorsQueryVariables>;
 export const GetBranchCleanupPlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetBranchCleanupPlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchCleanupPlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"deletable"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorLogin"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorName"}},{"kind":"Field","name":{"kind":"Name","value":"lastCommitAuthorAvatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"kept"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"blockReasons"}}]}}]}}]}}]} as unknown as DocumentNode<GetBranchCleanupPlanQuery, GetBranchCleanupPlanQueryVariables>;
-export const GetConnectionSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetConnectionSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getConnectionSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubConnected"}},{"kind":"Field","name":{"kind":"Name","value":"githubAuthMode"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithUrl"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithProjectId"}},{"kind":"Field","name":{"kind":"Name","value":"linearConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithWebhookPath"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithWebhookSecretSet"}}]}}]}}]} as unknown as DocumentNode<GetConnectionSettingsQuery, GetConnectionSettingsQueryVariables>;
+export const GetConnectionSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetConnectionSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getConnectionSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithUrl"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithProjectId"}},{"kind":"Field","name":{"kind":"Name","value":"linearConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithWebhookPath"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithWebhookSecretSet"}}]}}]}}]} as unknown as DocumentNode<GetConnectionSettingsQuery, GetConnectionSettingsQueryVariables>;
 export const FlagsmithProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FlagsmithProjects"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"url"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"apiKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagsmithProjects"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"url"},"value":{"kind":"Variable","name":{"kind":"Name","value":"url"}}},{"kind":"Argument","name":{"kind":"Name","value":"apiKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"apiKey"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<FlagsmithProjectsQuery, FlagsmithProjectsQueryVariables>;
 export const UpdateConnectionSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateConnectionSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateConnectionSettingsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateConnectionSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithConnected"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithUrl"}},{"kind":"Field","name":{"kind":"Name","value":"flagsmithProjectId"}},{"kind":"Field","name":{"kind":"Name","value":"linearConnected"}}]}}]}}]} as unknown as DocumentNode<UpdateConnectionSettingsMutation, UpdateConnectionSettingsMutationVariables>;
 export const ProjectTagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProjectTags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectTags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"color"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<ProjectTagsQuery, ProjectTagsQueryVariables>;
 export const CreateProjectTagDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProjectTag"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProjectTagInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProjectTag"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"color"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<CreateProjectTagMutation, CreateProjectTagMutationVariables>;
 export const DeleteProjectTagDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProjectTag"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeleteProjectTagInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProjectTag"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<DeleteProjectTagMutation, DeleteProjectTagMutationVariables>;
-export const GithubConnectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GithubConnection"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubConnection"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"connected"}},{"kind":"Field","name":{"kind":"Name","value":"githubLogin"}}]}}]}}]} as unknown as DocumentNode<GithubConnectionQuery, GithubConnectionQueryVariables>;
-export const GithubAuthorizeUrlDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GithubAuthorizeUrl"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubAuthorizeUrl"}}]}}]} as unknown as DocumentNode<GithubAuthorizeUrlQuery, GithubAuthorizeUrlQueryVariables>;
 export const GithubInstallUrlDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GithubInstallUrl"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"organizationId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"githubInstallUrl"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"organizationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"organizationId"}}}]}]}}]} as unknown as DocumentNode<GithubInstallUrlQuery, GithubInstallUrlQueryVariables>;
 export const CompleteGithubInstallationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CompleteGithubInstallation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CompleteGithubInstallationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completeGithubInstallation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"organizationId"}},{"kind":"Field","name":{"kind":"Name","value":"connected"}}]}}]}}]} as unknown as DocumentNode<CompleteGithubInstallationMutation, CompleteGithubInstallationMutationVariables>;
-export const DisconnectGithubDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DisconnectGithub"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"disconnectGithub"}}]}}]} as unknown as DocumentNode<DisconnectGithubMutation, DisconnectGithubMutationVariables>;
-export const ReauthorizeGithubDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ReauthorizeGithub"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"reauthorizeGithub"}}]}}]} as unknown as DocumentNode<ReauthorizeGithubMutation, ReauthorizeGithubMutationVariables>;
 export const LinearConnectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"LinearConnection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"linearConnection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"connected"}},{"kind":"Field","name":{"kind":"Name","value":"linearUser"}}]}}]}}]} as unknown as DocumentNode<LinearConnectionQuery, LinearConnectionQueryVariables>;
 export const LinearAuthorizeUrlDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"LinearAuthorizeUrl"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"linearAuthorizeUrl"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<LinearAuthorizeUrlQuery, LinearAuthorizeUrlQueryVariables>;
 export const DisconnectLinearDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DisconnectLinear"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"disconnectLinear"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<DisconnectLinearMutation, DisconnectLinearMutationVariables>;

@@ -1,4 +1,3 @@
-import { GithubAuthMode } from '@release-hub/db'
 import type {
   IProjectConnectionCredentials,
   IProjectWebhookSecretStatus,
@@ -7,7 +6,6 @@ import { ConnectionSettingsType } from './connection-settings.type'
 
 export interface IConnectionSettingsSource {
   projectId: string
-  githubAuthMode: GithubAuthMode
   githubInstallationId: string | null
   linearEnabled: boolean
   flagsmithEnabled: boolean
@@ -17,21 +15,15 @@ export interface IConnectionSettingsSource {
 }
 
 export function toConnectionSettings(source: IConnectionSettingsSource): ConnectionSettingsType {
-  const isInstallation = source.githubAuthMode === GithubAuthMode.installation
-
   const settings = new ConnectionSettingsType()
-  settings.githubAuthMode = source.githubAuthMode
-  settings.githubConnected =
-    source.orgHasActiveInstallation || (isInstallation && source.githubInstallationId !== null)
+  settings.githubConnected = source.orgHasActiveInstallation || source.githubInstallationId !== null
   settings.linearConnected = source.linearEnabled
   settings.flagsmithConnected = source.flagsmithEnabled
   settings.flagsmithUrl = source.credentials?.flagsmithUrl ?? null
   settings.flagsmithProjectId = source.credentials?.flagsmithProjectId ?? null
   settings.flagsmithWebhookSecretSet = source.webhookSecretStatus?.flagsmithWebhookSecretSet ?? false
   settings.flagsmithWebhookPath = `/webhooks/flagsmith/${source.projectId}`
-  settings.githubWebhookSecretSet = isInstallation
-    ? false
-    : (source.webhookSecretStatus?.githubWebhookSecretSet ?? false)
-  settings.githubWebhookPath = isInstallation ? null : `/webhooks/github/${source.projectId}`
+  settings.githubWebhookSecretSet = false
+  settings.githubWebhookPath = null
   return settings
 }

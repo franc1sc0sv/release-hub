@@ -55,7 +55,6 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
 
     return toConnectionSettings({
       projectId: command.projectId,
-      githubAuthMode: project.githubAuthMode,
       githubInstallationId: project.githubInstallationId,
       linearEnabled: project.linearEnabled,
       flagsmithEnabled: project.flagsmithEnabled,

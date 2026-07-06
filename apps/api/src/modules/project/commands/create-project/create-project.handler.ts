@@ -45,7 +45,6 @@ export class CreateProjectHandler extends BaseCommandHandler<CreateProjectComman
         name: command.name,
         repo: command.repo,
         organizationId: command.organizationId,
-        githubAuthMode: command.githubAuthMode,
         githubInstallationId: command.githubInstallationId,
       },
       tx,

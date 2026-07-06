@@ -84,18 +84,14 @@ type Documents = {
     "\n  query GetBranchCleanupPage($input: BranchCleanupPageInput!) {\n    branchCleanupPage(input: $input) {\n      totalCount\n      items {\n        name\n        isDefault\n        githubProtected\n        lastCommitAt\n        lastCommitAuthorLogin\n        lastCommitAuthorName\n        lastCommitAuthorAvatarUrl\n        openPullRequestNumber\n        openPullRequestUrl\n        blockReasons\n        deletable\n        overridable\n        signals {\n          mergedViaPr\n          noOpenPr\n          unreferencedByReleases\n        }\n      }\n    }\n  }\n": typeof types.GetBranchCleanupPageDocument,
     "\n  query GetBranchAuthors($projectId: ID!) {\n    branchAuthors(projectId: $projectId)\n  }\n": typeof types.GetBranchAuthorsDocument,
     "\n  query GetBranchCleanupPlan($projectId: ID!) {\n    branchCleanupPlan(projectId: $projectId) {\n      totalCount\n      deletable {\n        name\n        lastCommitAt\n        lastCommitAuthorLogin\n        lastCommitAuthorName\n        lastCommitAuthorAvatarUrl\n      }\n      kept {\n        name\n        blockReasons\n      }\n    }\n  }\n": typeof types.GetBranchCleanupPlanDocument,
-    "\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      githubAuthMode\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n": typeof types.GetConnectionSettingsDocument,
+    "\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n": typeof types.GetConnectionSettingsDocument,
     "\n  query FlagsmithProjects($projectId: ID!, $url: String!, $apiKey: String!) {\n    flagsmithProjects(projectId: $projectId, url: $url, apiKey: $apiKey) {\n      id\n      name\n    }\n  }\n": typeof types.FlagsmithProjectsDocument,
     "\n  mutation UpdateConnectionSettings($input: UpdateConnectionSettingsInput!) {\n    updateConnectionSettings(input: $input) {\n      githubConnected\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n    }\n  }\n": typeof types.UpdateConnectionSettingsDocument,
     "\n  query ProjectTags($projectId: ID!) {\n    projectTags(projectId: $projectId) {\n      id\n      name\n      color\n      createdAt\n    }\n  }\n": typeof types.ProjectTagsDocument,
     "\n  mutation CreateProjectTag($input: CreateProjectTagInput!) {\n    createProjectTag(input: $input) {\n      id\n      name\n      color\n      createdAt\n    }\n  }\n": typeof types.CreateProjectTagDocument,
     "\n  mutation DeleteProjectTag($input: DeleteProjectTagInput!) {\n    deleteProjectTag(input: $input)\n  }\n": typeof types.DeleteProjectTagDocument,
-    "\n  query GithubConnection {\n    githubConnection {\n      connected\n      githubLogin\n    }\n  }\n": typeof types.GithubConnectionDocument,
-    "\n  query GithubAuthorizeUrl {\n    githubAuthorizeUrl\n  }\n": typeof types.GithubAuthorizeUrlDocument,
     "\n  query GithubInstallUrl($projectId: String, $organizationId: String) {\n    githubInstallUrl(projectId: $projectId, organizationId: $organizationId)\n  }\n": typeof types.GithubInstallUrlDocument,
     "\n  mutation CompleteGithubInstallation($input: CompleteGithubInstallationInput!) {\n    completeGithubInstallation(input: $input) {\n      organizationId\n      connected\n    }\n  }\n": typeof types.CompleteGithubInstallationDocument,
-    "\n  mutation DisconnectGithub {\n    disconnectGithub\n  }\n": typeof types.DisconnectGithubDocument,
-    "\n  mutation ReauthorizeGithub {\n    reauthorizeGithub\n  }\n": typeof types.ReauthorizeGithubDocument,
     "\n  query LinearConnection($projectId: ID!) {\n    linearConnection(projectId: $projectId) {\n      connected\n      linearUser\n    }\n  }\n": typeof types.LinearConnectionDocument,
     "\n  query LinearAuthorizeUrl($projectId: ID!) {\n    linearAuthorizeUrl(projectId: $projectId)\n  }\n": typeof types.LinearAuthorizeUrlDocument,
     "\n  mutation DisconnectLinear($projectId: ID!) {\n    disconnectLinear(projectId: $projectId)\n  }\n": typeof types.DisconnectLinearDocument,
@@ -193,18 +189,14 @@ const documents: Documents = {
     "\n  query GetBranchCleanupPage($input: BranchCleanupPageInput!) {\n    branchCleanupPage(input: $input) {\n      totalCount\n      items {\n        name\n        isDefault\n        githubProtected\n        lastCommitAt\n        lastCommitAuthorLogin\n        lastCommitAuthorName\n        lastCommitAuthorAvatarUrl\n        openPullRequestNumber\n        openPullRequestUrl\n        blockReasons\n        deletable\n        overridable\n        signals {\n          mergedViaPr\n          noOpenPr\n          unreferencedByReleases\n        }\n      }\n    }\n  }\n": types.GetBranchCleanupPageDocument,
     "\n  query GetBranchAuthors($projectId: ID!) {\n    branchAuthors(projectId: $projectId)\n  }\n": types.GetBranchAuthorsDocument,
     "\n  query GetBranchCleanupPlan($projectId: ID!) {\n    branchCleanupPlan(projectId: $projectId) {\n      totalCount\n      deletable {\n        name\n        lastCommitAt\n        lastCommitAuthorLogin\n        lastCommitAuthorName\n        lastCommitAuthorAvatarUrl\n      }\n      kept {\n        name\n        blockReasons\n      }\n    }\n  }\n": types.GetBranchCleanupPlanDocument,
-    "\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      githubAuthMode\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n": types.GetConnectionSettingsDocument,
+    "\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n": types.GetConnectionSettingsDocument,
     "\n  query FlagsmithProjects($projectId: ID!, $url: String!, $apiKey: String!) {\n    flagsmithProjects(projectId: $projectId, url: $url, apiKey: $apiKey) {\n      id\n      name\n    }\n  }\n": types.FlagsmithProjectsDocument,
     "\n  mutation UpdateConnectionSettings($input: UpdateConnectionSettingsInput!) {\n    updateConnectionSettings(input: $input) {\n      githubConnected\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n    }\n  }\n": types.UpdateConnectionSettingsDocument,
     "\n  query ProjectTags($projectId: ID!) {\n    projectTags(projectId: $projectId) {\n      id\n      name\n      color\n      createdAt\n    }\n  }\n": types.ProjectTagsDocument,
     "\n  mutation CreateProjectTag($input: CreateProjectTagInput!) {\n    createProjectTag(input: $input) {\n      id\n      name\n      color\n      createdAt\n    }\n  }\n": types.CreateProjectTagDocument,
     "\n  mutation DeleteProjectTag($input: DeleteProjectTagInput!) {\n    deleteProjectTag(input: $input)\n  }\n": types.DeleteProjectTagDocument,
-    "\n  query GithubConnection {\n    githubConnection {\n      connected\n      githubLogin\n    }\n  }\n": types.GithubConnectionDocument,
-    "\n  query GithubAuthorizeUrl {\n    githubAuthorizeUrl\n  }\n": types.GithubAuthorizeUrlDocument,
     "\n  query GithubInstallUrl($projectId: String, $organizationId: String) {\n    githubInstallUrl(projectId: $projectId, organizationId: $organizationId)\n  }\n": types.GithubInstallUrlDocument,
     "\n  mutation CompleteGithubInstallation($input: CompleteGithubInstallationInput!) {\n    completeGithubInstallation(input: $input) {\n      organizationId\n      connected\n    }\n  }\n": types.CompleteGithubInstallationDocument,
-    "\n  mutation DisconnectGithub {\n    disconnectGithub\n  }\n": types.DisconnectGithubDocument,
-    "\n  mutation ReauthorizeGithub {\n    reauthorizeGithub\n  }\n": types.ReauthorizeGithubDocument,
     "\n  query LinearConnection($projectId: ID!) {\n    linearConnection(projectId: $projectId) {\n      connected\n      linearUser\n    }\n  }\n": types.LinearConnectionDocument,
     "\n  query LinearAuthorizeUrl($projectId: ID!) {\n    linearAuthorizeUrl(projectId: $projectId)\n  }\n": types.LinearAuthorizeUrlDocument,
     "\n  mutation DisconnectLinear($projectId: ID!) {\n    disconnectLinear(projectId: $projectId)\n  }\n": types.DisconnectLinearDocument,
@@ -529,7 +521,7 @@ export function graphql(source: "\n  query GetBranchCleanupPlan($projectId: ID!)
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      githubAuthMode\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n"): (typeof documents)["\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      githubAuthMode\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n"];
+export function graphql(source: "\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n"): (typeof documents)["\n  query GetConnectionSettings($projectId: ID!) {\n    getConnectionSettings(projectId: $projectId) {\n      githubConnected\n      flagsmithConnected\n      flagsmithUrl\n      flagsmithProjectId\n      linearConnected\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -553,27 +545,11 @@ export function graphql(source: "\n  mutation DeleteProjectTag($input: DeletePro
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GithubConnection {\n    githubConnection {\n      connected\n      githubLogin\n    }\n  }\n"): (typeof documents)["\n  query GithubConnection {\n    githubConnection {\n      connected\n      githubLogin\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query GithubAuthorizeUrl {\n    githubAuthorizeUrl\n  }\n"): (typeof documents)["\n  query GithubAuthorizeUrl {\n    githubAuthorizeUrl\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
 export function graphql(source: "\n  query GithubInstallUrl($projectId: String, $organizationId: String) {\n    githubInstallUrl(projectId: $projectId, organizationId: $organizationId)\n  }\n"): (typeof documents)["\n  query GithubInstallUrl($projectId: String, $organizationId: String) {\n    githubInstallUrl(projectId: $projectId, organizationId: $organizationId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation CompleteGithubInstallation($input: CompleteGithubInstallationInput!) {\n    completeGithubInstallation(input: $input) {\n      organizationId\n      connected\n    }\n  }\n"): (typeof documents)["\n  mutation CompleteGithubInstallation($input: CompleteGithubInstallationInput!) {\n    completeGithubInstallation(input: $input) {\n      organizationId\n      connected\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation DisconnectGithub {\n    disconnectGithub\n  }\n"): (typeof documents)["\n  mutation DisconnectGithub {\n    disconnectGithub\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation ReauthorizeGithub {\n    reauthorizeGithub\n  }\n"): (typeof documents)["\n  mutation ReauthorizeGithub {\n    reauthorizeGithub\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

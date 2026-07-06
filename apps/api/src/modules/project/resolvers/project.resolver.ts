@@ -51,7 +51,6 @@ export class ProjectResolver {
         input.organizationId,
         input.name,
         input.repo,
-        input.githubAuthMode,
         input.githubInstallationId,
       ),
     )

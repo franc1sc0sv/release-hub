@@ -17,8 +17,6 @@ import { ITicketSource } from './interfaces/ticket-source.abstract'
 import { LinearTicketSource } from './clients/linear-ticket-source'
 import { ITicketLinkRepository } from './interfaces/ticket-link.repository'
 import { TicketLinkRepository } from './repositories/ticket-link.repository'
-import { IGithubConnectionRepository } from '../github-auth/interfaces/github-connection.repository'
-import { GithubConnectionRepository } from '../github-auth/repositories/github-connection.repository'
 import { IFlagsmithFlagRepository } from './interfaces/flagsmith-flag.repository'
 import { FlagsmithFlagRepository } from './repositories/flagsmith-flag.repository'
 import { GetFlagsHandler } from './queries/get-flags/get-flags.handler'
@@ -46,7 +44,6 @@ import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
     { provide: IFlagsmithClient, useClass: FlagsmithClient },
     { provide: ITicketSource, useClass: LinearTicketSource },
     { provide: ITicketLinkRepository, useClass: TicketLinkRepository },
-    { provide: IGithubConnectionRepository, useClass: GithubConnectionRepository },
     { provide: IFlagsmithFlagRepository, useClass: FlagsmithFlagRepository },
     GetFlagsHandler,
     GetFlagsmithEnvironmentsHandler,

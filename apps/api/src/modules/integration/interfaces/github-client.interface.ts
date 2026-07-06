@@ -175,8 +175,6 @@ export abstract class IGitHubClient {
     accessToken: string,
   ): Promise<IGitHubPullRequestFile[]>
 
-  abstract revokeAuthorization(accessToken: string): Promise<void>
-
   abstract searchBranches(
     repo: string,
     search: string | null,

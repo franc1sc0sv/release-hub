@@ -45,7 +45,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
   const [error, setError] = useState<string | null>(null)
 
   const { activeOrg } = useOrganization()
-  const { reconnect, reconnecting } = useGithubConnection()
+  const { installViaApp, loading: installingApp } = useGithubConnection()
 
   const { data, loading: reposLoading, error: reposError } = useQuery(
     GITHUB_INSTALLATION_REPOSITORIES,
@@ -84,7 +84,6 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
           repo: selectedRepo.fullName,
           name: projectName.trim() || selectedRepo.name,
           organizationId: activeOrg.id,
-          githubAuthMode: null,
           githubInstallationId: null,
         },
       },
@@ -118,12 +117,12 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
               </Alert>
               <GradientButton
                 className="w-full"
-                onClick={() => void reconnect()}
-                disabled={reconnecting}
+                onClick={() => activeOrg && void installViaApp({ organizationId: activeOrg.id })}
+                disabled={installingApp || !activeOrg}
                 aria-label={t('selectRepo.reconnectButton')}
               >
-                {reconnecting && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-                {reconnecting ? t('selectRepo.reconnecting') : t('selectRepo.reconnectButton')}
+                {installingApp && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {installingApp ? t('selectRepo.reconnecting') : t('selectRepo.reconnectButton')}
               </GradientButton>
             </div>
           ) : (

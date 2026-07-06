@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { GithubAuthMode, GithubInstallationStatus } from '@release-hub/db'
+import { GithubInstallationStatus } from '@release-hub/db'
 import { IWebhookProjectRepository } from '../interfaces/webhook-project.repository'
 import type { IWebhookProjectSecrets } from '../interfaces/webhook-project.interfaces'
 
@@ -33,7 +33,6 @@ export class WebhookProjectRepository extends IWebhookProjectRepository {
       where: {
         repo: fullName,
         organizationId: installation.organizationId,
-        githubAuthMode: GithubAuthMode.installation,
         deletedAt: null,
       },
       select: { id: true },

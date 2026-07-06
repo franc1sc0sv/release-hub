@@ -1,6 +1,5 @@
 import { Field, ID, InputType } from '@nestjs/graphql'
-import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
-import { GithubAuthMode } from '../../../common/types/github-auth-mode.enum'
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 @InputType()
 export class CreateProjectInput {
@@ -20,11 +19,6 @@ export class CreateProjectInput {
   @IsNotEmpty()
   @MaxLength(255)
   repo: string
-
-  @Field(() => GithubAuthMode, { nullable: true })
-  @IsOptional()
-  @IsEnum(GithubAuthMode)
-  githubAuthMode?: GithubAuthMode
 
   @Field(() => String, { nullable: true })
   @IsOptional()

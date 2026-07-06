@@ -1,4 +1,3 @@
-import type { GithubAuthMode } from '@release-hub/db'
 import type { RepositoryMethod } from '../../../common/cqrs/types'
 import type { IBaseRepository } from '../../../common/cqrs/types'
 import type {
@@ -22,7 +21,7 @@ export abstract class IProjectRepository implements IBaseRepository<IProject> {
   abstract createDefaultFeatures: RepositoryMethod<[projectId: string], void>
   abstract update: RepositoryMethod<[id: string, data: IUpdateProjectData], IProject>
   abstract updateIntegrationSettings: RepositoryMethod<[id: string, data: IProjectIntegrationSettings], IProject>
-  abstract setInstallationMode: RepositoryMethod<[id: string, mode: GithubAuthMode, installationId: string], void>
+  abstract setInstallationMode: RepositoryMethod<[id: string, installationId: string], void>
   abstract delete: RepositoryMethod<[id: string], void>
   abstract findFlagRegistryConfig: RepositoryMethod<[id: string], IFlagRegistryConfig | null>
   abstract updateFlagRegistry: RepositoryMethod<[id: string, data: IUpdateFlagRegistryData], IFlagRegistryConfigResult>

@@ -107,11 +107,6 @@ enum InvitationStatus {
   @@map("invitation_status")
 }
 
-enum GithubAuthMode {
-  installation
-  oauth
-}
-
 enum GithubInstallationStatus {
   active
   suspended
@@ -166,7 +161,6 @@ model User {
   refreshTokens     RefreshToken[]
   organizationMemberships OrganizationMembership[]
   invitationsSent   Invitation[]       @relation("InvitedBy")
-  githubConnection  GithubConnection?
   flagDecisions     ReleaseFlagDecision[]
   notificationPreferences UserNotificationPreference[]
   createdBlockedBranches  BlockedBranch[]
@@ -175,23 +169,6 @@ model User {
 
   @@index([deletedAt])
   @@map("users")
-}
-
-model GithubConnection {
-  id            String    @id @default(cuid())
-  userId        String    @unique @map("user_id")
-  accessToken   String    @map("access_token")
-  refreshToken  String?   @map("refresh_token")
-  expiresAt     DateTime? @map("expires_at")
-  githubUserId  String    @map("github_user_id")
-  githubLogin   String    @map("github_login")
-  scopes        String?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("github_connections")
 }
 
 model GithubInstallation {
@@ -308,7 +285,6 @@ model Project {
   name        String
   repo        String
   githubInstallationId String? @map("github_installation_id")
-  githubAuthMode GithubAuthMode @default(oauth) @map("github_auth_mode")
   flagsmithEnabled Boolean @default(false) @map("flagsmith_enabled")
   flagsmithUrl     String? @map("flagsmith_url")
   flagsmithApiKey  String? @map("flagsmith_api_key")
