@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req, Res } from '@nestjs/common'
+import { Controller, Get, Logger, Query, Req, Res } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
 import { JwtService } from '@nestjs/jwt'
 import type { Request, Response } from 'express'
@@ -31,6 +31,8 @@ interface ILinearViewerResponse {
 
 @Controller('auth/linear')
 export class LinearAuthController {
+  private readonly logger = new Logger(LinearAuthController.name)
+
   constructor(
     private readonly commandBus: CommandBus,
     private readonly jwtService: JwtService,
@@ -49,6 +51,9 @@ export class LinearAuthController {
     try {
       const cookieState = req.cookies['linear_oauth_state'] as string | undefined
       if (!cookieState || cookieState !== this.extractNonce(state)) {
+        this.logger.warn(
+          `linear callback: state cookie check failed (cookiePresent=${cookieState != null})`,
+        )
         res.clearCookie('linear_oauth_state', { path: '/' })
         res.redirect(errorRedirect)
         return
@@ -64,6 +69,7 @@ export class LinearAuthController {
       const clientSecret = process.env.LINEAR_CLIENT_SECRET!
       const callbackUrl =
         process.env.LINEAR_CALLBACK_URL ?? 'http://localhost:3001/auth/linear/callback'
+      this.logger.log(`linear callback: exchanging code with redirect_uri=${callbackUrl}`)
 
       const tokenBody = new URLSearchParams({
         client_id: clientId,
@@ -82,6 +88,9 @@ export class LinearAuthController {
       const tokenData = (await tokenResponse.json()) as ILinearTokenResponse
 
       if (!tokenData.access_token || tokenData.error) {
+        this.logger.error(
+          `linear callback: token exchange failed status=${tokenResponse.status} error=${tokenData.error ?? 'no access_token'}`,
+        )
         res.redirect(errorRedirect)
         return
       }
@@ -98,6 +107,9 @@ export class LinearAuthController {
       const viewerData = (await viewerResponse.json()) as ILinearViewerResponse
 
       if (viewerData.errors?.length || !viewerData.data?.viewer) {
+        this.logger.error(
+          `linear callback: viewer query failed: ${JSON.stringify(viewerData.errors ?? 'no viewer')}`,
+        )
         res.redirect(errorRedirect)
         return
       }
@@ -120,8 +132,12 @@ export class LinearAuthController {
         ),
       )
 
+      this.logger.log(`linear callback: connected projectId=${projectId} viewer=${viewer.name}`)
       res.redirect(`${webAppUrl}/settings?linear=connected`)
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        `linear callback: unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+      )
       res.clearCookie('linear_oauth_state', { path: '/' })
       res.redirect(errorRedirect)
     }
