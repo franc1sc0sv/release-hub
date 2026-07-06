@@ -259,6 +259,19 @@ model ProjectLinearConnection {
   @@map("project_linear_connections")
 }
 
+model LinearOAuthState {
+  id         String    @id @default(cuid())
+  nonce      String    @unique
+  userId     String    @map("user_id")
+  projectId  String    @map("project_id")
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([expiresAt])
+  @@map("linear_oauth_states")
+}
+
 model LoginCode {
   id         String    @id @default(cuid())
   userId     String    @map("user_id")

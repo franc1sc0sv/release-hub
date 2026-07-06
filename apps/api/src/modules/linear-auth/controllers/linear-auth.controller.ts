@@ -3,6 +3,9 @@ import { CommandBus } from '@nestjs/cqrs'
 import { JwtService } from '@nestjs/jwt'
 import type { Response } from 'express'
 import { encryptToken } from '../../../common/crypto/token-cipher'
+import { IDatabaseService } from '../../../common/database/database.abstract'
+import { IProjectRepository } from '../../project/interfaces/project.repository'
+import { ILinearOAuthStateRepository } from '../interfaces/linear-oauth-state.repository'
 import { ConnectLinearCommand } from '../commands/connect-linear/connect-linear.command'
 
 interface ILinearStatePayload {
@@ -36,6 +39,9 @@ export class LinearAuthController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly jwtService: JwtService,
+    private readonly db: IDatabaseService,
+    private readonly oauthStateRepository: ILinearOAuthStateRepository,
+    private readonly projectRepository: IProjectRepository,
   ) {}
 
   @Get('callback')
@@ -44,13 +50,33 @@ export class LinearAuthController {
     @Query('state') state: string,
     @Res() res: Response,
   ): Promise<void> {
-    const webAppUrl = process.env.WEB_APP_URL ?? 'http://localhost:5173'
-    const errorRedirect = `${webAppUrl}/settings?linear=error`
+    const webAppUrl = (process.env.WEB_APP_URL ?? 'http://localhost:5173').replace(/\/+$/, '')
+    const fallbackErrorRedirect = `${webAppUrl}/?linear=error`
+    let errorRedirect = fallbackErrorRedirect
 
     try {
       const payload = this.jwtService.verify<ILinearStatePayload>(state)
       const userId = payload.sub
       const projectId = payload.projectId
+
+      const consumed = await this.db.$transaction((tx) =>
+        this.oauthStateRepository.consume(payload.nonce, tx),
+      )
+      if (!consumed) {
+        this.logger.warn('linear callback: install state invalid/expired/used')
+        res.redirect(fallbackErrorRedirect)
+        return
+      }
+
+      const project = await this.db.$query((tx) => this.projectRepository.findById(projectId, tx))
+      if (!project) {
+        this.logger.error(`linear callback: project not found projectId=${projectId}`)
+        res.redirect(fallbackErrorRedirect)
+        return
+      }
+
+      const base = `${webAppUrl}/${project.organizationId}/${projectId}/settings/connections`
+      errorRedirect = `${base}?linear=error`
 
       const clientId = process.env.LINEAR_CLIENT_ID!
       const clientSecret = process.env.LINEAR_CLIENT_SECRET!
@@ -120,7 +146,7 @@ export class LinearAuthController {
       )
 
       this.logger.log(`linear callback: connected projectId=${projectId} viewer=${viewer.name}`)
-      res.redirect(`${webAppUrl}/settings?linear=connected`)
+      res.redirect(`${base}?linear=connected`)
     } catch (error) {
       this.logger.error(
         `linear callback: unexpected error: ${error instanceof Error ? error.message : String(error)}`,

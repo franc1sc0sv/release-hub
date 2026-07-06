@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams, useNavigate, useLocation, generatePath } from 'react-router-dom'
 import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { Github, CheckCircle2, XCircle, Loader2, Clock } from 'lucide-react'
+import { Github, XCircle, Loader2, Clock } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useAuth } from '@/context/auth.context'
 import { ACTIVE_ORG_STORAGE_KEY } from '@/context/organization.context'
@@ -14,7 +14,7 @@ import { ROUTES } from '@/lib/routes'
 import { COMPLETE_GITHUB_INSTALLATION } from '@/features/settings/graphql/settings.operations'
 import { slideUp, easeSoft } from '@/lib/animations'
 
-type MutationState = 'processing' | 'success' | 'error'
+type MutationState = 'processing' | 'error'
 
 function SetupShell({
   glow,
@@ -78,17 +78,16 @@ export default function GithubSetupPage() {
 
   const [mutationState, setMutationState] = useState<MutationState>('processing')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [installedOrganizationId, setInstalledOrganizationId] = useState<string | null>(null)
   const hasFiredRef = useRef(false)
 
   const [completeGithubInstallation] = useMutation(COMPLETE_GITHUB_INSTALLATION, {
     onCompleted(data) {
-      localStorage.setItem(
-        ACTIVE_ORG_STORAGE_KEY,
-        data.completeGithubInstallation.organizationId,
+      const organizationId = data.completeGithubInstallation.organizationId
+      localStorage.setItem(ACTIVE_ORG_STORAGE_KEY, organizationId)
+      navigate(
+        generatePath(ROUTES.ORG_INTEGRATION, { organizationId, integration: 'github' }),
+        { replace: true },
       )
-      setInstalledOrganizationId(data.completeGithubInstallation.organizationId)
-      setMutationState('success')
     },
     onError(error) {
       setErrorMessage(error.message)
@@ -166,41 +165,6 @@ export default function GithubSetupPage() {
         heading={t('processing.heading')}
         description={t('processing.description')}
       />
-    )
-  }
-
-  if (mutationState === 'success') {
-    return (
-      <SetupShell
-        glow="magenta"
-        icon={<CheckCircle2 className="size-5" aria-hidden="true" />}
-        heading={t('success.heading')}
-        description={t('success.description')}
-      >
-        <div className="flex w-full flex-col gap-2">
-          <Button
-            className="w-full"
-            onClick={() =>
-              installedOrganizationId &&
-              navigate(
-                generatePath(ROUTES.ORG_INTEGRATION, {
-                  organizationId: installedOrganizationId,
-                  integration: 'github',
-                }),
-              )
-            }
-          >
-            {t('success.ctaSettings')}
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => navigate('/')}
-          >
-            {t('success.ctaWorkspace')}
-          </Button>
-        </div>
-      </SetupShell>
     )
   }
 
