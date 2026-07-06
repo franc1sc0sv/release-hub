@@ -13,6 +13,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
+import { isSafeRedirect } from '@/lib/safe-redirect'
 import { fadeIn } from '@/lib/animations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,11 +53,6 @@ const OTP_LENGTH = 6
 const RESEND_COOLDOWN_MS = 60_000
 
 type OtpStep = 'email' | 'code'
-
-function isSafeRedirect(path: string | null): path is string {
-  if (!path) return false
-  return path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/\\')
-}
 
 function cooldownStorageKey(email: string): string {
   return `otp-cooldown:${email}`

@@ -5,6 +5,7 @@ import { m, useReducedMotion } from 'motion/react'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useOrganization } from '@/context/organization.context'
+import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 import { CreateOrganizationDialog } from './CreateOrganizationDialog'
 
 interface ConnectedIndicatorProps {
@@ -43,6 +45,7 @@ function ConnectedIndicator({ connected, decorative = false }: ConnectedIndicato
 
 export function OrganizationSwitcher() {
   const { t } = useTranslation('organization')
+  const enumLabels = useEnumLabels()
   const { organizations, activeOrg, loading } = useOrganization()
   const reducedMotion = useReducedMotion()
   const navigate = useNavigate()
@@ -81,8 +84,18 @@ export function OrganizationSwitcher() {
             <Building2 className="size-4" aria-hidden />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold text-foreground">
-              {activeOrg?.name ?? t('switcher.noOrganizations')}
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate font-semibold text-foreground">
+                {activeOrg?.name ?? t('switcher.noOrganizations')}
+              </span>
+              {activeOrg && (
+                <Badge
+                  variant="outline"
+                  className="h-4 shrink-0 rounded-full px-1.5 text-[10px] leading-none"
+                >
+                  {enumLabels.orgRole(activeOrg.role)}
+                </Badge>
+              )}
             </span>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               {activeOrg && <ConnectedIndicator connected={activeOrg.githubConnected} decorative />}
@@ -134,6 +147,9 @@ export function OrganizationSwitcher() {
                   >
                     {org.name}
                   </span>
+                  <Badge variant="outline" className="shrink-0 rounded-full text-[10px]">
+                    {enumLabels.orgRole(org.role)}
+                  </Badge>
                   {isActive && (
                     <Check
                       className="ml-2 size-4 shrink-0 text-primary"

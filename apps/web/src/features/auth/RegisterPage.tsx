@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useMutation, useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { m, useReducedMotion } from 'motion/react'
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, User } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
+import { isSafeRedirect } from '@/lib/safe-redirect'
 import { fadeIn } from '@/lib/animations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,6 +32,7 @@ import {
 export function RegisterPage() {
   const { t } = useTranslation('common')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { setUser } = useAuth()
   const client = useApolloClient()
   const reduceMotion = useReducedMotion()
@@ -59,7 +61,9 @@ export function RegisterPage() {
         fetchPolicy: 'network-only',
       })
       if (meResult.data) setUser(meResult.data.me)
-      navigate(ROUTES.ONBOARDING, { replace: true })
+      const rawReturnTo = searchParams.get('returnTo')
+      const destination = isSafeRedirect(rawReturnTo) ? rawReturnTo : ROUTES.ONBOARDING
+      navigate(destination, { replace: true })
     } catch (err) {
       const graphqlErrors =
         err instanceof Error && 'graphQLErrors' in err

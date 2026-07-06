@@ -26,8 +26,10 @@
   "acceptInvite": {
     "title": "You have been invited",
     "description": "Accept the invitation to join this project.",
-    "loginPrompt": "Sign in to accept the invitation.",
-    "accept": "Sign in to accept",
+    "loginPrompt": "Sign in or create an account to accept the invitation.",
+    "createAccount": "Create account",
+    "logIn": "Log in",
+    "emailHint": "Use the email address your invite was sent to.",
     "accepting": "Joining project...",
     "accepted": "You have joined the project.",
     "error": "This invitation is invalid or has expired.",

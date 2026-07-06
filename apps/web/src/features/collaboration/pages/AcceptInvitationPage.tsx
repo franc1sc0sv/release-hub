@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { AuthSubmitButton } from '@/features/auth/components/AuthSubmitButton'
 import { ROUTES } from '@/lib/routes'
 import { ACCEPT_INVITATION } from '../graphql/collaboration.operations'
 import { defineAbilityFor, type IOrgMembership, OrgRole } from '@release-hub/shared'
@@ -91,15 +92,28 @@ export function AcceptInvitationPage() {
               <CardTitle className="font-display text-display-md">{t('acceptInvite.title')}</CardTitle>
               <CardDescription>{t('acceptInvite.loginPrompt')}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-3">
+              <AuthSubmitButton
+                type="button"
+                onClick={() =>
+                  navigate(`${ROUTES.REGISTER}?returnTo=${encodeURIComponent(returnTo)}`)
+                }
+              >
+                {t('acceptInvite.createAccount')}
+              </AuthSubmitButton>
               <Button
+                type="button"
+                variant="outline"
                 className="w-full"
                 onClick={() =>
                   navigate(`${ROUTES.LOGIN}?returnTo=${encodeURIComponent(returnTo)}`)
                 }
               >
-                {t('acceptInvite.accept')}
+                {t('acceptInvite.logIn')}
               </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                {t('acceptInvite.emailHint')}
+              </p>
             </CardContent>
           </GlassCard>
         </m.div>

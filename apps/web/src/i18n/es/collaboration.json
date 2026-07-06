@@ -26,8 +26,10 @@
   "acceptInvite": {
     "title": "Has sido invitado",
     "description": "Acepta la invitación para unirte a este proyecto.",
-    "loginPrompt": "Inicia sesión para aceptar la invitación.",
-    "accept": "Iniciar sesión para aceptar",
+    "loginPrompt": "Inicia sesión o crea una cuenta para aceptar la invitación.",
+    "createAccount": "Crear cuenta",
+    "logIn": "Iniciar sesión",
+    "emailHint": "Usa el correo electrónico al que se envió tu invitación.",
     "accepting": "Uniéndose al proyecto...",
     "accepted": "Te has unido al proyecto.",
     "error": "Esta invitación no es válida o ha expirado.",
