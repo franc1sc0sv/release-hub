@@ -13,7 +13,7 @@ export class SendProjectInvitationHandler {
 
   @OnEvent('collaboration.invitation.sent')
   async onInvitationSent(event: ProjectInvitationSentEvent): Promise<void> {
-    const acceptUrl = `${WEB_APP_URL}/invitations/accept?token=${event.acceptToken}`
+    const acceptUrl = `${WEB_APP_URL.replace(/\/+$/, '')}/invite/${event.acceptToken}`
     try {
       await this.mailService.sendProjectInvitation(
         event.to,
