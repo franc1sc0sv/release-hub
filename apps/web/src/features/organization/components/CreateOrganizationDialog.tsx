@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate, generatePath } from 'react-router-dom'
 import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
@@ -15,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { useOrganization } from '@/context/organization.context'
+import { ROUTES } from '@/lib/routes'
 import { CREATE_ORGANIZATION } from '../graphql/organization.operations'
 
 interface CreateOrganizationDialogProps {
@@ -25,14 +27,17 @@ interface CreateOrganizationDialogProps {
 export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizationDialogProps) {
   const { t } = useTranslation('organization')
   const { setActiveOrgId, refetch } = useOrganization()
+  const navigate = useNavigate()
   const [name, setName] = useState('')
 
   const [createOrganization, { loading, error }] = useMutation(CREATE_ORGANIZATION, {
     async onCompleted(data) {
+      const organizationId = data.createOrganization.id
       await refetch()
-      setActiveOrgId(data.createOrganization.id)
+      setActiveOrgId(organizationId)
       setName('')
       onOpenChange(false)
+      navigate(generatePath(ROUTES.ORG_ROOT, { organizationId }))
     },
   })
 
