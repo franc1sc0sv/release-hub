@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { LoggerModule } from 'nestjs-pino'
 import { join } from 'path'
+import type { IncomingMessage } from 'http'
 import pino, { stdSerializers, stdTimeFunctions } from 'pino'
 import pinoPretty from 'pino-pretty'
 import { ILogger } from './logging.abstract'
@@ -32,6 +33,9 @@ const streams = prettyEnabled
     LoggerModule.forRoot({
       pinoHttp: {
         level,
+        autoLogging: {
+          ignore: (req: IncomingMessage) => req.url === '/healthz' || req.url === '/readyz',
+        },
         timestamp: stdTimeFunctions.isoTime,
         formatters: { level: (label: string) => ({ level: label }) },
         serializers: { err: stdSerializers.err },

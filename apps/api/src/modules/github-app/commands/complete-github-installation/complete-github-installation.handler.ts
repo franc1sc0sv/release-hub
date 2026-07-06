@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import { CommandBus, CommandHandler, type ICommandHandler } from '@nestjs/cqrs'
 import { JwtService } from '@nestjs/jwt'
 import { Action, Subject } from '@release-hub/shared'
@@ -18,6 +19,8 @@ import { CompleteGithubInstallationCommand } from './complete-github-installatio
 export class CompleteGithubInstallationHandler
   implements ICommandHandler<CompleteGithubInstallationCommand, GithubInstallResultType>
 {
+  private readonly logger = new Logger(CompleteGithubInstallationHandler.name)
+
   constructor(
     private readonly db: IDatabaseService,
     private readonly organizationRepository: IOrganizationRepository,
@@ -29,7 +32,9 @@ export class CompleteGithubInstallationHandler
   ) {}
 
   async execute(command: CompleteGithubInstallationCommand): Promise<GithubInstallResultType> {
+    this.logger.log(`complete: start installationId=${command.installationId} userId=${command.userId}`)
     const payload = this.verifyState(command.state)
+    this.logger.log(`complete: state verified orgId=${payload.orgId}`)
 
     await this.db.$query((tx) =>
       authorizeOrgAction(
@@ -59,6 +64,7 @@ export class CompleteGithubInstallationHandler
     const consumed = await this.db.$transaction((tx) =>
       this.installStateRepository.consume(payload.nonce, tx),
     )
+    this.logger.log(`complete: install state consumed=${consumed} installationId=${numericInstallationId}`)
     if (!consumed) {
       throw new AppException(
         'Install state has expired or was already used.',
@@ -66,7 +72,15 @@ export class CompleteGithubInstallationHandler
       )
     }
 
-    const installation = await this.githubAppAuth.getInstallation(numericInstallationId)
+    let installation
+    try {
+      installation = await this.githubAppAuth.getInstallation(numericInstallationId)
+    } catch (error) {
+      this.logger.error(
+        `complete: getInstallation failed installationId=${numericInstallationId}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+      throw error
+    }
     if (installation.installationId !== numericInstallationId) {
       throw new AppException('Invalid GitHub App installation.', ErrorCode.GITHUB_INSTALL_STATE_INVALID)
     }
@@ -75,6 +89,7 @@ export class CompleteGithubInstallationHandler
       new LinkGithubInstallationCommand(payload.orgId, numericInstallationId, payload.projectId),
     )
 
+    this.logger.log(`complete: linked orgId=${payload.orgId} installationId=${numericInstallationId}`)
     return { organizationId: payload.orgId, connected: true }
   }
 
