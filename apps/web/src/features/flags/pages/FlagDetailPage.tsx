@@ -1,6 +1,6 @@
 import { useParams, Link, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { AlertCircle, ChevronRight, Flag as FlagIcon } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -47,13 +47,13 @@ export default function FlagDetailPage() {
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         variants={staggerContainer}
         initial={reduceMotion ? 'visible' : 'hidden'}
         animate="visible"
         className="mx-auto max-w-7xl space-y-6"
       >
-        <motion.nav
+        <m.nav
           variants={slideUp}
           aria-label={t('detail.breadcrumb.flags')}
           className="flex items-center gap-2 font-mono text-xs text-muted-foreground"
@@ -71,19 +71,19 @@ export default function FlagDetailPage() {
           <span aria-current="page" className="text-foreground">
             {flagKey}
           </span>
-        </motion.nav>
+        </m.nav>
 
         {loading && !flagDetail && (
-          <motion.div variants={slideUp}>
+          <m.div variants={slideUp}>
             <span className="sr-only" role="status">
               {t('detail.loading')}
             </span>
             <FlagDetailSkeleton />
-          </motion.div>
+          </m.div>
         )}
 
         {error && !loading && (
-          <motion.div variants={slideUp}>
+          <m.div variants={slideUp}>
             <GlassCard>
               <CardContent className="flex flex-col items-center gap-4 py-16">
                 <div className="flex size-14 items-center justify-center rounded-full bg-destructive/20">
@@ -99,28 +99,28 @@ export default function FlagDetailPage() {
                 </div>
               </CardContent>
             </GlassCard>
-          </motion.div>
+          </m.div>
         )}
 
         {!loading && !error && !flagDetail && (
-          <motion.div variants={slideUp}>
+          <m.div variants={slideUp}>
             <EmptyState
               icon={<FlagIcon className="size-7 text-brand-indigo-bright" aria-hidden />}
               heading={t('detail.notFound.heading')}
               description={t('detail.notFound.description')}
             />
-          </motion.div>
+          </m.div>
         )}
 
         {flagDetail && (
           <>
             {flagDetail.hasConflict && (
-              <motion.div variants={slideUp}>
+              <m.div variants={slideUp}>
                 <FlagConflictBanner />
-              </motion.div>
+              </m.div>
             )}
 
-            <motion.div variants={slideUp}>
+            <m.div variants={slideUp}>
               <FlagStatusHero
                 flagKey={flagDetail.key}
                 deploymentStatus={flagDetail.deploymentStatus}
@@ -128,9 +128,9 @@ export default function FlagDetailPage() {
                 onRescan={() => void handleRescan()}
                 rescanning={rescanning}
               />
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               variants={slideUp}
               className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[2fr_1fr]"
             >
@@ -140,14 +140,14 @@ export default function FlagDetailPage() {
                 <FlagLinkedFeatureCard feature={tracked?.feature ?? null} />
                 <FlagReleaseAppearancesCard releases={tracked?.releases ?? []} />
               </div>
-            </motion.div>
+            </m.div>
 
-            <motion.div variants={slideUp}>
+            <m.div variants={slideUp}>
               <FlagHistoryTimeline projectId={projectId} flagKey={flagDetail.key} />
-            </motion.div>
+            </m.div>
           </>
         )}
-      </motion.div>
+      </m.div>
     </NebulaBackground>
   )
 }

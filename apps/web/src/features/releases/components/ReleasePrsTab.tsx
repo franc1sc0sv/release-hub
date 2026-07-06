@@ -82,7 +82,7 @@ export function ReleasePrsTab({ features }: ReleasePrsTabProps) {
           {filteredPrs.map(({ pr, featureName }) => (
             <div
               key={pr.id}
-              className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm transition-colors hover:border-white/15"
+              className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 transition-colors hover:border-white/15"
             >
               <div className="flex items-start gap-4 px-5 py-4">
                 <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20">

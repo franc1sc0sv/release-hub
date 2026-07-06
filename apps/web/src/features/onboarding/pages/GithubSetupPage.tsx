@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, useLocation, generatePath } from 'react-r
 import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Github, XCircle, Loader2, Clock } from 'lucide-react'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { useAuth } from '@/context/auth.context'
 import { ACTIVE_ORG_STORAGE_KEY } from '@/context/organization.context'
 import { Button } from '@/components/ui/button'
@@ -38,7 +38,7 @@ function SetupShell({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_oklab,var(--brand-indigo-bright)_22%,transparent),transparent_60%)]"
       />
       <ThemeToggle />
-      <motion.div
+      <m.div
         variants={slideUp}
         initial="hidden"
         animate="visible"
@@ -60,7 +60,7 @@ function SetupShell({
             {children}
           </CardContent>
         </GlassCard>
-      </motion.div>
+      </m.div>
     </main>
   )
 }

@@ -1,7 +1,7 @@
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { Button } from '@/components/ui/button'
 import { RepoPicker } from '@/features/projects/components/RepoPicker'
@@ -29,13 +29,13 @@ export default function CreateProjectPage() {
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         className="mx-auto max-w-7xl space-y-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={itemVariants}>
+        <m.div variants={itemVariants}>
           <Button
             variant="ghost"
             size="sm"
@@ -52,12 +52,12 @@ export default function CreateProjectPage() {
           <h1 className="font-display text-display-lg font-bold tracking-tight text-foreground">
             {t('createProject.title')}
           </h1>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants} className="flex justify-center">
+        <m.div variants={itemVariants} className="flex justify-center">
           <RepoPicker onCreated={handleCreated} />
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </NebulaBackground>
   )
 }

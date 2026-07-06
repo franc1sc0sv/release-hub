@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Building2, Loader2, AlertCircle } from 'lucide-react'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,7 +32,7 @@ export function CreateOrgStage() {
   }
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -79,6 +79,6 @@ export function CreateOrgStage() {
           </form>
         </CardContent>
       </GlassCard>
-    </motion.div>
+    </m.div>
   )
 }

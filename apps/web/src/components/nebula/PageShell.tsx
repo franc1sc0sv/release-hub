@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { NebulaBackground } from './NebulaBackground'
 import { PageHeader } from './PageHeader'
 import { slideUp, staggerContainer } from '@/lib/animations'
@@ -27,24 +27,24 @@ export function PageShell({
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         variants={staggerContainer}
         initial={reduceMotion ? 'visible' : 'hidden'}
         animate="visible"
         className={cn('mx-auto space-y-8', maxWidth)}
       >
         {hasHeader && (
-          <motion.div variants={slideUp}>
+          <m.div variants={slideUp}>
             <PageHeader
               overline={eyebrow ?? ''}
               title={title ?? ''}
               description={description}
               actions={actions}
             />
-          </motion.div>
+          </m.div>
         )}
-        <motion.div variants={slideUp}>{children}</motion.div>
-      </motion.div>
+        <m.div variants={slideUp}>{children}</m.div>
+      </m.div>
     </NebulaBackground>
   )
 }

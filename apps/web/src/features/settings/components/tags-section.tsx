@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tag, X, Plus, Loader2, Tags } from 'lucide-react'
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -132,7 +132,7 @@ export function TagsSection({ projectId }: TagsSectionProps) {
           )}
 
           {tags.length > 0 && (
-            <motion.div
+            <m.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -140,7 +140,7 @@ export function TagsSection({ projectId }: TagsSectionProps) {
             >
               <AnimatePresence>
                 {tags.map((tag) => (
-                  <motion.div
+                  <m.div
                     key={tag.id}
                     variants={itemVariants}
                     exit={
@@ -173,10 +173,10 @@ export function TagsSection({ projectId }: TagsSectionProps) {
                         </button>
                       </Can>
                     </Badge>
-                  </motion.div>
+                  </m.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </m.div>
           )}
         </CardContent>
       </GlassCard>

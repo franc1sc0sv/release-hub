@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { MessageSquare, CheckCircle2, XCircle, Loader2, Send } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -57,7 +57,7 @@ export function SlackCard({ projectId }: SlackCardProps) {
   const itemVariants = reduceMotion ? undefined : slideUp
 
   return (
-    <motion.li
+    <m.li
       variants={itemVariants}
       className="flex flex-col gap-4 px-6 py-4"
     >
@@ -235,6 +235,6 @@ export function SlackCard({ projectId }: SlackCardProps) {
           </Button>
         </div>
       )}
-    </motion.li>
+    </m.li>
   )
 }

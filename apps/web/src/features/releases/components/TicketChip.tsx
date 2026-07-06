@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -53,7 +53,7 @@ export function TicketChip({ ticket }: TicketChipProps) {
       <Tooltip>
         <TooltipTrigger
           render={
-            <motion.a
+            <m.a
               href={ticket.url}
               target="_blank"
               rel="noopener noreferrer"

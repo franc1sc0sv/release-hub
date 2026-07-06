@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Bot, Loader2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { Action, Subject } from '@release-hub/shared'
@@ -71,12 +71,12 @@ export function NewPrsReviewPanel({ release, features, projectId }: NewPrsReview
       <GlassCard glow="indigo">
         <CardContent className="flex flex-col items-center gap-4 py-16">
           <div className="flex size-14 items-center justify-center rounded-full bg-indigo-500/20">
-            <motion.div
+            <m.div
               animate={reduceMotion ? {} : { rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
             >
               <Bot className="size-7 text-indigo-400" aria-hidden />
-            </motion.div>
+            </m.div>
           </div>
           <div className="text-center" role="status" aria-live="polite">
             <p className="font-display text-lg font-semibold text-foreground">
@@ -94,7 +94,7 @@ export function NewPrsReviewPanel({ release, features, projectId }: NewPrsReview
   const allPendingAssigned = pendingPrs.every((pr) => Boolean(pr.featureId))
 
   return (
-    <motion.div
+    <m.div
       initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4 rounded-[var(--radius-card)] border border-indigo-500/20 bg-indigo-500/5 p-5"
@@ -133,7 +133,7 @@ export function NewPrsReviewPanel({ release, features, projectId }: NewPrsReview
           />
         ))}
       </div>
-    </motion.div>
+    </m.div>
   )
 }
 

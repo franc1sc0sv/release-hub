@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { AlertTriangle, Bell, Flag, Loader2, Mail, Rocket, Send, Slack, type LucideIcon } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { EmptyState } from '@/components/nebula/EmptyState'
@@ -166,13 +166,13 @@ export function NotificationPreferencesSection({
   }
 
   return (
-    <motion.div
+    <m.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       className="space-y-6"
     >
-      <motion.div variants={itemVariants}>
+      <m.div variants={itemVariants}>
         <GlassCard>
           <CardContent className={cn('grid items-center gap-4 p-4', gridClass)}>
             <div>
@@ -207,10 +207,10 @@ export function NotificationPreferencesSection({
             })}
           </CardContent>
         </GlassCard>
-      </motion.div>
+      </m.div>
 
       {GROUPS.map((group) => (
-        <motion.div key={group.key} variants={itemVariants}>
+        <m.div key={group.key} variants={itemVariants}>
           <GlassCard>
             <CardHeader className="gap-3">
               <div className={cn('grid items-center gap-4', gridClass)}>
@@ -311,10 +311,10 @@ export function NotificationPreferencesSection({
               })}
             </CardContent>
           </GlassCard>
-        </motion.div>
+        </m.div>
       ))}
 
-      <motion.div variants={itemVariants}>
+      <m.div variants={itemVariants}>
         <GlassCard>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-semibold">
@@ -376,7 +376,7 @@ export function NotificationPreferencesSection({
             </Can>
           </CardContent>
         </GlassCard>
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   )
 }

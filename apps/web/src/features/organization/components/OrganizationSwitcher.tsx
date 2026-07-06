@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronsUpDown, Check, Building2, Plus } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useOrganization } from '@/context/organization.context'
@@ -69,7 +69,7 @@ export function OrganizationSwitcher() {
               size="lg"
               className={cn(
                 'rounded-xl border border-transparent',
-                'transition-all duration-200',
+                'transition-colors duration-200',
                 'hover:border-border/60 hover:shadow-glow-sm',
                 'data-[state=open]:border-border/60 data-[state=open]:shadow-glow-sm',
               )}
@@ -102,7 +102,7 @@ export function OrganizationSwitcher() {
           side="bottom"
           align="start"
           sideOffset={4}
-          className="w-64 rounded-xl border border-border/60 bg-popover/90 backdrop-blur-md"
+          className="w-64 rounded-xl border border-border/60 bg-popover"
         >
           <DropdownMenuGroup>
             <DropdownMenuLabel className="px-2 py-1.5 text-xs text-muted-foreground">
@@ -113,7 +113,7 @@ export function OrganizationSwitcher() {
           {organizations.map((org, index) => {
             const isActive = org.id === activeOrg?.id
             return (
-              <motion.div
+              <m.div
                 key={org.id}
                 initial={reducedMotion ? false : { opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export function OrganizationSwitcher() {
                     />
                   )}
                 </DropdownMenuItem>
-              </motion.div>
+              </m.div>
             )
           })}
 

@@ -2,7 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useMutation, useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import {
   Mail,
   Lock,
@@ -298,7 +298,7 @@ export function LoginPage() {
                     </Field>
 
                     {passwordError && (
-                      <motion.div
+                      <m.div
                         variants={reduceMotion ? undefined : fadeIn}
                         initial={reduceMotion ? undefined : 'hidden'}
                         animate={reduceMotion ? undefined : 'visible'}
@@ -309,7 +309,7 @@ export function LoginPage() {
                             {t('auth.loginError')}
                           </AlertDescription>
                         </Alert>
-                      </motion.div>
+                      </m.div>
                     )}
 
                     <Field>
@@ -346,7 +346,7 @@ export function LoginPage() {
                       </Field>
 
                       {otpError && (
-                        <motion.div
+                        <m.div
                           variants={reduceMotion ? undefined : fadeIn}
                           initial={reduceMotion ? undefined : 'hidden'}
                           animate={reduceMotion ? undefined : 'visible'}
@@ -357,7 +357,7 @@ export function LoginPage() {
                               {t('auth.codeInvalid')}
                             </AlertDescription>
                           </Alert>
-                        </motion.div>
+                        </m.div>
                       )}
 
                       <Field>
@@ -411,7 +411,7 @@ export function LoginPage() {
                       </Field>
 
                       {otpError && (
-                        <motion.div
+                        <m.div
                           variants={reduceMotion ? undefined : fadeIn}
                           initial={reduceMotion ? undefined : 'hidden'}
                           animate={reduceMotion ? undefined : 'visible'}
@@ -422,7 +422,7 @@ export function LoginPage() {
                               {t('auth.codeInvalid')}
                             </AlertDescription>
                           </Alert>
-                        </motion.div>
+                        </m.div>
                       )}
 
                       <Field>

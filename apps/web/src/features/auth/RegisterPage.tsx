@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useMutation, useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, User } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
 import { fadeIn } from '@/lib/animations'
@@ -159,7 +159,7 @@ export function RegisterPage() {
                 </Field>
 
                 {error && (
-                  <motion.div
+                  <m.div
                     variants={reduceMotion ? undefined : fadeIn}
                     initial={reduceMotion ? undefined : 'hidden'}
                     animate={reduceMotion ? undefined : 'visible'}
@@ -168,7 +168,7 @@ export function RegisterPage() {
                       <AlertCircle className="size-4" />
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
-                  </motion.div>
+                  </m.div>
                 )}
 
                 <Field>

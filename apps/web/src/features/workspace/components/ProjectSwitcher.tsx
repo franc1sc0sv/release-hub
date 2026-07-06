@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ChevronsUpDown, Check, FolderOpen, Plus } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useProject } from '@/context/project.context'
@@ -62,7 +62,7 @@ export function ProjectSwitcher() {
             size="lg"
             className={cn(
               'rounded-xl border border-transparent',
-              'transition-all duration-200',
+              'transition-colors duration-200',
               'hover:border-border/60 hover:shadow-glow-sm',
               'data-[state=open]:border-border/60 data-[state=open]:shadow-glow-sm',
             )}
@@ -88,7 +88,7 @@ export function ProjectSwitcher() {
         side="bottom"
         align="start"
         sideOffset={4}
-        className="w-64 rounded-xl border border-border/60 bg-popover/90 backdrop-blur-md"
+        className="w-64 rounded-xl border border-border/60 bg-popover"
       >
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1.5">
@@ -99,7 +99,7 @@ export function ProjectSwitcher() {
         {projects.map((project, index) => {
           const isActive = project.id === activeProject?.id
           return (
-            <motion.div
+            <m.div
               key={project.id}
               initial={reducedMotion ? false : { opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -131,7 +131,7 @@ export function ProjectSwitcher() {
                   />
                 )}
               </DropdownMenuItem>
-            </motion.div>
+            </m.div>
           )
         })}
 

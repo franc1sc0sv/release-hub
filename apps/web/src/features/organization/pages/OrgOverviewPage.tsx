@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FolderOpen, Github, Plus } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client/react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
@@ -36,13 +36,13 @@ function ProjectCard({ project, onSelect }: ProjectCardProps) {
       .length
 
   return (
-    <motion.div variants={slideUp}>
+    <m.div variants={slideUp}>
       <button
         type="button"
         onClick={() => onSelect(project.id)}
         className="group block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-[var(--radius-card)]"
       >
-        <GlassCard className="h-full transition-all duration-300 group-hover:border-white/20 group-hover:shadow-glow-indigo">
+        <GlassCard className="h-full transition-colors duration-300 group-hover:border-white/20">
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-brand-indigo-bright/15">
@@ -65,7 +65,7 @@ function ProjectCard({ project, onSelect }: ProjectCardProps) {
           </CardContent>
         </GlassCard>
       </button>
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -109,13 +109,13 @@ export default function OrgOverviewPage() {
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         className="mx-auto max-w-7xl space-y-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={itemVariants}>
+        <m.div variants={itemVariants}>
           <GlassCard glow="indigo">
             <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
               <p className="text-overline uppercase tracking-widest text-muted-foreground">
@@ -144,10 +144,10 @@ export default function OrgOverviewPage() {
               )}
             </CardContent>
           </GlassCard>
-        </motion.div>
+        </m.div>
 
         {!activeOrg.githubConnected ? (
-          <motion.div variants={itemVariants}>
+          <m.div variants={itemVariants}>
             <EmptyState
               icon={<Github className="size-7 text-brand-indigo-bright" aria-hidden />}
               heading={t('connectGithub.heading')}
@@ -170,11 +170,11 @@ export default function OrgOverviewPage() {
                 </div>
               }
             />
-          </motion.div>
+          </m.div>
         ) : (
           <>
             {loading && (
-              <motion.div
+              <m.div
                 variants={itemVariants}
                 className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
               >
@@ -190,11 +190,11 @@ export default function OrgOverviewPage() {
                     </CardContent>
                   </GlassCard>
                 ))}
-              </motion.div>
+              </m.div>
             )}
 
             {!loading && projects.length === 0 && (
-              <motion.div variants={itemVariants}>
+              <m.div variants={itemVariants}>
                 <EmptyState
                   icon={<FolderOpen className="size-7 text-brand-indigo-bright" aria-hidden />}
                   heading={t('empty.heading')}
@@ -210,11 +210,11 @@ export default function OrgOverviewPage() {
                     </GradientButton>
                   }
                 />
-              </motion.div>
+              </m.div>
             )}
 
             {!loading && projects.length > 0 && (
-              <motion.div variants={itemVariants} className="space-y-4">
+              <m.div variants={itemVariants} className="space-y-4">
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="font-display text-display-md font-semibold text-foreground">
                     {t('projectsHeading')}
@@ -234,7 +234,7 @@ export default function OrgOverviewPage() {
                     description={t('noResults.description')}
                   />
                 ) : (
-                  <motion.div
+                  <m.div
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
@@ -243,13 +243,13 @@ export default function OrgOverviewPage() {
                     {filteredProjects.map((project) => (
                       <ProjectCard key={project.id} project={project} onSelect={handleSelectProject} />
                     ))}
-                  </motion.div>
+                  </m.div>
                 )}
-              </motion.div>
+              </m.div>
             )}
           </>
         )}
-      </motion.div>
+      </m.div>
     </NebulaBackground>
   )
 }

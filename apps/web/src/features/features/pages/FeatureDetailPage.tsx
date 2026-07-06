@@ -1,6 +1,6 @@
 import { useParams, Link, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { ArrowLeft, AlertCircle, Loader2, GitBranch } from 'lucide-react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -82,13 +82,13 @@ export default function FeatureDetailPage() {
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         variants={staggerContainer}
         initial={reduceMotion ? 'visible' : 'hidden'}
         animate="visible"
         className="mx-auto max-w-7xl space-y-8"
       >
-        <motion.div variants={slideUp}>
+        <m.div variants={slideUp}>
           <Link
             to={featuresPath}
             className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] px-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -96,9 +96,9 @@ export default function FeatureDetailPage() {
             <ArrowLeft className="size-3.5" aria-hidden />
             {t('back')}
           </Link>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={slideUp}>
+        <m.div variants={slideUp}>
           <GlassCard glow="indigo">
             <CardContent className="space-y-5 py-6">
               <div className="space-y-3">
@@ -152,15 +152,15 @@ export default function FeatureDetailPage() {
               )}
             </CardContent>
           </GlassCard>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={slideUp} className="space-y-3">
+        <m.div variants={slideUp} className="space-y-3">
           <h2 className="font-display text-lg font-semibold text-foreground">
             {t('detail.releasesHeading')}
           </h2>
           <FeatureDetailTree releases={releases} prs={prs} snapshots={snapshots} />
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </NebulaBackground>
   )
 }

@@ -2,7 +2,7 @@ import { useState, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { useNavigate, generatePath } from 'react-router-dom'
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import {
   AlertCircle,
   ArrowLeft,
@@ -129,7 +129,7 @@ export function ReleaseWizard() {
 
       <AnimatePresence mode="wait">
         {step === 1 && (
-          <motion.div
+          <m.div
             key="step-1"
             variants={slideUp}
             initial={reduceMotion ? 'visible' : 'hidden'}
@@ -150,11 +150,11 @@ export function ReleaseWizard() {
                 <ArrowRight className="ml-2 size-4" aria-hidden />
               </GradientButton>
             </div>
-          </motion.div>
+          </m.div>
         )}
 
         {step === 2 && (
-          <motion.div
+          <m.div
             key="step-2"
             variants={slideUp}
             initial={reduceMotion ? 'visible' : 'hidden'}
@@ -179,11 +179,11 @@ export function ReleaseWizard() {
                 <ArrowRight className="ml-2 size-4" aria-hidden />
               </GradientButton>
             </div>
-          </motion.div>
+          </m.div>
         )}
 
         {step === 3 && (
-          <motion.div
+          <m.div
             key="step-3"
             variants={slideUp}
             initial={reduceMotion ? 'visible' : 'hidden'}
@@ -211,7 +211,7 @@ export function ReleaseWizard() {
                 {creating ? t('wizard.creating') : t('wizard.createLabel')}
               </GradientButton>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -367,7 +367,7 @@ function Step2({ comparing, error, comparison }: Step2Props) {
         )}
 
         {comparison.commits.length > 0 && (
-          <motion.ul
+          <m.ul
             variants={
               reduceMotion
                 ? undefined
@@ -382,7 +382,7 @@ function Step2({ comparing, error, comparison }: Step2Props) {
             {comparison.commits.map((commit) => (
               <CommitListItem key={commit.sha} commit={commit} />
             ))}
-          </motion.ul>
+          </m.ul>
         )}
       </CardContent>
     </GlassCard>
@@ -426,7 +426,7 @@ function CommitListItem({ commit }: CommitListItemProps) {
   })
 
   return (
-    <motion.li
+    <m.li
       variants={
         reduceMotion
           ? undefined
@@ -446,7 +446,7 @@ function CommitListItem({ commit }: CommitListItemProps) {
           <time dateTime={commit.committedAt}>{formattedDate}</time>
         </div>
       </div>
-    </motion.li>
+    </m.li>
   )
 }
 

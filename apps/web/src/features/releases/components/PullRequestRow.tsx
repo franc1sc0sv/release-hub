@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, ExternalLink, GitMerge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CommitRow } from './CommitRow'
@@ -44,7 +44,7 @@ export function PullRequestRow({ pr }: PullRequestRowProps) {
     : t('builder.pr.expandCommits')
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm transition-colors hover:border-white/15">
+    <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 transition-colors hover:border-white/15">
       <div className="flex items-start gap-4 px-5 py-4">
         <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20">
           <GitMerge className="size-4 text-indigo-400" />
@@ -95,19 +95,19 @@ export function PullRequestRow({ pr }: PullRequestRowProps) {
           onClick={() => setOpen((prev) => !prev)}
           className="shrink-0"
         >
-          <motion.span
+          <m.span
             animate={{ rotate: open ? 180 : 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
             <ChevronDown className="size-4" />
-          </motion.span>
+          </m.span>
         </Button>
       </div>
 
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             key="expanded"
             initial={reduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -121,7 +121,7 @@ export function PullRequestRow({ pr }: PullRequestRowProps) {
                 <CommitRow key={commit.sha} commit={commit} />
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

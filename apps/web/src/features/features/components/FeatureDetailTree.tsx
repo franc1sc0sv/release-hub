@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, generatePath, useParams } from 'react-router-dom'
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { format } from 'date-fns'
 import { ChevronDown, GitBranch, GitMerge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -71,7 +71,7 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
     : null
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm">
+    <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5">
       <div className="flex items-start gap-4 px-5 py-4">
         <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20">
           <GitMerge className="size-4 text-indigo-400" aria-hidden />
@@ -115,19 +115,19 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
           onClick={() => setOpen((prev) => !prev)}
           className="shrink-0"
         >
-          <motion.span
+          <m.span
             animate={{ rotate: open ? 180 : 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
             <ChevronDown className="size-4" aria-hidden />
-          </motion.span>
+          </m.span>
         </Button>
       </div>
 
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             key="commits"
             initial={reduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -140,7 +140,7 @@ function DetailPrRow({ pr }: DetailPrRowProps) {
                 <DetailCommitRow key={commit.sha} commit={commit} />
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -188,7 +188,7 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
   const toggleLabel = open ? t('tree.prCount', { count: prs.length }) : prCountLabel
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4 backdrop-blur-sm">
+    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4">
       <div className="flex items-start gap-3 px-5 py-4">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 border border-indigo-500/30">
           <GitBranch className="size-4 text-indigo-400" aria-hidden />
@@ -232,19 +232,19 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
           onClick={() => setOpen((prev) => !prev)}
           className="mt-1 flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <motion.span
+          <m.span
             animate={{ rotate: open ? 180 : 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
             <ChevronDown className="size-4" aria-hidden />
-          </motion.span>
+          </m.span>
         </button>
       </div>
 
       <AnimatePresence initial={false}>
         {open && prs.length > 0 && (
-          <motion.div
+          <m.div
             key="prs"
             initial={reduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -257,7 +257,7 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
                 <DetailPrRow key={pr.id} pr={pr} />
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

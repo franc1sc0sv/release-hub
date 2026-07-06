@@ -10,7 +10,7 @@ import {
   AlertTriangle,
   RefreshCw,
 } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -235,13 +235,13 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <motion.ul
+          <m.ul
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             className="divide-y divide-border/40"
           >
-            <motion.li variants={itemVariants} className="flex flex-col gap-4 px-6 py-4">
+            <m.li variants={itemVariants} className="flex flex-col gap-4 px-6 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex size-10 items-center justify-center rounded-full bg-muted">
@@ -358,11 +358,11 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
                   />
                 </div>
               )}
-            </motion.li>
+            </m.li>
 
             <SlackCard projectId={projectId} />
 
-            <motion.li
+            <m.li
               variants={itemVariants}
               className="flex items-center justify-between gap-4 px-6 py-4"
             >
@@ -452,8 +452,8 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
                   </>
                 )}
               </div>
-            </motion.li>
-          </motion.ul>
+            </m.li>
+          </m.ul>
         </CardContent>
       </GlassCard>
 

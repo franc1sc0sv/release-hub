@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Trash2, Users, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -195,14 +195,14 @@ export function MembersSection() {
             </div>
           )}
           {members.length > 0 && (
-            <motion.ul
+            <m.ul
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               className="divide-y divide-border/40"
             >
               {members.map((member) => (
-                <motion.li
+                <m.li
                   key={member.id}
                   variants={itemVariants}
                   className="flex items-center justify-between gap-4 py-3"
@@ -286,9 +286,9 @@ export function MembersSection() {
                       </AlertDialog>
                     </Can>
                   </div>
-                </motion.li>
+                </m.li>
               ))}
-            </motion.ul>
+            </m.ul>
           )}
         </CardContent>
       </GlassCard>
@@ -305,14 +305,14 @@ export function MembersSection() {
               </div>
             )}
             {pendingInvitations.length > 0 && (
-              <motion.ul
+              <m.ul
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
                 className="divide-y divide-border/40"
               >
                 {pendingInvitations.map((inv) => (
-                  <motion.li
+                  <m.li
                     key={inv.id}
                     variants={itemVariants}
                     className="flex items-center justify-between gap-4 py-3"
@@ -335,9 +335,9 @@ export function MembersSection() {
                         {t('invitations.revoke')}
                       </Button>
                     </Can>
-                  </motion.li>
+                  </m.li>
                 ))}
-              </motion.ul>
+              </m.ul>
             )}
           </CardContent>
         </GlassCard>

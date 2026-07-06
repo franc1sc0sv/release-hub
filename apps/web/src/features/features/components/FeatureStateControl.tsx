@@ -52,14 +52,14 @@ function StateSelectInner({ featureId, currentState }: FeatureStateControlProps)
   return (
     <Select value={optimisticState} onValueChange={handleChange}>
       <SelectTrigger
-        className={`h-auto rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium backdrop-blur-sm focus-visible:ring-ring ${FEATURE_STATE_TEXT_CLASS[optimisticState]}`}
+        className={`h-auto rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium focus-visible:ring-ring ${FEATURE_STATE_TEXT_CLASS[optimisticState]}`}
         aria-label={t('state.label')}
       >
         <SelectValue>
           {(value: string) => (value ? enumLabels.featureState(value as FeatureState) : null)}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="rounded-[var(--radius-card)] border border-white/15 bg-popover/95 backdrop-blur-xl">
+      <SelectContent className="rounded-[var(--radius-card)] border border-white/15 bg-popover">
         {FEATURE_STATE_OPTIONS.map((state) => (
           <SelectItem
             key={state}

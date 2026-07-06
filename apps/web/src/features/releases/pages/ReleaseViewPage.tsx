@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@apollo/client/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { AlertCircle, ArrowLeft, ExternalLink, GitBranch, Loader2 } from 'lucide-react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -93,13 +93,13 @@ export default function ReleaseViewPage() {
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         variants={staggerContainer}
         initial={reduceMotion ? 'visible' : 'hidden'}
         animate="visible"
         className="mx-auto max-w-7xl space-y-8"
       >
-        <motion.div variants={slideUp}>
+        <m.div variants={slideUp}>
           <Link
             to={releasesPath}
             className="inline-flex items-center gap-1.5 rounded-full px-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -107,9 +107,9 @@ export default function ReleaseViewPage() {
             <ArrowLeft className="size-3.5" aria-hidden />
             {t('view.back')}
           </Link>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={slideUp} className="flex items-start justify-between gap-4">
+        <m.div variants={slideUp} className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <p className="text-overline uppercase tracking-widest text-muted-foreground">
               {t('view.subtitle')}
@@ -171,9 +171,9 @@ export default function ReleaseViewPage() {
               variant="icon"
             />
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={slideUp}>
+        <m.div variants={slideUp}>
           <Tabs defaultValue="overview">
             <TabsList
               variant="line"
@@ -211,8 +211,8 @@ export default function ReleaseViewPage() {
               <SummaryTab release={release} features={features} />
             </TabsContent>
           </Tabs>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </NebulaBackground>
   )
 }

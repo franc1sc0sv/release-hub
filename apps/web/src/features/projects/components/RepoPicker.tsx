@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { Lock, Loader2, AlertCircle } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
@@ -94,7 +94,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
   const repos = data?.githubInstallationRepositories ?? []
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -171,7 +171,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
             </Field>
 
             {selectedRepo && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -188,11 +188,11 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
                     placeholder={t('selectRepo.projectNamePlaceholder')}
                   />
                 </Field>
-              </motion.div>
+              </m.div>
             )}
 
             {error && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.15 }}
@@ -201,7 +201,7 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
                   <AlertCircle className="size-4" aria-hidden="true" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              </motion.div>
+              </m.div>
             )}
 
             <GradientButton
@@ -217,6 +217,6 @@ export function RepoPicker({ onCreated }: RepoPickerProps) {
           )}
         </CardContent>
       </GlassCard>
-    </motion.div>
+    </m.div>
   )
 }

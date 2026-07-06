@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, generatePath, useParams } from 'react-router-dom'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -153,7 +153,7 @@ export function FlagMatrix({
   const offLabel = t('state.off')
 
   return (
-    <motion.div variants={reduceMotion ? undefined : fadeIn} initial="hidden" animate="visible">
+    <m.div variants={reduceMotion ? undefined : fadeIn} initial="hidden" animate="visible">
       <GlassCard>
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
@@ -219,6 +219,6 @@ export function FlagMatrix({
           </div>
         </CardContent>
       </GlassCard>
-    </motion.div>
+    </m.div>
   )
 }

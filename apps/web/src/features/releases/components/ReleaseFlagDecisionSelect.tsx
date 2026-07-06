@@ -66,7 +66,7 @@ export function ReleaseFlagDecisionSelect({
             <Button
               variant="outline"
               size="icon"
-              className="size-8 rounded-full border border-white/15 bg-white/5 p-0 backdrop-blur-sm focus-visible:ring-ring"
+              className="size-8 rounded-full border border-white/15 bg-white/5 p-0 focus-visible:ring-ring"
               aria-label={t('flags.decisionLabel')}
             />
           }

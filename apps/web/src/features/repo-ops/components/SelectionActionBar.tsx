@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -16,7 +16,7 @@ export function SelectionActionBar({ count, onClear, onDelete }: SelectionAction
   return (
     <AnimatePresence>
       {count > 0 && (
-        <motion.div
+        <m.div
           initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
@@ -36,7 +36,7 @@ export function SelectionActionBar({ count, onClear, onDelete }: SelectionAction
               </Button>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

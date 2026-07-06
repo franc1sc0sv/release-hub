@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { slideUp } from '@/lib/animations'
 import { cn } from '@/lib/utils'
@@ -24,7 +24,7 @@ export function AuthLayout({ eyebrow, headline, supportingText, children }: Auth
 
       <div className="relative z-10 grid min-h-svh lg:grid-cols-2">
         <div className="hidden flex-col justify-center gap-8 border-r border-border/40 px-16 lg:flex">
-          <motion.div
+          <m.div
             variants={reduceMotion ? undefined : slideUp}
             initial={reduceMotion ? undefined : 'hidden'}
             animate={reduceMotion ? undefined : 'visible'}
@@ -37,18 +37,18 @@ export function AuthLayout({ eyebrow, headline, supportingText, children }: Auth
               {headline}
             </h1>
             <p className="text-base text-muted-foreground text-balance">{supportingText}</p>
-          </motion.div>
+          </m.div>
         </div>
 
         <div className={cn('flex flex-col items-center justify-center px-6 py-16 md:px-10')}>
-          <motion.div
+          <m.div
             variants={reduceMotion ? undefined : slideUp}
             initial={reduceMotion ? undefined : 'hidden'}
             animate={reduceMotion ? undefined : 'visible'}
             className="w-full max-w-sm"
           >
             {children}
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </main>

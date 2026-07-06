@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@apollo/client/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -72,7 +72,7 @@ export function CoverageMeter({ releaseId, releaseStatus }: CoverageMeterProps) 
           <ProgressLabel className="sr-only">{t('coverage.title')}</ProgressLabel>
           <ProgressTrack>
             <ProgressIndicator
-              className={cn('transition-all', shouldReduceMotion ? '' : 'duration-600')}
+              className={cn('transition-[width]', shouldReduceMotion ? '' : 'duration-600')}
               style={{
                 backgroundColor: statusColor,
                 transition: shouldReduceMotion
@@ -84,7 +84,7 @@ export function CoverageMeter({ releaseId, releaseStatus }: CoverageMeterProps) 
         </ProgressPrimitive.Root>
 
         <div className="flex items-center justify-between">
-          <motion.span
+          <m.span
             key={`${assigned}-${total}`}
             initial={shouldReduceMotion ? false : { opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
@@ -93,9 +93,9 @@ export function CoverageMeter({ releaseId, releaseStatus }: CoverageMeterProps) 
             style={{ color: statusColor }}
           >
             {t('coverage.assignedOf', { assigned, total })}
-          </motion.span>
+          </m.span>
 
-          <motion.div
+          <m.div
             key={`${String(isDraft)}-${String(ready)}`}
             initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -119,7 +119,7 @@ export function CoverageMeter({ releaseId, releaseStatus }: CoverageMeterProps) 
                 {t('coverage.incomplete')}
               </>
             )}
-          </motion.div>
+          </m.div>
         </div>
       </CardContent>
     </GlassCard>

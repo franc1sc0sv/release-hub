@@ -10,26 +10,29 @@ import { AppBootstrap } from '@/components/AppBootstrap'
 import { apolloClient } from '@/lib/apollo'
 import { i18n } from '@/i18n/index'
 import { NuqsAdapter } from 'nuqs/adapters/react-router'
+import { LazyMotion, domAnimation } from 'motion/react'
 import { Router } from '@/router/Router'
 import '@/index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ApolloProvider client={apolloClient}>
-      <I18nextProvider i18n={i18n}>
-        <TooltipProvider>
-          <AuthProvider>
-            <AppBootstrap>
-              <AbilityBridge>
-                <NuqsAdapter>
-                  <Router />
-                  <Toaster position="bottom-right" richColors />
-                </NuqsAdapter>
-              </AbilityBridge>
-            </AppBootstrap>
-          </AuthProvider>
-        </TooltipProvider>
-      </I18nextProvider>
-    </ApolloProvider>
+    <LazyMotion features={domAnimation}>
+      <ApolloProvider client={apolloClient}>
+        <I18nextProvider i18n={i18n}>
+          <TooltipProvider>
+            <AuthProvider>
+              <AppBootstrap>
+                <AbilityBridge>
+                  <NuqsAdapter>
+                    <Router />
+                    <Toaster position="bottom-right" richColors />
+                  </NuqsAdapter>
+                </AbilityBridge>
+              </AppBootstrap>
+            </AuthProvider>
+          </TooltipProvider>
+        </I18nextProvider>
+      </ApolloProvider>
+    </LazyMotion>
   </StrictMode>,
 )

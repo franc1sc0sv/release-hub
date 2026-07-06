@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Github, Building2, Loader2 } from 'lucide-react'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ export function InstallAppStage() {
   const orgName = activeOrg?.name ?? ''
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -66,6 +66,6 @@ export function InstallAppStage() {
           </Button>
         </CardContent>
       </GlassCard>
-    </motion.div>
+    </m.div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, Layers } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { PullRequestRow } from './PullRequestRow'
@@ -31,7 +31,7 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
   const prCountLabel = t('view.feature.prCount', { count: prCount })
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4 backdrop-blur-sm">
+    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4">
       <div className="flex items-start gap-3 px-5 py-4">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-500/15 mt-0.5">
           <Layers className="size-4 text-indigo-400" />
@@ -76,19 +76,19 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
           onClick={() => setOpen((prev) => !prev)}
           className="mt-1 flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <motion.span
+          <m.span
             animate={{ rotate: open ? 180 : 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
             <ChevronDown className="size-4" />
-          </motion.span>
+          </m.span>
         </button>
       </div>
 
       <AnimatePresence initial={false}>
         {open && prCount > 0 && (
-          <motion.div
+          <m.div
             key="prs"
             initial={reduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -101,7 +101,7 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
                 <PullRequestRow key={pr.id} pr={pr} />
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

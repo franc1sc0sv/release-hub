@@ -220,7 +220,7 @@ export function CreateFeatureDialog({ open, onOpenChange }: CreateFeatureDialogP
                   {t('dialog.tagPickerPlaceholder')}
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-64 p-0 rounded-[var(--radius-card)] border-white/15 bg-background/95 backdrop-blur-sm"
+                  className="w-64 p-0 rounded-[var(--radius-card)] border-white/15 bg-background"
                   align="start"
                 >
                   <Command>

@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -9,7 +9,7 @@ export function GradientButton({ className, children, ...props }: GradientButton
   const reduceMotion = useReducedMotion()
 
   return (
-    <motion.div
+    <m.div
       whileHover={reduceMotion ? undefined : { y: -2 }}
       whileTap={reduceMotion ? undefined : { scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -21,6 +21,6 @@ export function GradientButton({ className, children, ...props }: GradientButton
       >
         {children}
       </Button>
-    </motion.div>
+    </m.div>
   )
 }

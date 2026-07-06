@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/client/react'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import { useTranslation } from 'react-i18next'
 import { Loader2, AlertCircle, MailCheck, CheckCircle2 } from 'lucide-react'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { useAuth } from '@/context/auth.context'
 import { useSetAbility } from '@/context/ability.context'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -76,7 +76,7 @@ export function AcceptInvitationPage() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_oklab,var(--brand-indigo-bright)_22%,transparent),transparent_60%)]"
         />
         <ThemeToggle />
-        <motion.div
+        <m.div
           variants={slideUp}
           initial="hidden"
           animate="visible"
@@ -102,7 +102,7 @@ export function AcceptInvitationPage() {
               </Button>
             </CardContent>
           </GlassCard>
-        </motion.div>
+        </m.div>
       </main>
     )
   }
@@ -114,7 +114,7 @@ export function AcceptInvitationPage() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_oklab,var(--brand-indigo-bright)_22%,transparent),transparent_60%)]"
       />
       <ThemeToggle />
-      <motion.div
+      <m.div
         variants={slideUp}
         initial="hidden"
         animate="visible"
@@ -168,7 +168,7 @@ export function AcceptInvitationPage() {
             )}
           </CardContent>
         </GlassCard>
-      </motion.div>
+      </m.div>
     </main>
   )
 }

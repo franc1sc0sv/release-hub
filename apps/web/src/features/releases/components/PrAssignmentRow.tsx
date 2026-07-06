@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Bot, ChevronDown, ExternalLink, GitMerge, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -94,7 +94,7 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
     : t('builder.pr.expandCommits')
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 backdrop-blur-sm">
+    <div className="rounded-[var(--radius-card)] border border-white/10 bg-white/5">
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-indigo-500/15">
           <GitMerge className="size-3.5 text-indigo-400" aria-hidden />
@@ -197,13 +197,13 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
           onClick={() => setShowCommits((p) => !p)}
           className="mt-1 flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <motion.span
+          <m.span
             animate={{ rotate: showCommits ? 180 : 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
             <ChevronDown className="size-4" aria-hidden />
-          </motion.span>
+          </m.span>
         </button>
       </div>
 

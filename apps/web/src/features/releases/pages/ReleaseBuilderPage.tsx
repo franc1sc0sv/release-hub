@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate, generatePath } from 'react-router-dom'
 import { useQuery } from '@apollo/client/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Github, Loader2 } from 'lucide-react'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -25,7 +25,7 @@ export default function ReleaseBuilderPage() {
 
   return (
     <NebulaBackground className="p-6">
-      <motion.div
+      <m.div
         variants={slideUp}
         initial={reduceMotion ? 'visible' : 'hidden'}
         animate="visible"
@@ -52,7 +52,7 @@ export default function ReleaseBuilderPage() {
         ) : (
           <ReleaseWizard />
         )}
-      </motion.div>
+      </m.div>
     </NebulaBackground>
   )
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, Link, generatePath } from 'react-router-dom'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import { AlertCircle, ArrowRight, Loader2, Rocket } from 'lucide-react'
 import { PageShell } from '@/components/nebula/PageShell'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -51,11 +51,11 @@ function ReleaseRow({ release, organizationId, projectId }: ReleaseRowProps) {
   const releaseLabel = release.name ?? `${release.baseRef} → ${release.compareRef}`
 
   return (
-    <motion.li variants={slideUp} className="relative">
+    <m.li variants={slideUp} className="relative">
       <Link
         to={detailPath}
         aria-label={t('list.viewRelease')}
-        className="group flex items-center gap-4 rounded-[var(--radius-card)] border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="group flex items-center gap-4 rounded-[var(--radius-card)] border border-white/10 bg-white/5 px-5 py-4 transition-colors duration-200 hover:border-white/20 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +89,7 @@ function ReleaseRow({ release, organizationId, projectId }: ReleaseRowProps) {
           variant="icon"
         />
       </div>
-    </motion.li>
+    </m.li>
   )
 }
 
@@ -163,7 +163,7 @@ export default function ReleasesPage() {
     }
 
     return (
-      <motion.ul
+      <m.ul
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
@@ -178,7 +178,7 @@ export default function ReleasesPage() {
             projectId={projectId}
           />
         ))}
-      </motion.ul>
+      </m.ul>
     )
   })()
 

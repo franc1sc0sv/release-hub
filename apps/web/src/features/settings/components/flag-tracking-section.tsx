@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Check, Flag, Loader2 } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -141,7 +141,7 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <motion.form
+        <m.form
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -149,30 +149,30 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
           noValidate
           className="space-y-4"
         >
-          <motion.p variants={itemVariants} className="text-sm text-muted-foreground">
+          <m.p variants={itemVariants} className="text-sm text-muted-foreground">
             {t('flagTracking.description')}
-          </motion.p>
+          </m.p>
 
           {loadingFlagRegistry && (
-            <motion.p
+            <m.p
               variants={itemVariants}
               className="flex items-center gap-2 text-xs text-muted-foreground"
             >
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
               {t('flagTracking.registry.loading')}
-            </motion.p>
+            </m.p>
           )}
 
           {!loadingFlagRegistry && configured?.path && (
-            <motion.p variants={itemVariants} className="font-mono text-xs text-muted-foreground">
+            <m.p variants={itemVariants} className="font-mono text-xs text-muted-foreground">
               {t('flagTracking.registry.current', {
                 path: configured.path,
                 branch: configured.branch ?? t('flagTracking.registry.defaultBranch'),
               })}
-            </motion.p>
+            </m.p>
           )}
 
-          <motion.div variants={itemVariants} className="space-y-2">
+          <m.div variants={itemVariants} className="space-y-2">
             <Label htmlFor="flag-registry-path">{t('flagTracking.registry.pathLabel')}</Label>
             <RepoFileCombobox
               id="flag-registry-path"
@@ -183,9 +183,9 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
               onSearch={(query) => searchRepoFiles(query, branch)}
               disabled={saving || loadingFlagRegistry}
             />
-          </motion.div>
+          </m.div>
 
-          <motion.div variants={itemVariants} className="space-y-2">
+          <m.div variants={itemVariants} className="space-y-2">
             <Label htmlFor="flag-registry-branch">{t('flagTracking.registry.branchLabel')}</Label>
             <Input
               id="flag-registry-branch"
@@ -196,31 +196,31 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
               autoComplete="off"
             />
             <p className="text-xs text-muted-foreground">{t('flagTracking.registry.branchHint')}</p>
-          </motion.div>
+          </m.div>
 
           <Can I={Action.UPDATE} a={Subject.PROJECT}>
-            <motion.div variants={itemVariants}>
+            <m.div variants={itemVariants}>
               <Button type="submit" disabled={saving || loadingFlagRegistry}>
                 {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {t('flagTracking.registry.save')}
               </Button>
-            </motion.div>
+            </m.div>
           </Can>
-        </motion.form>
+        </m.form>
 
-        <motion.div
+        <m.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="mt-4 space-y-2 border-t border-border/60 pt-4"
         >
-          <motion.div variants={itemVariants}>
+          <m.div variants={itemVariants}>
             <Label htmlFor="flag-reminder-interval">{t('flagTracking.reminderInterval.label')}</Label>
-          </motion.div>
+          </m.div>
           <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
             {(allowed) => (
               <>
-                <motion.div variants={itemVariants}>
+                <m.div variants={itemVariants}>
                   <Input
                     id="flag-reminder-interval"
                     type="number"
@@ -234,17 +234,17 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
                     aria-invalid={reminderIntervalError}
                     className="max-w-32"
                   />
-                </motion.div>
+                </m.div>
                 {reminderIntervalError && (
-                  <motion.p variants={itemVariants} className="text-xs text-destructive">
+                  <m.p variants={itemVariants} className="text-xs text-destructive">
                     {t('flagTracking.reminderInterval.invalid')}
-                  </motion.p>
+                  </m.p>
                 )}
-                <motion.p variants={itemVariants} className="text-xs text-muted-foreground">
+                <m.p variants={itemVariants} className="text-xs text-muted-foreground">
                   {t('flagTracking.reminderInterval.hint')}
-                </motion.p>
+                </m.p>
                 {allowed && (
-                  <motion.div variants={itemVariants}>
+                  <m.div variants={itemVariants}>
                     <Button
                       type="button"
                       onClick={() => void handleSaveReminderInterval()}
@@ -253,43 +253,43 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
                       {savingReminderInterval && <Loader2 className="mr-2 size-4 animate-spin" />}
                       {t('flagTracking.reminderInterval.save')}
                     </Button>
-                  </motion.div>
+                  </m.div>
                 )}
               </>
             )}
           </Can>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="mt-4 space-y-2 border-t border-border/60 pt-4"
         >
-          <motion.div variants={itemVariants} className="space-y-1">
+          <m.div variants={itemVariants} className="space-y-1">
             <Label>{t('flagTracking.conflictEnvironments.title')}</Label>
             <p className="text-xs text-muted-foreground">
               {t('flagTracking.conflictEnvironments.description')}
             </p>
-          </motion.div>
+          </m.div>
 
           {loadingConflictEnvironments ? (
-            <motion.p
+            <m.p
               variants={itemVariants}
               className="flex items-center gap-2 text-xs text-muted-foreground"
             >
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
               {t('flagTracking.conflictEnvironments.loading')}
-            </motion.p>
+            </m.p>
           ) : conflictEnvironmentOptions.length === 0 ? (
-            <motion.p variants={itemVariants} className="text-xs text-muted-foreground">
+            <m.p variants={itemVariants} className="text-xs text-muted-foreground">
               {t('flagTracking.conflictEnvironments.empty')}
-            </motion.p>
+            </m.p>
           ) : (
             <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
               {(allowed) => (
                 <>
-                  <motion.div
+                  <m.div
                     variants={itemVariants}
                     role="group"
                     aria-label={t('flagTracking.conflictEnvironments.title')}
@@ -318,14 +318,14 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
                         </Button>
                       )
                     })}
-                  </motion.div>
-                  <motion.p variants={itemVariants} className="text-xs text-muted-foreground">
+                  </m.div>
+                  <m.p variants={itemVariants} className="text-xs text-muted-foreground">
                     {selectedConflictEnvironments.length === 0
                       ? t('flagTracking.conflictEnvironments.allWatched')
                       : t('flagTracking.conflictEnvironments.filtered')}
-                  </motion.p>
+                  </m.p>
                   {allowed && (
-                    <motion.div variants={itemVariants}>
+                    <m.div variants={itemVariants}>
                       <Button
                         type="button"
                         onClick={() => void handleSaveConflictEnvironments()}
@@ -336,13 +336,13 @@ export function FlagTrackingSection({ projectId }: FlagTrackingSectionProps) {
                         )}
                         {t('flagTracking.conflictEnvironments.save')}
                       </Button>
-                    </motion.div>
+                    </m.div>
                   )}
                 </>
               )}
             </Can>
           )}
-        </motion.div>
+        </m.div>
       </CardContent>
     </GlassCard>
   )

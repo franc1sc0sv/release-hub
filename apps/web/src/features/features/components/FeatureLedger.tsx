@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { AlertCircle, Layers, Loader2 } from 'lucide-react'
 import { Link, generatePath, useParams } from 'react-router-dom'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -39,8 +39,8 @@ function FeatureRow({ feature }: { feature: FeaturePageItem }) {
   })
 
   return (
-    <motion.li variants={reduceMotion ? undefined : slideUp}>
-      <div className="group flex flex-wrap items-start gap-x-4 gap-y-3 rounded-[var(--radius-card)] border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8">
+    <m.li variants={reduceMotion ? undefined : slideUp}>
+      <div className="group flex flex-wrap items-start gap-x-4 gap-y-3 rounded-[var(--radius-card)] border border-white/10 bg-white/5 px-5 py-4 transition-colors duration-200 hover:border-white/20 hover:bg-white/8">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <Link
             to={detailPath}
@@ -58,7 +58,7 @@ function FeatureRow({ feature }: { feature: FeaturePageItem }) {
           <DeleteFeatureButton featureId={feature.id} featureName={feature.name} />
         </div>
       </div>
-    </motion.li>
+    </m.li>
   )
 }
 
@@ -140,7 +140,7 @@ export function FeatureLedger() {
 
       {!loadingInitial && !error && visibleFeatures.length > 0 && (
         <>
-          <motion.ul
+          <m.ul
             variants={reduceMotion ? undefined : staggerContainer}
             initial="hidden"
             animate="visible"
@@ -150,7 +150,7 @@ export function FeatureLedger() {
             {visibleFeatures.map((feature) => (
               <FeatureRow key={feature.id} feature={feature} />
             ))}
-          </motion.ul>
+          </m.ul>
 
           <div ref={sentinelRef} aria-hidden className="h-1" />
           {loadingMore && (

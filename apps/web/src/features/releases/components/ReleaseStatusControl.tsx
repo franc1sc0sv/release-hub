@@ -53,14 +53,14 @@ function StatusSelectInner({ releaseId, currentStatus }: ReleaseStatusControlPro
   return (
     <Select value={optimisticStatus} onValueChange={(v) => handleChange(v)}>
       <SelectTrigger
-        className={`h-auto rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium backdrop-blur-sm focus-visible:ring-ring ${RELEASE_STATUS_TEXT_CLASS[optimisticStatus]}`}
+        className={`h-auto rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium focus-visible:ring-ring ${RELEASE_STATUS_TEXT_CLASS[optimisticStatus]}`}
         aria-label={t('status.label')}
       >
         <SelectValue>
           {(value: string) => (value ? enumLabels.releaseStatus(value as ReleaseStatus) : null)}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="rounded-[var(--radius-card)] border border-white/15 bg-popover/95 backdrop-blur-xl">
+      <SelectContent className="rounded-[var(--radius-card)] border border-white/15 bg-popover">
         {RELEASE_STATUS_OPTIONS.map((status) => (
           <SelectItem
             key={status}

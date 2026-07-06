@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import { Bot, Check, ChevronDown, ExternalLink, Layers, Loader2, Rocket, Sparkles, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -71,13 +71,13 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
   const assignedFeatures = features.filter((n) => !n.feature.suggested)
 
   return (
-    <motion.div
+    <m.div
       variants={staggerContainer}
       initial={reduceMotion ? 'visible' : 'hidden'}
       animate="visible"
       className="space-y-8"
     >
-      <motion.div variants={slideUp} className="flex items-center justify-between gap-3">
+      <m.div variants={slideUp} className="flex items-center justify-between gap-3">
         <RegenerateDraftButton
           releaseId={release.id}
           aiDraftStatus={release.aiDraftStatus}
@@ -100,10 +100,10 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
             </>
           )}
         </Button>
-      </motion.div>
+      </m.div>
 
       {confirmData?.confirmRelease?.prUrl && (
-        <motion.div
+        <m.div
           variants={slideUp}
           className="flex items-center gap-2 rounded-[var(--radius-card)] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3"
           role="status"
@@ -119,7 +119,7 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
             {t('view.prUrl')}
             <ExternalLink className="size-3" aria-hidden />
           </a>
-        </motion.div>
+        </m.div>
       )}
 
       {confirmError && (
@@ -129,22 +129,22 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
       )}
 
       {!aiEnabled && (
-        <motion.div
+        <m.div
           variants={slideUp}
           className="flex items-center gap-2 rounded-[var(--radius-card)] border border-white/12 bg-white/4 px-4 py-3"
           role="status"
         >
           <Layers className="size-4 shrink-0 text-indigo-400" aria-hidden />
           <span className="text-sm text-muted-foreground">{t('draft.manualAssignHint')}</span>
-        </motion.div>
+        </m.div>
       )}
 
-      <motion.div variants={slideUp}>
+      <m.div variants={slideUp}>
         <CoverageMeter releaseId={release.id} releaseStatus={release.status} />
-      </motion.div>
+      </m.div>
 
       {suggestedFeatures.length > 0 && (
-        <motion.div variants={slideUp} className="space-y-4">
+        <m.div variants={slideUp} className="space-y-4">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-fuchsia-400" aria-hidden />
             <h2 className="font-display text-base font-semibold text-foreground">
@@ -161,11 +161,11 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
               />
             ))}
           </div>
-        </motion.div>
+        </m.div>
       )}
 
       {assignedFeatures.length > 0 && (
-        <motion.div variants={slideUp} className="space-y-4">
+        <m.div variants={slideUp} className="space-y-4">
           <h2 className="font-display text-base font-semibold text-foreground">
             {t('draft.prsByFeature')}
           </h2>
@@ -179,7 +179,7 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
               />
             ))}
           </div>
-        </motion.div>
+        </m.div>
       )}
 
       {features.length === 0 && isReady && (
@@ -195,7 +195,7 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
         </GlassCard>
       )}
 
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -206,12 +206,12 @@ function DraftingState({ reduceMotion }: { reduceMotion: boolean }) {
     <GlassCard glow="indigo">
       <CardContent className="flex flex-col items-center gap-4 py-16">
         <div className="flex size-14 items-center justify-center rounded-full bg-indigo-500/20">
-          <motion.div
+          <m.div
             animate={reduceMotion ? {} : { rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
             <Bot className="size-7 text-indigo-400" aria-hidden />
-          </motion.div>
+          </m.div>
         </div>
         <div className="text-center" role="status" aria-live="polite">
           <p className="font-display text-lg font-semibold text-foreground">
@@ -283,7 +283,7 @@ function SuggestedFeatureCard({ node, releaseId, projectId }: SuggestedFeatureCa
     : t('view.feature.expandLabel', { name: node.feature.name })
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-fuchsia-500/20 bg-fuchsia-500/5 backdrop-blur-sm">
+    <div className="rounded-[var(--radius-card)] border border-fuchsia-500/20 bg-fuchsia-500/5">
       <div className="flex items-start gap-3 px-5 py-4">
         <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-fuchsia-500/30 bg-fuchsia-500/15">
           <Sparkles className="size-4 text-fuchsia-400" aria-hidden />
@@ -334,13 +334,13 @@ function SuggestedFeatureCard({ node, releaseId, projectId }: SuggestedFeatureCa
             onClick={() => setOpen((p) => !p)}
             className="flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <motion.span
+            <m.span
               animate={{ rotate: open ? 180 : 0 }}
               transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
               className="flex items-center justify-center"
             >
               <ChevronDown className="size-4" aria-hidden />
-            </motion.span>
+            </m.span>
           </button>
         </div>
       </div>
@@ -417,7 +417,7 @@ function DraftFeatureSection({ node, releaseId, projectId }: DraftFeatureSection
   const isDefault = node.feature.kind === FeatureKindValue.DEFAULT
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4 backdrop-blur-sm">
+    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4">
       <div className="flex items-start gap-3 px-5 py-4">
         <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-500/15">
           <Layers className="size-4 text-indigo-400" aria-hidden />
@@ -444,13 +444,13 @@ function DraftFeatureSection({ node, releaseId, projectId }: DraftFeatureSection
           onClick={() => setOpen((p) => !p)}
           className="mt-1 flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <motion.span
+          <m.span
             animate={{ rotate: open ? 180 : 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="flex items-center justify-center"
           >
             <ChevronDown className="size-4" aria-hidden />
-          </motion.span>
+          </m.span>
         </button>
       </div>
 
