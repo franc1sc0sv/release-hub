@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common'
+import { Injectable, BadRequestException, Logger } from '@nestjs/common'
 import nodemailer from 'nodemailer'
 import { IMailService } from './mail.abstract'
 
@@ -27,7 +27,8 @@ const validateHttpUrl = (url: string): string => {
 
 @Injectable()
 export class NodemailerMailService extends IMailService {
-  private readonly transporter: nodemailer.Transporter
+  private readonly logger = new Logger(NodemailerMailService.name)
+  private readonly transporter: ReturnType<typeof nodemailer.createTransport>
   private readonly from: string
 
   constructor() {
@@ -41,12 +42,37 @@ export class NodemailerMailService extends IMailService {
     const smtpUser = process.env.SMTP_USER || undefined
     const smtpPass = process.env.SMTP_PASS || undefined
 
+    const host = process.env.SMTP_HOST
+    const port = parseInt(process.env.SMTP_PORT ?? '587', 10)
+    const secure = process.env.SMTP_SECURE === 'true'
+
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT ?? '587', 10),
-      secure: process.env.SMTP_SECURE === 'true',
+      host,
+      port,
+      secure,
       auth: smtpUser && smtpPass ? { user: smtpUser, pass: smtpPass } : undefined,
     })
+
+    this.logger.log(
+      `SMTP configured host=${host} port=${port} secure=${secure} auth=${smtpUser && smtpPass ? 'yes' : 'no'}`,
+    )
+
+    this.transporter
+      .verify()
+      .then(() => this.logger.log(`SMTP transport ready host=${host} port=${port}`))
+      .catch((error) =>
+        this.logger.error(
+          `SMTP transport verify failed host=${host} port=${port}: ${error instanceof Error ? error.message : String(error)}`,
+        ),
+      )
+  }
+
+  private async deliver(message: nodemailer.SendMailOptions): Promise<void> {
+    this.logger.log(`sending mail to=${String(message.to)} subject=${String(message.subject)}`)
+    const info = await this.transporter.sendMail(message)
+    this.logger.log(
+      `mail sent messageId=${info.messageId} response=${info.response} accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`,
+    )
   }
 
   async sendProjectInvitation(
@@ -84,7 +110,7 @@ export class NodemailerMailService extends IMailService {
 </body>
 </html>`
 
-    await this.transporter.sendMail({ from: this.from, to, subject, text, html })
+    await this.deliver({ from: this.from, to, subject, text, html })
   }
 
   async sendLoginCode(to: string, code: string, userName: string): Promise<void> {
@@ -109,7 +135,7 @@ export class NodemailerMailService extends IMailService {
 </body>
 </html>`
 
-    await this.transporter.sendMail({
+    await this.deliver({
       from: this.from,
       to,
       subject: MAIL_SUBJECT,
@@ -148,6 +174,6 @@ export class NodemailerMailService extends IMailService {
 </body>
 </html>`
 
-    await this.transporter.sendMail({ from: this.from, to, subject: escapedSubject, text, html })
+    await this.deliver({ from: this.from, to, subject: escapedSubject, text, html })
   }
 }
