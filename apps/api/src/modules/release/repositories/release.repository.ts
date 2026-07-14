@@ -146,7 +146,7 @@ export class ReleaseRepository extends IReleaseRepository {
   updateStatus = async (
     id: string,
     status: ReleaseStatus,
-    prUrl: string,
+    prUrl: string | null,
     tx: TxClient,
   ): Promise<IRelease> => {
     const row = await tx.release.update({

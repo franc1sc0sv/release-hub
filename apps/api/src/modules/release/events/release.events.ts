@@ -11,7 +11,7 @@ export interface IReleaseShippedEvent extends IDomainEvent {
   readonly eventName: 'release.shipped'
   readonly releaseId: string
   readonly projectId: string
-  readonly prUrl: string
+  readonly prUrl: string | null
   readonly tag: string
   readonly occurredAt: Date
 }

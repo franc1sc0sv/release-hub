@@ -1,4 +1,5 @@
 import { CommandHandler } from '@nestjs/cqrs'
+import { Logger } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
 import { Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
@@ -42,6 +43,8 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
   IConfirmReleasePreparation,
   ReleaseObjectType
 > {
+  private readonly logger = new Logger(ConfirmReleaseHandler.name)
+
   constructor(
     protected readonly db: IDatabaseService,
     protected readonly eventEmitter: IEventEmitter,
@@ -61,18 +64,26 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
     const source = await this.resolveSource(command)
 
     const prTitle = `Release ${source.releaseName}`
-    const openedPr = await this.gitHubClient.openReleasePullRequest(
-      source.repo,
-      source.baseRef,
-      source.compareRef,
-      prTitle,
-      source.prBody,
-      source.accessToken,
-    )
+    let prUrl: string | null = null
+    try {
+      const openedPr = await this.gitHubClient.openReleasePullRequest(
+        source.repo,
+        source.baseRef,
+        source.compareRef,
+        prTitle,
+        source.prBody,
+        source.accessToken,
+      )
+      prUrl = openedPr.url
+    } catch (error) {
+      this.logger.warn(
+        `Skipping pull request for release ${command.releaseId}: ${error instanceof Error ? error.message : 'unknown error'}`,
+      )
+    }
 
     return {
       releaseName: source.releaseName,
-      prUrl: openedPr.url,
+      prUrl,
       suggestedFeatureIds: source.suggestedFeatureIds,
       assignedFeatureIds: source.assignedFeatureIds,
     }

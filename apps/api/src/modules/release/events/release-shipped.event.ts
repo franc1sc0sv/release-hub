@@ -7,7 +7,7 @@ export class ReleaseShippedEvent implements IReleaseShippedEvent {
   constructor(
     readonly releaseId: string,
     readonly projectId: string,
-    readonly prUrl: string,
+    readonly prUrl: string | null,
     readonly tag: string,
   ) {
     this.occurredAt = new Date()

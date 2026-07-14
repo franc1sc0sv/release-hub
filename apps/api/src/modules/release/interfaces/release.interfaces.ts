@@ -121,7 +121,7 @@ export interface ICreateReleasePreparation {
 
 export interface IConfirmReleasePreparation {
   releaseName: string
-  prUrl: string
+  prUrl: string | null
   suggestedFeatureIds: string[]
   assignedFeatureIds: string[]
 }

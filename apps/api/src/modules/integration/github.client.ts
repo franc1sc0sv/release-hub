@@ -171,7 +171,7 @@ export class GitHubClient extends IGitHubClient {
       })
       return { url: response.data.html_url, number: response.data.number }
     } catch (error) {
-      const existing = await this.findOpenReleasePullRequest(
+      const existing = await this.findExistingReleasePullRequest(
         octokit,
         owner,
         repoName,
@@ -183,7 +183,7 @@ export class GitHubClient extends IGitHubClient {
     }
   }
 
-  private async findOpenReleasePullRequest(
+  private async findExistingReleasePullRequest(
     octokit: Octokit,
     owner: string,
     repoName: string,
@@ -196,9 +196,9 @@ export class GitHubClient extends IGitHubClient {
         repo: repoName,
         base: baseRef,
         head: `${owner}:${compareRef}`,
-        state: 'open',
+        state: 'all',
       })
-      const existing = response.data[0]
+      const existing = response.data.find((pr) => pr.state === 'open') ?? response.data[0]
       return existing ? { url: existing.html_url, number: existing.number } : null
     } catch {
       return null
