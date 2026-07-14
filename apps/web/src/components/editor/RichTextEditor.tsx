@@ -125,14 +125,15 @@ export function RichTextEditor({
   })
 
   useEffect(() => {
-    if (!editor) return
+    if (!editor || editor.isDestroyed) return
     if (value !== editor.getHTML()) {
       editor.commands.setContent(value, { emitUpdate: false })
     }
   }, [value, editor])
 
   useEffect(() => {
-    editor?.setEditable(editable)
+    if (!editor || editor.isDestroyed) return
+    editor.setEditable(editable)
   }, [editable, editor])
 
   if (!editor) return null
