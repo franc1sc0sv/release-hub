@@ -126,7 +126,13 @@ export function RichTextEditor({
 
   useEffect(() => {
     if (!editor || editor.isDestroyed) return
-    if (value !== editor.getHTML()) {
+    let currentHtml: string
+    try {
+      currentHtml = editor.getHTML()
+    } catch {
+      return
+    }
+    if (value !== currentHtml) {
       editor.commands.setContent(value, { emitUpdate: false })
     }
   }, [value, editor])
