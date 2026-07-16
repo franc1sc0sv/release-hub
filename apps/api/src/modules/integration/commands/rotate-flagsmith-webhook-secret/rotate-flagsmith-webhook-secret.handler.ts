@@ -10,7 +10,7 @@ import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
-import { ConnectionSettingsType } from '../../types/connection-settings.type'
+import { RotateWebhookSecretResultType } from '../../types/rotate-webhook-secret-result.type'
 import { toConnectionSettings } from '../../types/connection-settings.mappers'
 import { RotateFlagsmithWebhookSecretCommand } from './rotate-flagsmith-webhook-secret.command'
 
@@ -19,7 +19,7 @@ const WEBHOOK_SECRET_BYTES = 32
 @CommandHandler(RotateFlagsmithWebhookSecretCommand)
 export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
   RotateFlagsmithWebhookSecretCommand,
-  ConnectionSettingsType
+  RotateWebhookSecretResultType
 > {
   constructor(
     protected readonly db: IDatabaseService,
@@ -34,7 +34,7 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
     command: RotateFlagsmithWebhookSecretCommand,
     tx: TxClient,
     _events: IDomainEvent[],
-  ): Promise<ConnectionSettingsType> {
+  ): Promise<RotateWebhookSecretResultType> {
     const organizationId = await authorizeProjectAction(
       this.organizationRepository,
       { actorId: command.userId, projectId: command.projectId, action: Action.UPDATE, subjectKind: Subject.PROJECT },
@@ -53,7 +53,7 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
     const orgHasActiveInstallation =
       (await this.organizationRepository.findActiveInstallationIdForOrg(organizationId, tx)) !== null
 
-    return toConnectionSettings({
+    const connectionSettings = toConnectionSettings({
       projectId: command.projectId,
       githubInstallationId: project.githubInstallationId,
       linearEnabled: project.linearEnabled,
@@ -62,5 +62,7 @@ export class RotateFlagsmithWebhookSecretHandler extends BaseCommandHandler<
       credentials,
       webhookSecretStatus,
     })
+
+    return { connectionSettings, secret }
   }
 }

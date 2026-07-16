@@ -9,6 +9,7 @@ import type { IJwtUser } from '../../../common/types'
 import { Action, Subject } from '@release-hub/shared'
 import { FlagsResultType, FlagComparisonResultType } from '../types/flag-ref.type'
 import { ConnectionSettingsType } from '../types/connection-settings.type'
+import { RotateWebhookSecretResultType } from '../types/rotate-webhook-secret-result.type'
 import { FlagsmithProjectType } from '../types/flagsmith-project.type'
 import { FlagsmithVerifyResult } from '../types/flagsmith-verify-result.type'
 import { UpdateConnectionSettingsInput } from '../types/update-connection-settings.input'
@@ -156,12 +157,12 @@ export class IntegrationResolver {
     )
   }
 
-  @Mutation(() => ConnectionSettingsType)
+  @Mutation(() => RotateWebhookSecretResultType)
   @Can(Action.UPDATE, Subject.PROJECT)
   rotateFlagsmithWebhookSecret(
     @Args('projectId', { type: () => ID }) projectId: string,
     @CurrentUser() user: IJwtUser,
-  ): Promise<ConnectionSettingsType> {
+  ): Promise<RotateWebhookSecretResultType> {
     return this.commandBus.execute(new RotateFlagsmithWebhookSecretCommand(projectId, user.id))
   }
 

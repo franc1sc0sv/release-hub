@@ -677,7 +677,7 @@ type Mutation {
   requestLoginCode(input: RequestLoginCodeInput!): Boolean!
   resyncReleasePullRequests(releaseId: ID!): ResyncReleaseSummaryType!
   revokeInvitation(invitationId: ID!): Boolean!
-  rotateFlagsmithWebhookSecret(projectId: ID!): ConnectionSettingsType!
+  rotateFlagsmithWebhookSecret(projectId: ID!): RotateWebhookSecretResultType!
   rotateGithubWebhookSecret(projectId: ID!): ConnectionSettingsType!
   runFlagCoverage(projectId: ID!): FlagCoverageSummaryType!
   runFlagCoverageForFlag(key: String!, projectId: ID!): TrackedFlagDetailType!
@@ -1022,6 +1022,11 @@ input RequestLoginCodeInput {
 
 type ResyncReleaseSummaryType {
   newPrsAdded: Int!
+}
+
+type RotateWebhookSecretResultType {
+  connectionSettings: ConnectionSettingsType!
+  secret: String!
 }
 
 input SavePrSummaryInput {

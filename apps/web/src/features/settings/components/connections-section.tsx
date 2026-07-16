@@ -95,11 +95,13 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
     loadingProjects,
     verifying,
     rotatingFlagsmithSecret,
+    revealedFlagsmithSecret,
     loadFlagsmithProjects,
     verifyFlagsmithConnection,
     connectFlagsmith,
     disconnectFlagsmith,
     rotateFlagsmithWebhookSecret,
+    clearRevealedFlagsmithSecret,
   } = useConnectionSettings(projectId)
   const linear = useLinearConnection(projectId)
   const { sync: syncFlagsmithFlags, loading: syncingFlags } = useSyncFlagsmithFlags(projectId)
@@ -355,6 +357,8 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
                     secretSet={settings.flagsmithWebhookSecretSet}
                     rotating={rotatingFlagsmithSecret}
                     onRotate={rotateFlagsmithWebhookSecret}
+                    revealedSecret={revealedFlagsmithSecret}
+                    onDismissRevealedSecret={clearRevealedFlagsmithSecret}
                   />
                 </div>
               )}

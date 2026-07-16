@@ -17,6 +17,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 
@@ -26,6 +34,8 @@ interface WebhookFieldProps {
   secretSet: boolean
   rotating: boolean
   onRotate: () => void
+  revealedSecret: string | null
+  onDismissRevealedSecret: () => void
   description?: string
 }
 
@@ -35,10 +45,13 @@ export function WebhookField({
   secretSet,
   rotating,
   onRotate,
+  revealedSecret,
+  onDismissRevealedSecret,
   description,
 }: WebhookFieldProps) {
   const { t } = useTranslation('settings')
   const [copied, setCopied] = useState(false)
+  const [secretCopied, setSecretCopied] = useState(false)
 
   async function handleCopy(): Promise<void> {
     if (!url) return
@@ -46,6 +59,14 @@ export function WebhookField({
     setCopied(true)
     toast.success(t('connections.webhook.copied'))
     window.setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleCopySecret(): Promise<void> {
+    if (!revealedSecret) return
+    await navigator.clipboard.writeText(revealedSecret)
+    setSecretCopied(true)
+    toast.success(t('connections.webhook.secretCopied'))
+    window.setTimeout(() => setSecretCopied(false), 2000)
   }
 
   return (
@@ -123,6 +144,42 @@ export function WebhookField({
           </AlertDialog>
         </Can>
       </div>
+
+      <Dialog
+        open={revealedSecret !== null}
+        onOpenChange={(open) => {
+          if (!open) onDismissRevealedSecret()
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('connections.webhook.revealTitle')}</DialogTitle>
+            <DialogDescription>{t('connections.webhook.revealDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2">
+            <Input
+              value={revealedSecret ?? ''}
+              readOnly
+              className="font-mono text-xs"
+              aria-label={t('connections.webhook.revealTitle')}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => void handleCopySecret()}
+              aria-label={t('connections.webhook.copySecret')}
+            >
+              {secretCopied ? <CheckCircle2 className="size-4" /> : <Copy className="size-4" />}
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={onDismissRevealedSecret}>
+              {t('connections.webhook.revealDone')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

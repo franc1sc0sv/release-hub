@@ -27,6 +27,7 @@ export function useConnectionSettings(projectId: string) {
   const client = useApolloClient()
   const [loadingProjects, setLoadingProjects] = useState(false)
   const [verifying, setVerifying] = useState(false)
+  const [revealedFlagsmithSecret, setRevealedFlagsmithSecret] = useState<string | null>(null)
 
   const { data, loading, error } = useQuery(GET_CONNECTION_SETTINGS, {
     variables: { projectId },
@@ -42,13 +43,22 @@ export function useConnectionSettings(projectId: string) {
     },
   )
 
-  const [rotateFlagsmithWebhookSecret, { loading: rotatingFlagsmithSecret }] = useMutation(
+  const [rotateFlagsmithWebhookSecretMutation, { loading: rotatingFlagsmithSecret }] = useMutation(
     ROTATE_FLAGSMITH_WEBHOOK_SECRET,
     {
       variables: { projectId },
       refetchQueries: [{ query: GET_CONNECTION_SETTINGS, variables: { projectId } }],
     },
   )
+
+  async function rotateFlagsmithWebhookSecret(): Promise<void> {
+    const result = await rotateFlagsmithWebhookSecretMutation()
+    setRevealedFlagsmithSecret(result.data?.rotateFlagsmithWebhookSecret.secret ?? null)
+  }
+
+  function clearRevealedFlagsmithSecret(): void {
+    setRevealedFlagsmithSecret(null)
+  }
 
   async function loadFlagsmithProjects(
     url: string,
@@ -133,10 +143,12 @@ export function useConnectionSettings(projectId: string) {
     loadingProjects,
     verifying,
     rotatingFlagsmithSecret,
+    revealedFlagsmithSecret,
     loadFlagsmithProjects,
     verifyFlagsmithConnection,
     connectFlagsmith,
     disconnectFlagsmith,
-    rotateFlagsmithWebhookSecret: () => rotateFlagsmithWebhookSecret(),
+    rotateFlagsmithWebhookSecret,
+    clearRevealedFlagsmithSecret,
   }
 }

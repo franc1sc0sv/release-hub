@@ -64,7 +64,12 @@
       "secretNotSet": "Secret not set",
       "rotateSecret": "Rotate secret",
       "rotateTitle": "Rotate this webhook secret?",
-      "rotateDescription": "The current secret will stop working immediately. Update it wherever this webhook is configured before rotating."
+      "rotateDescription": "The current secret will stop working immediately. Update it wherever this webhook is configured before rotating.",
+      "revealTitle": "New webhook secret",
+      "revealDescription": "Copy this secret now and paste it into Flagsmith's webhook Secret field. It won't be shown again.",
+      "copySecret": "Copy secret",
+      "secretCopied": "Secret copied to clipboard.",
+      "revealDone": "Done"
     },
     "dialog": {
       "apiKey": "API key",

@@ -142,8 +142,11 @@ export const FLAG_REGISTRY = graphql(`
 export const ROTATE_FLAGSMITH_WEBHOOK_SECRET = graphql(`
   mutation RotateFlagsmithWebhookSecret($projectId: ID!) {
     rotateFlagsmithWebhookSecret(projectId: $projectId) {
-      flagsmithWebhookPath
-      flagsmithWebhookSecretSet
+      secret
+      connectionSettings {
+        flagsmithWebhookPath
+        flagsmithWebhookSecretSet
+      }
     }
   }
 `)

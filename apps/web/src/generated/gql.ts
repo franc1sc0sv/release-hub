@@ -99,7 +99,7 @@ type Documents = {
     "\n  query RepoFileSearch($input: RepoFileSearchInput!) {\n    repoFileSearch(input: $input)\n  }\n": typeof types.RepoFileSearchDocument,
     "\n  mutation SetFlagRegistry($input: SetFlagRegistryInput!) {\n    setFlagRegistry(input: $input) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": typeof types.SetFlagRegistryDocument,
     "\n  query FlagRegistry($projectId: ID!) {\n    flagRegistry(projectId: $projectId) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": typeof types.FlagRegistryDocument,
-    "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n": typeof types.RotateFlagsmithWebhookSecretDocument,
+    "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      secret\n      connectionSettings {\n        flagsmithWebhookPath\n        flagsmithWebhookSecretSet\n      }\n    }\n  }\n": typeof types.RotateFlagsmithWebhookSecretDocument,
     "\n  query SlackConnection($projectId: ID!) {\n    slackConnection(projectId: $projectId) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": typeof types.SlackConnectionDocument,
     "\n  query SlackAuthorizeUrl($projectId: ID!) {\n    slackAuthorizeUrl(projectId: $projectId)\n  }\n": typeof types.SlackAuthorizeUrlDocument,
     "\n  query SlackChannels($projectId: ID!) {\n    slackChannels(projectId: $projectId) {\n      id\n      name\n    }\n  }\n": typeof types.SlackChannelsDocument,
@@ -204,7 +204,7 @@ const documents: Documents = {
     "\n  query RepoFileSearch($input: RepoFileSearchInput!) {\n    repoFileSearch(input: $input)\n  }\n": types.RepoFileSearchDocument,
     "\n  mutation SetFlagRegistry($input: SetFlagRegistryInput!) {\n    setFlagRegistry(input: $input) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": types.SetFlagRegistryDocument,
     "\n  query FlagRegistry($projectId: ID!) {\n    flagRegistry(projectId: $projectId) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": types.FlagRegistryDocument,
-    "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n": types.RotateFlagsmithWebhookSecretDocument,
+    "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      secret\n      connectionSettings {\n        flagsmithWebhookPath\n        flagsmithWebhookSecretSet\n      }\n    }\n  }\n": types.RotateFlagsmithWebhookSecretDocument,
     "\n  query SlackConnection($projectId: ID!) {\n    slackConnection(projectId: $projectId) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": types.SlackConnectionDocument,
     "\n  query SlackAuthorizeUrl($projectId: ID!) {\n    slackAuthorizeUrl(projectId: $projectId)\n  }\n": types.SlackAuthorizeUrlDocument,
     "\n  query SlackChannels($projectId: ID!) {\n    slackChannels(projectId: $projectId) {\n      id\n      name\n    }\n  }\n": types.SlackChannelsDocument,
@@ -581,7 +581,7 @@ export function graphql(source: "\n  query FlagRegistry($projectId: ID!) {\n    
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n"): (typeof documents)["\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      flagsmithWebhookPath\n      flagsmithWebhookSecretSet\n    }\n  }\n"];
+export function graphql(source: "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      secret\n      connectionSettings {\n        flagsmithWebhookPath\n        flagsmithWebhookSecretSet\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      secret\n      connectionSettings {\n        flagsmithWebhookPath\n        flagsmithWebhookSecretSet\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
