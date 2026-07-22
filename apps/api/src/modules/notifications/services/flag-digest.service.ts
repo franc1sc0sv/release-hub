@@ -6,6 +6,7 @@ import { INotificationReadRepository } from '../interfaces/notification-read.rep
 import { NotificationDispatcherService } from './notification-dispatcher.service'
 import type { INotificationPayload, IProjectForDigest } from '../interfaces/notification.interfaces'
 
+const DIGEST_ENABLED: boolean = false
 const DAILY_WINDOW_DAYS = 1
 const WEEKLY_WINDOW_DAYS = 7
 
@@ -54,6 +55,8 @@ export class FlagDigestService {
   ) {}
 
   async sendDigestForProject(project: IProjectForDigest, frequency: DigestFrequency): Promise<void> {
+    if (!DIGEST_ENABLED) return
+
     const windowDays = frequency === DigestFrequency.DAILY ? DAILY_WINDOW_DAYS : WEEKLY_WINDOW_DAYS
     const since = new Date()
     since.setDate(since.getDate() - windowDays)

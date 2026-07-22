@@ -59,6 +59,14 @@ const GROUPS: NotificationGroup[] = [
   { key: 'flags', icon: Flag, labelKey: 'groups.flags.label', types: FLAG_NOTIFICATION_TYPES },
 ]
 
+const DIGEST_ENABLED: boolean = false
+
+function visibleTypes(types: NotificationType[]): NotificationType[] {
+  return DIGEST_ENABLED
+    ? types
+    : types.filter((type) => type !== NotificationTypeValue.FLAG_DIGEST)
+}
+
 export function NotificationPreferencesSection({
   projectId,
 }: NotificationPreferencesSectionProps) {
@@ -176,7 +184,7 @@ export function NotificationPreferencesSection({
               <p className="text-xs text-muted-foreground">{t('allNotifications.description')}</p>
             </div>
             {columns.map((column) => {
-              const checked = allEnabled(ALL_NOTIFICATION_TYPES, column.channel)
+              const checked = allEnabled(visibleTypes(ALL_NOTIFICATION_TYPES), column.channel)
               return (
                 <div key={column.channel} className="flex flex-col items-center gap-1 text-center">
                   <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
@@ -189,7 +197,7 @@ export function NotificationPreferencesSection({
                         <Switch
                           checked={checked}
                           onCheckedChange={() =>
-                            void handleBulkToggle(ALL_NOTIFICATION_TYPES, column.channel)
+                            void handleBulkToggle(visibleTypes(ALL_NOTIFICATION_TYPES), column.channel)
                           }
                           disabled={!allowed || updating}
                           aria-label={t('allNotifications.toggleAriaLabel', {
@@ -229,7 +237,7 @@ export function NotificationPreferencesSection({
                   {t('groups.enableAll')}
                 </span>
                 {columns.map((column) => {
-                  const checked = allEnabled(group.types, column.channel)
+                  const checked = allEnabled(visibleTypes(group.types), column.channel)
                   return (
                     <div key={column.channel} className="flex justify-center">
                       <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
@@ -237,7 +245,7 @@ export function NotificationPreferencesSection({
                           <div className={cn('rounded-full', checked && 'shadow-glow-indigo')}>
                             <Switch
                               checked={checked}
-                              onCheckedChange={() => void handleBulkToggle(group.types, column.channel)}
+                              onCheckedChange={() => void handleBulkToggle(visibleTypes(group.types), column.channel)}
                               disabled={!allowed || updating}
                               aria-label={t('groups.enableAllAriaLabel', {
                                 group: t(group.labelKey),
@@ -253,7 +261,7 @@ export function NotificationPreferencesSection({
               </div>
             </CardHeader>
             <CardContent className="divide-y divide-border/40 p-0">
-              {group.types.map((notificationType) => {
+              {visibleTypes(group.types).map((notificationType) => {
                 const EventIcon = NOTIFICATION_TYPE_ICON[notificationType]
                 return (
                   <div
@@ -311,6 +319,7 @@ export function NotificationPreferencesSection({
         </m.div>
       ))}
 
+      {DIGEST_ENABLED && (
       <m.div variants={itemVariants}>
         <GlassCard>
           <CardHeader>
@@ -374,6 +383,7 @@ export function NotificationPreferencesSection({
           </CardContent>
         </GlassCard>
       </m.div>
+      )}
     </m.div>
   )
 }
