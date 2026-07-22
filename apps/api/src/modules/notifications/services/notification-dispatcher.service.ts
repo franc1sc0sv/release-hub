@@ -7,6 +7,7 @@ import { DigestFrequency } from '../../../common/types/digest-frequency.enum'
 import { INotificationReadRepository } from '../interfaces/notification-read.repository'
 import { INotificationPreferenceRepository } from '../interfaces/notification-preference.repository'
 import { INotificationRepository } from '../interfaces/notification.repository'
+import { buildInAppNotificationUrl } from '../providers/notification-message.util'
 import { EmailNotificationProvider } from '../providers/email-notification.provider'
 import { SlackDmProvider } from '../providers/slack-dm.provider'
 import { SlackChannelProvider } from '../providers/slack-channel.provider'
@@ -55,14 +56,15 @@ export class NotificationDispatcherService {
     type: NotificationType,
     payload: INotificationPayload,
   ): Promise<void> {
-    const { members, preferences } = await this.db.$transaction(async (tx: TxClient) => {
+    const { members, preferences, organizationId } = await this.db.$transaction(async (tx: TxClient) => {
       const projectMembers = await this.notificationReadRepository.findMembersForProject(projectId, tx)
       const memberPreferences = await this.notificationPreferenceRepository.findAllForUsersAndProject(
         projectMembers.map((member) => member.userId),
         projectId,
         tx,
       )
-      return { members: projectMembers, preferences: memberPreferences }
+      const projectOrganizationId = await this.notificationReadRepository.findProjectOrganizationId(projectId, tx)
+      return { members: projectMembers, preferences: memberPreferences, organizationId: projectOrganizationId }
     })
 
     await Promise.all(members.map((member) => this.dispatchToMember(member, preferences, type, payload)))
@@ -73,6 +75,13 @@ export class NotificationDispatcherService {
     })
 
     if (inAppRecipients.length > 0) {
+      const inAppUrl = buildInAppNotificationUrl(
+        type,
+        organizationId,
+        payload.projectId,
+        payload.flagKey,
+        payload.releaseId,
+      )
       await this.db.$transaction((tx) =>
         this.notificationRepository.createMany(
           inAppRecipients.map((member) => ({
@@ -81,7 +90,7 @@ export class NotificationDispatcherService {
             type,
             title: payload.title,
             body: payload.bodyLines.join('\n'),
-            url: payload.url,
+            url: inAppUrl,
             flagKey: payload.flagKey,
           })),
           tx,

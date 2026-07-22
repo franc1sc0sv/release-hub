@@ -31,16 +31,12 @@ export class DeleteOrganizationHandler extends BaseCommandHandler<DeleteOrganiza
       tx,
     )
 
-    const activeProjects = await this.organizationRepository.countActiveProjects(command.organizationId, tx)
-    if (activeProjects > 0) {
-      throw new ConflictException('Cannot delete an organization that still has active projects')
-    }
-
     const organizations = await this.organizationRepository.findOrganizationsForUser(command.actorId, tx)
     if (organizations.length <= 1) {
       throw new ConflictException('Cannot delete your only organization')
     }
 
+    await this.organizationRepository.softDeleteProjectsForOrganization(command.organizationId, tx)
     await this.organizationRepository.softDelete(command.organizationId, tx)
 
     return true

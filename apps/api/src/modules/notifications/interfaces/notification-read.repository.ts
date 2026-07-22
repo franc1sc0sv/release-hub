@@ -17,6 +17,7 @@ export abstract class INotificationReadRepository {
     IProjectSlackConnectionSummary | null
   >
   abstract findMembersForProject: RepositoryMethod<[projectId: string], IProjectMemberForNotification[]>
+  abstract findProjectOrganizationId: RepositoryMethod<[projectId: string], string | null>
   abstract findAllActiveProjects: RepositoryMethod<[], IProjectForDigest[]>
   abstract findStaleInProgressFlags: RepositoryMethod<
     [projectId: string, staleDays: number],
