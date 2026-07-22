@@ -20,6 +20,14 @@ export const validateHttpUrl = (url: string): string => {
   }
 }
 
+const safeHttpUrl = (url: string): string | null => {
+  try {
+    return validateHttpUrl(url)
+  } catch {
+    return null
+  }
+}
+
 export interface IBrandedEmailCta {
   label: string
   url: string
@@ -50,7 +58,7 @@ export function renderBrandedEmail(content: IBrandedEmailContent): IRenderedEmai
   const escapedTitle = escapeHtml(content.title)
   const escapedParagraphs = content.paragraphs.map(escapeHtml)
   const escapedCodeBlock = content.codeBlock ? escapeHtml(content.codeBlock) : null
-  const validatedCtaUrl = content.cta ? validateHttpUrl(content.cta.url) : null
+  const validatedCtaUrl = content.cta ? safeHttpUrl(content.cta.url) : null
   const escapedCtaLabel = content.cta ? escapeHtml(content.cta.label) : null
   const escapedFooterNote = content.footerNote ? escapeHtml(content.footerNote) : null
 

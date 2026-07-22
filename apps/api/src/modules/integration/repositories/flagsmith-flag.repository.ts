@@ -274,11 +274,12 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     })
   }
 
-  softDeleteFlagByKey = async (projectId: string, key: string, tx: TxClient): Promise<void> => {
-    await tx.flagsmithFlag.updateMany({
+  softDeleteFlagByKey = async (projectId: string, key: string, tx: TxClient): Promise<number> => {
+    const result = await tx.flagsmithFlag.updateMany({
       where: { projectId, key, deletedAt: null },
       data: { deletedAt: new Date() },
     })
+    return result.count
   }
 
   findFlagMatrix = async (

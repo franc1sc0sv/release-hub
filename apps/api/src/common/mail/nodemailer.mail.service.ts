@@ -5,6 +5,12 @@ import { renderBrandedEmail } from './email-template'
 
 const CODE_TTL_LABEL = '10 minutes'
 const LOGIN_CODE_SUBJECT = 'Your Release Hub access code'
+const WEB_APP_URL = (process.env.WEB_APP_URL ?? 'http://localhost:5173').replace(/\/+$/, '')
+
+function toAbsoluteUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url
+  return `${WEB_APP_URL}/${url.replace(/^\/+/, '')}`
+}
 
 @Injectable()
 export class NodemailerMailService extends IMailService {
@@ -101,7 +107,7 @@ export class NodemailerMailService extends IMailService {
     const { html, text } = renderBrandedEmail({
       title,
       paragraphs: bodyLines,
-      cta: url ? { label: 'View details', url } : undefined,
+      cta: url ? { label: 'View details', url: toAbsoluteUrl(url) } : undefined,
     })
 
     await this.deliver({ from: this.from, to, subject, text, html })

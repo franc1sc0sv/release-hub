@@ -106,20 +106,26 @@ export class HandleFlagsmithWebhookHandler extends PreparedCommandHandler<
         parsed.environmentName,
         tx,
       )
-      await this.flagsmithFlagRepository.softDeleteFlagByKey(command.projectId, parsed.featureKey, tx)
-
-      historyRows.push({
-        projectId: command.projectId,
-        flagKey: parsed.featureKey,
-        flagsmithFlagId: existing?.flagId ?? null,
-        type: FlagHistoryEventType.flag_deleted,
-        source: FlagHistorySource.webhook,
-      })
-      await this.flagHistoryRepository.createMany(historyRows, tx)
-
-      events.push(
-        new FlagWebhookTransitionEvent(command.projectId, parsed.featureKey, null, FlagWebhookTransition.DELETED),
+      const deletedCount = await this.flagsmithFlagRepository.softDeleteFlagByKey(
+        command.projectId,
+        parsed.featureKey,
+        tx,
       )
+
+      if (deletedCount > 0) {
+        historyRows.push({
+          projectId: command.projectId,
+          flagKey: parsed.featureKey,
+          flagsmithFlagId: existing?.flagId ?? null,
+          type: FlagHistoryEventType.flag_deleted,
+          source: FlagHistorySource.webhook,
+        })
+        await this.flagHistoryRepository.createMany(historyRows, tx)
+
+        events.push(
+          new FlagWebhookTransitionEvent(command.projectId, parsed.featureKey, null, FlagWebhookTransition.DELETED),
+        )
+      }
       return
     }
 

@@ -176,7 +176,7 @@ export function NotificationPreferencesSection({
     >
       <m.div variants={itemVariants}>
         <GlassCard>
-          <CardContent className={cn('grid items-center gap-4 p-4', gridClass)}>
+          <CardContent className={cn('grid items-center gap-4 px-6 py-4', gridClass)}>
             <div>
               <p className="text-sm font-semibold text-foreground">
                 {t('allNotifications.label')}
@@ -187,10 +187,12 @@ export function NotificationPreferencesSection({
               const checked = allEnabled(visibleTypes(ALL_NOTIFICATION_TYPES), column.channel)
               return (
                 <div key={column.channel} className="flex flex-col items-center gap-1 text-center">
-                  <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
-                  <span className="text-overline uppercase text-muted-foreground">
-                    {column.label}
-                  </span>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
+                    <span className="text-overline uppercase text-muted-foreground">
+                      {column.label}
+                    </span>
+                  </div>
                   <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
                     {(allowed) => (
                       <div className={cn('rounded-full', checked && 'shadow-glow-indigo')}>
@@ -217,14 +219,14 @@ export function NotificationPreferencesSection({
       {GROUPS.map((group) => (
         <m.div key={group.key} variants={itemVariants}>
           <GlassCard>
-            <CardHeader className="gap-3">
+            <CardHeader className="gap-3 px-6">
               <div className={cn('grid items-center gap-4', gridClass)}>
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                   <group.icon className="size-4 text-muted-foreground" aria-hidden />
                   {t(group.labelKey)}
                 </CardTitle>
                 {columns.map((column) => (
-                  <div key={column.channel} className="flex flex-col items-center gap-1 text-center">
+                  <div key={column.channel} className="flex flex-row items-center justify-center gap-1.5 text-center">
                     <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
                     <span className="text-overline uppercase text-muted-foreground">
                       {column.label}
