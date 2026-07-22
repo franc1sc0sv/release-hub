@@ -518,20 +518,6 @@ export class GitHubClient extends IGitHubClient {
     const octokit = new Octokit({ auth: accessToken })
     const sha = await this.getRefSha(repo, fromRef, accessToken)
 
-    let canPush = false
-    try {
-      const repoInfo = await octokit.repos.get({ owner, repo: repoName })
-      canPush = repoInfo.data.permissions?.push ?? false
-    } catch (error) {
-      this.mapOctokitError(error)
-    }
-    if (!canPush) {
-      throw new AppException(
-        `Your GitHub account does not have write access to ${repo}, so a branch cannot be created. Reconnect GitHub or pick a repository you can push to.`,
-        ErrorCode.FORBIDDEN,
-      )
-    }
-
     try {
       await octokit.git.createRef({
         owner,

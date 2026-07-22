@@ -14,7 +14,7 @@ export abstract class IOrganizationRepository implements IBaseRepository<IOrgani
   abstract createForUser: RepositoryMethod<[userId: string, name: string, slug: string], { id: string }>
   abstract updateName: RepositoryMethod<[organizationId: string, name: string, slug: string], IOrganization>
   abstract softDelete: RepositoryMethod<[organizationId: string], void>
-  abstract countActiveProjects: RepositoryMethod<[organizationId: string], number>
+  abstract softDeleteProjectsForOrganization: RepositoryMethod<[organizationId: string], void>
   abstract slugExists: RepositoryMethod<[slug: string], boolean>
   abstract findOrganizationsForUser: RepositoryMethod<[userId: string], IUserOrganization[]>
   abstract listMembers: RepositoryMethod<[organizationId: string], IOrganizationMemberProfile[]>

@@ -99,8 +99,11 @@ export class OrganizationRepository extends IOrganizationRepository {
     })
   }
 
-  countActiveProjects = async (organizationId: string, tx: TxClient): Promise<number> => {
-    return tx.project.count({ where: { organizationId, deletedAt: null } })
+  softDeleteProjectsForOrganization = async (organizationId: string, tx: TxClient): Promise<void> => {
+    await tx.project.updateMany({
+      where: { organizationId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    })
   }
 
   slugExists = async (slug: string, tx: TxClient): Promise<boolean> => {

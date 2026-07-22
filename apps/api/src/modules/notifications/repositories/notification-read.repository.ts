@@ -48,6 +48,11 @@ export class NotificationReadRepository extends INotificationReadRepository {
     return rows.map((row) => ({ userId: row.user.id, email: row.user.email, name: row.user.name }))
   }
 
+  findProjectOrganizationId = async (projectId: string, tx: TxClient): Promise<string | null> => {
+    const row = await tx.project.findUnique({ where: { id: projectId }, select: { organizationId: true } })
+    return row?.organizationId ?? null
+  }
+
   findAllActiveProjects = async (tx: TxClient): Promise<IProjectForDigest[]> => {
     const rows = await tx.project.findMany({
       where: { deletedAt: null },

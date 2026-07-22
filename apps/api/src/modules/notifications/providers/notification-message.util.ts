@@ -26,6 +26,39 @@ function flagUrl(flagKey: string | undefined): string | null {
   return flagKey ? `/flags/${flagKey}` : null
 }
 
+const FLAG_DEEP_LINK_TYPES: NotificationType[] = [
+  NotificationType.FLAG_CREATED,
+  NotificationType.FLAG_DELETED,
+  NotificationType.FLAG_ENABLED,
+  NotificationType.FLAG_DISABLED,
+  NotificationType.FLAG_VALUE_CHANGED,
+  NotificationType.FLAG_CONFLICT,
+  NotificationType.FLAG_SHIP_OFF_REMINDER,
+  NotificationType.FLAG_IN_PROGRESS_REMINDER,
+  NotificationType.FLAG_STALENESS_ALERT,
+]
+
+const RELEASE_DEEP_LINK_TYPES: NotificationType[] = [
+  NotificationType.RELEASE_CREATED,
+  NotificationType.RELEASE_SHIPPED,
+  NotificationType.RELEASE_DEPLOYED,
+]
+
+export function buildInAppNotificationUrl(
+  type: NotificationType,
+  organizationId: string | null,
+  projectId: string,
+  flagKey: string | null,
+  releaseId: string | null,
+): string | null {
+  if (!organizationId) return null
+  const base = `/${organizationId}/${projectId}`
+  if (RELEASE_DEEP_LINK_TYPES.includes(type)) return releaseId ? `${base}/releases/${releaseId}` : null
+  if (type === NotificationType.FLAG_DIGEST) return `${base}/flags`
+  if (FLAG_DEEP_LINK_TYPES.includes(type)) return flagKey ? `${base}/flags/${flagKey}` : `${base}/flags`
+  return null
+}
+
 export function buildNotificationMessage(
   type: NotificationType,
   context: INotificationMessageContext,
