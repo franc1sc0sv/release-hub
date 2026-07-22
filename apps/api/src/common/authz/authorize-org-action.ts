@@ -10,6 +10,7 @@ import {
   type IPullRequestSubject,
   type IMembershipSubject,
   type IInvitationSubject,
+  type ISummaryProfileSubject,
 } from '@release-hub/shared'
 import { ForbiddenException, NotFoundException } from '../errors'
 import { IOrganizationRepository } from '../../modules/organization/interfaces/organization.repository'
@@ -22,6 +23,7 @@ type OrgScopedSubject =
   | ({ kind: 'PullRequest' } & IPullRequestSubject)
   | ({ kind: 'Membership' } & IMembershipSubject)
   | ({ kind: 'Invitation' } & IInvitationSubject)
+  | ({ kind: 'SummaryProfile' } & ISummaryProfileSubject)
 
 interface IAuthorizeProjectActionParams {
   actorId: string

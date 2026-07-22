@@ -7,6 +7,7 @@ import type {
   IAiSuggestInput,
   IAiSuggestResult,
   IAiStreamSummaryInput,
+  IAiSummaryProfile,
   IAiPrSummaryInput,
   IAiPrSummaryResult,
 } from '../interfaces/ai-provider.abstract'
@@ -17,8 +18,14 @@ const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
 const STRICT_JSON_SYSTEM_PROMPT =
   'You output only strict JSON matching the requested shape. No prose, no markdown, no code fences.'
 
-const PROSE_SYSTEM_PROMPT =
-  'You write clear, client-facing release notes as plain prose. Follow the requested structure and separators exactly. Output only the document — no preamble, no meta-commentary, no markdown, no headings, no bullet points, no formatting symbols.'
+const HTML_SUMMARY_SYSTEM_PROMPT = [
+  'You write client-facing release documents as valid HTML fragments.',
+  'You may use ONLY these tags: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <code>, <blockquote>, <a>, and <span style="color:...">.',
+  'Never use any other tag — no <h1>, <div>, <table>, <img>, <script>, <style>, <button>, <br> — and no markdown syntax (no #, *, -, `, etc).',
+  'The only inline style allowed is color on a <span>, and its value must be exactly one of: #6366f1, #8b5cf6, #ec1e8c, var(--muted-foreground), var(--foreground). Use a colored span sparingly, only for the rare, meaningful highlight.',
+  'Follow the requested structure and separators exactly.',
+  'Output only the raw HTML fragment — no preamble, no meta-commentary, no code fences, no explanation of what you did.',
+].join(' ')
 
 const SUMMARY_SENTINEL = '@@@'
 
@@ -88,8 +95,84 @@ function buildPromptPrSummary(input: IAiPrSummaryInput): string {
   ].join('\n')
 }
 
+function appendProfileBlock(lines: string[], profile: IAiSummaryProfile): void {
+  if (profile.rules.length > 0) {
+    lines.push('', 'RULES you MUST follow:')
+    profile.rules.forEach((rule, i) => lines.push(`  ${i + 1}. ${rule}`))
+  }
+
+  if (profile.outputTemplate) {
+    lines.push(
+      '',
+      'OUTPUT TEMPLATE (a whole-document exemplar — match its style and structure, not its literal content):',
+      profile.outputTemplate,
+    )
+  }
+
+  if (profile.goodExamples.length > 0) {
+    lines.push('', 'GOOD EXAMPLES (emulate this style):')
+    profile.goodExamples.forEach((example, i) => {
+      lines.push(`  ${i + 1}. ${example.content}`)
+      lines.push(`     Why: ${example.explanation}`)
+    })
+  }
+
+  if (profile.badExamples.length > 0) {
+    lines.push('', 'BAD EXAMPLES (never produce anything like this):')
+    profile.badExamples.forEach((example, i) => {
+      lines.push(`  ${i + 1}. ${example.content}`)
+      lines.push(`     Why: ${example.explanation}`)
+    })
+  }
+}
+
+function buildPromptReleaseNotes(input: IAiStreamSummaryInput): string {
+  const tagsLine = input.tags.length > 0 ? input.tags.join(', ') : 'none'
+
+  const workText = input.features
+    .map((f) => {
+      const items = f.prSummaries.length > 0 ? f.prSummaries : [f.description]
+      return [
+        `- feature: ${f.name}`,
+        `  type: ${f.kind}`,
+        '  shipped items:',
+        ...items.map((s) => `    * ${s}`),
+      ].join('\n')
+    })
+    .join('\n')
+
+  const lines = [
+    'You write a client-facing release notes document as styled HTML.',
+    'Voice: clear, warm, factual. Plain, client-facing language only — never use ticket IDs, PR numbers, branch names, feature-flag keys, or internal jargon.',
+    'Output only the raw HTML fragment: no preamble, no sign-off, no meta-commentary, no code fences.',
+    '',
+    'STRUCTURE — produce ONLY these two sections, in this exact order, and include a section only if it has at least one item:',
+    '  <h2>Features</h2> then a <ul> listing the new client-facing capabilities.',
+    '  <h2>Bug Fixes</h2> then a <ul> listing the fixes.',
+    'Create no other section or heading. Never output an availability or status line (e.g. "in development, planned for an upcoming release").',
+    'You may optionally open with a single short intro sentence in one <p> before the sections.',
+    '',
+    'CLASSIFY each provided item into those two sections — include ALL provided items, they were chosen deliberately, so never drop one:',
+    '  - The feature named "Bugs" holds bug fixes → one <li> per shipped item under Bug Fixes, phrased "Fixed a bug/issue where ...".',
+    '  - Every other provided feature is a client-facing change → one <li> under Features, leading with the client benefit; add a short quoted example when it helps.',
+    '  - Use one <li> per shipped item; never merge unrelated items into a single bullet.',
+    '',
+    `Release: ${input.releaseTitle}`,
+    `Release tags (context only): ${tagsLine}`,
+    '',
+    'Shipped work:',
+    workText,
+  ]
+
+  if (input.profile) {
+    appendProfileBlock(lines, input.profile)
+  }
+
+  return lines.join('\n')
+}
+
 function buildPromptB(input: IAiStreamSummaryInput): string {
-  const voice = input.tone ? `${input.tone}, factual` : 'clear, warm, factual'
+  const voice = 'clear, warm, factual'
 
   const featuresText = input.features
     .map((f, i) => {
@@ -102,23 +185,32 @@ function buildPromptB(input: IAiStreamSummaryInput): string {
     })
     .join('\n\n')
 
-  return [
-    'You write a client-facing release document as flowing prose.',
-    `Voice: ${voice}. No bullet points, no headings, no markdown.`,
+  const tagsLine = input.tags.length > 0 ? input.tags.join(', ') : 'none'
+
+  const lines = [
+    'You write a client-facing release document as styled HTML.',
+    `Voice: ${voice}.`,
     'Never use ticket IDs, branch names, PR numbers, or internal jargon.',
     'CRITICAL: never describe a feature as more available than its stated availability line. Stay consistent with it.',
     '',
-    'Output EXACTLY in this structure, as plain text:',
-    '  1. A 2-3 sentence introduction to the whole release.',
+    'Output EXACTLY in this structure:',
+    '  1. A 2-3 sentence introduction to the whole release, written as styled HTML (e.g. a <p>, optionally with <strong>/<em> or a single sparing colored <span> highlight).',
     `  2. A line containing only ${SUMMARY_SENTINEL}`,
-    `  3. One prose paragraph for EACH feature below, in the SAME ORDER, with a line containing only ${SUMMARY_SENTINEL} between consecutive paragraphs.`,
-    'Write only the descriptive paragraph for each feature — do not repeat the feature name or its availability line. Exactly one paragraph per feature.',
+    `  3. One styled HTML body for EACH feature below, in the SAME ORDER, with a line containing only ${SUMMARY_SENTINEL} between consecutive bodies.`,
+    'For each feature, write only the body — do not repeat the feature name or its availability line, both are already rendered above your text. You may use headings (<h3>), lists, emphasis, and a rare colored highlight to structure the body. Exactly one body per feature.',
     '',
     `Release: ${input.releaseTitle}`,
+    `Release tags (context only): ${tagsLine}`,
     '',
     'Features (in order):',
     featuresText,
-  ].join('\n')
+  ]
+
+  if (input.profile) {
+    appendProfileBlock(lines, input.profile)
+  }
+
+  return lines.join('\n')
 }
 
 function normalizeSuggestion(parsed: Partial<IAiSuggestResult>): Omit<IAiSuggestResult, 'usage'> {
@@ -149,6 +241,10 @@ function escapeHtml(text: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+}
+
+function stripFences(text: string): string {
+  return text.replace(/```html/gi, '').replace(/```/g, '')
 }
 
 function extractJson(text: string): string | null {
@@ -221,7 +317,7 @@ async function* streamQuery(prompt: string, model: string): AsyncGenerator<strin
   const q = query({
     prompt,
     options: {
-      systemPrompt: PROSE_SYSTEM_PROMPT,
+      systemPrompt: HTML_SUMMARY_SYSTEM_PROMPT,
       settingSources: [],
       allowedTools: [],
       maxTurns: 1,
@@ -258,7 +354,6 @@ function* openSection(
       done: false,
     }
   }
-  yield { chunk: '<p>', done: false }
 }
 
 function* closeSection(
@@ -267,9 +362,8 @@ function* closeSection(
   hadText: boolean,
 ): Generator<SummaryChunkType> {
   if (!hadText && index >= 0 && index < features.length) {
-    yield { chunk: escapeHtml(fallbackSummary(features[index])), done: false }
+    yield { chunk: `<p>${escapeHtml(fallbackSummary(features[index]))}</p>`, done: false }
   }
-  yield { chunk: '</p>', done: false }
 }
 
 @Injectable()
@@ -298,11 +392,48 @@ export class DevAiProvider extends IAiProvider {
     return { ...normalizePrSummary(parsed), usage }
   }
 
+  private async *streamReleaseNotes(
+    input: IAiStreamSummaryInput,
+    model: string,
+  ): AsyncGenerator<SummaryChunkType> {
+    const prompt = buildPromptReleaseNotes(input)
+    let started = false
+    let buffer = ''
+
+    try {
+      for await (const delta of streamQuery(prompt, model)) {
+        if (!started) {
+          buffer += delta
+          const lt = buffer.indexOf('<')
+          if (lt === -1) continue
+          started = true
+          const chunk = stripFences(buffer.slice(lt))
+          buffer = ''
+          if (chunk.length > 0) yield { chunk, done: false }
+        } else {
+          const chunk = stripFences(delta)
+          if (chunk.length > 0) yield { chunk, done: false }
+        }
+      }
+    } catch (err) {
+      this.logger.warn(
+        `streamSummary(release-notes) failed mid-stream: ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+
+    yield { chunk: '', done: true }
+  }
+
   async *streamSummary(input: IAiStreamSummaryInput): AsyncIterable<SummaryChunkType> {
     const model = input.model ?? DEFAULT_MODEL
     this.logger.log(
-      `streamSummary release="${input.releaseTitle}" model=${model} tone=${input.tone ?? 'none'} features=${input.features.length}`,
+      `streamSummary release="${input.releaseTitle}" model=${model} profile=${input.profile ? 'yes' : 'none'} tags=${input.tags.length} features=${input.features.length}`,
     )
+
+    if (input.profile) {
+      yield* this.streamReleaseNotes(input, model)
+      return
+    }
 
     const features = input.features
     const prompt = buildPromptB(input)
@@ -323,7 +454,7 @@ export class DevAiProvider extends IAiProvider {
           const before = pending.slice(0, sentinelIdx).replace(/\s+$/, '')
           const text = sectionHasText ? before : before.replace(/^\s+/, '')
           if (text.length > 0) {
-            yield { chunk: escapeHtml(text), done: false }
+            yield { chunk: text, done: false }
             sectionHasText = true
           }
           yield* closeSection(features, sectionIndex, sectionHasText)
@@ -340,7 +471,7 @@ export class DevAiProvider extends IAiProvider {
         if (flushable.length > 0) {
           const text = sectionHasText ? flushable : flushable.replace(/^\s+/, '')
           if (text.length > 0) {
-            yield { chunk: escapeHtml(text), done: false }
+            yield { chunk: text, done: false }
             if (text.trim().length > 0) sectionHasText = true
           }
         }
@@ -353,7 +484,7 @@ export class DevAiProvider extends IAiProvider {
 
     const tail = (sectionHasText ? pending : pending.replace(/^\s+/, '')).replace(/\s+$/, '')
     if (tail.length > 0) {
-      yield { chunk: escapeHtml(tail), done: false }
+      yield { chunk: tail, done: false }
       sectionHasText = true
     }
     yield* closeSection(features, sectionIndex, sectionHasText)

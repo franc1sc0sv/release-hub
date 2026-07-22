@@ -120,5 +120,9 @@
     "RECENT_ACTIVITY": "Recent activity",
     "MANUALLY_BLOCKED": "Manually blocked",
     "RELEASE_REFERENCED": "Release reference"
+  },
+  "summaryExampleKind": {
+    "GOOD": "Good example",
+    "BAD": "Bad example"
   }
 }

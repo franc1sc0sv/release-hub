@@ -252,17 +252,34 @@
     "generate": "Generar",
     "editor": "Resumen para el cliente",
     "editorPlaceholder": "Genera o escribe aquí el resumen para el cliente…",
+    "documentEmpty": "Aún no hay resumen. Genera uno o cambia a Editar para escribir el tuyo.",
+    "generating": {
+      "heading": "Generando resumen…",
+      "description": "La IA está escribiendo el resumen para el cliente. Continúa aunque salgas de esta página."
+    },
+    "generateFailed": "Falló la generación del resumen. Inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "popoverTitle": "Generar resumen",
     "save": "Guardar",
     "saving": "Guardando…",
     "saved": "Resumen guardado",
     "saveError": "No se pudo guardar el resumen",
     "lastSaved": "Guardado por última vez {{time}}",
-    "copyLink": "Copiar enlace",
-    "copyLinkAriaLabel": "Copiar enlace de la página al portapapeles",
-    "linkCopied": "¡Copiado!",
+    "mode": {
+      "label": "Modo de vista",
+      "read": "Leer",
+      "edit": "Editar"
+    },
+    "profile": {
+      "label": "Perfil",
+      "none": "Sin perfil",
+      "manage": "Gestionar perfiles"
+    },
     "featureSelection": {
       "label": "Incluir en el resumen",
-      "hint": "Selecciona al menos una funcionalidad para generar el resumen"
+      "hint": "Selecciona al menos una funcionalidad para generar el resumen",
+      "notIncluded": "No incluida",
+      "excludedReason": "No se puede agregar — esta funcionalidad está {{state}} y aún no se ha lanzado. Cámbiala a un estado lanzado para incluirla."
     }
   },
   "prSummary": {
@@ -278,6 +295,35 @@
     "editedAt": "Editado {{time}}",
     "generateError": "No se pudo generar el resumen",
     "saveError": "No se pudo guardar el resumen"
+  },
+  "overview": {
+    "stats": {
+      "prs": "Pull requests",
+      "features": "Funcionalidades",
+      "commits": "Commits",
+      "tickets": "Tickets vinculados",
+      "flagChanges": "Cambios de flags"
+    },
+    "featureBreakdown": {
+      "title": "Estado de funcionalidades",
+      "empty": "Aún no hay funcionalidades asignadas a este release."
+    },
+    "readiness": {
+      "title": "Listo para clientes",
+      "liveForClients": "En vivo para clientes",
+      "fraction": "{{live}} / {{total}}"
+    },
+    "summary": {
+      "ready": "Resumen para el cliente listo",
+      "notReady": "Aún no hay resumen para el cliente",
+      "lastEdited": "Editado {{time}}",
+      "open": "Abrir",
+      "create": "Crear"
+    },
+    "flagActivity": {
+      "title": "Actividad de flags",
+      "empty": "No hay cambios de feature flags en este release."
+    }
   },
   "coverage": {
     "title": "Cobertura",
@@ -302,11 +348,13 @@
     "error": "No se pudo eliminar el release"
   },
   "export": {
-    "markdown": "Exportar Markdown",
     "pdf": "Exportar PDF",
     "exporting": "Exportando...",
     "noSummary": "Genera el resumen primero antes de exportar",
-    "downloadFailed": "Descarga fallida"
+    "downloadFailed": "Descarga fallida",
+    "brand": "Release Hub",
+    "reportTitle": "Resumen para el cliente",
+    "generatedLabel": "Generado"
   },
   "status": {
     "label": "Estado del release"

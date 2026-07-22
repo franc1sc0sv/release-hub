@@ -102,6 +102,14 @@ export interface IShipOffReminderCandidate {
   decidedAt: Date | null
 }
 
+export interface IEnableOffConflictCandidate {
+  trackedFlagId: string
+  projectId: string
+  key: string
+  releaseId: string
+  releaseName: string
+}
+
 export interface INotification {
   id: string
   userId: string

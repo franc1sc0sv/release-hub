@@ -34,7 +34,10 @@ export const GET_RELEASE_TREE = graphql(`
         prUrl
         summary
         summaryEditedAt
+        summaryModel
+        summaryProfileId
         aiDraftStatus
+        summaryStatus
         projectId
         createdAt
         updatedAt
@@ -104,26 +107,6 @@ export const GET_COVERAGE = graphql(`
     }
   }
 `)
-
-export const EXPORT_SUMMARY = graphql(`
-  query ExportSummary($input: ExportSummaryInput!) {
-    exportSummary(input: $input) {
-      url
-      filename
-    }
-  }
-`)
-
-export const GENERATE_SUMMARY = graphql(`
-  subscription GenerateSummary($input: GenerateSummaryInput!) {
-    generateSummary(input: $input) {
-      chunk
-      done
-    }
-  }
-`)
-
-
 
 export const SEARCH_GITHUB_BRANCHES = graphql(`
   query SearchGithubBranches($projectId: ID!, $search: String, $limit: Float!) {

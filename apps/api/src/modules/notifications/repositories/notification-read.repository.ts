@@ -11,6 +11,7 @@ import type {
   IEnabledProdFlagSummary,
   IDeployedReleaseSummary,
   IShipOffReminderCandidate,
+  IEnableOffConflictCandidate,
 } from '../interfaces/notification.interfaces'
 
 const SHIP_OFF_RELEASE_STATUSES: ReleaseStatus[] = [ReleaseStatus.merged, ReleaseStatus.deployed]
@@ -188,12 +189,8 @@ export class NotificationReadRepository extends INotificationReadRepository {
 
   findShipOffReminderCandidates = async (
     projectId: string,
-    reminderIntervalDays: number,
     tx: TxClient,
   ): Promise<IShipOffReminderCandidate[]> => {
-    const remindBefore = new Date()
-    remindBefore.setDate(remindBefore.getDate() - reminderIntervalDays)
-
     const decisions = await tx.releaseFlagDecision.findMany({
       where: { trackedFlag: { projectId, deletedAt: null } },
       orderBy: { updatedAt: 'desc' },
@@ -227,9 +224,6 @@ export class NotificationReadRepository extends INotificationReadRepository {
       if (decision.release.deletedAt !== null) continue
       if (!SHIP_OFF_RELEASE_STATUSES.includes(decision.release.status)) continue
 
-      const { lastRemindedAt } = decision.trackedFlag
-      if (lastRemindedAt !== null && lastRemindedAt > remindBefore) continue
-
       const allStates = decision.trackedFlag.flagsmithFlags.flatMap((flag) => flag.states)
       const stillDisabled = allStates.every((state) => !state.enabled)
       if (!stillDisabled) continue
@@ -238,8 +232,61 @@ export class NotificationReadRepository extends INotificationReadRepository {
         trackedFlagId: decision.trackedFlag.id,
         projectId: decision.trackedFlag.projectId,
         key: decision.trackedFlag.key,
-        lastRemindedAt,
+        lastRemindedAt: decision.trackedFlag.lastRemindedAt,
         decidedAt: decision.decidedAt,
+      })
+    }
+
+    return candidates
+  }
+
+  findEnableButOffConflictCandidates = async (
+    projectId: string,
+    tx: TxClient,
+  ): Promise<IEnableOffConflictCandidate[]> => {
+    const decisions = await tx.releaseFlagDecision.findMany({
+      where: { trackedFlag: { projectId, deletedAt: null } },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        trackedFlagId: true,
+        decision: true,
+        releaseId: true,
+        release: { select: { status: true, deletedAt: true, name: true, compareRef: true } },
+        trackedFlag: {
+          select: {
+            id: true,
+            projectId: true,
+            key: true,
+            flagsmithFlags: { select: { states: { select: { enabled: true } } } },
+          },
+        },
+      },
+    })
+
+    const latestByFlag = new Map<string, (typeof decisions)[number]>()
+    for (const decision of decisions) {
+      if (!latestByFlag.has(decision.trackedFlagId)) {
+        latestByFlag.set(decision.trackedFlagId, decision)
+      }
+    }
+
+    const candidates: IEnableOffConflictCandidate[] = []
+    for (const decision of latestByFlag.values()) {
+      if (decision.decision !== ReleaseFlagDecisionType.ENABLE_IN_RELEASE) continue
+      if (decision.release.deletedAt !== null) continue
+      if (!SHIP_OFF_RELEASE_STATUSES.includes(decision.release.status)) continue
+
+      const allStates = decision.trackedFlag.flagsmithFlags.flatMap((flag) => flag.states)
+      if (allStates.length === 0) continue
+      const someDisabled = allStates.some((state) => !state.enabled)
+      if (!someDisabled) continue
+
+      candidates.push({
+        trackedFlagId: decision.trackedFlag.id,
+        projectId: decision.trackedFlag.projectId,
+        key: decision.trackedFlag.key,
+        releaseId: decision.releaseId,
+        releaseName: decision.release.name ?? decision.release.compareRef,
       })
     }
 

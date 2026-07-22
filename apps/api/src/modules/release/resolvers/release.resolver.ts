@@ -145,7 +145,13 @@ export class ReleaseResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ReleaseObjectType> {
     return this.commandBus.execute(
-      new SaveReleaseSummaryCommand(user.id, input.releaseId, input.summary),
+      new SaveReleaseSummaryCommand(
+        user.id,
+        input.releaseId,
+        input.summary,
+        input.summaryProfileId,
+        input.summaryModel,
+      ),
     )
   }
 

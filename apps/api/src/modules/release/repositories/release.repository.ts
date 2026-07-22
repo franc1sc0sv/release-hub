@@ -4,6 +4,7 @@ import { kysely } from '@release-hub/db'
 import { sql } from 'kysely'
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
 import { AiDraftStatus } from '../../../common/types/ai-draft-status.enum'
+import { AiSummaryStatus } from '../../../common/types/ai-summary-status.enum'
 import { IReleaseRepository } from '../interfaces/release.repository'
 import type {
   IRelease,
@@ -29,6 +30,9 @@ type ReleaseRow = {
   summaryEditedAt: Date | null
   deployedAt: Date | null
   githubDeploymentId: string | null
+  summaryProfileId: string | null
+  summaryModel: string | null
+  summaryStatus: string
   createdAt: Date
   updatedAt: Date
 }
@@ -46,6 +50,13 @@ const AI_STATUS_MAP: Record<string, AiDraftStatus> = {
   running: AiDraftStatus.RUNNING,
   ready: AiDraftStatus.READY,
   failed: AiDraftStatus.FAILED,
+}
+
+const SUMMARY_STATUS_MAP: Record<string, AiSummaryStatus> = {
+  idle: AiSummaryStatus.IDLE,
+  generating: AiSummaryStatus.GENERATING,
+  ready: AiSummaryStatus.READY,
+  failed: AiSummaryStatus.FAILED,
 }
 
 @Injectable()
@@ -205,10 +216,39 @@ export class ReleaseRepository extends IReleaseRepository {
     return rows.map((r) => r.id)
   }
 
-  updateSummary = async (id: string, summary: string, tx: TxClient): Promise<IRelease> => {
+  updateSummaryStatus = async (id: string, status: AiSummaryStatus, tx: TxClient): Promise<IRelease> => {
     const row = await tx.release.update({
       where: { id },
-      data: { summary, summaryEditedAt: new Date() },
+      data: { summaryStatus: status },
+    })
+    return this.toIRelease(row)
+  }
+
+  updateSummaryStatusBulk = async (ids: string[], status: AiSummaryStatus, tx: TxClient): Promise<void> => {
+    await tx.release.updateMany({
+      where: { id: { in: ids } },
+      data: { summaryStatus: status },
+    })
+  }
+
+  findIdsBySummaryStatus = async (status: AiSummaryStatus, tx: TxClient): Promise<string[]> => {
+    const rows = await tx.release.findMany({
+      where: { summaryStatus: status, deletedAt: null },
+      select: { id: true },
+    })
+    return rows.map((r) => r.id)
+  }
+
+  updateSummary = async (
+    id: string,
+    summary: string,
+    summaryProfileId: string | null,
+    summaryModel: string | null,
+    tx: TxClient,
+  ): Promise<IRelease> => {
+    const row = await tx.release.update({
+      where: { id },
+      data: { summary, summaryEditedAt: new Date(), summaryProfileId, summaryModel },
     })
     return this.toIRelease(row)
   }
@@ -236,6 +276,9 @@ export class ReleaseRepository extends IReleaseRepository {
       summaryEditedAt: row.summaryEditedAt,
       deployedAt: row.deployedAt,
       githubDeploymentId: row.githubDeploymentId,
+      summaryProfileId: row.summaryProfileId,
+      summaryModel: row.summaryModel,
+      summaryStatus: SUMMARY_STATUS_MAP[row.summaryStatus] ?? AiSummaryStatus.IDLE,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }

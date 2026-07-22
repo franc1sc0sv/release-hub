@@ -7,6 +7,7 @@ import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { NotFoundException } from '../../../../common/errors'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
+import { sanitizeSummaryHtml } from '../../../../common/text/sanitize-summary-html'
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { ReleaseObjectType } from '../../types/release.type'
@@ -46,7 +47,13 @@ export class SaveReleaseSummaryHandler extends BaseCommandHandler<
       tx,
     )
 
-    const updated = await this.releaseRepository.updateSummary(command.releaseId, command.summary, tx)
+    const updated = await this.releaseRepository.updateSummary(
+      command.releaseId,
+      sanitizeSummaryHtml(command.summary),
+      command.summaryProfileId,
+      command.summaryModel,
+      tx,
+    )
 
     return toReleaseObjectType(updated)
   }

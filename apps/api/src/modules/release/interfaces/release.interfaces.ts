@@ -1,5 +1,6 @@
 import type { ReleaseStatus } from '../../../common/types/release-status.enum'
 import type { AiDraftStatus } from '../../../common/types/ai-draft-status.enum'
+import type { AiSummaryStatus } from '../../../common/types/ai-summary-status.enum'
 import type { TicketSource } from '../../../common/types/ticket-source.enum'
 import type { IGitHubCommit } from '../../integration/interfaces/github-client.interface'
 
@@ -73,6 +74,9 @@ export interface IRelease {
   summaryEditedAt: Date | null
   deployedAt: Date | null
   githubDeploymentId: string | null
+  summaryProfileId: string | null
+  summaryModel: string | null
+  summaryStatus: AiSummaryStatus
   createdAt: Date
   updatedAt: Date
 }

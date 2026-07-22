@@ -8,6 +8,7 @@ import type {
   IEnabledProdFlagSummary,
   IDeployedReleaseSummary,
   IShipOffReminderCandidate,
+  IEnableOffConflictCandidate,
 } from './notification.interfaces'
 
 export abstract class INotificationReadRepository {
@@ -29,7 +30,11 @@ export abstract class INotificationReadRepository {
     IDeployedReleaseSummary[]
   >
   abstract findShipOffReminderCandidates: RepositoryMethod<
-    [projectId: string, reminderIntervalDays: number],
+    [projectId: string],
     IShipOffReminderCandidate[]
+  >
+  abstract findEnableButOffConflictCandidates: RepositoryMethod<
+    [projectId: string],
+    IEnableOffConflictCandidate[]
   >
 }

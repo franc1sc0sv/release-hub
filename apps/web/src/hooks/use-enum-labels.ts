@@ -17,6 +17,7 @@ import type {
   NotificationChannel,
   DigestFrequency,
   BranchBlockReason,
+  SummaryExampleKind,
 } from '@/generated/graphql'
 
 export function useEnumLabels() {
@@ -40,5 +41,6 @@ export function useEnumLabels() {
     notificationChannel: (v: NotificationChannel): string => t(`notificationChannel.${v}`),
     digestFrequency: (v: DigestFrequency): string => t(`digestFrequency.${v}`),
     branchBlockReason: (v: BranchBlockReason): string => t(`branchBlockReason.${v}`),
+    summaryExampleKind: (v: SummaryExampleKind): string => t(`summaryExampleKind.${v}`),
   }
 }

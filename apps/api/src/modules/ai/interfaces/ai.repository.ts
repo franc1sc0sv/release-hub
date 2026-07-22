@@ -32,6 +32,7 @@ export interface IAiReleaseContext {
   name: string
   compareRef: string
   projectId: string
+  tags: string[]
   features: IAiFeatureContext[]
 }
 

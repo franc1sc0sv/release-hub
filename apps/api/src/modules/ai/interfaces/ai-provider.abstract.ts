@@ -45,14 +45,28 @@ export interface IAiPrSummaryResult {
   usage?: IAiUsage
 }
 
+export interface IAiSummaryProfileExample {
+  content: string
+  explanation: string
+}
+
+export interface IAiSummaryProfile {
+  outputTemplate: string | null
+  rules: string[]
+  goodExamples: IAiSummaryProfileExample[]
+  badExamples: IAiSummaryProfileExample[]
+}
+
 export interface IAiStreamSummaryInput {
   releaseTitle: string
-  tone: string | null
   model: string | null
+  tags: string[]
+  profile: IAiSummaryProfile | null
   features: Array<{
     featureId: string
     name: string
     description: string
+    kind: string
     statusLine: string
     prSummaries: string[]
   }>

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { DEFAULT_FEATURES, OrgRole, GithubInstallationStatus } from '@release-hub/db'
+import { DEFAULT_FEATURES, DEFAULT_SUMMARY_PROFILE, OrgRole, GithubInstallationStatus } from '@release-hub/db'
 import { IProjectRepository } from '../interfaces/project.repository'
 import type {
   IProject,
@@ -149,6 +149,31 @@ export class ProjectRepository extends IProjectRepository {
         tags: [],
         suggested: false,
       })),
+    })
+  }
+
+  createDefaultSummaryProfile = async (projectId: string, tx: TxClient): Promise<void> => {
+    await tx.summaryProfile.create({
+      data: {
+        projectId,
+        name: DEFAULT_SUMMARY_PROFILE.name,
+        description: DEFAULT_SUMMARY_PROFILE.description,
+        outputTemplate: DEFAULT_SUMMARY_PROFILE.outputTemplate,
+        rules: {
+          create: DEFAULT_SUMMARY_PROFILE.rules.map((rule) => ({
+            content: rule.content,
+            position: rule.position,
+          })),
+        },
+        examples: {
+          create: DEFAULT_SUMMARY_PROFILE.examples.map((example) => ({
+            kind: example.kind,
+            content: example.content,
+            explanation: example.explanation,
+            position: example.position,
+          })),
+        },
+      },
     })
   }
 

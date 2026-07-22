@@ -22,6 +22,13 @@ type AiSuggestionType {
   rationale: String!
 }
 
+enum AiSummaryStatus {
+  FAILED
+  GENERATING
+  IDLE
+  READY
+}
+
 input AssignPrToFeatureInput {
   featureId: ID!
   prId: ID!
@@ -239,6 +246,15 @@ input CreateReleaseInput {
   tags: [String!]
 }
 
+input CreateSummaryProfileInput {
+  description: String
+  examples: [SummaryProfileExampleInput!]!
+  name: String!
+  outputTemplate: String
+  projectId: ID!
+  rules: [SummaryProfileRuleInput!]!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -258,6 +274,10 @@ input DeleteGithubBranchesInput {
 
 input DeleteProjectTagInput {
   tagId: ID!
+}
+
+input DeleteSummaryProfileInput {
+  profileId: ID!
 }
 
 enum DigestFrequency {
@@ -506,13 +526,6 @@ type FlagsmithVerifyResult {
   warnings: [String!]!
 }
 
-input GenerateSummaryInput {
-  featureIds: [ID!]
-  model: String
-  releaseId: ID!
-  tone: String
-}
-
 input GetFlagHistoryInput {
   flagKey: String!
   limit: Int = 20
@@ -654,12 +667,14 @@ type Mutation {
   createProject(input: CreateProjectInput!): ProjectType!
   createProjectTag(input: CreateProjectTagInput!): ProjectTagType!
   createRelease(input: CreateReleaseInput!): ReleaseObjectType!
+  createSummaryProfile(input: CreateSummaryProfileInput!): SummaryProfileType!
   deleteFeature(id: ID!): Boolean!
   deleteGithubBranches(input: DeleteGithubBranchesInput!): [DeleteBranchOutcomeType!]!
   deleteOrganization(organizationId: ID!): Boolean!
   deleteProject(id: ID!): Boolean!
   deleteProjectTag(input: DeleteProjectTagInput!): Boolean!
   deleteRelease(releaseId: ID!): ReleaseObjectType!
+  deleteSummaryProfile(input: DeleteSummaryProfileInput!): Boolean!
   disconnectLinear(projectId: ID!): Boolean!
   disconnectSlack(projectId: ID!): Boolean!
   generatePrSummary(prId: ID!): PullRequestType!
@@ -692,6 +707,7 @@ type Mutation {
   setReleaseStatus(input: SetReleaseStatusInput!): ReleaseObjectType!
   setSlackChannel(channelId: String!, channelName: String!, projectId: ID!): SlackConnectionStatus!
   shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
+  startSummaryGeneration(input: StartSummaryGenerationInput!): ReleaseObjectType!
   syncFlagsmithFlags(projectId: ID!): Int!
   syncGithubDeployments(releaseId: ID!): SyncGithubDeploymentsResultType!
   triggerFlagDigest(projectId: ID!): Boolean!
@@ -703,6 +719,7 @@ type Mutation {
   updateProject(input: UpdateProjectInput!): ProjectType!
   updateRelease(input: UpdateReleaseInput!): ReleaseObjectType!
   updateSlackNotificationSettings(notifyOnCreated: Boolean!, notifyOnDeployed: Boolean!, notifyOnShipped: Boolean!, projectId: ID!): SlackConnectionStatus!
+  updateSummaryProfile(input: UpdateSummaryProfileInput!): SummaryProfileType!
 }
 
 enum NotificationChannel {
@@ -885,6 +902,8 @@ type Query {
   slackChannels(projectId: ID!): [SlackChannel!]!
   slackConnection(projectId: ID!): SlackConnectionStatus!
   suggestFeatureForPr(prId: ID!): AiSuggestionType!
+  summaryProfile(profileId: ID!): SummaryProfileType!
+  summaryProfiles(projectId: ID!): [SummaryProfileType!]!
   trackedFlag(key: String!, projectId: ID!): TrackedFlagDetailType
   trackedFlags(projectId: ID!): [TrackedFlagType!]!
   unreadNotificationsCount: Int!
@@ -974,6 +993,9 @@ type ReleaseObjectType {
   status: ReleaseStatus!
   summary: String
   summaryEditedAt: DateTime
+  summaryModel: String
+  summaryProfileId: ID
+  summaryStatus: AiSummaryStatus!
   tags: [String!]!
   updatedAt: DateTime!
 }
@@ -1037,6 +1059,8 @@ input SavePrSummaryInput {
 input SaveReleaseSummaryInput {
   releaseId: ID!
   summary: String!
+  summaryModel: String
+  summaryProfileId: ID
 }
 
 type ScanReleasePullRequestsSummaryType {
@@ -1101,13 +1125,50 @@ enum SortDirection {
   DESC
 }
 
-type Subscription {
-  generateSummary(input: GenerateSummaryInput!): SummaryChunkType!
+input StartSummaryGenerationInput {
+  featureIds: [ID!]
+  model: String
+  releaseId: ID!
+  summaryProfileId: ID
 }
 
-type SummaryChunkType {
-  chunk: String!
-  done: Boolean!
+enum SummaryExampleKind {
+  BAD
+  GOOD
+}
+
+input SummaryProfileExampleInput {
+  content: String!
+  explanation: String!
+  kind: SummaryExampleKind!
+}
+
+type SummaryProfileExampleType {
+  content: String!
+  explanation: String!
+  id: ID!
+  kind: SummaryExampleKind!
+}
+
+input SummaryProfileRuleInput {
+  content: String!
+}
+
+type SummaryProfileRuleType {
+  content: String!
+  id: ID!
+}
+
+type SummaryProfileType {
+  createdAt: DateTime!
+  description: String
+  examples: [SummaryProfileExampleType!]!
+  id: ID!
+  name: String!
+  outputTemplate: String
+  projectId: ID!
+  rules: [SummaryProfileRuleType!]!
+  updatedAt: DateTime!
 }
 
 type SyncGithubDeploymentsResultType {
@@ -1221,6 +1282,15 @@ input UpdateReleaseInput {
   prAssignments: [PrAssignmentInput!]
   releaseId: ID!
   tags: [String!]
+}
+
+input UpdateSummaryProfileInput {
+  description: String
+  examples: [SummaryProfileExampleInput!]!
+  name: String!
+  outputTemplate: String
+  profileId: ID!
+  rules: [SummaryProfileRuleInput!]!
 }
 
 type UserProfileType {

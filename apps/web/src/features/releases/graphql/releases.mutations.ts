@@ -76,6 +76,19 @@ export const SAVE_RELEASE_SUMMARY = graphql(`
       id
       summary
       summaryEditedAt
+      summaryModel
+      summaryProfileId
+    }
+  }
+`)
+
+export const START_SUMMARY_GENERATION = graphql(`
+  mutation StartSummaryGeneration($input: StartSummaryGenerationInput!) {
+    startSummaryGeneration(input: $input) {
+      id
+      summaryStatus
+      summaryModel
+      summaryProfileId
     }
   }
 `)

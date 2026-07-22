@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
 import { AiDraftStatus } from '../../../common/types/ai-draft-status.enum'
+import { AiSummaryStatus } from '../../../common/types/ai-summary-status.enum'
 
 @ObjectType()
 export class ReleaseObjectType {
@@ -42,6 +43,15 @@ export class ReleaseObjectType {
 
   @Field(() => String, { nullable: true })
   githubDeploymentId: string | null
+
+  @Field(() => ID, { nullable: true })
+  summaryProfileId: string | null
+
+  @Field(() => String, { nullable: true })
+  summaryModel: string | null
+
+  @Field(() => AiSummaryStatus)
+  summaryStatus: AiSummaryStatus
 
   @Field(() => Date)
   createdAt: Date

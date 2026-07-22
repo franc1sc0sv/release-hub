@@ -34,6 +34,8 @@ import esOrganization from './es/organization.json'
 import enOrganization from './en/organization.json'
 import esGithubSetup from './es/githubSetup.json'
 import enGithubSetup from './en/githubSetup.json'
+import esSummaryProfiles from './es/summaryProfiles.json'
+import enSummaryProfiles from './en/summaryProfiles.json'
 
 i18n.use(initReactI18next).init({
   lng: localStorage.getItem('language') ?? 'en',
@@ -58,6 +60,7 @@ i18n.use(initReactI18next).init({
       palette: esPalette,
       organization: esOrganization,
       githubSetup: esGithubSetup,
+      summaryProfiles: esSummaryProfiles,
     },
     en: {
       enums: enEnums,
@@ -77,6 +80,7 @@ i18n.use(initReactI18next).init({
       palette: enPalette,
       organization: enOrganization,
       githubSetup: enGithubSetup,
+      summaryProfiles: enSummaryProfiles,
     },
   },
   interpolation: {

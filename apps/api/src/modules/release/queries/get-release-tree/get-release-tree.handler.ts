@@ -13,7 +13,6 @@ import { IPullRequestRepository } from '../../interfaces/pull-request.repository
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import { IPullRequestFlagChangeRepository } from '../../../flag-tracking/interfaces/pull-request-flag-change.repository'
 import { ReleaseTreeType, ReleaseFeatureNodeType } from '../../types/release-tree.type'
-import { FeatureState } from '../../../../common/types/feature-state.enum'
 import { FlagStateType } from '../../../feature/types/flag-state.type'
 import { toReleaseObjectType, toPullRequestType } from '../../types/release.mappers'
 import { toFeatureType } from '../../../feature/types/feature.mappers'
@@ -99,7 +98,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
       })
       .map((feature) => {
         const ledger = ledgerByFeatureId.get(feature.id)
-        const state = ledger?.state ?? FeatureState.IN_PROGRESS
+        const state = ledger?.state ?? feature.state
         const flagState = this.toFlagStateType(ledger)
         const node = new ReleaseFeatureNodeType()
         node.feature = toFeatureType(feature)

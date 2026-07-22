@@ -252,17 +252,34 @@
     "generate": "Generate",
     "editor": "Client summary",
     "editorPlaceholder": "Generate or write the client-facing summary here…",
+    "documentEmpty": "No summary yet. Generate one, or switch to Edit to write your own.",
+    "generating": {
+      "heading": "Generating summary…",
+      "description": "The AI is writing the client-facing summary. This keeps running if you navigate away."
+    },
+    "generateFailed": "Summary generation failed. Please try again.",
+    "retry": "Retry",
+    "popoverTitle": "Generate summary",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Summary saved",
     "saveError": "Failed to save summary",
     "lastSaved": "Last saved {{time}}",
-    "copyLink": "Copy link",
-    "copyLinkAriaLabel": "Copy page link to clipboard",
-    "linkCopied": "Copied!",
+    "mode": {
+      "label": "View mode",
+      "read": "Read",
+      "edit": "Edit"
+    },
+    "profile": {
+      "label": "Profile",
+      "none": "No profile",
+      "manage": "Manage profiles"
+    },
     "featureSelection": {
       "label": "Include in summary",
-      "hint": "Select at least one feature to generate a summary"
+      "hint": "Select at least one feature to generate a summary",
+      "notIncluded": "Not included",
+      "excludedReason": "Can't be added — this feature is {{state}} and hasn't shipped yet. Set it to a released state to include it."
     }
   },
   "prSummary": {
@@ -278,6 +295,35 @@
     "editedAt": "Edited {{time}}",
     "generateError": "Failed to generate summary",
     "saveError": "Failed to save summary"
+  },
+  "overview": {
+    "stats": {
+      "prs": "Pull requests",
+      "features": "Features",
+      "commits": "Commits",
+      "tickets": "Tickets linked",
+      "flagChanges": "Flag changes"
+    },
+    "featureBreakdown": {
+      "title": "Feature status",
+      "empty": "No features assigned to this release yet."
+    },
+    "readiness": {
+      "title": "Client readiness",
+      "liveForClients": "Live for clients",
+      "fraction": "{{live}} / {{total}}"
+    },
+    "summary": {
+      "ready": "Client summary ready",
+      "notReady": "No client summary yet",
+      "lastEdited": "Edited {{time}}",
+      "open": "Open",
+      "create": "Create"
+    },
+    "flagActivity": {
+      "title": "Flag activity",
+      "empty": "No feature-flag changes in this release."
+    }
   },
   "coverage": {
     "title": "Coverage",
@@ -302,11 +348,13 @@
     "error": "Failed to delete release"
   },
   "export": {
-    "markdown": "Export Markdown",
     "pdf": "Export PDF",
     "exporting": "Exporting...",
     "noSummary": "Generate the summary first before exporting",
-    "downloadFailed": "Download failed"
+    "downloadFailed": "Download failed",
+    "brand": "Release Hub",
+    "reportTitle": "Client summary",
+    "generatedLabel": "Generated"
   },
   "status": {
     "label": "Release status"

@@ -24,6 +24,7 @@ import { AiModule } from './modules/ai/ai.module'
 import { CollaborationModule } from './modules/collaboration/collaboration.module'
 import { IntegrationModule } from './modules/integration/integration.module'
 import { ProjectTagModule } from './modules/project-tag/project-tag.module'
+import { SummaryProfileModule } from './modules/summary-profile/summary-profile.module'
 import { GithubAuthModule } from './modules/github-auth/github-auth.module'
 import { GithubAppModule } from './modules/github-app/github-app.module'
 import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
@@ -84,6 +85,7 @@ import { RepoOpsModule } from './modules/repo-ops/repo-ops.module'
     CollaborationModule,
     IntegrationModule,
     ProjectTagModule,
+    SummaryProfileModule,
     GithubAuthModule,
     GithubAppModule,
     LinearAuthModule,

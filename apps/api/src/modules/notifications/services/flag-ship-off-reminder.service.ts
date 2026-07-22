@@ -40,11 +40,7 @@ export class FlagShipOffReminderService {
 
   async runShipOffReminderScanForProject(project: IProjectForDigest): Promise<void> {
     const candidates = await this.db.$transaction((tx) =>
-      this.notificationReadRepository.findShipOffReminderCandidates(
-        project.id,
-        project.flagReminderIntervalDays,
-        tx,
-      ),
+      this.notificationReadRepository.findShipOffReminderCandidates(project.id, tx),
     )
     if (candidates.length === 0) return
 

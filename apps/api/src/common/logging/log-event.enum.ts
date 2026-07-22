@@ -9,6 +9,10 @@ export const LogEvent = {
   AI_DRAFT_FAILED: 'ai.draft.failed',
   AI_DRAFT_ORPHAN_SWEEP: 'ai.draft.orphan.sweep',
   AI_DRAFT_REGENERATE: 'ai.draft.regenerate',
+  AI_SUMMARY_STARTED: 'ai.summary.started',
+  AI_SUMMARY_COMPLETED: 'ai.summary.completed',
+  AI_SUMMARY_FAILED: 'ai.summary.failed',
+  AI_SUMMARY_ORPHAN_SWEEP: 'ai.summary.orphan.sweep',
   FLAGSMITH_SYNC_FAILED: 'flagsmith.sync.failed',
 } as const
 

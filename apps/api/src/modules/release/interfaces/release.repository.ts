@@ -2,6 +2,7 @@ import type { RepositoryMethod } from '../../../common/cqrs/types'
 import type { IBaseRepository } from '../../../common/cqrs/types'
 import type { ReleaseStatus } from '../../../common/types/release-status.enum'
 import type { AiDraftStatus } from '../../../common/types/ai-draft-status.enum'
+import type { AiSummaryStatus } from '../../../common/types/ai-summary-status.enum'
 import type {
   IRelease,
   ICreateReleaseData,
@@ -25,6 +26,12 @@ export abstract class IReleaseRepository implements IBaseRepository<IRelease> {
   abstract updateAiDraftStatus: RepositoryMethod<[id: string, status: AiDraftStatus], IRelease>
   abstract updateAiDraftStatusBulk: RepositoryMethod<[ids: string[], status: AiDraftStatus], void>
   abstract findIdsByAiDraftStatus: RepositoryMethod<[status: AiDraftStatus], string[]>
-  abstract updateSummary: RepositoryMethod<[id: string, summary: string], IRelease>
+  abstract updateSummaryStatus: RepositoryMethod<[id: string, status: AiSummaryStatus], IRelease>
+  abstract updateSummaryStatusBulk: RepositoryMethod<[ids: string[], status: AiSummaryStatus], void>
+  abstract findIdsBySummaryStatus: RepositoryMethod<[status: AiSummaryStatus], string[]>
+  abstract updateSummary: RepositoryMethod<
+    [id: string, summary: string, summaryProfileId: string | null, summaryModel: string | null],
+    IRelease
+  >
   abstract softDelete: RepositoryMethod<[id: string], IRelease>
 }

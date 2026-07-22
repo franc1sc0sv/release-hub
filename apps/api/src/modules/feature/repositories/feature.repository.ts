@@ -12,6 +12,7 @@ import { FeatureKind } from '../../../common/types/feature-kind.enum'
 import { FeatureState } from '../../../common/types/feature-state.enum'
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
 import { AiDraftStatus } from '../../../common/types/ai-draft-status.enum'
+import { AiSummaryStatus } from '../../../common/types/ai-summary-status.enum'
 import { TicketSource } from '../../../common/types/ticket-source.enum'
 
 const prismaToAppReleaseStatus: Record<string, ReleaseStatus> = {
@@ -27,6 +28,13 @@ const prismaToAppAiDraftStatus: Record<string, AiDraftStatus> = {
   running: AiDraftStatus.RUNNING,
   ready: AiDraftStatus.READY,
   failed: AiDraftStatus.FAILED,
+}
+
+const prismaToAppSummaryStatus: Record<string, AiSummaryStatus> = {
+  idle: AiSummaryStatus.IDLE,
+  generating: AiSummaryStatus.GENERATING,
+  ready: AiSummaryStatus.READY,
+  failed: AiSummaryStatus.FAILED,
 }
 
 const prismaToAppState: Record<string, FeatureState> = {
@@ -190,6 +198,9 @@ export class FeatureRepository extends IFeatureRepository {
     summaryEditedAt: Date | null
     deployedAt: Date | null
     githubDeploymentId: string | null
+    summaryProfileId: string | null
+    summaryModel: string | null
+    summaryStatus: string
     createdAt: Date
     updatedAt: Date
   }): IRelease {
@@ -207,6 +218,9 @@ export class FeatureRepository extends IFeatureRepository {
       summaryEditedAt: row.summaryEditedAt,
       deployedAt: row.deployedAt,
       githubDeploymentId: row.githubDeploymentId,
+      summaryProfileId: row.summaryProfileId,
+      summaryModel: row.summaryModel,
+      summaryStatus: prismaToAppSummaryStatus[row.summaryStatus] ?? AiSummaryStatus.IDLE,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }

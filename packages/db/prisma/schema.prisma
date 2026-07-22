@@ -49,6 +49,15 @@ enum AiDraftStatus {
   @@map("ai_draft_status")
 }
 
+enum AiSummaryStatus {
+  idle
+  generating
+  ready
+  failed
+
+  @@map("ai_summary_status")
+}
+
 enum ReleaseStatus {
   draft
   ready_to_release
@@ -111,6 +120,13 @@ enum GithubInstallationStatus {
   active
   suspended
   deleted
+}
+
+enum SummaryExampleKind {
+  good
+  bad
+
+  @@map("summary_example_kind")
 }
 
 model Organization {
@@ -316,6 +332,7 @@ model Project {
   blockedBranches       BlockedBranch[]
   flagHistoryEvents     FlagHistoryEvent[]
   notifications         Notification[]
+  summaryProfiles       SummaryProfile[]
 
   @@index([deletedAt])
   @@index([organizationId])
@@ -358,6 +375,9 @@ model Release {
   summaryEditedAt  DateTime?     @map("summary_edited_at")
   deployedAt         DateTime? @map("deployed_at")
   githubDeploymentId String?   @map("github_deployment_id")
+  summaryProfileId String?       @map("summary_profile_id")
+  summaryModel     String?       @map("summary_model")
+  summaryStatus    AiSummaryStatus @default(idle) @map("summary_status")
   createdAt        DateTime      @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
   deletedAt        DateTime?     @map("deleted_at")
@@ -367,6 +387,7 @@ model Release {
   featureInReleases FeatureInRelease[]
   flagDecisions     ReleaseFlagDecision[]
   flagHistoryEvents FlagHistoryEvent[]
+  summaryProfile    SummaryProfile?   @relation(fields: [summaryProfileId], references: [id], onDelete: SetNull)
 
   @@index([projectId, deletedAt])
   @@map("releases")
@@ -812,4 +833,52 @@ model Notification {
   @@index([userId, readAt])
   @@index([userId, createdAt])
   @@map("notifications")
+}
+
+model SummaryProfile {
+  id             String    @id @default(cuid())
+  projectId      String    @map("project_id")
+  name           String
+  description    String?
+  outputTemplate String?   @map("output_template")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  project  Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  rules    SummaryProfileRule[]
+  examples SummaryProfileExample[]
+  releases Release[]
+
+  @@unique([projectId, name])
+  @@index([projectId, deletedAt])
+  @@map("summary_profiles")
+}
+
+model SummaryProfileRule {
+  id               String   @id @default(cuid())
+  summaryProfileId String   @map("summary_profile_id")
+  content          String
+  position         Int      @default(0)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  summaryProfile SummaryProfile @relation(fields: [summaryProfileId], references: [id], onDelete: Cascade)
+
+  @@index([summaryProfileId])
+  @@map("summary_profile_rules")
+}
+
+model SummaryProfileExample {
+  id               String             @id @default(cuid())
+  summaryProfileId String             @map("summary_profile_id")
+  kind             SummaryExampleKind
+  content          String
+  explanation      String
+  position         Int                @default(0)
+  createdAt        DateTime           @default(now()) @map("created_at")
+
+  summaryProfile SummaryProfile @relation(fields: [summaryProfileId], references: [id], onDelete: Cascade)
+
+  @@index([summaryProfileId])
+  @@map("summary_profile_examples")
 }

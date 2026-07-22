@@ -17,6 +17,7 @@ import { NotificationDispatcherService } from './services/notification-dispatche
 import { FlagDigestService } from './services/flag-digest.service'
 import { FlagStalenessService } from './services/flag-staleness.service'
 import { FlagShipOffReminderService } from './services/flag-ship-off-reminder.service'
+import { FlagEnableOffConflictService } from './services/flag-enable-off-conflict.service'
 import { NotificationCronService } from './services/notification-cron.service'
 import { GetNotificationPreferencesHandler } from './queries/get-notification-preferences/get-notification-preferences.handler'
 import { GetNotificationsPageHandler } from './queries/get-notifications-page/get-notifications-page.handler'
@@ -45,6 +46,7 @@ import { NotificationFlagConflictDetectedHandler } from './events/flag-conflict-
     FlagDigestService,
     FlagStalenessService,
     FlagShipOffReminderService,
+    FlagEnableOffConflictService,
     NotificationCronService,
     GetNotificationPreferencesHandler,
     GetNotificationsPageHandler,
