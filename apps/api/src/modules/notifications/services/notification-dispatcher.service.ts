@@ -11,13 +11,14 @@ import { buildInAppNotificationUrl } from '../providers/notification-message.uti
 import { EmailNotificationProvider } from '../providers/email-notification.provider'
 import { SlackDmProvider } from '../providers/slack-dm.provider'
 import { SlackChannelProvider } from '../providers/slack-channel.provider'
+import { INotificationPubSub } from '../interfaces/notification-pubsub.abstract'
+import { defaultEnabledForChannel } from '../utils/default-notification-preference.util'
 import type {
   INotificationPayload,
   IProjectMemberForNotification,
   IUserNotificationPreference,
 } from '../interfaces/notification.interfaces'
 
-const DEFAULT_ENABLED = true
 const DEFAULT_DIGEST_FREQUENCY: DigestFrequency = DigestFrequency.WEEKLY
 
 const RELEASE_EVENT_TYPES: NotificationType[] = [
@@ -32,7 +33,7 @@ function resolvePreference(
   channel: NotificationChannel,
 ): { enabled: boolean; digestFrequency: DigestFrequency } {
   const match = preferences.find((pref) => pref.notificationType === type && pref.channel === channel)
-  if (!match) return { enabled: DEFAULT_ENABLED, digestFrequency: DEFAULT_DIGEST_FREQUENCY }
+  if (!match) return { enabled: defaultEnabledForChannel(channel), digestFrequency: DEFAULT_DIGEST_FREQUENCY }
   return {
     enabled: match.enabled,
     digestFrequency: match.digestFrequency ?? DEFAULT_DIGEST_FREQUENCY,
@@ -49,6 +50,7 @@ export class NotificationDispatcherService {
     private readonly emailProvider: EmailNotificationProvider,
     private readonly slackDmProvider: SlackDmProvider,
     private readonly slackChannelProvider: SlackChannelProvider,
+    private readonly notificationPubSub: INotificationPubSub,
   ) {}
 
   async dispatchToProjectMembers(
@@ -82,7 +84,7 @@ export class NotificationDispatcherService {
         payload.flagKey,
         payload.releaseId,
       )
-      await this.db.$transaction((tx) =>
+      const createdNotifications = await this.db.$transaction((tx) =>
         this.notificationRepository.createMany(
           inAppRecipients.map((member) => ({
             userId: member.userId,
@@ -94,6 +96,12 @@ export class NotificationDispatcherService {
             flagKey: payload.flagKey,
           })),
           tx,
+        ),
+      )
+
+      await Promise.all(
+        createdNotifications.map((notification) =>
+          this.notificationPubSub.publish(notification.userId, notification),
         ),
       )
     }

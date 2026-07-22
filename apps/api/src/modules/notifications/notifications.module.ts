@@ -13,6 +13,8 @@ import { NotificationRepository } from './repositories/notification.repository'
 import { EmailNotificationProvider } from './providers/email-notification.provider'
 import { SlackDmProvider } from './providers/slack-dm.provider'
 import { SlackChannelProvider } from './providers/slack-channel.provider'
+import { INotificationPubSub } from './interfaces/notification-pubsub.abstract'
+import { NotificationPubSubService } from './services/notification-pubsub.service'
 import { NotificationDispatcherService } from './services/notification-dispatcher.service'
 import { FlagDigestService } from './services/flag-digest.service'
 import { FlagStalenessService } from './services/flag-staleness.service'
@@ -26,6 +28,7 @@ import { UpdateNotificationPreferenceHandler } from './commands/update-notificat
 import { TriggerFlagDigestHandler } from './commands/trigger-flag-digest/trigger-flag-digest.handler'
 import { MarkNotificationReadHandler } from './commands/mark-notification-read/mark-notification-read.handler'
 import { MarkAllNotificationsReadHandler } from './commands/mark-all-notifications-read/mark-all-notifications-read.handler'
+import { ClearNotificationsHandler } from './commands/clear-notifications/clear-notifications.handler'
 import { NotificationReleaseCreatedHandler } from './events/release-created.handler'
 import { NotificationReleaseShippedHandler } from './events/release-shipped.handler'
 import { NotificationReleaseDeployedHandler } from './events/release-deployed.handler'
@@ -42,6 +45,7 @@ import { NotificationFlagConflictDetectedHandler } from './events/flag-conflict-
     EmailNotificationProvider,
     SlackDmProvider,
     SlackChannelProvider,
+    { provide: INotificationPubSub, useClass: NotificationPubSubService },
     NotificationDispatcherService,
     FlagDigestService,
     FlagStalenessService,
@@ -55,6 +59,7 @@ import { NotificationFlagConflictDetectedHandler } from './events/flag-conflict-
     TriggerFlagDigestHandler,
     MarkNotificationReadHandler,
     MarkAllNotificationsReadHandler,
+    ClearNotificationsHandler,
     NotificationReleaseCreatedHandler,
     NotificationReleaseShippedHandler,
     NotificationReleaseDeployedHandler,

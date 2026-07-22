@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bell } from 'lucide-react'
+import { useSubscription } from '@apollo/client/react'
 import { Sheet, SheetTrigger } from '@/components/ui/sheet'
 import {
   SidebarMenu,
@@ -9,6 +10,8 @@ import {
   SidebarMenuBadge,
 } from '@/components/ui/sidebar'
 import { useUnreadNotificationsCount } from '../hooks/use-unread-notifications-count'
+import { useNotifications } from '../hooks/use-notifications'
+import { NOTIFICATION_RECEIVED } from '../graphql/notifications.queries'
 import { NotificationsSheetContent } from './NotificationsSheetContent'
 
 const MAX_DISPLAY_COUNT = 99
@@ -17,6 +20,19 @@ export function NotificationBell() {
   const { t } = useTranslation('notifications')
   const [open, setOpen] = useState(false)
   const { unreadCount, refetch: refetchUnreadCount } = useUnreadNotificationsCount()
+  const notifications = useNotifications(!open)
+
+  useSubscription(NOTIFICATION_RECEIVED, {
+    variables: { projectId: undefined },
+    onData: ({ data }) => {
+      const entry = data.data?.notificationReceived
+      if (!entry) return
+      void refetchUnreadCount()
+      if (open) {
+        notifications.prependNotification(entry)
+      }
+    },
+  })
 
   const badgeLabel = unreadCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : String(unreadCount)
 
@@ -47,8 +63,8 @@ export function NotificationBell() {
         </SidebarMenuItem>
       </SidebarMenu>
       <NotificationsSheetContent
-        open={open}
         unreadCount={unreadCount}
+        notifications={notifications}
         onNavigate={() => setOpen(false)}
         onReadStateChange={() => void refetchUnreadCount()}
       />

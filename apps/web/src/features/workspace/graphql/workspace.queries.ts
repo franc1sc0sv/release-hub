@@ -11,13 +11,11 @@ export const LIST_PROJECTS = graphql(`
         github
         linear
         flagsmith
-        slack
       }
       integrations {
         github
         linear
         flagsmith
-        slack
       }
     }
   }
@@ -33,13 +31,11 @@ export const GET_PROJECT = graphql(`
         github
         linear
         flagsmith
-        slack
       }
       integrations {
         github
         linear
         flagsmith
-        slack
       }
     }
   }

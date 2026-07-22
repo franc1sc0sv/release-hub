@@ -10,6 +10,7 @@ import { NotificationType } from '../../../../common/types/notification-type.enu
 import { NotificationChannel } from '../../../../common/types/notification-channel.enum'
 import { DigestFrequency } from '../../../../common/types/digest-frequency.enum'
 import { NotificationPreferenceEntryType } from '../../types/notification-preference.type'
+import { defaultEnabledForChannel } from '../../utils/default-notification-preference.util'
 import { GetNotificationPreferencesQuery } from './get-notification-preferences.query'
 
 const ALL_NOTIFICATION_TYPES = Object.values(NotificationType)
@@ -58,7 +59,7 @@ export class GetNotificationPreferencesHandler extends BaseQueryHandler<
         const entry = new NotificationPreferenceEntryType()
         entry.notificationType = notificationType
         entry.channel = channel
-        entry.enabled = match?.enabled ?? true
+        entry.enabled = match?.enabled ?? defaultEnabledForChannel(channel)
         entry.digestFrequency = match?.digestFrequency ?? DigestFrequency.WEEKLY
         matrix.push(entry)
       }

@@ -1,29 +1,10 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import nodemailer from 'nodemailer'
 import { IMailService } from './mail.abstract'
+import { renderBrandedEmail } from './email-template'
 
-const CODE_TTL_LABEL = '10 minutos'
-const MAIL_SUBJECT = 'Tu código de acceso Release Hub'
-
-const escapeHtml = (text: string): string =>
-  text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-
-const validateHttpUrl = (url: string): string => {
-  try {
-    const parsed = new URL(url)
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      throw new Error('Invalid URL scheme')
-    }
-    return parsed.toString()
-  } catch {
-    throw new BadRequestException('Invalid URL format')
-  }
-}
+const CODE_TTL_LABEL = '10 minutes'
+const LOGIN_CODE_SUBJECT = 'Your Release Hub access code'
 
 @Injectable()
 export class NodemailerMailService extends IMailService {
@@ -81,64 +62,30 @@ export class NodemailerMailService extends IMailService {
     projectName: string,
     acceptUrl: string,
   ): Promise<void> {
-    const escapedInviterName = escapeHtml(inviterName)
-    const escapedProjectName = escapeHtml(projectName)
-    const validatedUrl = validateHttpUrl(acceptUrl)
+    const subject = `${inviterName} invited you to collaborate on ${projectName}`
 
-    const subject = `${escapedInviterName} te invitó a colaborar en ${escapedProjectName}`
-
-    const text = [
-      `Hola,`,
-      '',
-      `${escapedInviterName} te ha invitado a colaborar en el proyecto "${escapedProjectName}" en Release Hub.`,
-      '',
-      `Acepta la invitación aquí: ${validatedUrl}`,
-      '',
-      `Si no esperabas esta invitación, puedes ignorar este correo.`,
-    ].join('\n')
-
-    const html = `
-<!DOCTYPE html>
-<html lang="es">
-<body style="font-family:sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;padding:24px">
-  <p>Hola,</p>
-  <p><strong>${escapedInviterName}</strong> te ha invitado a colaborar en el proyecto <strong>${escapedProjectName}</strong> en Release Hub.</p>
-  <div style="text-align:center;margin:24px 0">
-    <a href="${validatedUrl}" style="display:inline-block;padding:12px 24px;background:#2A2483;color:#fff;border-radius:9999px;text-decoration:none;font-weight:bold">Aceptar invitación</a>
-  </div>
-  <p style="font-size:12px;color:#6b7280">Si no esperabas esta invitación, puedes ignorar este correo.</p>
-</body>
-</html>`
+    const { html, text } = renderBrandedEmail({
+      title: 'You have been invited to Release Hub',
+      paragraphs: [`Hi,`, `${inviterName} invited you to collaborate on the ${projectName} organization.`],
+      cta: { label: 'Accept invitation', url: acceptUrl },
+      footerNote: "If you weren't expecting this invitation, you can safely ignore this email.",
+    })
 
     await this.deliver({ from: this.from, to, subject, text, html })
   }
 
   async sendLoginCode(to: string, code: string, userName: string): Promise<void> {
-    const text = [
-      `Hola ${userName},`,
-      '',
-      'Tu código de acceso es:',
-      '',
-      code,
-      '',
-      `Este código expira en ${CODE_TTL_LABEL}. Si no lo solicitaste, ignora este correo.`,
-    ].join('\n')
-
-    const html = `
-<!DOCTYPE html>
-<html lang="es">
-<body style="font-family:sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;padding:24px">
-  <p>Hola ${userName},</p>
-  <p>Tu código de acceso es:</p>
-  <div style="font-size:36px;font-weight:bold;letter-spacing:8px;text-align:center;padding:24px;background:#f4f4f5;border-radius:8px;margin:24px 0">${code}</div>
-  <p>Este código expira en ${CODE_TTL_LABEL}. Si no lo solicitaste, ignora este correo.</p>
-</body>
-</html>`
+    const { html, text } = renderBrandedEmail({
+      title: 'Your access code',
+      paragraphs: [`Hi ${userName},`, 'Your access code is:'],
+      codeBlock: code,
+      footerNote: `This code expires in ${CODE_TTL_LABEL}. If you didn't request this, you can safely ignore this email.`,
+    })
 
     await this.deliver({
       from: this.from,
       to,
-      subject: MAIL_SUBJECT,
+      subject: LOGIN_CODE_SUBJECT,
       text,
       html,
     })
@@ -151,29 +98,12 @@ export class NodemailerMailService extends IMailService {
     bodyLines: string[],
     url: string | null,
   ): Promise<void> {
-    const escapedSubject = escapeHtml(subject)
-    const escapedTitle = escapeHtml(title)
-    const escapedBodyLines = bodyLines.map(escapeHtml)
-    const validatedUrl = url ? validateHttpUrl(url) : null
+    const { html, text } = renderBrandedEmail({
+      title,
+      paragraphs: bodyLines,
+      cta: url ? { label: 'View details', url } : undefined,
+    })
 
-    const text = [escapedTitle, '', ...escapedBodyLines, ...(validatedUrl ? ['', validatedUrl] : [])].join(
-      '\n',
-    )
-
-    const html = `
-<!DOCTYPE html>
-<html lang="es">
-<body style="font-family:sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;padding:24px">
-  <p><strong>${escapedTitle}</strong></p>
-  ${escapedBodyLines.map((line) => `<p>${line}</p>`).join('\n  ')}
-  ${
-    validatedUrl
-      ? `<div style="text-align:center;margin:24px 0"><a href="${validatedUrl}" style="display:inline-block;padding:12px 24px;background:#2A2483;color:#fff;border-radius:9999px;text-decoration:none;font-weight:bold">Ver detalles</a></div>`
-      : ''
-  }
-</body>
-</html>`
-
-    await this.deliver({ from: this.from, to, subject: escapedSubject, text, html })
+    await this.deliver({ from: this.from, to, subject, text, html })
   }
 }

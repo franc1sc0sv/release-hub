@@ -26,3 +26,20 @@ export const UNREAD_NOTIFICATIONS_COUNT = graphql(`
     unreadNotificationsCount
   }
 `)
+
+export const NOTIFICATION_RECEIVED = graphql(`
+  subscription NotificationReceived($projectId: ID) {
+    notificationReceived(projectId: $projectId) {
+      id
+      projectId
+      projectName
+      type
+      title
+      body
+      url
+      flagKey
+      readAt
+      createdAt
+    }
+  }
+`)

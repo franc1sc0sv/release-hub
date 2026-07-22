@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bell as BellIcon, CheckCheck, Loader2 } from 'lucide-react'
+import { Bell as BellIcon, CheckCheck, Loader2, Trash2 } from 'lucide-react'
 import {
   SheetContent,
   SheetHeader,
@@ -11,21 +11,21 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/nebula/EmptyState'
-import { useNotifications } from '../hooks/use-notifications'
+import type { useNotifications } from '../hooks/use-notifications'
 import { NotificationListItem } from './NotificationListItem'
 
 const EXTERNAL_URL_PATTERN = /^https?:\/\//
 
 interface NotificationsSheetContentProps {
-  open: boolean
   unreadCount: number
+  notifications: ReturnType<typeof useNotifications>
   onNavigate: () => void
   onReadStateChange: () => void
 }
 
 export function NotificationsSheetContent({
-  open,
   unreadCount,
+  notifications,
   onNavigate,
   onReadStateChange,
 }: NotificationsSheetContentProps) {
@@ -38,15 +38,23 @@ export function NotificationsSheetContent({
     loading,
     loadingMore,
     markingAllRead,
+    clearingAll,
     loadMore,
     markRead,
     markAllRead,
-  } = useNotifications(!open)
+    clearAll,
+  } = notifications
 
   const hasUnread = unreadCount > 0
+  const hasItems = items.length > 0
 
   async function handleMarkAllRead(): Promise<void> {
     await markAllRead()
+    onReadStateChange()
+  }
+
+  async function handleClearAll(): Promise<void> {
+    await clearAll()
     onReadStateChange()
   }
 
@@ -68,20 +76,36 @@ export function NotificationsSheetContent({
       <SheetHeader className="border-b border-border/60">
         <div className="flex items-center justify-between gap-2 pr-9">
           <SheetTitle>{t('sheet.title')}</SheetTitle>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => void handleMarkAllRead()}
-            disabled={markingAllRead || !hasUnread}
-          >
-            {markingAllRead ? (
-              <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
-            ) : (
-              <CheckCheck className="mr-1.5 size-3.5" aria-hidden />
-            )}
-            {t('sheet.markAllRead')}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => void handleMarkAllRead()}
+              disabled={markingAllRead || !hasUnread}
+            >
+              {markingAllRead ? (
+                <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
+              ) : (
+                <CheckCheck className="mr-1.5 size-3.5" aria-hidden />
+              )}
+              {t('sheet.markAllRead')}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => void handleClearAll()}
+              disabled={clearingAll || !hasItems}
+            >
+              {clearingAll ? (
+                <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
+              ) : (
+                <Trash2 className="mr-1.5 size-3.5" aria-hidden />
+              )}
+              {t('sheet.clearAll')}
+            </Button>
+          </div>
         </div>
         <SheetDescription>{t('sheet.description', { count: totalCount })}</SheetDescription>
       </SheetHeader>

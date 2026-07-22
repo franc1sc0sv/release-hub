@@ -658,6 +658,7 @@ type Mutation {
   acceptSuggestedFeature(input: AcceptSuggestedFeatureInput!): FeatureType!
   assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
   blockBranch(input: BlockBranchInput!): BlockedBranchType!
+  clearAllNotifications: Int!
   completeGithubInstallation(input: CompleteGithubInstallationInput!): GithubInstallResultType!
   confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
   confirmReleaseAdditions(releaseId: ID!): ReleaseObjectType!
@@ -1130,6 +1131,10 @@ input StartSummaryGenerationInput {
   model: String
   releaseId: ID!
   summaryProfileId: ID
+}
+
+type Subscription {
+  notificationReceived(projectId: ID): NotificationEntryType!
 }
 
 enum SummaryExampleKind {

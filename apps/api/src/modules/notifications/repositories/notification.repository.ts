@@ -50,9 +50,9 @@ export class NotificationRepository extends INotificationRepository {
     return toINotification(row)
   }
 
-  createMany = async (data: ICreateNotificationData[], tx: TxClient): Promise<void> => {
-    if (data.length === 0) return
-    await tx.notification.createMany({
+  createMany = async (data: ICreateNotificationData[], tx: TxClient): Promise<INotification[]> => {
+    if (data.length === 0) return []
+    const rows = await tx.notification.createManyAndReturn({
       data: data.map((item) => ({
         userId: item.userId,
         projectId: item.projectId,
@@ -62,7 +62,9 @@ export class NotificationRepository extends INotificationRepository {
         url: item.url,
         flagKey: item.flagKey,
       })),
+      include: { project: { select: { name: true } } },
     })
+    return rows.map(toINotification)
   }
 
   findPageForUser = async (
@@ -102,5 +104,10 @@ export class NotificationRepository extends INotificationRepository {
 
   markAllRead = async (userId: string, tx: TxClient): Promise<void> => {
     await tx.notification.updateMany({ where: { userId, readAt: null }, data: { readAt: new Date() } })
+  }
+
+  deleteAllForUser = async (userId: string, tx: TxClient): Promise<number> => {
+    const result = await tx.notification.deleteMany({ where: { userId } })
+    return result.count
   }
 }

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { AlertTriangle, Bell, Flag, Loader2, Mail, Rocket, Send, Slack, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, Bell, Flag, Loader2, Mail, Rocket, Send, type LucideIcon } from 'lucide-react'
 import { m, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { GradientButton } from '@/components/nebula/GradientButton'
@@ -31,7 +31,6 @@ import {
 } from '@/lib/notification-enums'
 import { NOTIFICATION_TYPE_ICON } from '@/features/notifications/constants/notification-icons'
 import { useNotificationPreferences } from '../hooks/use-notification-preferences'
-import { useSlackConnection } from '../hooks/use-slack-connection'
 import type { DigestFrequency, NotificationChannel, NotificationType } from '@/generated/graphql'
 
 interface NotificationPreferencesSectionProps {
@@ -53,7 +52,6 @@ interface NotificationColumn {
 
 const GRID_CLASS_BY_COLUMN_COUNT: Record<number, string> = {
   2: 'grid-cols-[minmax(0,1fr)_5rem_5rem]',
-  3: 'grid-cols-[minmax(0,1fr)_5rem_5rem_5rem]',
 }
 
 const GROUPS: NotificationGroup[] = [
@@ -77,7 +75,6 @@ export function NotificationPreferencesSection({
     setPreferencesForColumn,
     triggerDigest,
   } = useNotificationPreferences(projectId)
-  const slack = useSlackConnection(projectId)
 
   const containerVariants = reduceMotion ? undefined : staggerContainer
   const itemVariants = reduceMotion ? undefined : slideUp
@@ -122,9 +119,6 @@ export function NotificationPreferencesSection({
   const columns: NotificationColumn[] = [
     { channel: NotificationChannelValue.IN_APP, label: t('channels.inApp'), icon: Bell },
     { channel: NotificationChannelValue.EMAIL, label: t('channels.email'), icon: Mail },
-    ...(slack.connected
-      ? [{ channel: NotificationChannelValue.SLACK_DM, label: t('channels.slack'), icon: Slack }]
-      : []),
   ]
   const gridClass = GRID_CLASS_BY_COLUMN_COUNT[columns.length] ?? GRID_CLASS_BY_COLUMN_COUNT[2]
 
@@ -184,8 +178,11 @@ export function NotificationPreferencesSection({
             {columns.map((column) => {
               const checked = allEnabled(ALL_NOTIFICATION_TYPES, column.channel)
               return (
-                <div key={column.channel} className="flex flex-col items-center gap-1.5">
+                <div key={column.channel} className="flex flex-col items-center gap-1 text-center">
                   <column.icon className="size-3.5 text-muted-foreground" aria-hidden />
+                  <span className="text-overline uppercase text-muted-foreground">
+                    {column.label}
+                  </span>
                   <Can I={Action.UPDATE} a={Subject.PROJECT} passThrough>
                     {(allowed) => (
                       <div className={cn('rounded-full', checked && 'shadow-glow-indigo')}>

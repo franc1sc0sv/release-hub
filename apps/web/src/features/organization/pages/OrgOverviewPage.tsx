@@ -32,8 +32,7 @@ function ProjectCard({ project, onSelect }: ProjectCardProps) {
 
   const connectedCount =
     1 +
-    [project.integrations.linear, project.integrations.flagsmith, project.integrations.slack].filter(Boolean)
-      .length
+    [project.integrations.linear, project.integrations.flagsmith].filter(Boolean).length
 
   return (
     <m.div variants={slideUp}>

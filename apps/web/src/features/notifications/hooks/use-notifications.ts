@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
 import { NOTIFICATIONS } from '../graphql/notifications.queries'
-import { MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ } from '../graphql/notifications.mutations'
+import {
+  MARK_NOTIFICATION_READ,
+  MARK_ALL_NOTIFICATIONS_READ,
+  CLEAR_ALL_NOTIFICATIONS,
+} from '../graphql/notifications.mutations'
 import type { NotificationsQuery } from '@/generated/graphql'
 
 const PAGE_SIZE = 50
 
-type NotificationEntry = NotificationsQuery['notifications']['items'][number]
+export type NotificationEntry = NotificationsQuery['notifications']['items'][number]
 
 export function useNotifications(skip: boolean) {
   const client = useApolloClient()
@@ -51,6 +55,7 @@ export function useNotifications(skip: boolean) {
 
   const [markReadMutation] = useMutation(MARK_NOTIFICATION_READ)
   const [markAllReadMutation, { loading: markingAllRead }] = useMutation(MARK_ALL_NOTIFICATIONS_READ)
+  const [clearAllMutation, { loading: clearingAll }] = useMutation(CLEAR_ALL_NOTIFICATIONS)
 
   async function markRead(id: string): Promise<void> {
     const target = items.find((item) => item.id === id)
@@ -67,6 +72,18 @@ export function useNotifications(skip: boolean) {
     setItems((prev) => prev.map((item) => ({ ...item, readAt: item.readAt ?? now })))
   }
 
+  async function clearAll(): Promise<void> {
+    await clearAllMutation()
+    setItems([])
+    setTotalCount(0)
+    setHasMore(false)
+  }
+
+  function prependNotification(entry: NotificationEntry): void {
+    setItems((prev) => (prev.some((item) => item.id === entry.id) ? prev : [entry, ...prev]))
+    setTotalCount((prev) => prev + 1)
+  }
+
   return {
     items,
     totalCount,
@@ -74,8 +91,11 @@ export function useNotifications(skip: boolean) {
     loading: loading && items.length === 0,
     loadingMore,
     markingAllRead,
+    clearingAll,
     loadMore,
     markRead,
     markAllRead,
+    clearAll,
+    prependNotification,
   }
 }

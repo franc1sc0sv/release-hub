@@ -51,7 +51,6 @@ import { staggerContainer, slideUp } from '@/lib/animations'
 import { useConnectionSettings } from '../hooks/use-connection-settings'
 import { useLinearConnection } from '../hooks/use-linear-connection'
 import { useSyncFlagsmithFlags } from '@/features/flags/hooks/use-sync-flagsmith-flags'
-import { SlackCard } from './slack-card'
 import { WebhookField } from './webhook-field'
 
 interface ConnectionsSectionProps {
@@ -363,8 +362,6 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
                 </div>
               )}
             </m.li>
-
-            <SlackCard projectId={projectId} />
 
             <m.li
               variants={itemVariants}

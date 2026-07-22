@@ -8,9 +8,10 @@ import type {
 
 export abstract class INotificationRepository implements IBaseRepository<INotification> {
   abstract findById: RepositoryMethod<[id: string], INotification | null>
-  abstract createMany: RepositoryMethod<[data: ICreateNotificationData[]], void>
+  abstract createMany: RepositoryMethod<[data: ICreateNotificationData[]], INotification[]>
   abstract findPageForUser: RepositoryMethod<[filters: INotificationsPageFilters], INotificationsPage>
   abstract countUnread: RepositoryMethod<[userId: string], number>
   abstract markRead: RepositoryMethod<[id: string, userId: string], void>
   abstract markAllRead: RepositoryMethod<[userId: string], void>
+  abstract deleteAllForUser: RepositoryMethod<[userId: string], number>
 }

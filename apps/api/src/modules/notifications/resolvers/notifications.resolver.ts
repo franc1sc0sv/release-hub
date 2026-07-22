@@ -1,4 +1,4 @@
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard'
@@ -8,8 +8,10 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator'
 import { Action, Subject } from '@release-hub/shared'
 import type { IJwtUser } from '../../../common/types'
 import { NotificationPreferenceEntryType } from '../types/notification-preference.type'
+import { NotificationEntryType } from '../types/notification-entry.type'
 import { NotificationsPageType } from '../types/notifications-page.type'
 import { NotificationsPageInput } from '../types/notifications-page.input'
+import { toNotificationEntryType } from '../types/notification.mappers'
 import { GetNotificationPreferencesQuery } from '../queries/get-notification-preferences/get-notification-preferences.query'
 import { GetNotificationsPageQuery } from '../queries/get-notifications-page/get-notifications-page.query'
 import { GetUnreadNotificationsCountQuery } from '../queries/get-unread-notifications-count/get-unread-notifications-count.query'
@@ -18,6 +20,12 @@ import { UpdateNotificationPreferenceCommand } from '../commands/update-notifica
 import { TriggerFlagDigestCommand } from '../commands/trigger-flag-digest/trigger-flag-digest.command'
 import { MarkNotificationReadCommand } from '../commands/mark-notification-read/mark-notification-read.command'
 import { MarkAllNotificationsReadCommand } from '../commands/mark-all-notifications-read/mark-all-notifications-read.command'
+import { ClearNotificationsCommand } from '../commands/clear-notifications/clear-notifications.command'
+import { INotificationPubSub } from '../interfaces/notification-pubsub.abstract'
+
+interface INotificationReceivedResolvedPayload {
+  notificationReceived: NotificationEntryType
+}
 
 @Resolver()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -25,6 +33,7 @@ export class NotificationsResolver {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly notificationPubSub: INotificationPubSub,
   ) {}
 
   @Query(() => [NotificationPreferenceEntryType])
@@ -93,5 +102,27 @@ export class NotificationsResolver {
   @Can(Action.UPDATE, Subject.USER)
   markAllNotificationsRead(@CurrentUser() user: IJwtUser): Promise<boolean> {
     return this.commandBus.execute(new MarkAllNotificationsReadCommand(user.id))
+  }
+
+  @Mutation(() => Int)
+  @Can(Action.UPDATE, Subject.USER)
+  clearAllNotifications(@CurrentUser() user: IJwtUser): Promise<number> {
+    return this.commandBus.execute(new ClearNotificationsCommand(user.id))
+  }
+
+  @Subscription(() => NotificationEntryType, {
+    filter: (payload: INotificationReceivedResolvedPayload, variables: { projectId?: string }) => {
+      if (!variables.projectId) return true
+      return payload.notificationReceived.projectId === variables.projectId
+    },
+  })
+  @Can(Action.READ, Subject.USER)
+  async *notificationReceived(
+    @CurrentUser() user: IJwtUser,
+    @Args('projectId', { type: () => ID, nullable: true }) _projectId?: string,
+  ): AsyncGenerator<INotificationReceivedResolvedPayload> {
+    for await (const event of this.notificationPubSub.subscribeToUser(user.id)) {
+      yield { notificationReceived: toNotificationEntryType(event.notificationReceived) }
+    }
   }
 }

@@ -71,9 +71,30 @@ export class HandleFlagsmithWebhookHandler extends PreparedCommandHandler<
     events: IDomainEvent[],
     prepared: IPreparedWebhookHandling,
   ): Promise<void> {
-    if (!prepared.parsed || prepared.handledByFullSync) return
+    if (!prepared.parsed) return
 
     const parsed = prepared.parsed
+
+    if (prepared.handledByFullSync) {
+      const created = await this.flagsmithFlagRepository.findFlagAndEnvironmentIds(
+        command.projectId,
+        parsed.featureKey,
+        parsed.environmentName,
+        tx,
+      )
+      if (created) {
+        events.push(
+          new FlagWebhookTransitionEvent(
+            command.projectId,
+            parsed.featureKey,
+            parsed.environmentName,
+            FlagWebhookTransition.CREATED,
+          ),
+        )
+      }
+      return
+    }
+
     const historyRows: ICreateFlagHistoryEventData[] = []
     const project = await this.projectRepository.findById(command.projectId, tx)
     const watchedEnvironments = project?.conflictEnvironments ?? []

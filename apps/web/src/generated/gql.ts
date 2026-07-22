@@ -43,8 +43,10 @@ type Documents = {
     "\n  query GetFlagHistory($input: GetFlagHistoryInput!) {\n    flagHistory(input: $input) {\n      totalCount\n      items {\n        id\n        type\n        environmentName\n        previousValue\n        newValue\n        releaseId\n        releaseName\n        actorName\n        source\n        occurredAt\n        branchName\n        prNumber\n        detectedFile\n      }\n    }\n  }\n": typeof types.GetFlagHistoryDocument,
     "\n  mutation MarkNotificationRead($id: ID!) {\n    markNotificationRead(id: $id)\n  }\n": typeof types.MarkNotificationReadDocument,
     "\n  mutation MarkAllNotificationsRead {\n    markAllNotificationsRead\n  }\n": typeof types.MarkAllNotificationsReadDocument,
+    "\n  mutation ClearAllNotifications {\n    clearAllNotifications\n  }\n": typeof types.ClearAllNotificationsDocument,
     "\n  query Notifications($input: NotificationsPageInput!) {\n    notifications(input: $input) {\n      totalCount\n      hasMore\n      items {\n        id\n        projectId\n        projectName\n        type\n        title\n        body\n        url\n        flagKey\n        readAt\n        createdAt\n      }\n    }\n  }\n": typeof types.NotificationsDocument,
     "\n  query UnreadNotificationsCount {\n    unreadNotificationsCount\n  }\n": typeof types.UnreadNotificationsCountDocument,
+    "\n  subscription NotificationReceived($projectId: ID) {\n    notificationReceived(projectId: $projectId) {\n      id\n      projectId\n      projectName\n      type\n      title\n      body\n      url\n      flagKey\n      readAt\n      createdAt\n    }\n  }\n": typeof types.NotificationReceivedDocument,
     "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      id\n      name\n      repo\n    }\n  }\n": typeof types.CreateProjectDocument,
     "\n  query MyOrganizations {\n    myOrganizations {\n      id\n      name\n      role\n      slug\n      githubConnected\n    }\n  }\n": typeof types.MyOrganizationsDocument,
     "\n  query GetOrganization($organizationId: ID!) {\n    getOrganization(organizationId: $organizationId) {\n      id\n      name\n      role\n      slug\n      githubConnected\n    }\n  }\n": typeof types.GetOrganizationDocument,
@@ -99,13 +101,6 @@ type Documents = {
     "\n  mutation SetFlagRegistry($input: SetFlagRegistryInput!) {\n    setFlagRegistry(input: $input) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": typeof types.SetFlagRegistryDocument,
     "\n  query FlagRegistry($projectId: ID!) {\n    flagRegistry(projectId: $projectId) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": typeof types.FlagRegistryDocument,
     "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      secret\n      connectionSettings {\n        flagsmithWebhookPath\n        flagsmithWebhookSecretSet\n      }\n    }\n  }\n": typeof types.RotateFlagsmithWebhookSecretDocument,
-    "\n  query SlackConnection($projectId: ID!) {\n    slackConnection(projectId: $projectId) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": typeof types.SlackConnectionDocument,
-    "\n  query SlackAuthorizeUrl($projectId: ID!) {\n    slackAuthorizeUrl(projectId: $projectId)\n  }\n": typeof types.SlackAuthorizeUrlDocument,
-    "\n  query SlackChannels($projectId: ID!) {\n    slackChannels(projectId: $projectId) {\n      id\n      name\n    }\n  }\n": typeof types.SlackChannelsDocument,
-    "\n  mutation DisconnectSlack($projectId: ID!) {\n    disconnectSlack(projectId: $projectId)\n  }\n": typeof types.DisconnectSlackDocument,
-    "\n  mutation SetSlackChannel($projectId: ID!, $channelId: String!, $channelName: String!) {\n    setSlackChannel(projectId: $projectId, channelId: $channelId, channelName: $channelName) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": typeof types.SetSlackChannelDocument,
-    "\n  mutation UpdateSlackNotificationSettings(\n    $projectId: ID!\n    $notifyOnCreated: Boolean!\n    $notifyOnShipped: Boolean!\n    $notifyOnDeployed: Boolean!\n  ) {\n    updateSlackNotificationSettings(\n      projectId: $projectId\n      notifyOnCreated: $notifyOnCreated\n      notifyOnShipped: $notifyOnShipped\n      notifyOnDeployed: $notifyOnDeployed\n    ) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": typeof types.UpdateSlackNotificationSettingsDocument,
-    "\n  mutation SendSlackTestMessage($projectId: ID!) {\n    sendSlackTestMessage(projectId: $projectId) {\n      ok\n      error\n    }\n  }\n": typeof types.SendSlackTestMessageDocument,
     "\n  query NotificationPreferences($projectId: ID!) {\n    notificationPreferences(projectId: $projectId) {\n      notificationType\n      channel\n      enabled\n      digestFrequency\n    }\n  }\n": typeof types.NotificationPreferencesDocument,
     "\n  mutation UpdateNotificationPreference($input: UpdateNotificationPreferenceInput!) {\n    updateNotificationPreference(input: $input) {\n      notificationType\n      channel\n      enabled\n      digestFrequency\n    }\n  }\n": typeof types.UpdateNotificationPreferenceDocument,
     "\n  mutation TriggerFlagDigest($projectId: ID!) {\n    triggerFlagDigest(projectId: $projectId)\n  }\n": typeof types.TriggerFlagDigestDocument,
@@ -119,8 +114,8 @@ type Documents = {
     "\n  mutation CreateSummaryProfile($input: CreateSummaryProfileInput!) {\n    createSummaryProfile(input: $input) {\n      id\n      projectId\n      name\n      description\n      outputTemplate\n      createdAt\n      updatedAt\n      rules {\n        id\n        content\n      }\n      examples {\n        id\n        kind\n        content\n        explanation\n      }\n    }\n  }\n": typeof types.CreateSummaryProfileDocument,
     "\n  mutation UpdateSummaryProfile($input: UpdateSummaryProfileInput!) {\n    updateSummaryProfile(input: $input) {\n      id\n      projectId\n      name\n      description\n      outputTemplate\n      createdAt\n      updatedAt\n      rules {\n        id\n        content\n      }\n      examples {\n        id\n        kind\n        content\n        explanation\n      }\n    }\n  }\n": typeof types.UpdateSummaryProfileDocument,
     "\n  mutation DeleteSummaryProfile($input: DeleteSummaryProfileInput!) {\n    deleteSummaryProfile(input: $input)\n  }\n": typeof types.DeleteSummaryProfileDocument,
-    "\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n": typeof types.ListProjectsDocument,
-    "\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n": typeof types.GetProjectDocument,
+    "\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n": typeof types.ListProjectsDocument,
+    "\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n": typeof types.GetProjectDocument,
 };
 const documents: Documents = {
     "\n  mutation Login($input: LoginInput!) {\n    login(input: $input) {\n      accessToken\n      refreshToken\n    }\n  }\n": types.LoginDocument,
@@ -152,8 +147,10 @@ const documents: Documents = {
     "\n  query GetFlagHistory($input: GetFlagHistoryInput!) {\n    flagHistory(input: $input) {\n      totalCount\n      items {\n        id\n        type\n        environmentName\n        previousValue\n        newValue\n        releaseId\n        releaseName\n        actorName\n        source\n        occurredAt\n        branchName\n        prNumber\n        detectedFile\n      }\n    }\n  }\n": types.GetFlagHistoryDocument,
     "\n  mutation MarkNotificationRead($id: ID!) {\n    markNotificationRead(id: $id)\n  }\n": types.MarkNotificationReadDocument,
     "\n  mutation MarkAllNotificationsRead {\n    markAllNotificationsRead\n  }\n": types.MarkAllNotificationsReadDocument,
+    "\n  mutation ClearAllNotifications {\n    clearAllNotifications\n  }\n": types.ClearAllNotificationsDocument,
     "\n  query Notifications($input: NotificationsPageInput!) {\n    notifications(input: $input) {\n      totalCount\n      hasMore\n      items {\n        id\n        projectId\n        projectName\n        type\n        title\n        body\n        url\n        flagKey\n        readAt\n        createdAt\n      }\n    }\n  }\n": types.NotificationsDocument,
     "\n  query UnreadNotificationsCount {\n    unreadNotificationsCount\n  }\n": types.UnreadNotificationsCountDocument,
+    "\n  subscription NotificationReceived($projectId: ID) {\n    notificationReceived(projectId: $projectId) {\n      id\n      projectId\n      projectName\n      type\n      title\n      body\n      url\n      flagKey\n      readAt\n      createdAt\n    }\n  }\n": types.NotificationReceivedDocument,
     "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      id\n      name\n      repo\n    }\n  }\n": types.CreateProjectDocument,
     "\n  query MyOrganizations {\n    myOrganizations {\n      id\n      name\n      role\n      slug\n      githubConnected\n    }\n  }\n": types.MyOrganizationsDocument,
     "\n  query GetOrganization($organizationId: ID!) {\n    getOrganization(organizationId: $organizationId) {\n      id\n      name\n      role\n      slug\n      githubConnected\n    }\n  }\n": types.GetOrganizationDocument,
@@ -208,13 +205,6 @@ const documents: Documents = {
     "\n  mutation SetFlagRegistry($input: SetFlagRegistryInput!) {\n    setFlagRegistry(input: $input) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": types.SetFlagRegistryDocument,
     "\n  query FlagRegistry($projectId: ID!) {\n    flagRegistry(projectId: $projectId) {\n      projectId\n      flagRegistryPath\n      flagRegistryBranch\n    }\n  }\n": types.FlagRegistryDocument,
     "\n  mutation RotateFlagsmithWebhookSecret($projectId: ID!) {\n    rotateFlagsmithWebhookSecret(projectId: $projectId) {\n      secret\n      connectionSettings {\n        flagsmithWebhookPath\n        flagsmithWebhookSecretSet\n      }\n    }\n  }\n": types.RotateFlagsmithWebhookSecretDocument,
-    "\n  query SlackConnection($projectId: ID!) {\n    slackConnection(projectId: $projectId) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": types.SlackConnectionDocument,
-    "\n  query SlackAuthorizeUrl($projectId: ID!) {\n    slackAuthorizeUrl(projectId: $projectId)\n  }\n": types.SlackAuthorizeUrlDocument,
-    "\n  query SlackChannels($projectId: ID!) {\n    slackChannels(projectId: $projectId) {\n      id\n      name\n    }\n  }\n": types.SlackChannelsDocument,
-    "\n  mutation DisconnectSlack($projectId: ID!) {\n    disconnectSlack(projectId: $projectId)\n  }\n": types.DisconnectSlackDocument,
-    "\n  mutation SetSlackChannel($projectId: ID!, $channelId: String!, $channelName: String!) {\n    setSlackChannel(projectId: $projectId, channelId: $channelId, channelName: $channelName) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": types.SetSlackChannelDocument,
-    "\n  mutation UpdateSlackNotificationSettings(\n    $projectId: ID!\n    $notifyOnCreated: Boolean!\n    $notifyOnShipped: Boolean!\n    $notifyOnDeployed: Boolean!\n  ) {\n    updateSlackNotificationSettings(\n      projectId: $projectId\n      notifyOnCreated: $notifyOnCreated\n      notifyOnShipped: $notifyOnShipped\n      notifyOnDeployed: $notifyOnDeployed\n    ) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n": types.UpdateSlackNotificationSettingsDocument,
-    "\n  mutation SendSlackTestMessage($projectId: ID!) {\n    sendSlackTestMessage(projectId: $projectId) {\n      ok\n      error\n    }\n  }\n": types.SendSlackTestMessageDocument,
     "\n  query NotificationPreferences($projectId: ID!) {\n    notificationPreferences(projectId: $projectId) {\n      notificationType\n      channel\n      enabled\n      digestFrequency\n    }\n  }\n": types.NotificationPreferencesDocument,
     "\n  mutation UpdateNotificationPreference($input: UpdateNotificationPreferenceInput!) {\n    updateNotificationPreference(input: $input) {\n      notificationType\n      channel\n      enabled\n      digestFrequency\n    }\n  }\n": types.UpdateNotificationPreferenceDocument,
     "\n  mutation TriggerFlagDigest($projectId: ID!) {\n    triggerFlagDigest(projectId: $projectId)\n  }\n": types.TriggerFlagDigestDocument,
@@ -228,8 +218,8 @@ const documents: Documents = {
     "\n  mutation CreateSummaryProfile($input: CreateSummaryProfileInput!) {\n    createSummaryProfile(input: $input) {\n      id\n      projectId\n      name\n      description\n      outputTemplate\n      createdAt\n      updatedAt\n      rules {\n        id\n        content\n      }\n      examples {\n        id\n        kind\n        content\n        explanation\n      }\n    }\n  }\n": types.CreateSummaryProfileDocument,
     "\n  mutation UpdateSummaryProfile($input: UpdateSummaryProfileInput!) {\n    updateSummaryProfile(input: $input) {\n      id\n      projectId\n      name\n      description\n      outputTemplate\n      createdAt\n      updatedAt\n      rules {\n        id\n        content\n      }\n      examples {\n        id\n        kind\n        content\n        explanation\n      }\n    }\n  }\n": types.UpdateSummaryProfileDocument,
     "\n  mutation DeleteSummaryProfile($input: DeleteSummaryProfileInput!) {\n    deleteSummaryProfile(input: $input)\n  }\n": types.DeleteSummaryProfileDocument,
-    "\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n": types.ListProjectsDocument,
-    "\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n": types.GetProjectDocument,
+    "\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n": types.ListProjectsDocument,
+    "\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n": types.GetProjectDocument,
 };
 
 /**
@@ -365,11 +355,19 @@ export function graphql(source: "\n  mutation MarkAllNotificationsRead {\n    ma
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation ClearAllNotifications {\n    clearAllNotifications\n  }\n"): (typeof documents)["\n  mutation ClearAllNotifications {\n    clearAllNotifications\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  query Notifications($input: NotificationsPageInput!) {\n    notifications(input: $input) {\n      totalCount\n      hasMore\n      items {\n        id\n        projectId\n        projectName\n        type\n        title\n        body\n        url\n        flagKey\n        readAt\n        createdAt\n      }\n    }\n  }\n"): (typeof documents)["\n  query Notifications($input: NotificationsPageInput!) {\n    notifications(input: $input) {\n      totalCount\n      hasMore\n      items {\n        id\n        projectId\n        projectName\n        type\n        title\n        body\n        url\n        flagKey\n        readAt\n        createdAt\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query UnreadNotificationsCount {\n    unreadNotificationsCount\n  }\n"): (typeof documents)["\n  query UnreadNotificationsCount {\n    unreadNotificationsCount\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription NotificationReceived($projectId: ID) {\n    notificationReceived(projectId: $projectId) {\n      id\n      projectId\n      projectName\n      type\n      title\n      body\n      url\n      flagKey\n      readAt\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  subscription NotificationReceived($projectId: ID) {\n    notificationReceived(projectId: $projectId) {\n      id\n      projectId\n      projectName\n      type\n      title\n      body\n      url\n      flagKey\n      readAt\n      createdAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -589,34 +587,6 @@ export function graphql(source: "\n  mutation RotateFlagsmithWebhookSecret($proj
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query SlackConnection($projectId: ID!) {\n    slackConnection(projectId: $projectId) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n"): (typeof documents)["\n  query SlackConnection($projectId: ID!) {\n    slackConnection(projectId: $projectId) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query SlackAuthorizeUrl($projectId: ID!) {\n    slackAuthorizeUrl(projectId: $projectId)\n  }\n"): (typeof documents)["\n  query SlackAuthorizeUrl($projectId: ID!) {\n    slackAuthorizeUrl(projectId: $projectId)\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query SlackChannels($projectId: ID!) {\n    slackChannels(projectId: $projectId) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query SlackChannels($projectId: ID!) {\n    slackChannels(projectId: $projectId) {\n      id\n      name\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation DisconnectSlack($projectId: ID!) {\n    disconnectSlack(projectId: $projectId)\n  }\n"): (typeof documents)["\n  mutation DisconnectSlack($projectId: ID!) {\n    disconnectSlack(projectId: $projectId)\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation SetSlackChannel($projectId: ID!, $channelId: String!, $channelName: String!) {\n    setSlackChannel(projectId: $projectId, channelId: $channelId, channelName: $channelName) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n"): (typeof documents)["\n  mutation SetSlackChannel($projectId: ID!, $channelId: String!, $channelName: String!) {\n    setSlackChannel(projectId: $projectId, channelId: $channelId, channelName: $channelName) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation UpdateSlackNotificationSettings(\n    $projectId: ID!\n    $notifyOnCreated: Boolean!\n    $notifyOnShipped: Boolean!\n    $notifyOnDeployed: Boolean!\n  ) {\n    updateSlackNotificationSettings(\n      projectId: $projectId\n      notifyOnCreated: $notifyOnCreated\n      notifyOnShipped: $notifyOnShipped\n      notifyOnDeployed: $notifyOnDeployed\n    ) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateSlackNotificationSettings(\n    $projectId: ID!\n    $notifyOnCreated: Boolean!\n    $notifyOnShipped: Boolean!\n    $notifyOnDeployed: Boolean!\n  ) {\n    updateSlackNotificationSettings(\n      projectId: $projectId\n      notifyOnCreated: $notifyOnCreated\n      notifyOnShipped: $notifyOnShipped\n      notifyOnDeployed: $notifyOnDeployed\n    ) {\n      connected\n      teamName\n      channelId\n      channelName\n      notifyOnCreated\n      notifyOnShipped\n      notifyOnDeployed\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation SendSlackTestMessage($projectId: ID!) {\n    sendSlackTestMessage(projectId: $projectId) {\n      ok\n      error\n    }\n  }\n"): (typeof documents)["\n  mutation SendSlackTestMessage($projectId: ID!) {\n    sendSlackTestMessage(projectId: $projectId) {\n      ok\n      error\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
 export function graphql(source: "\n  query NotificationPreferences($projectId: ID!) {\n    notificationPreferences(projectId: $projectId) {\n      notificationType\n      channel\n      enabled\n      digestFrequency\n    }\n  }\n"): (typeof documents)["\n  query NotificationPreferences($projectId: ID!) {\n    notificationPreferences(projectId: $projectId) {\n      notificationType\n      channel\n      enabled\n      digestFrequency\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -669,11 +639,11 @@ export function graphql(source: "\n  mutation DeleteSummaryProfile($input: Delet
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n"): (typeof documents)["\n  query ListProjects {\n    listProjects {\n      id\n      name\n      repo\n      organizationId\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n        slack\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n        slack\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetProject($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      repo\n      connectionHealth {\n        github\n        linear\n        flagsmith\n      }\n      integrations {\n        github\n        linear\n        flagsmith\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

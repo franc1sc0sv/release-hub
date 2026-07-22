@@ -27,22 +27,6 @@
       "syncSuccess": "Se sincronizaron {{count}} flags desde Flagsmith.",
       "syncError": "No se pudieron sincronizar los flags desde Flagsmith. Inténtalo de nuevo."
     },
-    "slack": {
-      "label": "Slack",
-      "description": "Opcional — notificaciones de releases y flags en Slack",
-      "connected": "Conectado",
-      "disconnected": "No conectado",
-      "connect": "Conectar Slack",
-      "channelLabel": "Canal de notificaciones",
-      "channelPlaceholder": "Selecciona un canal",
-      "loadingChannels": "Cargando canales…",
-      "notifyOnCreated": "Notificar cuando se crea un release",
-      "notifyOnShipped": "Notificar cuando se lanza un release",
-      "notifyOnDeployed": "Notificar cuando se despliega un release",
-      "sendTest": "Enviar mensaje de prueba",
-      "testSent": "Mensaje de prueba enviado a Slack.",
-      "testFailed": "No se pudo enviar el mensaje de prueba. Inténtalo de nuevo."
-    },
     "linear": {
       "label": "Linear",
       "description": "Opcional — detección de tickets en PRs",

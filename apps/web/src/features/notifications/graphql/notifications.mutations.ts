@@ -11,3 +11,9 @@ export const MARK_ALL_NOTIFICATIONS_READ = graphql(`
     markAllNotificationsRead
   }
 `)
+
+export const CLEAR_ALL_NOTIFICATIONS = graphql(`
+  mutation ClearAllNotifications {
+    clearAllNotifications
+  }
+`)

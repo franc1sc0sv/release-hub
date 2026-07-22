@@ -98,6 +98,9 @@ importers:
       graphql:
         specifier: ^16.0.0
         version: 16.13.2
+      graphql-subscriptions:
+        specifier: ^3.0.0
+        version: 3.0.0(graphql@16.13.2)
       graphql-ws:
         specifier: ^6.0.8
         version: 6.0.8(graphql@16.13.2)(ws@8.20.0)
@@ -5066,6 +5069,11 @@ packages:
     peerDependenciesMeta:
       cosmiconfig-toml-loader:
         optional: true
+
+  graphql-subscriptions@3.0.0:
+    resolution: {integrity: sha512-kZCdevgmzDjGAOqH7GlDmQXYAkuHoKpMlJrqF40HMPhUhM5ZWSFSxCwD/nSi6AkaijmMfsFhoJRGJ27UseCvRA==}
+    peerDependencies:
+      graphql: ^15.7.2 || ^16.0.0
 
   graphql-tag@2.12.6:
     resolution: {integrity: sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==}
@@ -13136,6 +13144,10 @@ snapshots:
       - crossws
       - typescript
       - utf-8-validate
+
+  graphql-subscriptions@3.0.0(graphql@16.13.2):
+    dependencies:
+      graphql: 16.13.2
 
   graphql-tag@2.12.6(graphql@16.13.2):
     dependencies:
