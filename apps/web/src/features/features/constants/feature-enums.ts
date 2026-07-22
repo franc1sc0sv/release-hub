@@ -51,6 +51,17 @@ export const FEATURE_STATE_BADGE_CLASS = {
   FLAG_CLEANUP_PENDING: 'border-orange-500/40 bg-orange-500/10 text-orange-300',
 } as const satisfies Record<FeatureState, string>
 
+export const FEATURE_STATE_BAR_CLASS = {
+  IN_PROGRESS: 'bg-indigo-400',
+  LIVE_STAGING: 'bg-amber-400',
+  LIVE_PROD: 'bg-emerald-400',
+  FULLY_RELEASED: 'bg-emerald-300',
+  PARTIAL: 'bg-violet-400',
+  BLOCKED: 'bg-rose-400',
+  SHIPPED_FLAG_OFF: 'bg-slate-400',
+  FLAG_CLEANUP_PENDING: 'bg-orange-400',
+} as const satisfies Record<FeatureState, string>
+
 const FEATURE_STATE_TONE = {
   IN_PROGRESS: StatusBadgeTone.INDIGO,
   LIVE_STAGING: StatusBadgeTone.AMBER,

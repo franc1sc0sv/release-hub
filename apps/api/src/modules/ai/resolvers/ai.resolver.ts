@@ -1,5 +1,5 @@
-import { Args, Context, ID, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql'
-import { UnauthorizedException, UseGuards } from '@nestjs/common'
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { UseGuards } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard'
 import { PoliciesGuard } from '../../../common/guards/policies.guard'
@@ -10,13 +10,12 @@ import { AiDisabledException } from '../../../common/errors'
 import { isAiEnabled } from '../../../common/config/ai-availability'
 import type { IJwtUser } from '../../../common/types'
 import { AiSuggestionType } from '../types/ai-suggestion.type'
-import { SummaryChunkType } from '../types/summary-chunk.type'
-import { GenerateSummaryInput } from '../types/generate-summary.input'
+import { StartSummaryGenerationInput } from '../commands/start-summary-generation/start-summary-generation.input'
 import { PullRequestType } from '../../release/types/pull-request.type'
 import { SuggestFeatureForPrQuery } from '../queries/suggest-feature-for-pr/suggest-feature-for-pr.query'
-import { GenerateSummaryQuery } from '../queries/generate-summary/generate-summary.query'
 import { GeneratePrSummaryCommand } from '../commands/generate-pr-summary/generate-pr-summary.command'
 import { RegenerateDraftCommand } from '../commands/regenerate-draft/regenerate-draft.command'
+import { StartSummaryGenerationCommand } from '../commands/start-summary-generation/start-summary-generation.command'
 import { ReleaseObjectType } from '../../release/types/release.type'
 
 @Resolver()
@@ -66,41 +65,23 @@ export class AiResolver {
     )
   }
 
-  @Subscription(() => SummaryChunkType)
-  @UseGuards(JwtAuthGuard)
-  async generateSummary(
-    @Args('input', { type: () => GenerateSummaryInput }) input: GenerateSummaryInput,
-    @Context() ctx: { req?: { user?: IJwtUser } },
-  ): Promise<AsyncIterator<{ generateSummary: SummaryChunkType }>> {
-    const user = ctx.req?.user
-    if (!user) {
-      throw new UnauthorizedException()
-    }
+  @Mutation(() => ReleaseObjectType)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  startSummaryGeneration(
+    @Args('input', { type: () => StartSummaryGenerationInput }) input: StartSummaryGenerationInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleaseObjectType> {
     if (!isAiEnabled()) {
       throw new AiDisabledException()
     }
-
-    const iterable = await this.queryBus.execute<
-      GenerateSummaryQuery,
-      AsyncIterable<SummaryChunkType>
-    >(
-      new GenerateSummaryQuery(
+    return this.commandBus.execute(
+      new StartSummaryGenerationCommand(
         input.releaseId,
         user.id,
         input.model,
-        input.tone,
+        input.summaryProfileId,
         input.featureIds,
       ),
     )
-
-    return wrapWithFieldName(iterable)
-  }
-}
-
-async function* wrapWithFieldName(
-  source: AsyncIterable<SummaryChunkType>,
-): AsyncGenerator<{ generateSummary: SummaryChunkType }> {
-  for await (const chunk of source) {
-    yield { generateSummary: chunk }
   }
 }

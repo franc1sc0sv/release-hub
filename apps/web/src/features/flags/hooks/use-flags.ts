@@ -40,7 +40,8 @@ export function useFlags({
       },
     },
     skip: !projectId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
+    nextFetchPolicy: 'cache-first',
   })
 
   const resolvedData = data ?? previousData

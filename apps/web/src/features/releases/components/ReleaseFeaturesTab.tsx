@@ -6,8 +6,6 @@ import { GlassCard } from '@/components/nebula/GlassCard'
 import { SearchField } from '@/components/nebula/SearchField'
 import { CardContent } from '@/components/ui/card'
 import { ReleaseFeatureNode } from './ReleaseFeatureNode'
-import { useEnumLabels } from '@/hooks/use-enum-labels'
-import { FEATURE_STATE_BADGE_CLASS } from '@/features/features/constants/feature-enums'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
 
 type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
@@ -18,7 +16,6 @@ interface ReleaseFeaturesTabProps {
 
 export function ReleaseFeaturesTab({ features }: ReleaseFeaturesTabProps) {
   const { t } = useTranslation('releases')
-  const enumLabels = useEnumLabels()
   const [search, setSearch] = useState('')
 
   const acceptedFeatures = features.filter((node) => !node.feature.suggested)
@@ -53,29 +50,20 @@ export function ReleaseFeaturesTab({ features }: ReleaseFeaturesTabProps) {
         </GlassCard>
       ) : (
         <div className="space-y-3">
-          {filteredFeatures.map((node) => {
-            const currentState = node.feature.currentState
-            return (
-              <div key={node.feature.id} className="space-y-0">
-                <ReleaseFeatureNode
-                  node={node}
-                  badge={
-                    node.feature.suggested ? (
-                      <Badge className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-2 py-0.5 text-xs font-medium text-fuchsia-300">
-                        {t('view.feature.suggested')}
-                      </Badge>
-                    ) : currentState ? (
-                      <Badge
-                        className={`rounded-full border px-2 py-0.5 text-xs font-medium ${FEATURE_STATE_BADGE_CLASS[currentState]}`}
-                      >
-                        {enumLabels.featureState(currentState)}
-                      </Badge>
-                    ) : null
-                  }
-                />
-              </div>
-            )
-          })}
+          {filteredFeatures.map((node) => (
+            <div key={node.feature.id} className="space-y-0">
+              <ReleaseFeatureNode
+                node={node}
+                badge={
+                  node.feature.suggested ? (
+                    <Badge className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-2 py-0.5 text-xs font-medium text-fuchsia-300">
+                      {t('view.feature.suggested')}
+                    </Badge>
+                  ) : null
+                }
+              />
+            </div>
+          ))}
         </div>
       )}
     </div>

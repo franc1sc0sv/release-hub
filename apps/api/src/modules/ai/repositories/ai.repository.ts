@@ -81,7 +81,7 @@ export class AiRepository extends IAiRepository {
   ): Promise<IAiReleaseContext | null> => {
     const release = await tx.release.findFirst({
       where: { id: releaseId, deletedAt: null },
-      select: { id: true, name: true, compareRef: true, projectId: true },
+      select: { id: true, name: true, compareRef: true, projectId: true, tags: true },
     })
 
     if (!release) return null
@@ -96,6 +96,7 @@ export class AiRepository extends IAiRepository {
             name: true,
             description: true,
             kind: true,
+            state: true,
             tags: true,
           },
         },
@@ -139,7 +140,7 @@ export class AiRepository extends IAiRepository {
         name: feature.name,
         description: feature.description,
         kind: feature.kind,
-        state: ledger?.state ?? FeatureState.IN_PROGRESS,
+        state: ledger?.state ?? feature.state,
         flagStaging: ledger?.flagStaging ?? null,
         flagProduction: ledger?.flagProduction ?? null,
         tags: feature.tags,
@@ -152,6 +153,7 @@ export class AiRepository extends IAiRepository {
       name: release.name ?? '',
       compareRef: release.compareRef,
       projectId: release.projectId,
+      tags: release.tags,
       features,
     }
   }

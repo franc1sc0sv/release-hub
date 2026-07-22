@@ -1,0 +1,75 @@
+{
+  "sections": {
+    "title": "Perfiles de resumen"
+  },
+  "list": {
+    "create": "Nuevo perfil",
+    "empty": "Todavía no hay perfiles de resumen. Crea uno para guiar cómo se redactan los resúmenes de release.",
+    "ruleCount": "{{count}} regla",
+    "ruleCount_other": "{{count}} reglas",
+    "exampleCount": "{{count}} ejemplo",
+    "exampleCount_other": "{{count}} ejemplos",
+    "editAria": "Editar {{name}}",
+    "deleteAria": "Eliminar {{name}}",
+    "delete": "Eliminar"
+  },
+  "dialog": {
+    "createTitle": "Nuevo perfil de resumen",
+    "editTitle": "Editar perfil de resumen",
+    "description": "Define una plantilla de salida, reglas y ejemplos que guíen el resumen de release generado por IA.",
+    "namePlaceholder": "p. ej. Predeterminado",
+    "descriptionPlaceholder": "¿Para qué es este perfil?",
+    "outputTemplatePlaceholder": "Escribe un resumen de muestra completo (intro + una sección de feature) que muestre el estilo a seguir.",
+    "submit": "Crear perfil",
+    "saveChanges": "Guardar cambios",
+    "submitting": "Guardando…",
+    "cancel": "Cancelar",
+    "deleteTitle": "¿Eliminar este perfil?",
+    "deleteDescription": "Este perfil de resumen y sus reglas y ejemplos se eliminarán permanentemente. Esta acción no se puede deshacer.",
+    "fields": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "outputTemplate": "Plantilla de salida",
+      "rules": "Reglas",
+      "examples": "Ejemplos"
+    },
+    "rules": {
+      "add": "Agregar regla",
+      "empty": "Todavía no hay reglas.",
+      "placeholder": "p. ej. Nunca uses signos de exclamación",
+      "ariaLabel": "Regla {{index}}",
+      "removeAria": "Eliminar regla {{index}}"
+    },
+    "examples": {
+      "add": "Agregar ejemplo",
+      "empty": "Todavía no hay ejemplos.",
+      "kindLabel": "Tipo de ejemplo",
+      "contentLabel": "Contenido del ejemplo",
+      "contentPlaceholder": "Escribe el contenido de ejemplo.",
+      "explanationLabel": "Explicación",
+      "explanationPlaceholder": "¿Por qué debería la IA emular o evitar esto?",
+      "removeAria": "Eliminar ejemplo {{index}}"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio.",
+      "nameTooLong": "El nombre debe tener {{max}} caracteres o menos.",
+      "descriptionTooLong": "La descripción debe tener {{max}} caracteres o menos.",
+      "outputTemplateTooLong": "La plantilla de salida debe tener {{max}} caracteres o menos.",
+      "tooManyRules": "Puedes agregar hasta {{max}} reglas.",
+      "ruleRequired": "La regla no puede estar vacía.",
+      "ruleTooLong": "La regla debe tener {{max}} caracteres o menos.",
+      "tooManyExamples": "Puedes agregar hasta {{max}} ejemplos.",
+      "exampleContentRequired": "El contenido del ejemplo es obligatorio.",
+      "exampleContentTooLong": "El contenido del ejemplo debe tener {{max}} caracteres o menos.",
+      "exampleExplanationRequired": "La explicación es obligatoria.",
+      "exampleExplanationTooLong": "La explicación debe tener {{max}} caracteres o menos."
+    }
+  },
+  "toast": {
+    "created": "Perfil de resumen \"{{name}}\" creado.",
+    "createError": "No se pudo crear el perfil de resumen. Inténtalo de nuevo.",
+    "updated": "Perfil de resumen \"{{name}}\" actualizado.",
+    "updateError": "No se pudo actualizar el perfil de resumen. Inténtalo de nuevo.",
+    "deleteError": "No se pudo eliminar el perfil de resumen. Inténtalo de nuevo."
+  }
+}

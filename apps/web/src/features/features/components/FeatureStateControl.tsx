@@ -31,7 +31,10 @@ function StateSelectInner({ featureId, currentState }: FeatureStateControlProps)
   const enumLabels = useEnumLabels()
   const [optimisticState, setOptimisticState] = useState<FeatureState>(currentState)
 
-  const [setFeatureState] = useMutation(SET_FEATURE_STATE)
+  const [setFeatureState] = useMutation(SET_FEATURE_STATE, {
+    refetchQueries: ['GetReleaseTree'],
+    awaitRefetchQueries: true,
+  })
 
   async function handleChange(value: string | null) {
     if (!value) return

@@ -19,6 +19,7 @@ export abstract class IProjectRepository implements IBaseRepository<IProject> {
   abstract findCredentials: RepositoryMethod<[id: string], IProjectConnectionCredentials | null>
   abstract create: RepositoryMethod<[data: ICreateProjectData], IProject>
   abstract createDefaultFeatures: RepositoryMethod<[projectId: string], void>
+  abstract createDefaultSummaryProfile: RepositoryMethod<[projectId: string], void>
   abstract update: RepositoryMethod<[id: string, data: IUpdateProjectData], IProject>
   abstract updateIntegrationSettings: RepositoryMethod<[id: string, data: IProjectIntegrationSettings], IProject>
   abstract setInstallationMode: RepositoryMethod<[id: string, installationId: string], void>

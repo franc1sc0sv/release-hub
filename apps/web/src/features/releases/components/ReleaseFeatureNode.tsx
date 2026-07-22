@@ -2,11 +2,9 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, Layers } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { PullRequestRow } from './PullRequestRow'
 import { ClientAvailabilityLine } from '@/features/features/components/ClientAvailabilityLine'
-import { useEnumLabels } from '@/hooks/use-enum-labels'
-import { FEATURE_STATE_BADGE_CLASS } from '@/features/features/constants/feature-enums'
+import { FeatureStateControl } from '@/features/features/components/FeatureStateControl'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
 
 type FeatureNode = GetReleaseTreeQuery['getReleaseTree']['features'][number]
@@ -18,7 +16,6 @@ interface ReleaseFeatureNodeProps {
 
 export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
   const { t } = useTranslation('releases')
-  const enumLabels = useEnumLabels()
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
 
@@ -46,12 +43,13 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
             <span className="text-xs text-muted-foreground">{prCountLabel}</span>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <Badge
-              className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${FEATURE_STATE_BADGE_CLASS[state]}`}
-            >
-              {enumLabels.featureState(state)}
-            </Badge>
+          <div className="flex flex-col gap-1.5">
+            <div className="w-fit">
+              <FeatureStateControl
+                featureId={feature.id}
+                currentState={feature.currentState ?? state}
+              />
+            </div>
             <ClientAvailabilityLine clientAvailabilityKey={clientAvailabilityKey} />
           </div>
 

@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
-import { Plug, Bell, Flag, Tags, type LucideIcon } from 'lucide-react'
+import { Plug, Bell, Flag, Tags, FileText, type LucideIcon } from 'lucide-react'
 import { ConnectionsSection } from '../components/connections-section'
 import { NotificationPreferencesSection } from '../components/notification-preferences-section'
 import { FlagTrackingSection } from '../components/flag-tracking-section'
 import { TagsSection } from '../components/tags-section'
+import { SummaryProfilesSection } from '@/features/summary-profiles/components/summary-profiles-section'
 
 export interface SettingsSectionDef {
   slug: string
@@ -41,6 +42,13 @@ export const SETTINGS_SECTIONS = [
     descriptionKey: 'descriptions.tags',
     icon: Tags,
     render: (projectId) => <TagsSection projectId={projectId} />,
+  },
+  {
+    slug: 'summary-profiles',
+    labelKey: 'sections.summaryProfiles',
+    descriptionKey: 'descriptions.summaryProfiles',
+    icon: FileText,
+    render: (projectId) => <SummaryProfilesSection projectId={projectId} />,
   },
 ] as const satisfies readonly SettingsSectionDef[]
 

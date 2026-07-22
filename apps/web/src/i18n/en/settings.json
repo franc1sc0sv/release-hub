@@ -6,13 +6,15 @@
     "notifications": "Notifications",
     "flagTracking": "Feature flag tracking",
     "tags": "Tag taxonomy",
+    "summaryProfiles": "Summary profiles",
     "project": "Project"
   },
   "descriptions": {
     "connections": "Integrations that power branch diffs, flag parity, and notifications.",
     "notifications": "Choose which release and flag events reach you, and where they land.",
     "flagTracking": "Ship-off reminders and the code-scan flag registry.",
-    "tags": "The tag taxonomy that groups features in every release summary."
+    "tags": "The tag taxonomy that groups features in every release summary.",
+    "summaryProfiles": "Reusable templates, rules, and examples that shape how release summaries are written."
   },
   "connections": {
     "flagsmith": {

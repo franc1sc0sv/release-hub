@@ -51,6 +51,7 @@ export class CreateProjectHandler extends BaseCommandHandler<CreateProjectComman
     )
 
     await this.projectRepository.createDefaultFeatures(project.id, tx)
+    await this.projectRepository.createDefaultSummaryProfile(project.id, tx)
 
     events.push(new ProjectCreatedEvent(project.id))
 

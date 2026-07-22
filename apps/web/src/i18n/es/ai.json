@@ -25,12 +25,6 @@
     "claude-opus-4-5": "Claude Opus 4.5",
     "claude-sonnet-4-5": "Claude Sonnet 4.5"
   },
-  "tone": {
-    "label": "Tono",
-    "concise": "Conciso",
-    "warm": "Cálido",
-    "formal": "Formal"
-  },
   "copy": "Copiar",
   "copyAriaLabel": "Copiar resumen al portapapeles",
   "unavailable": {

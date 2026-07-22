@@ -40,7 +40,37 @@ const splitLink = split(
   authLink.concat(httpLink),
 )
 
+interface ListFeaturesPageField {
+  items: unknown[]
+  totalCount: number
+  hasMore: boolean
+}
+
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        listFeaturesPage: {
+          keyArgs: [['input', ['projectId', 'search']]],
+          merge(
+            existing: ListFeaturesPageField | undefined,
+            incoming: ListFeaturesPageField,
+            { args }: { args: { input?: { offset?: number | null } } | null },
+          ): ListFeaturesPageField {
+            const offset = args?.input?.offset ?? 0
+            const items = existing ? existing.items.slice() : []
+            incoming.items.forEach((item, index) => {
+              items[offset + index] = item
+            })
+            return { ...incoming, items }
+          },
+        },
+      },
+    },
+  },
+})
+
 export const apolloClient = new ApolloClient({
   link: splitLink,
-  cache: new InMemoryCache(),
+  cache,
 })

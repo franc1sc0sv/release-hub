@@ -6,13 +6,15 @@
     "notifications": "Notificaciones",
     "flagTracking": "Seguimiento de feature flags",
     "tags": "Taxonomía de etiquetas",
+    "summaryProfiles": "Perfiles de resumen",
     "project": "Proyecto"
   },
   "descriptions": {
     "connections": "Integraciones para diffs de ramas, paridad de flags y notificaciones.",
     "notifications": "Elige qué eventos de releases y flags recibes, y dónde llegan.",
     "flagTracking": "Recordatorios de apagado y el registro de flags del escaneo de código.",
-    "tags": "La taxonomía de etiquetas que agrupa las features en cada resumen de release."
+    "tags": "La taxonomía de etiquetas que agrupa las features en cada resumen de release.",
+    "summaryProfiles": "Plantillas, reglas y ejemplos reutilizables que definen cómo se redactan los resúmenes de release."
   },
   "connections": {
     "flagsmith": {

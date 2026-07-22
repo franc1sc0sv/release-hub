@@ -5,3 +5,9 @@ export type { DB } from './types'
 export * from './generated/client/enums'
 export { DEFAULT_FEATURES } from './default-features'
 export type { IDefaultFeatureDefinition } from './default-features'
+export { DEFAULT_SUMMARY_PROFILE } from './default-summary-profile'
+export type {
+  IDefaultSummaryProfileDefinition,
+  IDefaultSummaryProfileRule,
+  IDefaultSummaryProfileExample,
+} from './default-summary-profile'

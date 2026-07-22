@@ -217,7 +217,7 @@ export class HandleFlagsmithWebhookHandler extends PreparedCommandHandler<
   }
 
   private parsePayload(payload: HandleFlagsmithWebhookCommand['payload']): IParsedFlagsmithWebhookEvent | null {
-    const state = payload.data.new_state ?? payload.data.previous_state
+    const state = payload?.data?.new_state ?? payload?.data?.previous_state
     if (!state) return null
 
     const isDeleted = payload.event_type === FlagsmithWebhookEventType.FLAG_DELETED

@@ -1,0 +1,75 @@
+{
+  "sections": {
+    "title": "Summary profiles"
+  },
+  "list": {
+    "create": "New profile",
+    "empty": "No summary profiles yet. Create one to guide how release summaries are written.",
+    "ruleCount": "{{count}} rule",
+    "ruleCount_other": "{{count}} rules",
+    "exampleCount": "{{count}} example",
+    "exampleCount_other": "{{count}} examples",
+    "editAria": "Edit {{name}}",
+    "deleteAria": "Delete {{name}}",
+    "delete": "Delete"
+  },
+  "dialog": {
+    "createTitle": "New summary profile",
+    "editTitle": "Edit summary profile",
+    "description": "Define an output template, rules, and worked examples that guide the AI-generated release summary.",
+    "namePlaceholder": "e.g. Default",
+    "descriptionPlaceholder": "What is this profile for?",
+    "outputTemplatePlaceholder": "Write a full sample summary (intro + one feature section) showing the style to follow.",
+    "submit": "Create profile",
+    "saveChanges": "Save changes",
+    "submitting": "Saving…",
+    "cancel": "Cancel",
+    "deleteTitle": "Delete this profile?",
+    "deleteDescription": "This summary profile and its rules and examples will be permanently deleted. This action cannot be undone.",
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "outputTemplate": "Output template",
+      "rules": "Rules",
+      "examples": "Examples"
+    },
+    "rules": {
+      "add": "Add rule",
+      "empty": "No rules yet.",
+      "placeholder": "e.g. Never use exclamation marks",
+      "ariaLabel": "Rule {{index}}",
+      "removeAria": "Remove rule {{index}}"
+    },
+    "examples": {
+      "add": "Add example",
+      "empty": "No examples yet.",
+      "kindLabel": "Example kind",
+      "contentLabel": "Example content",
+      "contentPlaceholder": "Write the example output.",
+      "explanationLabel": "Explanation",
+      "explanationPlaceholder": "Why should the AI emulate or avoid this?",
+      "removeAria": "Remove example {{index}}"
+    },
+    "validation": {
+      "nameRequired": "Name is required.",
+      "nameTooLong": "Name must be {{max}} characters or fewer.",
+      "descriptionTooLong": "Description must be {{max}} characters or fewer.",
+      "outputTemplateTooLong": "Output template must be {{max}} characters or fewer.",
+      "tooManyRules": "You can add up to {{max}} rules.",
+      "ruleRequired": "Rule cannot be empty.",
+      "ruleTooLong": "Rule must be {{max}} characters or fewer.",
+      "tooManyExamples": "You can add up to {{max}} examples.",
+      "exampleContentRequired": "Example content is required.",
+      "exampleContentTooLong": "Example content must be {{max}} characters or fewer.",
+      "exampleExplanationRequired": "Explanation is required.",
+      "exampleExplanationTooLong": "Explanation must be {{max}} characters or fewer."
+    }
+  },
+  "toast": {
+    "created": "Summary profile \"{{name}}\" created.",
+    "createError": "Couldn't create the summary profile. Please try again.",
+    "updated": "Summary profile \"{{name}}\" updated.",
+    "updateError": "Couldn't update the summary profile. Please try again.",
+    "deleteError": "Couldn't delete the summary profile. Please try again."
+  }
+}

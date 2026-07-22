@@ -1,5 +1,6 @@
 import type {
   AiDraftStatus,
+  AiSummaryStatus,
   FlagChangeAction,
   ReleaseFlagDecisionType,
   ReleaseStatus,
@@ -57,6 +58,13 @@ export const AiDraftStatusValue = {
   READY: 'READY',
   FAILED: 'FAILED',
 } as const satisfies Record<AiDraftStatus, AiDraftStatus>
+
+export const AiSummaryStatusValue = {
+  IDLE: 'IDLE',
+  GENERATING: 'GENERATING',
+  READY: 'READY',
+  FAILED: 'FAILED',
+} as const satisfies Record<AiSummaryStatus, AiSummaryStatus>
 
 export const ReleaseFlagDecisionTypeValue = {
   ENABLE_IN_RELEASE: 'ENABLE_IN_RELEASE',

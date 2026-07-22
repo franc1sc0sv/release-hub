@@ -2,7 +2,7 @@ import { Field, ID, InputType } from '@nestjs/graphql'
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 @InputType()
-export class GenerateSummaryInput {
+export class StartSummaryGenerationInput {
   @Field(() => ID)
   @IsNotEmpty()
   @IsString()
@@ -14,11 +14,10 @@ export class GenerateSummaryInput {
   @MaxLength(80)
   model: string | null
 
-  @Field(() => String, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @IsOptional()
   @IsString()
-  @MaxLength(80)
-  tone: string | null
+  summaryProfileId: string | null
 
   @Field(() => [ID], { nullable: true })
   @IsOptional()

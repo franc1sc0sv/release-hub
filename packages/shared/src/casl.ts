@@ -36,6 +36,7 @@ export const Subject = {
   PULL_REQUEST: 'PullRequest',
   MEMBERSHIP: 'Membership',
   INVITATION: 'Invitation',
+  SUMMARY_PROFILE: 'SummaryProfile',
   ALL: 'all',
 } as const
 
@@ -80,6 +81,11 @@ export interface IInvitationSubject {
   organizationId: string
 }
 
+export interface ISummaryProfileSubject {
+  __type: 'SummaryProfile'
+  organizationId: string
+}
+
 type SubjectTypes = InferSubjects<
   | ({ kind: 'User' } & IUserSubject)
   | ({ kind: 'Organization' } & IOrganizationSubject)
@@ -89,6 +95,7 @@ type SubjectTypes = InferSubjects<
   | ({ kind: 'PullRequest' } & IPullRequestSubject)
   | ({ kind: 'Membership' } & IMembershipSubject)
   | ({ kind: 'Invitation' } & IInvitationSubject)
+  | ({ kind: 'SummaryProfile' } & ISummaryProfileSubject)
 >
 
 export type AppAbility = MongoAbility<[Action, SubjectTypes | 'all']>
@@ -116,6 +123,7 @@ export function defineGateAbility(): AppAbility {
   can(Action.MANAGE, 'PullRequest')
   can(Action.MANAGE, 'Membership')
   can(Action.MANAGE, 'Invitation')
+  can(Action.MANAGE, 'SummaryProfile')
 
   return buildAbility(builder)
 }
@@ -138,6 +146,7 @@ export function defineAbilityFor(memberships: IOrgMembership[] = []): AppAbility
       can(Action.MANAGE, 'PullRequest', { organizationId })
       can(Action.MANAGE, 'Membership', { organizationId })
       can(Action.MANAGE, 'Invitation', { organizationId })
+      can(Action.MANAGE, 'SummaryProfile', { organizationId })
     }
 
     if (role === OrgRole.MEMBER) {
@@ -155,6 +164,10 @@ export function defineAbilityFor(memberships: IOrgMembership[] = []): AppAbility
       can(Action.UPDATE, 'PullRequest', { organizationId })
       can(Action.READ, 'Membership', { organizationId })
       can(Action.READ, 'Invitation', { organizationId })
+      can(Action.CREATE, 'SummaryProfile', { organizationId })
+      can(Action.READ, 'SummaryProfile', { organizationId })
+      can(Action.UPDATE, 'SummaryProfile', { organizationId })
+      can(Action.DELETE, 'SummaryProfile', { organizationId })
     }
 
     if (role === OrgRole.VIEWER) {
@@ -164,6 +177,7 @@ export function defineAbilityFor(memberships: IOrgMembership[] = []): AppAbility
       can(Action.READ, 'Feature', { organizationId })
       can(Action.READ, 'PullRequest', { organizationId })
       can(Action.READ, 'Membership', { organizationId })
+      can(Action.READ, 'SummaryProfile', { organizationId })
     }
   }
 

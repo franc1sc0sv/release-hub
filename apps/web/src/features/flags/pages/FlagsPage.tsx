@@ -34,7 +34,7 @@ import { useProject } from '@/context/project.context'
 import { ROUTES } from '@/lib/routes'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import type { FlagActivityFilter, FlagDeploymentStatus, FlagSortField, SortDirection } from '@/generated/graphql'
+import type { FlagDeploymentStatus, FlagSortField, SortDirection } from '@/generated/graphql'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { cn } from '@/lib/utils'
 import { useFlags } from '../hooks/use-flags'
@@ -45,9 +45,8 @@ import { ColumnVisibilityMenu } from '../components/ColumnVisibilityMenu'
 import { CompareFlagsDialog } from '../components/CompareFlagsDialog'
 import { ExportFlagsDialog } from '../components/ExportFlagsDialog'
 import { FlagStatusFilterMenu } from '../components/FlagStatusFilterMenu'
-import { FlagActivityFilterControl } from '../components/FlagActivityFilterControl'
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 25
 
 export default function FlagsPage() {
   const { t, i18n } = useTranslation('flags')
@@ -65,7 +64,6 @@ export default function FlagsPage() {
   const [compareOpen, setCompareOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<FlagDeploymentStatus[]>([])
-  const [activityFilter, setActivityFilter] = useState<FlagActivityFilter | undefined>(undefined)
 
   const projectName = activeProject?.name ?? ''
 
@@ -102,7 +100,6 @@ export default function FlagsPage() {
     sortEnvironment: activeSortEnv,
     sortDirection,
     statuses: statusFilter,
-    activity: activityFilter,
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
   })
@@ -153,11 +150,6 @@ export default function FlagsPage() {
 
   const handleStatusFilterChange = useCallback((statuses: FlagDeploymentStatus[]) => {
     setStatusFilter(statuses)
-    setPage(1)
-  }, [])
-
-  const handleActivityFilterChange = useCallback((activity: FlagActivityFilter | undefined) => {
-    setActivityFilter(activity)
     setPage(1)
   }, [])
 
@@ -267,8 +259,6 @@ export default function FlagsPage() {
                 )}
 
                 <FlagStatusFilterMenu selected={statusFilter} onChange={handleStatusFilterChange} />
-
-                <FlagActivityFilterControl value={activityFilter} onChange={handleActivityFilterChange} />
 
                 <Button
                   variant="outline"

@@ -4,6 +4,7 @@ import { PrismaClient } from '../src/generated/client/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { hash } from 'bcryptjs'
 import { DEFAULT_FEATURES } from '../src/default-features'
+import { DEFAULT_SUMMARY_PROFILE } from '../src/default-summary-profile'
 
 config({ path: resolve(__dirname, '../../../.env') })
 
@@ -141,6 +142,33 @@ async function seedDefaultFeatures(projectId: string, projectPrefix: string) {
   }
 
   return features
+}
+
+async function seedDefaultSummaryProfile(projectId: string) {
+  await prisma.summaryProfile.upsert({
+    where: { projectId_name: { projectId, name: DEFAULT_SUMMARY_PROFILE.name } },
+    update: {},
+    create: {
+      projectId,
+      name: DEFAULT_SUMMARY_PROFILE.name,
+      description: DEFAULT_SUMMARY_PROFILE.description,
+      outputTemplate: DEFAULT_SUMMARY_PROFILE.outputTemplate,
+      rules: {
+        create: DEFAULT_SUMMARY_PROFILE.rules.map((rule) => ({
+          content: rule.content,
+          position: rule.position,
+        })),
+      },
+      examples: {
+        create: DEFAULT_SUMMARY_PROFILE.examples.map((example) => ({
+          kind: example.kind,
+          content: example.content,
+          explanation: example.explanation,
+          position: example.position,
+        })),
+      },
+    },
+  })
 }
 
 async function seedProductFeatures(projectId: string, projectPrefix: string) {
@@ -617,8 +645,12 @@ async function main() {
   const { admin, alice, bob, carol } = await seedUsers()
   console.log('Seeded users')
 
-  const { purco } = await seedProjects(admin.id, alice.id, bob.id, carol.id)
+  const { purco, sdi } = await seedProjects(admin.id, alice.id, bob.id, carol.id)
   console.log('Seeded projects and memberships')
+
+  await seedDefaultSummaryProfile(purco.id)
+  await seedDefaultSummaryProfile(sdi.id)
+  console.log('Seeded default summary profiles')
 
   const defaultFeatures = await seedDefaultFeatures(purco.id, 'purco')
   const productFeatures = await seedProductFeatures(purco.id, 'purco')

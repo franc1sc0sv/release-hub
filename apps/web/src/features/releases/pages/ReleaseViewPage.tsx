@@ -12,9 +12,14 @@ import { ROUTES } from '@/lib/routes'
 import { slideUp, staggerContainer } from '@/lib/animations'
 import { useProject } from '@/context/project.context'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
-import { AiDraftStatusValue, ReleaseStatusValue } from '../constants/release-enums'
-import type { AiDraftStatus } from '@/generated/graphql'
-import { OverviewTab } from '../components/OverviewTab'
+import { AiDraftStatusValue, AiSummaryStatusValue, ReleaseStatusValue } from '../constants/release-enums'
+import type { AiDraftStatus, AiSummaryStatus } from '@/generated/graphql'
+import { CoverageMeter } from '../components/CoverageMeter'
+import { ReleaseOverview } from '../components/ReleaseOverview'
+import { NewPrsReviewPanel } from '../components/NewPrsReviewPanel'
+import { ReleaseFlagsTab } from '../components/ReleaseFlagsTab'
+import { ReleaseFeaturesTab } from '../components/ReleaseFeaturesTab'
+import { ReleasePrsTab } from '../components/ReleasePrsTab'
 import { DraftTab } from '../components/DraftTab'
 import { SummaryTab } from '../components/SummaryTab'
 import { DeleteReleaseButton } from '../components/DeleteReleaseButton'
@@ -34,8 +39,12 @@ export default function ReleaseViewPage() {
   const reduceMotion = useReducedMotion()
   const { activeProject } = useProject()
 
+  const [activeTab, setActiveTab] = useState('overview')
   const [knownAiStatus, setKnownAiStatus] = useState<AiDraftStatus | undefined>(undefined)
-  const pollInterval = !knownAiStatus || DRAFTING_STATUSES.has(knownAiStatus) ? POLL_INTERVAL_MS : 0
+  const [knownSummaryStatus, setKnownSummaryStatus] = useState<AiSummaryStatus | undefined>(undefined)
+  const isDrafting = !knownAiStatus || DRAFTING_STATUSES.has(knownAiStatus)
+  const isSummaryGenerating = knownSummaryStatus === AiSummaryStatusValue.GENERATING
+  const pollInterval = isDrafting || isSummaryGenerating ? POLL_INTERVAL_MS : 0
 
   const { data, loading, error } = useQuery(GET_RELEASE_TREE, {
     variables: { id: releaseId ?? '' },
@@ -46,6 +55,11 @@ export default function ReleaseViewPage() {
   const aiStatus = data?.getReleaseTree?.release?.aiDraftStatus
   if (aiStatus !== knownAiStatus) {
     setKnownAiStatus(aiStatus)
+  }
+
+  const summaryStatus = data?.getReleaseTree?.release?.summaryStatus
+  if (summaryStatus !== knownSummaryStatus) {
+    setKnownSummaryStatus(summaryStatus)
   }
 
   if (loading && !data) {
@@ -174,7 +188,7 @@ export default function ReleaseViewPage() {
         </m.div>
 
         <m.div variants={slideUp}>
-          <Tabs defaultValue="overview">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList
               variant="line"
               className="mb-6"
@@ -183,10 +197,22 @@ export default function ReleaseViewPage() {
               <TabsTrigger value="overview">
                 {t('view.tabs.overview')}
               </TabsTrigger>
-              {isDraftStatus && (
+              {isDraftStatus ? (
                 <TabsTrigger value="draft">
                   {t('view.tabs.draft')}
                 </TabsTrigger>
+              ) : (
+                <>
+                  <TabsTrigger value="features">
+                    {t('view.innerTabs.features')}
+                  </TabsTrigger>
+                  <TabsTrigger value="prs">
+                    {t('view.innerTabs.prs')}
+                  </TabsTrigger>
+                  <TabsTrigger value="flags">
+                    {t('view.innerTabs.flags')}
+                  </TabsTrigger>
+                </>
               )}
               <TabsTrigger value="summary">
                 {t('view.tabs.summary')}
@@ -194,17 +220,33 @@ export default function ReleaseViewPage() {
             </TabsList>
 
             <TabsContent value="overview">
-              <OverviewTab release={release} features={features} projectId={projectId} />
-            </TabsContent>
-
-            {isDraftStatus && (
-              <TabsContent value="draft">
-                <DraftTab
+              <div className="space-y-6">
+                <NewPrsReviewPanel release={release} features={features} projectId={projectId} />
+                <CoverageMeter releaseId={release.id} releaseStatus={release.status} />
+                <ReleaseOverview
                   release={release}
                   features={features}
-                  projectId={projectId}
+                  onOpenSummary={() => setActiveTab('summary')}
                 />
+              </div>
+            </TabsContent>
+
+            {isDraftStatus ? (
+              <TabsContent value="draft">
+                <DraftTab release={release} features={features} projectId={projectId} />
               </TabsContent>
+            ) : (
+              <>
+                <TabsContent value="features">
+                  <ReleaseFeaturesTab features={features} />
+                </TabsContent>
+                <TabsContent value="prs">
+                  <ReleasePrsTab features={features} />
+                </TabsContent>
+                <TabsContent value="flags">
+                  <ReleaseFlagsTab releaseId={release.id} />
+                </TabsContent>
+              </>
             )}
 
             <TabsContent value="summary">
