@@ -17,6 +17,7 @@ import { FlagStateType } from '../../../feature/types/flag-state.type'
 import { toReleaseObjectType, toPullRequestType } from '../../types/release.mappers'
 import { toFeatureType } from '../../../feature/types/feature.mappers'
 import { deriveClientAvailability } from '../../../feature/types/client-availability.map'
+import { isExcludedFromSummary } from '../../../feature/types/summary-inclusion'
 import type { IFeatureInRelease } from '../../../feature/interfaces/feature.interfaces'
 import type { IPullRequest } from '../../interfaces/release.interfaces'
 import type { IPullRequestFlagChangeWithPullRequest } from '../../../flag-tracking/interfaces/flag-tracking.interfaces'
@@ -104,6 +105,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
         node.feature = toFeatureType(feature)
         node.state = state
         node.clientAvailabilityKey = deriveClientAvailability(state, flagState)
+        node.excludedFromSummary = isExcludedFromSummary(feature.kind, feature.state)
         node.flagState = flagState
         node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) =>
           toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? []),

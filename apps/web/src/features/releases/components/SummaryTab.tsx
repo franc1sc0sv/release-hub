@@ -29,7 +29,7 @@ import { SummaryDocument } from './SummaryDocument'
 import { SAVE_RELEASE_SUMMARY, START_SUMMARY_GENERATION } from '../graphql/releases.mutations'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
 import { AiSummaryStatusValue } from '../constants/release-enums'
-import { FeatureKindValue, FeatureStateValue } from '@/features/features/constants/feature-enums'
+import { FeatureKindValue } from '@/features/features/constants/feature-enums'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { useSummaryProfiles } from '@/features/summary-profiles/hooks/use-summary-profiles'
 import type { FeatureState, GetReleaseTreeQuery } from '@/generated/graphql'
@@ -48,16 +48,6 @@ type AiModel = (typeof AI_MODELS)[number]
 
 const DEFAULT_MODEL: AiModel = 'claude-haiku-4-5-20251001'
 const NONE_PROFILE_VALUE = 'none' as const
-
-const UNRELEASED_STATES = new Set<string>([
-  FeatureStateValue.IN_PROGRESS,
-  FeatureStateValue.SHIPPED_FLAG_OFF,
-  FeatureStateValue.BLOCKED,
-])
-
-function isExcludedFromSummary(kind: string, state: string): boolean {
-  return kind === FeatureKindValue.PRODUCT && UNRELEASED_STATES.has(state)
-}
 
 function resolveFeatureState(node: FeatureNodes[number]): FeatureState {
   return node.feature.currentState ?? node.state
@@ -120,10 +110,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
   const [selectedFeatureIds, setSelectedFeatureIds] = useState<Set<string>>(() => {
     const initial = new Set<string>()
     for (const node of features) {
-      if (
-        node.feature.kind === FeatureKindValue.PRODUCT &&
-        !isExcludedFromSummary(node.feature.kind, resolveFeatureState(node))
-      ) {
+      if (node.feature.kind === FeatureKindValue.PRODUCT && !node.excludedFromSummary) {
         initial.add(node.feature.id)
       }
     }
@@ -382,7 +369,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
                           <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
                             {features.map((node) => {
                               const featureState = resolveFeatureState(node)
-                              const excluded = isExcludedFromSummary(node.feature.kind, featureState)
+                              const excluded = node.excludedFromSummary
                               const checked =
                                 selectedFeatureIds.has(node.feature.id) && !excluded
                               const stateLabel = enumLabels.featureState(featureState)

@@ -941,6 +941,7 @@ input RejectSuggestedFeatureInput {
 
 type ReleaseFeatureNodeType {
   clientAvailabilityKey: String!
+  excludedFromSummary: Boolean!
   feature: FeatureType!
   flagState: FlagStateType
   prs: [PullRequestType!]!

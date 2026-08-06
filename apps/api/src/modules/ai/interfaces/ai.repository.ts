@@ -1,4 +1,6 @@
 import type { RepositoryMethod, TxClient } from '../../../common/cqrs/types'
+import type { FeatureKind } from '../../../common/types/feature-kind.enum'
+import type { FeatureState } from '../../../common/types/feature-state.enum'
 
 export interface IAiPullRequestContext {
   id: string
@@ -19,8 +21,8 @@ export interface IAiFeatureContext {
   id: string
   name: string
   description: string
-  kind: string
-  state: string
+  kind: FeatureKind
+  state: FeatureState
   flagStaging: boolean | null
   flagProduction: boolean | null
   tags: string[]

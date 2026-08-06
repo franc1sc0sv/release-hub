@@ -140,7 +140,7 @@ export class AiRepository extends IAiRepository {
         name: feature.name,
         description: feature.description,
         kind: feature.kind,
-        state: ledger?.state ?? feature.state,
+        state: feature.state,
         flagStaging: ledger?.flagStaging ?? null,
         flagProduction: ledger?.flagProduction ?? null,
         tags: feature.tags,

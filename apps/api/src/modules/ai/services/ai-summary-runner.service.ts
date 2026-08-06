@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { FeatureKind } from '@release-hub/db'
 import { IDatabaseService } from '../../../common/database/database.abstract'
 import { ILogger } from '../../../common/logging/logging.abstract'
 import { LogEvent } from '../../../common/logging/log-event.enum'
 import { AiSummaryStatus } from '../../../common/types/ai-summary-status.enum'
-import { FeatureState } from '../../../common/types/feature-state.enum'
 import { SummaryExampleKind } from '../../../common/types/summary-example-kind.enum'
-import { NotFoundException, ForbiddenException } from '../../../common/errors'
+import { NotFoundException, ForbiddenException, ConflictException } from '../../../common/errors'
+import { isExcludedFromSummary } from '../../feature/types/summary-inclusion'
 import { sanitizeSummaryHtml } from '../../../common/text/sanitize-summary-html'
 import { IReleaseRepository } from '../../release/interfaces/release.repository'
 import { ISummaryProfileRepository } from '../../summary-profile/interfaces/summary-profile.repository'
@@ -16,12 +15,6 @@ import type { IAiReleaseContext } from '../interfaces/ai.repository'
 import { IAiProvider } from '../interfaces/ai-provider.abstract'
 import type { IAiSummaryProfile } from '../interfaces/ai-provider.abstract'
 import { featureStateToClientLine } from '../prompts/availability-line'
-
-const UNRELEASED_STATES = new Set<string>([
-  FeatureState.IN_PROGRESS,
-  FeatureState.SHIPPED_FLAG_OFF,
-  FeatureState.BLOCKED,
-])
 
 interface IAiSummaryRunOptions {
   model: string | null
@@ -93,11 +86,15 @@ export class AiSummaryRunner {
   ): Promise<string> {
     const releaseTitle = releaseContext.name || releaseContext.compareRef
 
-    const sourceFeatures = profile
-      ? releaseContext.features.filter(
-          (f) => f.kind !== FeatureKind.product || !UNRELEASED_STATES.has(f.state),
-        )
-      : releaseContext.features
+    const sourceFeatures = releaseContext.features.filter(
+      (f) => !isExcludedFromSummary(f.kind, f.state),
+    )
+
+    if (sourceFeatures.length === 0) {
+      throw new ConflictException(
+        'No selected feature can appear in a client summary. Unreleased product features are excluded.',
+      )
+    }
 
     let accumulated = ''
 

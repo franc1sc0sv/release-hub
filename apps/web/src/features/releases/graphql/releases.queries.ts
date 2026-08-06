@@ -54,6 +54,7 @@ export const GET_RELEASE_TREE = graphql(`
         }
         state
         clientAvailabilityKey
+        excludedFromSummary
         flagState {
           staging
           production

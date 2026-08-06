@@ -16,6 +16,9 @@ export class ReleaseFeatureNodeType {
   @Field(() => String)
   clientAvailabilityKey: string
 
+  @Field(() => Boolean)
+  excludedFromSummary: boolean
+
   @Field(() => FlagStateType, { nullable: true })
   flagState: FlagStateType | null
 
