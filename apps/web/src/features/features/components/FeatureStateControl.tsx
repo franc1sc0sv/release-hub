@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { SET_FEATURE_STATE } from '../graphql/features.mutations'
@@ -85,21 +84,9 @@ function ReadOnlyStateBadge({ state }: { state: FeatureState }) {
   return <StatusBadge tone={featureStateTone(state)}>{enumLabels.featureState(state)}</StatusBadge>
 }
 
-function SystemStateBadge({ state }: { state: FeatureState }) {
-  const { t } = useTranslation('features')
-  return (
-    <Tooltip>
-      <TooltipTrigger render={<span tabIndex={0} className="inline-flex" />}>
-        <ReadOnlyStateBadge state={state} />
-      </TooltipTrigger>
-      <TooltipContent>{t('state.systemLocked')}</TooltipContent>
-    </Tooltip>
-  )
-}
-
 export function FeatureStateControl(props: FeatureStateControlProps) {
   if (props.kind === FeatureKindValue.DEFAULT) {
-    return <SystemStateBadge state={props.currentState} />
+    return null
   }
 
   return (

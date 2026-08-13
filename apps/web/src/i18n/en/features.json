@@ -7,8 +7,7 @@
   "searchPlaceholder": "Search features...",
   "state": {
     "label": "Feature state",
-    "none": "No release yet",
-    "systemLocked": "System features keep a fixed status"
+    "none": "No release yet"
   },
   "fields": {
     "name": "Name",

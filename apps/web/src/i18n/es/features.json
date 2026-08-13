@@ -7,8 +7,7 @@
   "searchPlaceholder": "Buscar funcionalidades...",
   "state": {
     "label": "Estado de la funcionalidad",
-    "none": "Sin lanzamiento aún",
-    "systemLocked": "Las funcionalidades del sistema mantienen un estado fijo"
+    "none": "Sin lanzamiento aún"
   },
   "fields": {
     "name": "Nombre",

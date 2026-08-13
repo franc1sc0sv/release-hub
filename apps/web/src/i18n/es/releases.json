@@ -193,7 +193,6 @@
       "stateLabel": "Estado en este release",
       "stateChanged": "Estado actualizado para este release",
       "stateError": "No se pudo actualizar el estado para este release",
-      "systemLocked": "Las funcionalidades del sistema mantienen un estado fijo",
       "flagState": {
         "staging": "Staging",
         "production": "Producción",

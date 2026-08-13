@@ -33,4 +33,10 @@ export const DEFAULT_FEATURES: IDefaultFeatureDefinition[] = [
     description: 'Dependency updates, code cleanup, refactoring, and developer experience improvements.',
     kind: FeatureKind.default,
   },
+  {
+    name: 'Technical Debt',
+    description:
+      'Deliberate work to pay down accumulated shortcuts — refactoring legacy or duplicated production code, deleting dead or deprecated code paths, migrating off outdated libraries or patterns, and architectural cleanup that changes no user-facing behavior. Choose this over Dev/Chore when the PR restructures existing production code rather than updating dependencies, tooling, or developer experience.',
+    kind: FeatureKind.default,
+  },
 ]

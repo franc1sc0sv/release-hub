@@ -80,6 +80,7 @@ export default function FeatureDetailPage() {
 
   const { feature, releases, prs, snapshots, timeline } = detail
   const featureKind = feature.kind as FeatureKind
+  const isSystemFeature = featureKind === FeatureKindValue.DEFAULT
 
   return (
     <NebulaBackground className="p-6">
@@ -163,15 +164,21 @@ export default function FeatureDetailPage() {
           <h2 className="font-display text-lg font-semibold text-foreground">
             {t('detail.releasesHeading')}
           </h2>
-          <FeatureDetailTree releases={releases} prs={prs} snapshots={snapshots} />
+          <FeatureDetailTree
+            releases={releases}
+            prs={prs}
+            snapshots={isSystemFeature ? [] : snapshots}
+          />
         </m.div>
 
-        <m.div variants={slideUp} className="space-y-3">
-          <h2 className="font-display text-lg font-semibold text-foreground">
-            {t('detail.timeline.heading')}
-          </h2>
-          <FeatureTimeline timeline={timeline} />
-        </m.div>
+        {!isSystemFeature && (
+          <m.div variants={slideUp} className="space-y-3">
+            <h2 className="font-display text-lg font-semibold text-foreground">
+              {t('detail.timeline.heading')}
+            </h2>
+            <FeatureTimeline timeline={timeline} />
+          </m.div>
+        )}
       </m.div>
     </NebulaBackground>
   )

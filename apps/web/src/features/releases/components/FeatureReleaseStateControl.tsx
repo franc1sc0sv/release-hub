@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
@@ -89,17 +88,8 @@ function ReadOnlyState({ state }: { state: FeatureState }) {
 }
 
 export function FeatureReleaseStateControl(props: FeatureReleaseStateControlProps) {
-  const { t } = useTranslation('releases')
-
   if (props.kind === FeatureKindValue.DEFAULT) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={<span tabIndex={0} className="inline-flex" />}>
-          <ReadOnlyState state={props.state} />
-        </TooltipTrigger>
-        <TooltipContent>{t('view.feature.systemLocked')}</TooltipContent>
-      </Tooltip>
-    )
+    return null
   }
 
   return (

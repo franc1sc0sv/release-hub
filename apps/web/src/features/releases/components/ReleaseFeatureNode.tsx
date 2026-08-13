@@ -4,6 +4,7 @@ import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, Layers } from 'lucide-react'
 import { PullRequestRow } from './PullRequestRow'
 import { ClientAvailabilityLine } from '@/features/features/components/ClientAvailabilityLine'
+import { FeatureKindValue } from '@/features/features/constants/feature-enums'
 import { FeatureReleaseStateControl } from './FeatureReleaseStateControl'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
 
@@ -21,6 +22,7 @@ export function ReleaseFeatureNode({ node, releaseId, badge }: ReleaseFeatureNod
   const reduceMotion = useReducedMotion()
 
   const { feature, state, clientAvailabilityKey, prs } = node
+  const isSystemFeature = feature.kind === FeatureKindValue.DEFAULT
   const prCount = prs.length
   const toggleLabel = open
     ? t('view.feature.collapseLabel', { name: feature.name })
@@ -44,20 +46,22 @@ export function ReleaseFeatureNode({ node, releaseId, badge }: ReleaseFeatureNod
             <span className="text-xs text-muted-foreground">{prCountLabel}</span>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">
-                {t('view.feature.stateInRelease')}
-              </span>
-              <FeatureReleaseStateControl
-                featureId={feature.id}
-                releaseId={releaseId}
-                state={state}
-                kind={feature.kind}
-              />
+          {!isSystemFeature && (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {t('view.feature.stateInRelease')}
+                </span>
+                <FeatureReleaseStateControl
+                  featureId={feature.id}
+                  releaseId={releaseId}
+                  state={state}
+                  kind={feature.kind}
+                />
+              </div>
+              <ClientAvailabilityLine clientAvailabilityKey={clientAvailabilityKey} />
             </div>
-            <ClientAvailabilityLine clientAvailabilityKey={clientAvailabilityKey} />
-          </div>
+          )}
 
           {feature.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
