@@ -22,6 +22,7 @@ import { SetReleaseFlagDecisionHandler } from './commands/set-release-flag-decis
 import { GetTrackedFlagsHandler } from './queries/get-tracked-flags/get-tracked-flags.handler'
 import { GetTrackedFlagDetailHandler } from './queries/get-tracked-flag-detail/get-tracked-flag-detail.handler'
 import { GetReleaseFlagsHandler } from './queries/get-release-flags/get-release-flags.handler'
+import { GetCarriedOverFlagsHandler } from './queries/get-carried-over-flags/get-carried-over-flags.handler'
 import { GetFlagRegistryHandler } from './queries/get-flag-registry/get-flag-registry.handler'
 import { GetFlagHistoryHandler } from './queries/get-flag-history/get-flag-history.handler'
 import { GetFlagDetailHandler } from './queries/get-flag-detail/get-flag-detail.handler'
@@ -50,6 +51,7 @@ import { ScanFlagsOnReleaseCreatedHandler } from './events/scan-flags-on-release
     GetTrackedFlagsHandler,
     GetTrackedFlagDetailHandler,
     GetReleaseFlagsHandler,
+    GetCarriedOverFlagsHandler,
     GetFlagRegistryHandler,
     GetFlagHistoryHandler,
     GetFlagDetailHandler,

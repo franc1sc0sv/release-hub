@@ -9,6 +9,7 @@ import type {
   ICreateReleaseFlagDecisionData,
   IReleaseFlagDecision,
   ILatestInProgressFlagDecision,
+  ILatestFlagDecisionForProject,
 } from '../interfaces/flag-tracking.interfaces'
 
 interface IReleaseFlagDecisionRow {
@@ -116,6 +117,55 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
         key: decision.trackedFlag.key,
         featureId: decision.trackedFlag.featureId,
         releaseId: decision.releaseId,
+        decidedAt: decision.decidedAt,
+      })
+    }
+
+    return [...latestByFlag.values()]
+  }
+
+  findLatestDecisionsForProject = async (
+    projectId: string,
+    excludeReleaseId: string | null,
+    tx: TxClient,
+  ): Promise<ILatestFlagDecisionForProject[]> => {
+    const decisions = await tx.releaseFlagDecision.findMany({
+      where: {
+        trackedFlag: { projectId, deletedAt: null, presentInCode: true },
+        release: { deletedAt: null },
+      },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        releaseId: true,
+        decision: true,
+        decidedAt: true,
+        trackedFlag: {
+          select: { id: true, key: true, featureId: true, feature: { select: { name: true } } },
+        },
+      },
+    })
+
+    const excludedFlagIds = new Set(
+      excludeReleaseId === null
+        ? []
+        : decisions
+            .filter((decision) => decision.releaseId === excludeReleaseId)
+            .map((decision) => decision.trackedFlag.id),
+    )
+
+    const latestByFlag = new Map<string, ILatestFlagDecisionForProject>()
+    for (const decision of decisions) {
+      const flag = decision.trackedFlag
+      if (excludedFlagIds.has(flag.id)) continue
+      if (latestByFlag.has(flag.id)) continue
+
+      latestByFlag.set(flag.id, {
+        trackedFlagId: flag.id,
+        key: flag.key,
+        featureId: flag.featureId,
+        featureName: flag.feature?.name ?? null,
+        releaseId: decision.releaseId,
+        decision: decision.decision,
         decidedAt: decision.decidedAt,
       })
     }

@@ -33,7 +33,9 @@ export function ReleaseFlagDecisionSelect({
     decision,
   )
 
-  const [setReleaseFlagDecision] = useMutation(SET_RELEASE_FLAG_DECISION)
+  const [setReleaseFlagDecision] = useMutation(SET_RELEASE_FLAG_DECISION, {
+    refetchQueries: ['CarriedOverFlags'],
+  })
 
   async function handleChange(newDecision: ReleaseFlagDecisionType) {
     const previousDecision = optimisticDecision

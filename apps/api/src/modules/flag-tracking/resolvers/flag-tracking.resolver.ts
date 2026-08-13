@@ -12,6 +12,7 @@ import { FlagCoverageSummaryType } from '../types/flag-coverage-summary.type'
 import { TrackedFlagType } from '../types/tracked-flag.type'
 import { TrackedFlagDetailType } from '../types/tracked-flag-detail.type'
 import { ReleaseFlagType } from '../types/release-flag.type'
+import { CarriedOverFlagType } from '../types/carried-over-flag.type'
 import { ReleaseFlagDecisionResultType } from '../types/release-flag-decision.type'
 import { ScanReleasePullRequestsSummaryType } from '../types/scan-release-pull-requests-summary.type'
 import { SetFlagRegistryInput } from '../commands/set-flag-registry/set-flag-registry.input'
@@ -24,6 +25,7 @@ import { SetReleaseFlagDecisionCommand } from '../commands/set-release-flag-deci
 import { GetTrackedFlagsQuery } from '../queries/get-tracked-flags/get-tracked-flags.query'
 import { GetTrackedFlagDetailQuery } from '../queries/get-tracked-flag-detail/get-tracked-flag-detail.query'
 import { GetReleaseFlagsQuery } from '../queries/get-release-flags/get-release-flags.query'
+import { GetCarriedOverFlagsQuery } from '../queries/get-carried-over-flags/get-carried-over-flags.query'
 import { GetFlagRegistryQuery } from '../queries/get-flag-registry/get-flag-registry.query'
 import { GetFlagHistoryQuery } from '../queries/get-flag-history/get-flag-history.query'
 import { GetFlagDetailQuery } from '../queries/get-flag-detail/get-flag-detail.query'
@@ -114,6 +116,15 @@ export class FlagTrackingResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ReleaseFlagType[]> {
     return this.queryBus.execute(new GetReleaseFlagsQuery(releaseId, user.id))
+  }
+
+  @Query(() => [CarriedOverFlagType])
+  @Can(Action.READ, Subject.RELEASE)
+  carriedOverFlags(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<CarriedOverFlagType[]> {
+    return this.queryBus.execute(new GetCarriedOverFlagsQuery(releaseId, user.id))
   }
 
   @Query(() => FlagRegistryConfigType)

@@ -131,3 +131,13 @@ export interface ILatestInProgressFlagDecision {
   releaseId: string
   decidedAt: Date | null
 }
+
+export interface ILatestFlagDecisionForProject {
+  trackedFlagId: string
+  key: string
+  featureId: string | null
+  featureName: string | null
+  releaseId: string
+  decision: ReleaseFlagDecisionType
+  decidedAt: Date | null
+}

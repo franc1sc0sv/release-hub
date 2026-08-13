@@ -9,6 +9,7 @@ import { Action, Subject } from '@release-hub/shared'
 import { useReleaseFlags } from '../hooks/useReleaseFlags'
 import { FlagScanButton } from './FlagScanButton'
 import { ReleaseFlagRow } from './ReleaseFlagRow'
+import { CarriedOverFlagsPanel } from './CarriedOverFlagsPanel'
 import { FlagChangeActionValue } from '../constants/release-enums'
 import type { ReleaseFlagsQuery } from '@/generated/graphql'
 
@@ -58,6 +59,8 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
         />
         <FlagScanButton releaseId={releaseId} />
       </div>
+
+      <CarriedOverFlagsPanel releaseId={releaseId} />
 
       {loading && flags.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-10">

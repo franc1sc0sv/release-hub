@@ -137,6 +137,23 @@ export const COMPARE_REFS = graphql(`
   }
 `)
 
+export const CARRIED_OVER_FLAGS = graphql(`
+  query CarriedOverFlags($releaseId: ID!) {
+    carriedOverFlags(releaseId: $releaseId) {
+      trackedFlagId
+      key
+      featureId
+      featureName
+      originReleaseId
+      originReleaseName
+      decision
+      deploymentStatus
+      decidedAt
+      featureReleaseState
+    }
+  }
+`)
+
 export const RELEASE_FLAGS = graphql(`
   query ReleaseFlags($releaseId: ID!) {
     releaseFlags(releaseId: $releaseId) {

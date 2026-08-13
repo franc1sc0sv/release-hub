@@ -395,6 +395,12 @@
     "noDecision": "No decision yet",
     "removedNote": "Removed",
     "searchPlaceholder": "Search flags…",
+    "carriedOver": {
+      "heading_one": "{{count}} flag carried over from earlier releases",
+      "heading_other": "{{count}} flags carried over from earlier releases",
+      "description": "These flags were decided in a past release and are still open. Give them a decision here to close them out.",
+      "origin": "from {{release}}"
+    },
     "pending": {
       "heading_one": "{{count}} flag needs a decision",
       "heading_other": "{{count}} flags need a decision",

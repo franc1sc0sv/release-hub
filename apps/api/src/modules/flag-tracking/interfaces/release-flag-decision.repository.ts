@@ -3,6 +3,7 @@ import type {
   IReleaseFlagDecision,
   ICreateReleaseFlagDecisionData,
   ILatestInProgressFlagDecision,
+  ILatestFlagDecisionForProject,
 } from './flag-tracking.interfaces'
 
 export interface IActiveEnableDecisionForFlag {
@@ -23,6 +24,10 @@ export abstract class IReleaseFlagDecisionRepository implements IBaseRepository<
   abstract findLatestInProgressForProject: RepositoryMethod<
     [projectId: string, excludeReleaseId: string | null],
     ILatestInProgressFlagDecision[]
+  >
+  abstract findLatestDecisionsForProject: RepositoryMethod<
+    [projectId: string, excludeReleaseId: string | null],
+    ILatestFlagDecisionForProject[]
   >
   abstract findActiveEnableDecisionForFlag: RepositoryMethod<
     [projectId: string, key: string],

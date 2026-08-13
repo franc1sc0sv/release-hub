@@ -168,6 +168,19 @@ enum BranchSignalFilter {
   UNREFERENCED
 }
 
+type CarriedOverFlagType {
+  decidedAt: DateTime
+  decision: ReleaseFlagDecisionType!
+  deploymentStatus: FlagDeploymentStatus!
+  featureId: ID
+  featureName: String
+  featureReleaseState: FeatureState
+  key: String!
+  originReleaseId: ID!
+  originReleaseName: String!
+  trackedFlagId: ID!
+}
+
 type CommitType {
   author: String!
   date: DateTime!
@@ -899,6 +912,7 @@ type Query {
   branchCleanupCandidates(projectId: ID!): [BranchCleanupCandidateType!]!
   branchCleanupPage(input: BranchCleanupPageInput!): BranchCleanupPageType!
   branchCleanupPlan(projectId: ID!): BranchCleanupPlanType!
+  carriedOverFlags(releaseId: ID!): [CarriedOverFlagType!]!
   compareFlags(baselineEnvironments: [String!]!, comparedEnvironments: [String!]!, projectId: ID!): FlagComparisonResultType!
   compareRefs(baseRef: String!, compareRef: String!, projectId: ID!): RefComparisonType!
   exportSummary(input: ExportSummaryInput!): ExportResultType!
