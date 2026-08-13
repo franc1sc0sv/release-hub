@@ -170,6 +170,7 @@ enum BranchSignalFilter {
 
 type CarriedOverFlagType {
   decidedAt: DateTime
+  decidedInThisRelease: Boolean!
   decision: ReleaseFlagDecisionType!
   deploymentStatus: FlagDeploymentStatus!
   featureId: ID

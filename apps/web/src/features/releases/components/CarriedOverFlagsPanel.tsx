@@ -22,6 +22,8 @@ const GROUP_ORDER: FlagDeploymentStatus[] = [
   FlagDeploymentStatusValue.CONFLICT,
   FlagDeploymentStatusValue.IN_PROGRESS,
   FlagDeploymentStatusValue.SHIPPED_OFF,
+  FlagDeploymentStatusValue.SHIPPED_ON,
+  FlagDeploymentStatusValue.UNTRACKED,
 ]
 
 interface CarriedOverFlagsPanelProps {
@@ -59,7 +61,11 @@ function CarriedOverFlagRow({ flag, releaseId }: { flag: CarriedOverFlag; releas
               {flag.featureName}
             </Link>
           )}
-          <span>{t('flags.carriedOver.origin', { release: flag.originReleaseName })}</span>
+          <span>
+            {flag.decidedInThisRelease
+              ? t('flags.carriedOver.decidedHere')
+              : t('flags.carriedOver.origin', { release: flag.originReleaseName })}
+          </span>
           {flag.featureReleaseState && (
             <StatusBadge tone={featureStateTone(flag.featureReleaseState)}>
               {enumLabels.featureState(flag.featureReleaseState)}
@@ -74,7 +80,7 @@ function CarriedOverFlagRow({ flag, releaseId }: { flag: CarriedOverFlag; releas
             <ReleaseFlagDecisionSelect
               releaseId={releaseId}
               trackedFlagId={flag.trackedFlagId}
-              decision={null}
+              decision={flag.decidedInThisRelease ? flag.decision : null}
             />
           ) : null
         }

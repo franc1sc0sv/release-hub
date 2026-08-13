@@ -26,7 +26,7 @@ export abstract class IReleaseFlagDecisionRepository implements IBaseRepository<
     ILatestInProgressFlagDecision[]
   >
   abstract findLatestDecisionsForProject: RepositoryMethod<
-    [projectId: string, excludeReleaseId: string | null],
+    [projectId: string],
     ILatestFlagDecisionForProject[]
   >
   abstract findActiveEnableDecisionForFlag: RepositoryMethod<

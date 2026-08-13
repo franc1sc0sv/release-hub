@@ -397,8 +397,9 @@
     "carriedOver": {
       "heading_one": "{{count}} flag arrastrado de releases anteriores",
       "heading_other": "{{count}} flags arrastrados de releases anteriores",
-      "description": "Estos flags se decidieron en un release pasado y siguen abiertos. Dales una decisión aquí para cerrarlos.",
-      "origin": "desde {{release}}"
+      "description": "Estos flags vienen de releases anteriores. Dales una decisión aquí para cerrarlos — tu decisión queda en este release.",
+      "origin": "desde {{release}}",
+      "decidedHere": "Decidido en este release"
     },
     "pending": {
       "heading_one": "{{count}} flag necesita una decisión",

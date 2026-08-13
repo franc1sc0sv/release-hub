@@ -138,7 +138,12 @@ export default function FlagDetailPage() {
 
               <div className="space-y-4">
                 <FlagLinkedFeatureCard feature={tracked?.feature ?? null} />
-                <FlagReleaseAppearancesCard releases={tracked?.releases ?? []} />
+                {tracked && (
+                  <FlagReleaseAppearancesCard
+                    releases={tracked.releases}
+                    trackedFlagId={tracked.id}
+                  />
+                )}
               </div>
             </m.div>
 

@@ -32,6 +32,9 @@ export class CarriedOverFlagType {
   @Field(() => Date, { nullable: true })
   decidedAt: Date | null
 
+  @Field(() => Boolean)
+  decidedInThisRelease: boolean
+
   @Field(() => FeatureState, { nullable: true })
   featureReleaseState: FeatureState | null
 }

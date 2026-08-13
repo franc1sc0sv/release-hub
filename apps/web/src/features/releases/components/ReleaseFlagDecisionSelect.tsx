@@ -20,12 +20,14 @@ interface ReleaseFlagDecisionSelectProps {
   releaseId: string
   trackedFlagId: string
   decision: ReleaseFlagDecisionType | null
+  refetchQueries?: string[]
 }
 
 export function ReleaseFlagDecisionSelect({
   releaseId,
   trackedFlagId,
   decision,
+  refetchQueries = ['CarriedOverFlags'],
 }: ReleaseFlagDecisionSelectProps) {
   const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
@@ -33,9 +35,7 @@ export function ReleaseFlagDecisionSelect({
     decision,
   )
 
-  const [setReleaseFlagDecision] = useMutation(SET_RELEASE_FLAG_DECISION, {
-    refetchQueries: ['CarriedOverFlags'],
-  })
+  const [setReleaseFlagDecision] = useMutation(SET_RELEASE_FLAG_DECISION, { refetchQueries })
 
   async function handleChange(newDecision: ReleaseFlagDecisionType) {
     const previousDecision = optimisticDecision

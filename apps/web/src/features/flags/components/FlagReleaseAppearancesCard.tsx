@@ -7,22 +7,28 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
+import { Can } from '@/context/ability.context'
+import { Action, Subject } from '@release-hub/shared'
 import { releaseStatusTone, releaseFlagDecisionTone } from '@/features/releases/constants/release-enums'
+import { ReleaseFlagDecisionSelect } from '@/features/releases/components/ReleaseFlagDecisionSelect'
 import type { GetFlagDetailQuery } from '@/generated/graphql'
+
+const DECISION_REFETCH_QUERIES = ['GetFlagDetail', 'GetFlagHistory']
 
 type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 type FlagRelease = TrackedFlagDetail['releases'][number]
 
 interface FlagReleaseRowProps {
   release: FlagRelease
+  trackedFlagId: string
 }
 
-function FlagReleaseRow({ release }: FlagReleaseRowProps) {
+function FlagReleaseRow({ release, trackedFlagId }: FlagReleaseRowProps) {
   const enumLabels = useEnumLabels()
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   return (
-    <li>
+    <li className="flex items-center gap-3 border-t border-border py-3 first:border-t-0 first:pt-0">
       <Link
         to={{
           pathname: generatePath(ROUTES.PROJECT_RELEASE_DETAIL, {
@@ -32,7 +38,7 @@ function FlagReleaseRow({ release }: FlagReleaseRowProps) {
           }),
           search: '?section=flags',
         }}
-        className="flex items-center gap-3 rounded-[var(--radius-button)] border-t border-border py-3 first:border-t-0 first:pt-0 transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-button)] transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="min-w-0 flex-1">
           <p className="font-mono text-sm font-medium text-foreground">{release.version}</p>
@@ -45,22 +51,38 @@ function FlagReleaseRow({ release }: FlagReleaseRowProps) {
             </span>
           </div>
         </div>
-        {release.decision && (
-          <StatusBadge tone={releaseFlagDecisionTone(release.decision)}>
-            {enumLabels.releaseFlagDecision(release.decision)}
-          </StatusBadge>
-        )}
         <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       </Link>
+
+      <Can I={Action.UPDATE} a={Subject.RELEASE} passThrough>
+        {(canDecide) =>
+          canDecide ? (
+            <ReleaseFlagDecisionSelect
+              releaseId={release.releaseId}
+              trackedFlagId={trackedFlagId}
+              decision={release.decision}
+              refetchQueries={DECISION_REFETCH_QUERIES}
+            />
+          ) : release.decision ? (
+            <StatusBadge tone={releaseFlagDecisionTone(release.decision)}>
+              {enumLabels.releaseFlagDecision(release.decision)}
+            </StatusBadge>
+          ) : null
+        }
+      </Can>
     </li>
   )
 }
 
 interface FlagReleaseAppearancesCardProps {
   releases: FlagRelease[]
+  trackedFlagId: string
 }
 
-export function FlagReleaseAppearancesCard({ releases }: FlagReleaseAppearancesCardProps) {
+export function FlagReleaseAppearancesCard({
+  releases,
+  trackedFlagId,
+}: FlagReleaseAppearancesCardProps) {
   const { t } = useTranslation('flags')
 
   return (
@@ -81,7 +103,11 @@ export function FlagReleaseAppearancesCard({ releases }: FlagReleaseAppearancesC
         ) : (
           <ul className="space-y-0">
             {releases.map((release) => (
-              <FlagReleaseRow key={release.releaseId} release={release} />
+              <FlagReleaseRow
+                key={release.releaseId}
+                release={release}
+                trackedFlagId={trackedFlagId}
+              />
             ))}
           </ul>
         )}

@@ -10,8 +10,10 @@ import { computeFlagDeploymentStatus } from '../../../../common/types/flag-deplo
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
+import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { IFeatureInReleaseRepository } from '../../../release/interfaces/feature-in-release.repository'
 import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
+import { IPullRequestFlagChangeRepository } from '../../interfaces/pull-request-flag-change.repository'
 import { IReleaseFlagDecisionRepository } from '../../interfaces/release-flag-decision.repository'
 import { CarriedOverFlagType } from '../../types/carried-over-flag.type'
 import { GetCarriedOverFlagsQuery } from './get-carried-over-flags.query'
@@ -32,6 +34,8 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
     private readonly organizationRepository: IOrganizationRepository,
     private readonly projectRepository: IProjectRepository,
     private readonly releaseRepository: IReleaseRepository,
+    private readonly pullRequestRepository: IPullRequestRepository,
+    private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
     private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
@@ -59,10 +63,16 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
 
     const decisions = await this.releaseFlagDecisionRepository.findLatestDecisionsForProject(
       release.projectId,
-      query.releaseId,
       tx,
     )
     if (decisions.length === 0) return []
+
+    const prs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
+    const changes = await this.pullRequestFlagChangeRepository.findAllForPullRequestIds(
+      prs.map((pr) => pr.id),
+      tx,
+    )
+    const flagIdsInThisRelease = new Set(changes.map((change) => change.trackedFlagId))
 
     const project = await this.projectRepository.findById(release.projectId, tx)
     const watchedEnvironments = project?.conflictEnvironments ?? []
@@ -86,11 +96,14 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
 
     const results: CarriedOverFlagType[] = []
     for (const decision of decisions) {
+      if (flagIdsInThisRelease.has(decision.trackedFlagId)) continue
+
+      const decidedInThisRelease = decision.releaseId === query.releaseId
       const deploymentStatus = computeFlagDeploymentStatus(
         decision.decision,
         disabledByKey.get(decision.key) ?? false,
       )
-      if (!CARRIED_OVER_STATUSES.includes(deploymentStatus)) continue
+      if (!decidedInThisRelease && !CARRIED_OVER_STATUSES.includes(deploymentStatus)) continue
 
       const originRelease = await this.releaseRepository.findById(decision.releaseId, tx)
       if (!originRelease) continue
@@ -105,6 +118,7 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
       carried.decision = decision.decision
       carried.deploymentStatus = deploymentStatus
       carried.decidedAt = decision.decidedAt
+      carried.decidedInThisRelease = decidedInThisRelease
       carried.featureReleaseState = decision.featureId
         ? (stateByFeatureId.get(decision.featureId) ?? null)
         : null

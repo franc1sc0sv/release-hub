@@ -149,6 +149,7 @@ export const CARRIED_OVER_FLAGS = graphql(`
       decision
       deploymentStatus
       decidedAt
+      decidedInThisRelease
       featureReleaseState
     }
   }

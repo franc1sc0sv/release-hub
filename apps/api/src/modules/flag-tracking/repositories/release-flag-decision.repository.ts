@@ -126,7 +126,6 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
 
   findLatestDecisionsForProject = async (
     projectId: string,
-    excludeReleaseId: string | null,
     tx: TxClient,
   ): Promise<ILatestFlagDecisionForProject[]> => {
     const decisions = await tx.releaseFlagDecision.findMany({
@@ -145,18 +144,9 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
       },
     })
 
-    const excludedFlagIds = new Set(
-      excludeReleaseId === null
-        ? []
-        : decisions
-            .filter((decision) => decision.releaseId === excludeReleaseId)
-            .map((decision) => decision.trackedFlag.id),
-    )
-
     const latestByFlag = new Map<string, ILatestFlagDecisionForProject>()
     for (const decision of decisions) {
       const flag = decision.trackedFlag
-      if (excludedFlagIds.has(flag.id)) continue
       if (latestByFlag.has(flag.id)) continue
 
       latestByFlag.set(flag.id, {
