@@ -1,6 +1,7 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
 import { FlagChangeAction } from '../../../common/types/flag-change-action.enum'
 import { FlagReferenceKind } from '../../../common/types/flag-reference-kind.enum'
+import { FeatureState } from '../../../common/types/feature-state.enum'
 import { ReleaseFlagDecisionType } from '../../../common/types/release-flag-decision-type.enum'
 import { TrackedFlagFeatureType } from './tracked-flag.type'
 
@@ -44,4 +45,10 @@ export class ReleaseFlagType {
 
   @Field(() => Date, { nullable: true })
   decidedAt: Date | null
+
+  @Field(() => FeatureState, { nullable: true })
+  suggestedFeatureState: FeatureState | null
+
+  @Field(() => FeatureState, { nullable: true })
+  featureReleaseState: FeatureState | null
 }

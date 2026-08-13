@@ -4,6 +4,7 @@ export interface IReleaseCreatedEvent extends IDomainEvent {
   readonly eventName: 'release.created'
   readonly releaseId: string
   readonly projectId: string
+  readonly actorId: string
   readonly occurredAt: Date
 }
 

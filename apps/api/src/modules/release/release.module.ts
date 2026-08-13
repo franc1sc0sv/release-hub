@@ -75,6 +75,6 @@ import { HandleGithubDeploymentWebhookHandler } from './commands/handle-github-d
     SyncGithubDeploymentsHandler,
     HandleGithubDeploymentWebhookHandler,
   ],
-  exports: [IPullRequestRepository, IReleaseRepository],
+  exports: [IPullRequestRepository, IReleaseRepository, IFeatureInReleaseRepository],
 })
 export class ReleaseModule {}

@@ -5,5 +5,6 @@ export class ListFeaturesPageQuery {
     readonly limit: number,
     readonly offset: number,
     readonly search: string | undefined,
+    readonly assignableOnly: boolean,
   ) {}
 }

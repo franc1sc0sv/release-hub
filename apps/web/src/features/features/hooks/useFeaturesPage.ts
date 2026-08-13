@@ -17,7 +17,13 @@ export function useFeaturesPage({ search }: UseFeaturesPageOptions) {
   const projectId = activeProject?.id ?? ''
 
   const input = useMemo(
-    () => ({ projectId, search: search || undefined, limit: PAGE_LIMIT, offset: 0 }),
+    () => ({
+      projectId,
+      search: search || undefined,
+      limit: PAGE_LIMIT,
+      offset: 0,
+      assignableOnly: false,
+    }),
     [projectId, search],
   )
 

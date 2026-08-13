@@ -8,6 +8,7 @@ import { authorizeProjectAction } from '../../../../common/authz/authorize-org-a
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
+import { IFeatureStateEventRepository } from '../../interfaces/feature-state-event.repository'
 import { FeatureDetailType } from '../../types/feature-detail.type'
 import { toFeatureDetailType } from '../../types/feature.mappers'
 import { GetFeatureQuery } from './get-feature.query'
@@ -19,6 +20,7 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
     private readonly orgRepository: IOrganizationRepository,
     private readonly featureRepository: IFeatureRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
+    private readonly featureStateEventRepository: IFeatureStateEventRepository,
   ) {
     super(db)
   }
@@ -36,12 +38,13 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
       tx,
     )
 
-    const [releases, prs, snapshots] = await Promise.all([
+    const [releases, prs, snapshots, timeline] = await Promise.all([
       this.featureRepository.findReleasesForFeature(query.featureId, tx),
       this.featureRepository.findPullRequestsForFeature(query.featureId, tx),
       this.featureInReleaseRepository.findByFeature(query.featureId, tx),
+      this.featureStateEventRepository.findAllByFeature(query.featureId, tx),
     ])
 
-    return toFeatureDetailType({ feature, releases, prs, snapshots })
+    return toFeatureDetailType({ feature, releases, prs, snapshots, timeline })
   }
 }

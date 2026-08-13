@@ -144,6 +144,8 @@ export const RELEASE_FLAGS = graphql(`
       key
       decision
       decidedAt
+      suggestedFeatureState
+      featureReleaseState
       feature {
         id
         name

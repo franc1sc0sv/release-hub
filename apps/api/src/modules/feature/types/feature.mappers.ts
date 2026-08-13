@@ -1,6 +1,7 @@
-import type { IFeature, IFeatureDetail, IFeaturePullRequest, IFeatureCommit, IFeatureTicketLink, IFeatureInRelease } from '../interfaces/feature.interfaces'
+import type { IFeature, IFeatureDetail, IFeaturePullRequest, IFeatureCommit, IFeatureTicketLink, IFeatureInRelease, IFeatureStateEvent } from '../interfaces/feature.interfaces'
 import { FeatureType } from './feature.type'
 import { FeatureDetailType, FeatureReleaseSnapshotType } from './feature-detail.type'
+import { FeatureTimelineEntryType } from './feature-timeline.type'
 import { FeatureInReleaseType } from './feature-in-release.type'
 import { FlagStateType } from './flag-state.type'
 import { FeatureKind } from '../../../common/types/feature-kind.enum'
@@ -77,12 +78,28 @@ function toFeatureReleaseSnapshotType(fir: IFeatureInRelease): FeatureReleaseSna
   return type
 }
 
+export function toFeatureTimelineEntryType(event: IFeatureStateEvent): FeatureTimelineEntryType {
+  const type = new FeatureTimelineEntryType()
+  type.id = event.id
+  type.releaseId = event.releaseId
+  type.releaseName = event.releaseName
+  type.scope = event.scope
+  type.source = event.source
+  type.fromState = event.fromState
+  type.toState = event.toState
+  type.actorName = event.actorName
+  type.flagKey = event.flagKey
+  type.occurredAt = event.occurredAt
+  return type
+}
+
 export function toFeatureDetailType(detail: IFeatureDetail): FeatureDetailType {
   const type = new FeatureDetailType()
   type.feature = toFeatureType(detail.feature)
   type.releases = detail.releases.map(toReleaseObjectType)
   type.prs = detail.prs.map(toFeaturePullRequestType)
   type.snapshots = detail.snapshots.map(toFeatureReleaseSnapshotType)
+  type.timeline = detail.timeline.map(toFeatureTimelineEntryType)
   return type
 }
 

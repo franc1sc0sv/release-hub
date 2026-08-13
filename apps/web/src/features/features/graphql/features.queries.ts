@@ -74,6 +74,18 @@ export const GET_FEATURE = graphql(`
           production
         }
       }
+      timeline {
+        id
+        releaseId
+        releaseName
+        scope
+        source
+        fromState
+        toState
+        actorName
+        flagKey
+        occurredAt
+      }
     }
   }
 `)

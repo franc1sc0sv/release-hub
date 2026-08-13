@@ -25,6 +25,17 @@ export const SET_FEATURE_STATE = graphql(`
   }
 `)
 
+export const SET_FEATURE_RELEASE_STATE = graphql(`
+  mutation SetFeatureReleaseState($input: SetFeatureReleaseStateInput!) {
+    setFeatureReleaseState(input: $input) {
+      featureId
+      releaseId
+      state
+      updatedAt
+    }
+  }
+`)
+
 export const SET_FEATURE_TAGS = graphql(`
   mutation SetFeatureTags($input: SetFeatureTagsInput!) {
     setFeatureTags(input: $input) {

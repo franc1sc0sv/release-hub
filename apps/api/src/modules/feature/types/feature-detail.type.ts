@@ -4,6 +4,7 @@ import { ReleaseObjectType } from '../../release/types/release.type'
 import { PullRequestType } from '../../release/types/pull-request.type'
 import { FeatureState } from '../../../common/types/feature-state.enum'
 import { FlagStateType } from './flag-state.type'
+import { FeatureTimelineEntryType } from './feature-timeline.type'
 
 @ObjectType()
 export class FeatureReleaseSnapshotType {
@@ -30,4 +31,7 @@ export class FeatureDetailType {
 
   @Field(() => [FeatureReleaseSnapshotType])
   snapshots: FeatureReleaseSnapshotType[]
+
+  @Field(() => [FeatureTimelineEntryType])
+  timeline: FeatureTimelineEntryType[]
 }

@@ -65,6 +65,9 @@ export class FeatureRepository extends IFeatureRepository {
       ...(filters.search
         ? { name: { contains: filters.search, mode: 'insensitive' as const } }
         : {}),
+      ...(filters.assignableOnly
+        ? { suggested: false, state: { not: FeatureState.COMPLETED } }
+        : {}),
     }
 
     const [rows, totalCount] = await Promise.all([

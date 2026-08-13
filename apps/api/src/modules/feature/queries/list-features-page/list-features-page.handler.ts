@@ -33,6 +33,7 @@ export class ListFeaturesPageHandler extends BaseQueryHandler<ListFeaturesPageQu
         limit: query.limit,
         offset: query.offset,
         search: query.search,
+        assignableOnly: query.assignableOnly,
       },
       tx,
     )

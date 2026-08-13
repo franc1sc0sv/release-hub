@@ -11,6 +11,7 @@ import { IOrganizationRepository } from '../../../organization/interfaces/organi
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
+import { assertFeatureAcceptsPullRequests } from '../../types/feature-state.rules'
 import { PrAssignedToFeatureEvent } from '../../events/pr-assigned-to-feature.event'
 import { AssignPrToFeatureCommand } from './assign-pr-to-feature.command'
 
@@ -51,6 +52,10 @@ export class AssignPrToFeatureHandler extends BaseCommandHandler<AssignPrToFeatu
 
     if (feature.projectId !== projectId) {
       throw new ForbiddenException()
+    }
+
+    if (pr.featureId !== command.featureId) {
+      assertFeatureAcceptsPullRequests(feature)
     }
 
     await this.pullRequestRepository.assignToFeature(command.prId, command.featureId, tx)

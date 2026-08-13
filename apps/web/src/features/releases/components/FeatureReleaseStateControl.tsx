@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
 import { toast } from 'sonner'
-import { useEnumLabels } from '@/hooks/use-enum-labels'
 import {
   Select,
   SelectContent,
@@ -14,44 +13,48 @@ import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import { SET_FEATURE_STATE } from '../graphql/features.mutations'
+import { useEnumLabels } from '@/hooks/use-enum-labels'
+import { SET_FEATURE_RELEASE_STATE } from '@/features/features/graphql/features.mutations'
 import {
   FEATURE_STATE_OPTIONS,
   FEATURE_STATE_TEXT_CLASS,
   FeatureKindValue,
   featureStateTone,
-} from '../constants/feature-enums'
+} from '@/features/features/constants/feature-enums'
 import type { FeatureKind, FeatureState } from '@/generated/graphql'
 
-interface FeatureStateControlProps {
+interface FeatureReleaseStateControlProps {
   featureId: string
-  currentState: FeatureState
+  releaseId: string
+  state: FeatureState
   kind: FeatureKind
 }
 
-function StateSelectInner({ featureId, currentState }: FeatureStateControlProps) {
-  const { t } = useTranslation('features')
+function ReleaseStateSelect({ featureId, releaseId, state }: FeatureReleaseStateControlProps) {
+  const { t } = useTranslation('releases')
   const enumLabels = useEnumLabels()
-  const [optimisticState, setOptimisticState] = useState<FeatureState>(currentState)
+  const [optimisticState, setOptimisticState] = useState<FeatureState>(state)
 
-  const [setFeatureState] = useMutation(SET_FEATURE_STATE, {
+  const [setFeatureReleaseState] = useMutation(SET_FEATURE_RELEASE_STATE, {
     refetchQueries: ['GetReleaseTree'],
     awaitRefetchQueries: true,
   })
 
   async function handleChange(value: string | null) {
     if (!value) return
-    const newState = value as FeatureState
+    const nextState = value as FeatureState
     const previousState = optimisticState
 
-    setOptimisticState(newState)
+    setOptimisticState(nextState)
 
     try {
-      await setFeatureState({ variables: { input: { featureId, state: newState } } })
-      toast.success(t('toast.stateChanged'))
+      await setFeatureReleaseState({
+        variables: { input: { featureId, releaseId, state: nextState, flagKey: null } },
+      })
+      toast.success(t('view.feature.stateChanged'))
     } catch {
       setOptimisticState(previousState)
-      toast.error(t('toast.stateError'))
+      toast.error(t('view.feature.stateError'))
     }
   }
 
@@ -59,20 +62,20 @@ function StateSelectInner({ featureId, currentState }: FeatureStateControlProps)
     <Select value={optimisticState} onValueChange={handleChange}>
       <SelectTrigger
         className={`h-auto rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium focus-visible:ring-ring ${FEATURE_STATE_TEXT_CLASS[optimisticState]}`}
-        aria-label={t('state.label')}
+        aria-label={t('view.feature.stateLabel')}
       >
         <SelectValue>
           {(value: string) => (value ? enumLabels.featureState(value as FeatureState) : null)}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="rounded-[var(--radius-card)] border border-white/15 bg-popover">
-        {FEATURE_STATE_OPTIONS.map((state) => (
+        {FEATURE_STATE_OPTIONS.map((option) => (
           <SelectItem
-            key={state}
-            value={state}
-            className={`rounded-xl text-xs ${FEATURE_STATE_TEXT_CLASS[state]}`}
+            key={option}
+            value={option}
+            className={`rounded-xl text-xs ${FEATURE_STATE_TEXT_CLASS[option]}`}
           >
-            {enumLabels.featureState(state)}
+            {enumLabels.featureState(option)}
           </SelectItem>
         ))}
       </SelectContent>
@@ -80,32 +83,29 @@ function StateSelectInner({ featureId, currentState }: FeatureStateControlProps)
   )
 }
 
-function ReadOnlyStateBadge({ state }: { state: FeatureState }) {
+function ReadOnlyState({ state }: { state: FeatureState }) {
   const enumLabels = useEnumLabels()
   return <StatusBadge tone={featureStateTone(state)}>{enumLabels.featureState(state)}</StatusBadge>
 }
 
-function SystemStateBadge({ state }: { state: FeatureState }) {
-  const { t } = useTranslation('features')
-  return (
-    <Tooltip>
-      <TooltipTrigger render={<span tabIndex={0} className="inline-flex" />}>
-        <ReadOnlyStateBadge state={state} />
-      </TooltipTrigger>
-      <TooltipContent>{t('state.systemLocked')}</TooltipContent>
-    </Tooltip>
-  )
-}
+export function FeatureReleaseStateControl(props: FeatureReleaseStateControlProps) {
+  const { t } = useTranslation('releases')
 
-export function FeatureStateControl(props: FeatureStateControlProps) {
   if (props.kind === FeatureKindValue.DEFAULT) {
-    return <SystemStateBadge state={props.currentState} />
+    return (
+      <Tooltip>
+        <TooltipTrigger render={<span tabIndex={0} className="inline-flex" />}>
+          <ReadOnlyState state={props.state} />
+        </TooltipTrigger>
+        <TooltipContent>{t('view.feature.systemLocked')}</TooltipContent>
+      </Tooltip>
+    )
   }
 
   return (
     <Can I={Action.UPDATE} a={Subject.FEATURE} passThrough>
       {(allowed) =>
-        allowed ? <StateSelectInner {...props} /> : <ReadOnlyStateBadge state={props.currentState} />
+        allowed ? <ReleaseStateSelect {...props} /> : <ReadOnlyState state={props.state} />
       }
     </Can>
   )

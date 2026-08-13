@@ -14,6 +14,7 @@ export const LogEvent = {
   AI_SUMMARY_FAILED: 'ai.summary.failed',
   AI_SUMMARY_ORPHAN_SWEEP: 'ai.summary.orphan.sweep',
   FLAGSMITH_SYNC_FAILED: 'flagsmith.sync.failed',
+  FLAG_SCAN_FAILED: 'flag.scan.failed',
 } as const
 
 export type LogEvent = (typeof LogEvent)[keyof typeof LogEvent]

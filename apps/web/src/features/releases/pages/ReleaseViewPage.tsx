@@ -238,7 +238,7 @@ export default function ReleaseViewPage() {
             ) : (
               <>
                 <TabsContent value="features">
-                  <ReleaseFeaturesTab features={features} />
+                  <ReleaseFeaturesTab features={features} releaseId={release.id} />
                 </TabsContent>
                 <TabsContent value="prs">
                   <ReleasePrsTab features={features} />

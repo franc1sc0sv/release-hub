@@ -97,7 +97,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   const { data: featuresData, loading: featuresLoading } = useQuery(LIST_FEATURES_PAGE, {
     variables: {
-      input: { projectId, limit: RESULT_LIMIT, offset: 0, search: debouncedSearch },
+      input: {
+        projectId,
+        limit: RESULT_LIMIT,
+        offset: 0,
+        search: debouncedSearch,
+        assignableOnly: false,
+      },
     },
     skip: !projectId || !canSearch,
   })

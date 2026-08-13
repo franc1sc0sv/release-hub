@@ -162,7 +162,7 @@ export class CreateReleaseHandler extends PreparedCommandHandler<
       }
     }
 
-    events.push(new ReleaseCreatedEvent(release.id, release.projectId))
+    events.push(new ReleaseCreatedEvent(release.id, release.projectId, command.userId))
 
     return toReleaseObjectType(release)
   }

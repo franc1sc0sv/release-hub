@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import { ReleaseFlagDecisionSelect } from './ReleaseFlagDecisionSelect'
+import { FlagFeatureStateSuggestion } from './FlagFeatureStateSuggestion'
 import { FlagPrLinkChip } from './FlagPrLinkChip'
 import type { ReleaseFlagsQuery } from '@/generated/graphql'
 
@@ -89,6 +90,17 @@ export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: Rel
         </Badge>
       ) : (
         <span className="text-xs text-muted-foreground">{t('flags.noDecision')}</span>
+      )}
+
+      {showDecision && flag.feature && flag.suggestedFeatureState && (
+        <FlagFeatureStateSuggestion
+          releaseId={releaseId}
+          featureId={flag.feature.id}
+          featureName={flag.feature.name}
+          flagKey={flag.key}
+          suggestedState={flag.suggestedFeatureState}
+          currentState={flag.featureReleaseState}
+        />
       )}
     </div>
   )

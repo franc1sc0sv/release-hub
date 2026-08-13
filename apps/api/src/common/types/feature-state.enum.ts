@@ -9,6 +9,7 @@ export const FeatureState = {
   FULLY_RELEASED: 'fully_released',
   FLAG_CLEANUP_PENDING: 'flag_cleanup_pending',
   BLOCKED: 'blocked',
+  COMPLETED: 'completed',
 } as const
 
 export type FeatureState = (typeof FeatureState)[keyof typeof FeatureState]

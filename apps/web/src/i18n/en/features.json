@@ -7,7 +7,8 @@
   "searchPlaceholder": "Search features...",
   "state": {
     "label": "Feature state",
-    "none": "No release yet"
+    "none": "No release yet",
+    "systemLocked": "System features keep a fixed status"
   },
   "fields": {
     "name": "Name",
@@ -59,6 +60,13 @@
     "notFound": "Feature not found",
     "notFoundDescription": "This feature does not exist or has been deleted.",
     "releasesHeading": "Releases",
+    "timeline": {
+      "heading": "Status timeline",
+      "empty": "No status changes recorded yet.",
+      "scopeFeature": "Feature",
+      "scopeRelease": "Release",
+      "by": "by {{name}}"
+    },
     "stateLabel": "State",
     "kindLabel": "Kind",
     "tagsLabel": "Tags",

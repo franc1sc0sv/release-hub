@@ -16,6 +16,7 @@ export const FeatureStateValue = {
   FULLY_RELEASED: 'FULLY_RELEASED',
   FLAG_CLEANUP_PENDING: 'FLAG_CLEANUP_PENDING',
   BLOCKED: 'BLOCKED',
+  COMPLETED: 'COMPLETED',
 } as const satisfies Record<FeatureState, FeatureState>
 
 export const FEATURE_STATE_OPTIONS: FeatureState[] = [
@@ -27,6 +28,7 @@ export const FEATURE_STATE_OPTIONS: FeatureState[] = [
   FeatureStateValue.FULLY_RELEASED,
   FeatureStateValue.FLAG_CLEANUP_PENDING,
   FeatureStateValue.BLOCKED,
+  FeatureStateValue.COMPLETED,
 ]
 
 export const FEATURE_STATE_TEXT_CLASS = {
@@ -38,6 +40,7 @@ export const FEATURE_STATE_TEXT_CLASS = {
   BLOCKED: 'text-rose-300',
   SHIPPED_FLAG_OFF: 'text-slate-300',
   FLAG_CLEANUP_PENDING: 'text-orange-300',
+  COMPLETED: 'text-emerald-300',
 } as const satisfies Record<FeatureState, string>
 
 export const FEATURE_STATE_BADGE_CLASS = {
@@ -49,6 +52,7 @@ export const FEATURE_STATE_BADGE_CLASS = {
   BLOCKED: 'border-rose-500/40 bg-rose-500/10 text-rose-300',
   SHIPPED_FLAG_OFF: 'border-slate-500/40 bg-slate-500/10 text-slate-300',
   FLAG_CLEANUP_PENDING: 'border-orange-500/40 bg-orange-500/10 text-orange-300',
+  COMPLETED: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
 } as const satisfies Record<FeatureState, string>
 
 export const FEATURE_STATE_BAR_CLASS = {
@@ -60,6 +64,7 @@ export const FEATURE_STATE_BAR_CLASS = {
   BLOCKED: 'bg-rose-400',
   SHIPPED_FLAG_OFF: 'bg-slate-400',
   FLAG_CLEANUP_PENDING: 'bg-orange-400',
+  COMPLETED: 'bg-emerald-400',
 } as const satisfies Record<FeatureState, string>
 
 const FEATURE_STATE_TONE = {
@@ -71,6 +76,7 @@ const FEATURE_STATE_TONE = {
   BLOCKED: StatusBadgeTone.ROSE,
   SHIPPED_FLAG_OFF: StatusBadgeTone.SLATE,
   FLAG_CLEANUP_PENDING: StatusBadgeTone.ORANGE,
+  COMPLETED: StatusBadgeTone.EMERALD,
 } as const satisfies Record<FeatureState, StatusBadgeToneValue>
 
 export function featureStateTone(state: FeatureState): StatusBadgeToneValue {

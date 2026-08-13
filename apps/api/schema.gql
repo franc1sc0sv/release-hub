@@ -305,6 +305,16 @@ type FeatureDetailType {
   prs: [PullRequestType!]!
   releases: [ReleaseObjectType!]!
   snapshots: [FeatureReleaseSnapshotType!]!
+  timeline: [FeatureTimelineEntryType!]!
+}
+
+type FeatureInReleaseType {
+  clientAvailabilityKey: String!
+  featureId: ID!
+  flagState: FlagStateType
+  releaseId: ID!
+  state: FeatureState!
+  updatedAt: DateTime!
 }
 
 enum FeatureKind {
@@ -326,6 +336,7 @@ type FeatureReleaseSnapshotType {
 
 enum FeatureState {
   BLOCKED
+  COMPLETED
   FLAG_CLEANUP_PENDING
   FULLY_RELEASED
   IN_PROGRESS
@@ -333,6 +344,30 @@ enum FeatureState {
   LIVE_STAGING
   PARTIAL
   SHIPPED_FLAG_OFF
+}
+
+type FeatureTimelineEntryType {
+  actorName: String
+  flagKey: String
+  fromState: FeatureState
+  id: ID!
+  occurredAt: DateTime!
+  releaseId: ID
+  releaseName: String
+  scope: FeatureTimelineScope!
+  source: FeatureTimelineSource!
+  toState: FeatureState!
+}
+
+enum FeatureTimelineScope {
+  FEATURE
+  RELEASE
+}
+
+enum FeatureTimelineSource {
+  FLAG_DECISION
+  SYSTEM
+  USER
 }
 
 type FeatureType {
@@ -621,6 +656,7 @@ type LinearConnectionStatus {
 }
 
 input ListFeaturesPageInput {
+  assignableOnly: Boolean = false
   limit: Int = 20
   offset: Int = 0
   projectId: ID!
@@ -701,6 +737,7 @@ type Mutation {
   saveReleaseSummary(input: SaveReleaseSummaryInput!): ReleaseObjectType!
   scanReleasePullRequests(releaseId: ID!): ScanReleasePullRequestsSummaryType!
   sendSlackTestMessage(projectId: ID!): SlackTestMessageResult!
+  setFeatureReleaseState(input: SetFeatureReleaseStateInput!): FeatureInReleaseType!
   setFeatureState(input: SetFeatureStateInput!): FeatureType!
   setFeatureTags(input: SetFeatureTagsInput!): FeatureType!
   setFlagRegistry(input: SetFlagRegistryInput!): FlagRegistryConfigType!
@@ -977,8 +1014,10 @@ type ReleaseFlagType {
   decidedAt: DateTime
   decision: ReleaseFlagDecisionType
   feature: TrackedFlagFeatureType
+  featureReleaseState: FeatureState
   id: ID!
   key: String!
+  suggestedFeatureState: FeatureState
 }
 
 type ReleaseObjectType {
@@ -1069,6 +1108,13 @@ type ScanReleasePullRequestsSummaryType {
   changesRecorded: Int!
   flagsFound: Int!
   prsScanned: Int!
+}
+
+input SetFeatureReleaseStateInput {
+  featureId: ID!
+  flagKey: String
+  releaseId: ID!
+  state: FeatureState!
 }
 
 input SetFeatureStateInput {

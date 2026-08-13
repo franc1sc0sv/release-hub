@@ -49,7 +49,11 @@ function FeatureRow({ feature }: { feature: FeaturePageItem }) {
             {feature.name}
           </Link>
           <TagChip>{enumLabels.featureKind(feature.kind)}</TagChip>
-          <FeatureStateControl featureId={feature.id} currentState={feature.currentState} />
+          <FeatureStateControl
+            featureId={feature.id}
+            currentState={feature.currentState}
+            kind={feature.kind}
+          />
           {feature.suggested && <StatusBadge tone="violet">{t('suggested')}</StatusBadge>}
         </div>
 

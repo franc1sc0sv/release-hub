@@ -7,6 +7,7 @@ export class ReleaseCreatedEvent implements IReleaseCreatedEvent {
   constructor(
     readonly releaseId: string,
     readonly projectId: string,
+    readonly actorId: string,
   ) {
     this.occurredAt = new Date()
   }

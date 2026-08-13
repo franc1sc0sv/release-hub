@@ -7,7 +7,17 @@
     "PARTIAL": "Parcial",
     "FULLY_RELEASED": "Completamente lanzado",
     "FLAG_CLEANUP_PENDING": "Limpieza de flag pendiente",
-    "BLOCKED": "Bloqueado"
+    "BLOCKED": "Bloqueado",
+    "COMPLETED": "Completado"
+  },
+  "featureTimelineScope": {
+    "FEATURE": "Funcionalidad",
+    "RELEASE": "Release"
+  },
+  "featureTimelineSource": {
+    "USER": "Cambio manual",
+    "FLAG_DECISION": "Decisión de flag",
+    "SYSTEM": "Sistema"
   },
   "featureKind": {
     "PRODUCT": "Producto",

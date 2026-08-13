@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import type {
   FeatureState,
   FeatureKind,
+  FeatureTimelineScope,
+  FeatureTimelineSource,
   ReleaseStatus,
   TicketSource,
   OrgRole,
@@ -26,6 +28,8 @@ export function useEnumLabels() {
   return {
     featureState: (v: FeatureState): string => t(`featureState.${v}`),
     featureKind: (v: FeatureKind): string => t(`featureKind.${v}`),
+    featureTimelineScope: (v: FeatureTimelineScope): string => t(`featureTimelineScope.${v}`),
+    featureTimelineSource: (v: FeatureTimelineSource): string => t(`featureTimelineSource.${v}`),
     releaseStatus: (v: ReleaseStatus): string => t(`releaseStatus.${v}`),
     ticketSource: (v: TicketSource): string => t(`ticketSource.${v}`),
     orgRole: (v: OrgRole): string => t(`orgRole.${v}`),

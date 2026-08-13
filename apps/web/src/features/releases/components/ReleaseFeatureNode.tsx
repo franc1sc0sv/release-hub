@@ -4,17 +4,18 @@ import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, Layers } from 'lucide-react'
 import { PullRequestRow } from './PullRequestRow'
 import { ClientAvailabilityLine } from '@/features/features/components/ClientAvailabilityLine'
-import { FeatureStateControl } from '@/features/features/components/FeatureStateControl'
+import { FeatureReleaseStateControl } from './FeatureReleaseStateControl'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
 
 type FeatureNode = GetReleaseTreeQuery['getReleaseTree']['features'][number]
 
 interface ReleaseFeatureNodeProps {
   node: FeatureNode
+  releaseId: string
   badge?: ReactNode
 }
 
-export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
+export function ReleaseFeatureNode({ node, releaseId, badge }: ReleaseFeatureNodeProps) {
   const { t } = useTranslation('releases')
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
@@ -44,10 +45,15 @@ export function ReleaseFeatureNode({ node, badge }: ReleaseFeatureNodeProps) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <div className="w-fit">
-              <FeatureStateControl
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {t('view.feature.stateInRelease')}
+              </span>
+              <FeatureReleaseStateControl
                 featureId={feature.id}
-                currentState={feature.currentState ?? state}
+                releaseId={releaseId}
+                state={state}
+                kind={feature.kind}
               />
             </div>
             <ClientAvailabilityLine clientAvailabilityKey={clientAvailabilityKey} />

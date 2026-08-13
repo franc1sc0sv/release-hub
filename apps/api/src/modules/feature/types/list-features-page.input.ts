@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql'
-import { IsOptional, IsString, IsInt, Min, Max } from 'class-validator'
+import { IsOptional, IsString, IsInt, IsBoolean, Min, Max } from 'class-validator'
 
 @InputType()
 export class ListFeaturesPageInput {
@@ -24,4 +24,9 @@ export class ListFeaturesPageInput {
   @IsOptional()
   @IsString()
   search?: string
+
+  @Field(() => Boolean, { nullable: true, defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  assignableOnly?: boolean
 }

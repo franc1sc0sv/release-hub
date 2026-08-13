@@ -189,6 +189,11 @@
       "prCount_one": "{{count}} pull request",
       "prCount_other": "{{count}} pull requests",
       "suggested": "Sugerida por IA",
+      "stateInRelease": "Estado en este release",
+      "stateLabel": "Estado en este release",
+      "stateChanged": "Estado actualizado para este release",
+      "stateError": "No se pudo actualizar el estado para este release",
+      "systemLocked": "Las funcionalidades del sistema mantienen un estado fijo",
       "flagState": {
         "staging": "Staging",
         "production": "Producción",
@@ -233,6 +238,10 @@
     "defaultFeature": "Por defecto",
     "assignTo": "Funcionalidad",
     "selectFeature": "Seleccionar funcionalidad…",
+    "searchFeature": "Buscar funcionalidades…",
+    "loadingFeatures": "Cargando funcionalidades…",
+    "noFeatureMatches": "Ninguna funcionalidad coincide con tu búsqueda",
+    "refineFeatureHint": "Se encontraron 50+ funcionalidades — refina tu búsqueda para ver más",
     "assignError": "No se pudo guardar la asignación",
     "confirm": "Confirmar release",
     "confirming": "Confirmando…",
@@ -386,6 +395,18 @@
     "noDecision": "Sin decisión aún",
     "removedNote": "Eliminado",
     "searchPlaceholder": "Buscar flags…",
+    "pending": {
+      "heading_one": "{{count}} flag necesita una decisión",
+      "heading_other": "{{count}} flags necesitan una decisión",
+      "description": "Indica qué pasa con cada flag en este release. Puedes lanzar el release antes de decidir."
+    },
+    "suggestion": {
+      "label": "Estado sugerido para {{feature}}:",
+      "apply": "Aplicar a la funcionalidad",
+      "alreadyApplied": "Aplicado",
+      "applied": "Estado actualizado para {{feature}}",
+      "applyError": "No se pudo aplicar el estado sugerido"
+    },
     "subTabs": {
       "label": "Cambios de flags",
       "added": "Agregados",

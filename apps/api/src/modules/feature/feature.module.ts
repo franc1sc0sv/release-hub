@@ -9,6 +9,9 @@ import { IFeatureRepository } from './interfaces/feature.repository'
 import { FeatureRepository } from './repositories/feature.repository'
 import { IFeatureInReleaseRepository } from './interfaces/feature-in-release.repository'
 import { FeatureInReleaseRepository } from './repositories/feature-in-release.repository'
+import { IFeatureStateEventRepository } from './interfaces/feature-state-event.repository'
+import { FeatureStateEventRepository } from './repositories/feature-state-event.repository'
+import { SetFeatureReleaseStateHandler } from './commands/set-feature-release-state/set-feature-release-state.handler'
 import { ListFeaturesPageHandler } from './queries/list-features-page/list-features-page.handler'
 import { GetFeatureHandler } from './queries/get-feature/get-feature.handler'
 import { CreateFeatureHandler } from './commands/create-feature/create-feature.handler'
@@ -25,11 +28,13 @@ import { DeleteFeatureHandler } from './commands/delete-feature/delete-feature.h
     FeatureResolver,
     { provide: IFeatureRepository, useClass: FeatureRepository },
     { provide: IFeatureInReleaseRepository, useClass: FeatureInReleaseRepository },
+    { provide: IFeatureStateEventRepository, useClass: FeatureStateEventRepository },
     ListFeaturesPageHandler,
     GetFeatureHandler,
     CreateFeatureHandler,
     AssignPrToFeatureHandler,
     SetFeatureStateHandler,
+    SetFeatureReleaseStateHandler,
     SetFeatureTagsHandler,
     AcceptSuggestedFeatureHandler,
     RejectSuggestedFeatureHandler,

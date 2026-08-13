@@ -1,4 +1,6 @@
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
+import type { FeatureState } from '../../../common/types/feature-state.enum'
+import { suggestFeatureStateForDecision } from './flag-decision-feature-state.map'
 import type {
   ITrackedFlagWithDetails,
   IFlagBranchPresence,
@@ -60,6 +62,7 @@ export function toReleaseFlagType(
   flag: ITrackedFlagWithDetails,
   changes: IPullRequestFlagChangeWithPullRequest[],
   decision: IReleaseFlagDecision | null,
+  featureReleaseState: FeatureState | null,
 ): ReleaseFlagType {
   const type = new ReleaseFlagType()
   type.id = flag.id
@@ -75,6 +78,10 @@ export function toReleaseFlagType(
   type.changes = changes.map(toReleaseFlagChangeType)
   type.decision = decision?.decision ?? null
   type.decidedAt = decision?.decidedAt ?? null
+  type.suggestedFeatureState = flag.feature
+    ? suggestFeatureStateForDecision(decision?.decision ?? null)
+    : null
+  type.featureReleaseState = featureReleaseState
   return type
 }
 

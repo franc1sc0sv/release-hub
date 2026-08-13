@@ -25,6 +25,7 @@ import { GetReleaseFlagsHandler } from './queries/get-release-flags/get-release-
 import { GetFlagRegistryHandler } from './queries/get-flag-registry/get-flag-registry.handler'
 import { GetFlagHistoryHandler } from './queries/get-flag-history/get-flag-history.handler'
 import { GetFlagDetailHandler } from './queries/get-flag-detail/get-flag-detail.handler'
+import { ScanFlagsOnReleaseCreatedHandler } from './events/scan-flags-on-release-created.handler'
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { GetFlagDetailHandler } from './queries/get-flag-detail/get-flag-detail.
     GetFlagRegistryHandler,
     GetFlagHistoryHandler,
     GetFlagDetailHandler,
+    ScanFlagsOnReleaseCreatedHandler,
   ],
   exports: [IPullRequestFlagChangeRepository, ITrackedFlagRepository, FlagHistoryModule],
 })

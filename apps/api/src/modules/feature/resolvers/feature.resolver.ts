@@ -13,7 +13,10 @@ import { FeaturePageType } from '../types/feature-page.type'
 import { ListFeaturesPageInput } from '../types/list-features-page.input'
 import { CreateFeatureInput } from '../types/create-feature.input'
 import { AssignPrToFeatureInput } from '../types/assign-pr-to-feature.input'
+import { FeatureInReleaseType } from '../types/feature-in-release.type'
 import { SetFeatureStateInput } from '../commands/set-feature-state/set-feature-state.input'
+import { SetFeatureReleaseStateInput } from '../commands/set-feature-release-state/set-feature-release-state.input'
+import { SetFeatureReleaseStateCommand } from '../commands/set-feature-release-state/set-feature-release-state.command'
 import { SetFeatureTagsInput } from '../commands/set-feature-tags/set-feature-tags.input'
 import { ListFeaturesPageQuery } from '../queries/list-features-page/list-features-page.query'
 import { GetFeatureQuery } from '../queries/get-feature/get-feature.query'
@@ -48,6 +51,7 @@ export class FeatureResolver {
         input.limit ?? 20,
         input.offset ?? 0,
         input.search,
+        input.assignableOnly ?? false,
       ),
     )
   }
@@ -91,6 +95,23 @@ export class FeatureResolver {
   ): Promise<FeatureType> {
     return this.commandBus.execute(
       new SetFeatureStateCommand(input.featureId, input.state, user.id),
+    )
+  }
+
+  @Mutation(() => FeatureInReleaseType)
+  @Can(Action.UPDATE, Subject.FEATURE)
+  setFeatureReleaseState(
+    @Args('input', { type: () => SetFeatureReleaseStateInput }) input: SetFeatureReleaseStateInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<FeatureInReleaseType> {
+    return this.commandBus.execute(
+      new SetFeatureReleaseStateCommand(
+        input.featureId,
+        input.releaseId,
+        input.state,
+        user.id,
+        input.flagKey ?? null,
+      ),
     )
   }
 

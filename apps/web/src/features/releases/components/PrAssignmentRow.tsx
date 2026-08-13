@@ -1,20 +1,13 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMutation, useQuery } from '@apollo/client/react'
+import { useMutation } from '@apollo/client/react'
 import { m, useReducedMotion } from 'motion/react'
 import { Bot, ChevronDown, ExternalLink, GitMerge, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { CommitRow } from './CommitRow'
 import { TicketChip } from './TicketChip'
 import { PrSummaryPanel } from './PrSummaryPanel'
-import { LIST_FEATURES_PAGE } from '@/features/features/graphql/features.queries'
+import { FeatureCombobox } from './FeatureCombobox'
 import { UPDATE_RELEASE } from '../graphql/releases.mutations'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
 import type { GetReleaseTreeQuery } from '@/generated/graphql'
@@ -35,18 +28,12 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
   const [showCommits, setShowCommits] = useState(false)
   const reduceMotion = useReducedMotion()
 
-  const { data: featuresData } = useQuery(LIST_FEATURES_PAGE, {
-    variables: { input: { projectId, limit: 50, offset: 0, search: undefined } },
-    fetchPolicy: 'cache-first',
-  })
-
   const [updateRelease, { loading: saving }] = useMutation(UPDATE_RELEASE, {
     refetchQueries: [{ query: GET_RELEASE_TREE, variables: { id: releaseId } }],
   })
 
   const handleFeatureChange = useCallback(
-    async (value: string | null) => {
-      if (!value) return
+    async (value: string) => {
       try {
         await updateRelease({
           variables: {
@@ -62,10 +49,6 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
       }
     },
     [updateRelease, releaseId, pr.id, t],
-  )
-
-  const assignableFeatures = (featuresData?.listFeaturesPage.items ?? []).filter(
-    (f) => !f.suggested,
   )
 
   const confidenceLevel =
@@ -158,32 +141,14 @@ export function PrAssignmentRow({ pr, featureName, releaseId, projectId }: PrAss
             >
               {t('draft.assignTo')}
             </label>
-            <Select
-              value={pr.featureId ?? ''}
-              onValueChange={handleFeatureChange}
+            <FeatureCombobox
+              id={`feature-select-${pr.id}`}
+              projectId={projectId}
+              value={pr.featureId ?? null}
+              label={featureName}
+              onChange={handleFeatureChange}
               disabled={saving}
-            >
-              <SelectTrigger
-                id={`feature-select-${pr.id}`}
-                size="sm"
-                className="h-7 min-w-0 flex-1 text-xs"
-              >
-                <SelectValue placeholder={t('draft.selectFeature')}>
-                  {(value: string) =>
-                    value
-                      ? (assignableFeatures.find((f) => f.id === value)?.name ?? featureName)
-                      : null
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {assignableFeatures.map((f) => (
-                  <SelectItem key={f.id} value={f.id} className="text-xs">
-                    {f.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {saving && (
               <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-hidden />
             )}

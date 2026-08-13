@@ -12,9 +12,10 @@ type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
 
 interface ReleaseFeaturesTabProps {
   features: FeatureNodes
+  releaseId: string
 }
 
-export function ReleaseFeaturesTab({ features }: ReleaseFeaturesTabProps) {
+export function ReleaseFeaturesTab({ features, releaseId }: ReleaseFeaturesTabProps) {
   const { t } = useTranslation('releases')
   const [search, setSearch] = useState('')
 
@@ -54,6 +55,7 @@ export function ReleaseFeaturesTab({ features }: ReleaseFeaturesTabProps) {
             <div key={node.feature.id} className="space-y-0">
               <ReleaseFeatureNode
                 node={node}
+                releaseId={releaseId}
                 badge={
                   node.feature.suggested ? (
                     <Badge className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-2 py-0.5 text-xs font-medium text-fuchsia-300">

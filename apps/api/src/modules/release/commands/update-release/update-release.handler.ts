@@ -13,6 +13,8 @@ import { authorizeProjectAction } from '../../../../common/authz/authorize-org-a
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
+import { IFeatureRepository } from '../../../feature/interfaces/feature.repository'
+import { assertFeatureAcceptsPullRequests } from '../../../feature/types/feature-state.rules'
 import { ReleaseObjectType } from '../../types/release.type'
 import { toReleaseObjectType } from '../../types/release.mappers'
 import { UpdateReleaseCommand } from './update-release.command'
@@ -25,6 +27,7 @@ export class UpdateReleaseHandler extends BaseCommandHandler<UpdateReleaseComman
     private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
+    private readonly featureRepository: IFeatureRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -64,14 +67,19 @@ export class UpdateReleaseHandler extends BaseCommandHandler<UpdateReleaseComman
       for (const assignment of command.prAssignments) {
         if (!assignment.featureId) continue
 
-        if (!isDraft) {
-          const pr = await this.pullRequestRepository.findById(assignment.pullRequestId, tx)
-          if (!pr || !pr.pendingAddition) {
-            throw new AppException(
-              'Only pending-addition pull requests can be assigned on a non-draft release',
-              ErrorCode.VALIDATION_ERROR,
-            )
-          }
+        const pr = await this.pullRequestRepository.findById(assignment.pullRequestId, tx)
+
+        if (!isDraft && (!pr || !pr.pendingAddition)) {
+          throw new AppException(
+            'Only pending-addition pull requests can be assigned on a non-draft release',
+            ErrorCode.VALIDATION_ERROR,
+          )
+        }
+
+        if (pr?.featureId !== assignment.featureId) {
+          const feature = await this.featureRepository.findById(assignment.featureId, tx)
+          if (!feature) throw new NotFoundException('Feature')
+          assertFeatureAcceptsPullRequests(feature)
         }
 
         await this.pullRequestRepository.assignToFeature(assignment.pullRequestId, assignment.featureId, tx)

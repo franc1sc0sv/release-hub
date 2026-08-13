@@ -29,8 +29,24 @@ enum FeatureState {
   fully_released
   flag_cleanup_pending
   blocked
+  completed
 
   @@map("feature_state")
+}
+
+enum FeatureTimelineScope {
+  feature
+  release
+
+  @@map("feature_timeline_scope")
+}
+
+enum FeatureTimelineSource {
+  user
+  flag_decision
+  system
+
+  @@map("feature_timeline_source")
 }
 
 enum ReleaseType {
@@ -182,6 +198,7 @@ model User {
   createdBlockedBranches  BlockedBranch[]
   flagHistoryEvents       FlagHistoryEvent[]
   notifications           Notification[]
+  featureStateEvents      FeatureStateEvent[]
 
   @@index([deletedAt])
   @@map("users")
@@ -356,9 +373,31 @@ model Feature {
   pullRequests    PullRequest[]
   featureInReleases FeatureInRelease[]
   trackedFlags    TrackedFlag[]
+  stateEvents     FeatureStateEvent[]
 
   @@index([projectId, deletedAt])
   @@map("features")
+}
+
+model FeatureStateEvent {
+  id         String                @id @default(cuid())
+  featureId  String                @map("feature_id")
+  releaseId  String?               @map("release_id")
+  scope      FeatureTimelineScope
+  source     FeatureTimelineSource
+  fromState  FeatureState?         @map("from_state")
+  toState    FeatureState          @map("to_state")
+  actorId    String?               @map("actor_id")
+  flagKey    String?               @map("flag_key")
+  occurredAt DateTime              @default(now()) @map("occurred_at")
+
+  feature Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  release Release? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+  actor   User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([featureId, occurredAt])
+  @@index([releaseId])
+  @@map("feature_state_events")
 }
 
 model Release {
@@ -387,6 +426,7 @@ model Release {
   featureInReleases FeatureInRelease[]
   flagDecisions     ReleaseFlagDecision[]
   flagHistoryEvents FlagHistoryEvent[]
+  featureStateEvents FeatureStateEvent[]
   summaryProfile    SummaryProfile?   @relation(fields: [summaryProfileId], references: [id], onDelete: SetNull)
 
   @@index([projectId, deletedAt])

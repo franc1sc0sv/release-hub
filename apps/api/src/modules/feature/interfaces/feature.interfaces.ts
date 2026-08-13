@@ -1,5 +1,9 @@
 import type { FeatureKind } from '../../../common/types/feature-kind.enum'
 import type { FeatureState } from '../../../common/types/feature-state.enum'
+import type {
+  FeatureTimelineScope,
+  FeatureTimelineSource,
+} from '../../../common/types/feature-timeline.enum'
 import type { TicketSource } from '../../../common/types/ticket-source.enum'
 import type { IRelease } from '../../release/interfaces/release.interfaces'
 
@@ -75,6 +79,7 @@ export interface IFeatureDetail {
   releases: IRelease[]
   prs: IFeaturePullRequest[]
   snapshots: IFeatureInRelease[]
+  timeline: IFeatureStateEvent[]
 }
 
 export interface IMinimalPullRequest {
@@ -92,6 +97,33 @@ export interface IFeaturesPageFilters {
   limit: number
   offset: number
   search?: string
+  assignableOnly?: boolean
+}
+
+export interface IFeatureStateEvent {
+  id: string
+  featureId: string
+  releaseId: string | null
+  scope: FeatureTimelineScope
+  source: FeatureTimelineSource
+  fromState: FeatureState | null
+  toState: FeatureState
+  actorId: string | null
+  actorName: string | null
+  releaseName: string | null
+  flagKey: string | null
+  occurredAt: Date
+}
+
+export interface ICreateFeatureStateEventData {
+  featureId: string
+  releaseId: string | null
+  scope: FeatureTimelineScope
+  source: FeatureTimelineSource
+  fromState: FeatureState | null
+  toState: FeatureState
+  actorId: string | null
+  flagKey: string | null
 }
 
 export interface IFeaturesPage {

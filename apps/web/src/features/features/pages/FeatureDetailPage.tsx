@@ -15,6 +15,7 @@ import { FeatureKindValue } from '../constants/feature-enums'
 import { useFeature } from '../hooks/useFeature'
 import { FeatureDetailTree } from '../components/FeatureDetailTree'
 import { FeatureStateControl } from '../components/FeatureStateControl'
+import { FeatureTimeline } from '../components/FeatureTimeline'
 import type { FeatureKind } from '@/generated/graphql'
 
 export default function FeatureDetailPage() {
@@ -77,7 +78,7 @@ export default function FeatureDetailPage() {
     )
   }
 
-  const { feature, releases, prs, snapshots } = detail
+  const { feature, releases, prs, snapshots, timeline } = detail
   const featureKind = feature.kind as FeatureKind
 
   return (
@@ -120,7 +121,11 @@ export default function FeatureDetailPage() {
                     >
                       {enumLabels.featureKind(featureKind)}
                     </StatusBadge>
-                    <FeatureStateControl featureId={feature.id} currentState={feature.currentState} />
+                    <FeatureStateControl
+                      featureId={feature.id}
+                      currentState={feature.currentState}
+                      kind={featureKind}
+                    />
                     {feature.suggested && (
                       <StatusBadge tone={StatusBadgeTone.VIOLET}>{t('suggested')}</StatusBadge>
                     )}
@@ -159,6 +164,13 @@ export default function FeatureDetailPage() {
             {t('detail.releasesHeading')}
           </h2>
           <FeatureDetailTree releases={releases} prs={prs} snapshots={snapshots} />
+        </m.div>
+
+        <m.div variants={slideUp} className="space-y-3">
+          <h2 className="font-display text-lg font-semibold text-foreground">
+            {t('detail.timeline.heading')}
+          </h2>
+          <FeatureTimeline timeline={timeline} />
         </m.div>
       </m.div>
     </NebulaBackground>

@@ -8,6 +8,7 @@ import { authorizeProjectAction } from '../../../../common/authz/authorize-org-a
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
+import { IFeatureInReleaseRepository } from '../../../release/interfaces/feature-in-release.repository'
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
 import { IPullRequestFlagChangeRepository } from '../../interfaces/pull-request-flag-change.repository'
 import { IReleaseFlagDecisionRepository } from '../../interfaces/release-flag-decision.repository'
@@ -25,6 +26,7 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
     private readonly trackedFlagRepository: ITrackedFlagRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
     private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
+    private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
   ) {
     super(db)
   }
@@ -52,6 +54,9 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
     const decisions = await this.releaseFlagDecisionRepository.findAllForRelease(query.releaseId, tx)
     const decisionsByFlagId = new Map(decisions.map((decision) => [decision.trackedFlagId, decision]))
 
+    const featureStates = await this.featureInReleaseRepository.findByRelease(query.releaseId, tx)
+    const stateByFeatureId = new Map(featureStates.map((row) => [row.featureId, row.state]))
+
     const result: ReleaseFlagType[] = []
     for (const trackedFlagId of trackedFlagIds) {
       const flag = flagsById.get(trackedFlagId)
@@ -59,8 +64,11 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
 
       const flagChanges = changes.filter((change) => change.trackedFlagId === trackedFlagId)
       const decision = decisionsByFlagId.get(trackedFlagId) ?? null
+      const featureReleaseState = flag.feature
+        ? (stateByFeatureId.get(flag.feature.id) ?? null)
+        : null
 
-      result.push(toReleaseFlagType(flag, flagChanges, decision))
+      result.push(toReleaseFlagType(flag, flagChanges, decision, featureReleaseState))
     }
 
     return result

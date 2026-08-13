@@ -189,6 +189,11 @@
       "prCount_one": "{{count}} pull request",
       "prCount_other": "{{count}} pull requests",
       "suggested": "AI suggested",
+      "stateInRelease": "Status in this release",
+      "stateLabel": "Status in this release",
+      "stateChanged": "Status updated for this release",
+      "stateError": "Could not update the status for this release",
+      "systemLocked": "System features keep a fixed status",
       "flagState": {
         "staging": "Staging",
         "production": "Production",
@@ -233,6 +238,10 @@
     "defaultFeature": "Default",
     "assignTo": "Feature",
     "selectFeature": "Select feature…",
+    "searchFeature": "Search features…",
+    "loadingFeatures": "Loading features…",
+    "noFeatureMatches": "No features match your search",
+    "refineFeatureHint": "50+ features found — refine your search to see more",
     "assignError": "Failed to save assignment",
     "confirm": "Confirm release",
     "confirming": "Confirming…",
@@ -386,6 +395,18 @@
     "noDecision": "No decision yet",
     "removedNote": "Removed",
     "searchPlaceholder": "Search flags…",
+    "pending": {
+      "heading_one": "{{count}} flag needs a decision",
+      "heading_other": "{{count}} flags need a decision",
+      "description": "Tell us what happens to each flag in this release. You can still ship the release before you decide."
+    },
+    "suggestion": {
+      "label": "Suggested status for {{feature}}:",
+      "apply": "Apply to feature",
+      "alreadyApplied": "Applied",
+      "applied": "Status updated for {{feature}}",
+      "applyError": "Could not apply the suggested status"
+    },
     "subTabs": {
       "label": "Flag changes",
       "added": "Added",

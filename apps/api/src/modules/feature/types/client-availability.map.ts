@@ -22,6 +22,7 @@ const stateToKey: Readonly<Record<FeatureState, ClientAvailabilityKey>> = Object
   [FeatureState.FULLY_RELEASED]: ClientAvailabilityKey.AVAILABLE_NOW,
   [FeatureState.FLAG_CLEANUP_PENDING]: ClientAvailabilityKey.INTERNAL_ONLY,
   [FeatureState.BLOCKED]: ClientAvailabilityKey.DELAYED,
+  [FeatureState.COMPLETED]: ClientAvailabilityKey.AVAILABLE_NOW,
 })
 
 export function deriveClientAvailability(

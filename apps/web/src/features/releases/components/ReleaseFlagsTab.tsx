@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, AlertCircle, FlagIcon } from 'lucide-react'
+import { Loader2, AlertCircle, FlagIcon, TriangleAlert } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { SearchField } from '@/components/nebula/SearchField'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
@@ -35,9 +36,19 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
   )
   const addedFlags = filteredFlags.filter(isAddedFlag)
   const removedFlags = filteredFlags.filter(isRemovedFlag)
+  const undecidedCount = flags.filter(
+    (flag) => isAddedFlag(flag) && flag.decision === null,
+  ).length
 
   return (
     <div className="space-y-4">
+      {!loading && !error && undecidedCount > 0 && (
+        <Alert>
+          <TriangleAlert className="size-4 text-amber-400" aria-hidden />
+          <AlertTitle>{t('flags.pending.heading', { count: undecidedCount })}</AlertTitle>
+          <AlertDescription>{t('flags.pending.description')}</AlertDescription>
+        </Alert>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <SearchField
           value={search}

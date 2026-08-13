@@ -9,8 +9,14 @@ import { authorizeProjectAction } from '../../../../common/authz/authorize-org-a
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IFeatureRepository } from '../../interfaces/feature.repository'
+import { IFeatureStateEventRepository } from '../../interfaces/feature-state-event.repository'
 import { FeatureType } from '../../types/feature.type'
 import { toFeatureType } from '../../types/feature.mappers'
+import { assertFeatureStateEditable } from '../../types/feature-state.rules'
+import {
+  FeatureTimelineScope,
+  FeatureTimelineSource,
+} from '../../../../common/types/feature-timeline.enum'
 import { FeatureStateChangedEvent } from '../../events/feature-state-changed.event'
 import { SetFeatureStateCommand } from './set-feature-state.command'
 
@@ -21,6 +27,7 @@ export class SetFeatureStateHandler extends BaseCommandHandler<SetFeatureStateCo
     protected readonly eventEmitter: IEventEmitter,
     private readonly orgRepository: IOrganizationRepository,
     private readonly featureRepository: IFeatureRepository,
+    private readonly featureStateEventRepository: IFeatureStateEventRepository,
   ) {
     super(db, eventEmitter)
   }
@@ -39,7 +46,25 @@ export class SetFeatureStateHandler extends BaseCommandHandler<SetFeatureStateCo
       tx,
     )
 
+    assertFeatureStateEditable(feature)
+
     const updated = await this.featureRepository.updateState(command.featureId, command.state, tx)
+
+    if (feature.state !== command.state) {
+      await this.featureStateEventRepository.create(
+        {
+          featureId: command.featureId,
+          releaseId: null,
+          scope: FeatureTimelineScope.FEATURE,
+          source: FeatureTimelineSource.USER,
+          fromState: feature.state,
+          toState: command.state,
+          actorId: command.userId,
+          flagKey: null,
+        },
+        tx,
+      )
+    }
 
     events.push(new FeatureStateChangedEvent(command.featureId, command.state))
 

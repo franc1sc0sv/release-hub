@@ -7,7 +7,8 @@
   "searchPlaceholder": "Buscar funcionalidades...",
   "state": {
     "label": "Estado de la funcionalidad",
-    "none": "Sin lanzamiento aún"
+    "none": "Sin lanzamiento aún",
+    "systemLocked": "Las funcionalidades del sistema mantienen un estado fijo"
   },
   "fields": {
     "name": "Nombre",
@@ -59,6 +60,13 @@
     "notFound": "Funcionalidad no encontrada",
     "notFoundDescription": "Esta funcionalidad no existe o ha sido eliminada.",
     "releasesHeading": "Lanzamientos",
+    "timeline": {
+      "heading": "Línea de tiempo del estado",
+      "empty": "Todavía no hay cambios de estado registrados.",
+      "scopeFeature": "Funcionalidad",
+      "scopeRelease": "Release",
+      "by": "por {{name}}"
+    },
     "stateLabel": "Estado",
     "kindLabel": "Tipo",
     "tagsLabel": "Etiquetas",
