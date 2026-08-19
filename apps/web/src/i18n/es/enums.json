@@ -2,11 +2,9 @@
   "featureState": {
     "IN_PROGRESS": "En progreso",
     "SHIPPED_FLAG_OFF": "Enviado, flag apagado",
-    "LIVE_STAGING": "En staging",
-    "LIVE_PROD": "En producción",
+    "READY_TO_RELEASE": "Listo para lanzar",
     "PARTIAL": "Parcial",
     "FULLY_RELEASED": "Completamente lanzado",
-    "FLAG_CLEANUP_PENDING": "Limpieza de flag pendiente",
     "BLOCKED": "Bloqueado",
     "COMPLETED": "Completado"
   },

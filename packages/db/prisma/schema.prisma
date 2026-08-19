@@ -23,11 +23,9 @@ enum FeatureKind {
 enum FeatureState {
   in_progress
   shipped_flag_off
-  live_staging
-  live_prod
+  ready_to_release
   partial
   fully_released
-  flag_cleanup_pending
   blocked
   completed
 

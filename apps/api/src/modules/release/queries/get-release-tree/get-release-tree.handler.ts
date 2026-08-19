@@ -105,7 +105,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
         node.feature = toFeatureType(feature)
         node.state = state
         node.clientAvailabilityKey = deriveClientAvailability(state, flagState)
-        node.excludedFromSummary = isExcludedFromSummary(feature.kind, feature.state)
+        node.excludedFromSummary = isExcludedFromSummary(feature.kind, state)
         node.flagState = flagState
         node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) =>
           toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? []),

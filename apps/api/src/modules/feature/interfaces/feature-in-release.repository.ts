@@ -6,5 +6,6 @@ export abstract class IFeatureInReleaseRepository implements IBaseRepository<IFe
   abstract findById: RepositoryMethod<[id: string], IFeatureInRelease | null>
   abstract findByFeatureAndRelease: RepositoryMethod<[featureId: string, releaseId: string], IFeatureInRelease | null>
   abstract findByFeature: RepositoryMethod<[featureId: string], IFeatureInRelease[]>
+  abstract findByRelease: RepositoryMethod<[releaseId: string], IFeatureInRelease[]>
   abstract upsertState: RepositoryMethod<[featureId: string, releaseId: string, state: FeatureState], IFeatureInRelease>
 }

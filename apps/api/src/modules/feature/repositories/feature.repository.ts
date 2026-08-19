@@ -40,11 +40,9 @@ const prismaToAppSummaryStatus: Record<string, AiSummaryStatus> = {
 const prismaToAppState: Record<string, FeatureState> = {
   [PrismaFeatureState.in_progress]: FeatureState.IN_PROGRESS,
   [PrismaFeatureState.shipped_flag_off]: FeatureState.SHIPPED_FLAG_OFF,
-  [PrismaFeatureState.live_staging]: FeatureState.LIVE_STAGING,
-  [PrismaFeatureState.live_prod]: FeatureState.LIVE_PROD,
+  [PrismaFeatureState.ready_to_release]: FeatureState.READY_TO_RELEASE,
   [PrismaFeatureState.partial]: FeatureState.PARTIAL,
   [PrismaFeatureState.fully_released]: FeatureState.FULLY_RELEASED,
-  [PrismaFeatureState.flag_cleanup_pending]: FeatureState.FLAG_CLEANUP_PENDING,
   [PrismaFeatureState.blocked]: FeatureState.BLOCKED,
 }
 

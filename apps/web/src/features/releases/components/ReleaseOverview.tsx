@@ -32,8 +32,8 @@ type ReleaseNode = GetReleaseTreeQuery['getReleaseTree']['release']
 type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
 
 const LIVE_FOR_CLIENT_STATES = new Set<string>([
-  FeatureStateValue.LIVE_PROD,
   FeatureStateValue.FULLY_RELEASED,
+  FeatureStateValue.COMPLETED,
 ])
 
 const FLAG_ACTIVITY_ORDER = [
@@ -49,7 +49,7 @@ interface ReleaseOverviewProps {
 }
 
 function featureState(node: FeatureNodes[number]): FeatureState {
-  return node.feature.currentState ?? node.state
+  return node.state
 }
 
 function StatTile({

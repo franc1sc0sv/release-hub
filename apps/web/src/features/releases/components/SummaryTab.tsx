@@ -50,7 +50,7 @@ const DEFAULT_MODEL: AiModel = 'claude-haiku-4-5-20251001'
 const NONE_PROFILE_VALUE = 'none' as const
 
 function resolveFeatureState(node: FeatureNodes[number]): FeatureState {
-  return node.feature.currentState ?? node.state
+  return node.state
 }
 
 const RichTextEditor = lazy(() =>

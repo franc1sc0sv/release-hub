@@ -2,11 +2,9 @@
   "featureState": {
     "IN_PROGRESS": "In progress",
     "SHIPPED_FLAG_OFF": "Shipped, flag off",
-    "LIVE_STAGING": "Live staging",
-    "LIVE_PROD": "Live prod",
+    "READY_TO_RELEASE": "Ready to release",
     "PARTIAL": "Partial",
     "FULLY_RELEASED": "Fully released",
-    "FLAG_CLEANUP_PENDING": "Flag cleanup pending",
     "BLOCKED": "Blocked",
     "COMPLETED": "Completed"
   },

@@ -374,12 +374,10 @@ export type FeatureReleaseSnapshotType = {
 export type FeatureState =
   | 'BLOCKED'
   | 'COMPLETED'
-  | 'FLAG_CLEANUP_PENDING'
   | 'FULLY_RELEASED'
   | 'IN_PROGRESS'
-  | 'LIVE_PROD'
-  | 'LIVE_STAGING'
   | 'PARTIAL'
+  | 'READY_TO_RELEASE'
   | 'SHIPPED_FLAG_OFF';
 
 export type FeatureTimelineEntryType = {

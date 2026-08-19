@@ -16,11 +16,9 @@ export type ClientAvailabilityKey = (typeof ClientAvailabilityKey)[keyof typeof 
 const stateToKey: Readonly<Record<FeatureState, ClientAvailabilityKey>> = Object.freeze({
   [FeatureState.IN_PROGRESS]: ClientAvailabilityKey.IN_DEVELOPMENT,
   [FeatureState.SHIPPED_FLAG_OFF]: ClientAvailabilityKey.BUILT_NOT_ON,
-  [FeatureState.LIVE_STAGING]: ClientAvailabilityKey.IN_FINAL_TESTING,
-  [FeatureState.LIVE_PROD]: ClientAvailabilityKey.AVAILABLE_NOW,
+  [FeatureState.READY_TO_RELEASE]: ClientAvailabilityKey.IN_FINAL_TESTING,
   [FeatureState.PARTIAL]: ClientAvailabilityKey.FIRST_PART_AVAILABLE,
   [FeatureState.FULLY_RELEASED]: ClientAvailabilityKey.AVAILABLE_NOW,
-  [FeatureState.FLAG_CLEANUP_PENDING]: ClientAvailabilityKey.INTERNAL_ONLY,
   [FeatureState.BLOCKED]: ClientAvailabilityKey.DELAYED,
   [FeatureState.COMPLETED]: ClientAvailabilityKey.AVAILABLE_NOW,
 })
