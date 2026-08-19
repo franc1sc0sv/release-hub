@@ -22,10 +22,7 @@
       "description": "Opcional — matriz de feature flags y paridad",
       "connected": "Conectado",
       "disconnected": "No conectado",
-      "connect": "Conectar Flagsmith",
-      "syncNow": "Sincronizar ahora",
-      "syncSuccess": "Se sincronizaron {{count}} flags desde Flagsmith.",
-      "syncError": "No se pudieron sincronizar los flags desde Flagsmith. Inténtalo de nuevo."
+      "connect": "Conectar Flagsmith"
     },
     "linear": {
       "label": "Linear",

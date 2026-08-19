@@ -1,12 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, generatePath } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import {
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
   Download,
   Flag,
   GitCompare,
@@ -23,30 +21,26 @@ import { SearchField } from '@/components/nebula/SearchField'
 import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from '@/components/ui/pagination'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useProject } from '@/context/project.context'
 import { ROUTES } from '@/lib/routes'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import type { FlagDeploymentStatus, FlagSortField, SortDirection } from '@/generated/graphql'
-import { useLocalStorage } from '@/hooks/use-local-storage'
-import { cn } from '@/lib/utils'
+import type { SyncFlagsmithFlagsMutation } from '@/generated/graphql'
 import { useFlags } from '../hooks/use-flags'
+import { useFlagFilters } from '../hooks/use-flag-filters'
 import { useRunFlagCoverage } from '../hooks/use-run-flag-coverage'
 import { useSyncFlagsmithFlags } from '../hooks/use-sync-flagsmith-flags'
+import { applyFlagFilters } from '../lib/flag-filtering'
 import { FlagMatrix } from '../components/FlagMatrix'
 import { ColumnVisibilityMenu } from '../components/ColumnVisibilityMenu'
 import { CompareFlagsDialog } from '../components/CompareFlagsDialog'
 import { ExportFlagsDialog } from '../components/ExportFlagsDialog'
 import { FlagStatusFilterMenu } from '../components/FlagStatusFilterMenu'
+import { FlagActivityFilterMenu } from '../components/FlagActivityFilterMenu'
+import { FlagSyncReportDialog } from '../components/FlagSyncReportDialog'
 
-const PAGE_SIZE = 25
+type FlagSyncReport = SyncFlagsmithFlagsMutation['syncFlagsmithFlags']
 
 export default function FlagsPage() {
   const { t, i18n } = useTranslation('flags')
@@ -56,21 +50,15 @@ export default function FlagsPage() {
   const flagsmithEnabled = activeProject?.integrations.flagsmith ?? false
   const projectId = activeProject?.id ?? null
 
-  const [searchInput, setSearchInput] = useState('')
-  const [sortField, setSortField] = useState<FlagSortField>('CREATED')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('DESC')
-  const [activeSortEnv, setActiveSortEnv] = useState<string | undefined>(undefined)
-  const [page, setPage] = useState(1)
+  const { filters, setSearch, setSort, setStatuses, setActivity, toggleEnvironmentColumn } =
+    useFlagFilters()
+
   const [compareOpen, setCompareOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<FlagDeploymentStatus[]>([])
+  const [syncReportOpen, setSyncReportOpen] = useState(false)
+  const [syncReport, setSyncReport] = useState<FlagSyncReport | null>(null)
 
   const projectName = activeProject?.name ?? ''
-
-  const [hiddenEnvs, setHiddenEnvs] = useLocalStorage<string[]>(
-    `release-hub:flags:columns:${projectId ?? 'none'}`,
-    [],
-  )
 
   const { run: runCoverage, loading: runningCoverage } = useRunFlagCoverage(projectId ?? '')
   const { sync: syncFlags, loading: syncing } = useSyncFlagsmithFlags(projectId ?? '')
@@ -93,65 +81,30 @@ export default function FlagsPage() {
     }
   }
 
-  const { environments, items, totalCount, lastSyncedAt, loading, isRefetching, error, refetch } = useFlags({
+  const { environments, items, lastSyncedAt, loading, error, refetch } = useFlags({
     projectId: flagsmithEnabled ? projectId : null,
-    search: searchInput || undefined,
-    sortField,
-    sortEnvironment: activeSortEnv,
-    sortDirection,
-    statuses: statusFilter,
-    limit: PAGE_SIZE,
-    offset: (page - 1) * PAGE_SIZE,
   })
 
   async function handleSync(): Promise<void> {
     try {
       const result = await syncFlags()
-      const flagsSynced = result.data?.syncFlagsmithFlags ?? 0
-      toast.success(t('sync.success', { count: flagsSynced }))
+      const report = result.data?.syncFlagsmithFlags ?? null
       await refetch()
+      if (report) {
+        setSyncReport(report)
+        setSyncReportOpen(true)
+      }
     } catch {
       toast.error(t('sync.error'))
     }
   }
 
   const visibleEnvironments = useMemo(
-    () => environments.filter((e) => !hiddenEnvs.includes(e)),
-    [environments, hiddenEnvs],
+    () => environments.filter((e) => !filters.hiddenEnvironments.includes(e)),
+    [environments, filters.hiddenEnvironments],
   )
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+  const visibleItems = useMemo(() => applyFlagFilters(items, filters), [items, filters])
   const neverSynced = !loading && !error && lastSyncedAt === null
-
-  const handleSortChange = useCallback(
-    (field: FlagSortField, envName?: string) => {
-      if (field === sortField && (field !== 'ENVIRONMENT' || envName === activeSortEnv)) {
-        setSortDirection((prev) => (prev === 'ASC' ? 'DESC' : 'ASC'))
-      } else {
-        setSortField(field)
-        setActiveSortEnv(envName)
-        setSortDirection('DESC')
-      }
-      setPage(1)
-    },
-    [sortField, activeSortEnv],
-  )
-
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchInput(value)
-    setPage(1)
-  }, [])
-
-  const handleColumnToggle = useCallback(
-    (env: string, hidden: boolean) => {
-      setHiddenEnvs(hidden ? [...hiddenEnvs, env] : hiddenEnvs.filter((e) => e !== env))
-    },
-    [hiddenEnvs, setHiddenEnvs],
-  )
-
-  const handleStatusFilterChange = useCallback((statuses: FlagDeploymentStatus[]) => {
-    setStatusFilter(statuses)
-    setPage(1)
-  }, [])
 
   const syncButton = (
     <Can I={Action.UPDATE} a={Subject.PROJECT}>
@@ -244,8 +197,8 @@ export default function FlagsPage() {
             <>
               <div className="flex flex-wrap items-center gap-3">
                 <SearchField
-                  value={searchInput}
-                  onValueChange={handleSearchChange}
+                  value={filters.search}
+                  onValueChange={setSearch}
                   placeholder={t('search.placeholder')}
                   className="flex-1 min-w-52"
                 />
@@ -253,12 +206,14 @@ export default function FlagsPage() {
                 {environments.length > 0 && (
                   <ColumnVisibilityMenu
                     environments={environments}
-                    hiddenEnvs={hiddenEnvs}
-                    onToggle={handleColumnToggle}
+                    hiddenEnvs={filters.hiddenEnvironments}
+                    onToggle={toggleEnvironmentColumn}
                   />
                 )}
 
-                <FlagStatusFilterMenu selected={statusFilter} onChange={handleStatusFilterChange} />
+                <FlagStatusFilterMenu selected={filters.statuses} onChange={setStatuses} />
+
+                <FlagActivityFilterMenu selected={filters.activity} onChange={setActivity} />
 
                 <Button
                   variant="outline"
@@ -327,7 +282,7 @@ export default function FlagsPage() {
                 </GlassCard>
               )}
 
-              {!loading && !error && items.length === 0 && (
+              {!loading && !error && visibleItems.length === 0 && (
                 <EmptyState
                   icon={<Flag className="size-7 text-brand-indigo-bright" aria-hidden />}
                   heading={t('empty.heading')}
@@ -335,60 +290,27 @@ export default function FlagsPage() {
                 />
               )}
 
-              {!loading && !error && items.length > 0 && (
-                <div
-                  aria-busy={isRefetching}
-                  className={cn('transition-opacity duration-200', isRefetching && 'opacity-60')}
-                >
-                  <FlagMatrix
-                    items={items}
-                    totalCount={totalCount}
-                    visibleEnvironments={visibleEnvironments}
-                    sortField={sortField}
-                    sortDirection={sortDirection}
-                    onSortChange={handleSortChange}
-                    activeSortEnv={activeSortEnv}
-                  />
-                </div>
-              )}
-
-              {!loading && !error && totalPages > 1 && (
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={page > 1 ? () => setPage((p) => p - 1) : undefined}
-                        aria-disabled={page === 1}
-                        aria-label={t('pagination.previous')}
-                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
-                      >
-                        <ChevronLeft className="size-4" aria-hidden />
-                        <span className="sr-only">{t('pagination.previous')}</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <span className="px-4 py-2 text-sm text-muted-foreground">
-                        {t('pagination.pageOf', { page, total: totalPages })}
-                      </span>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={page < totalPages ? () => setPage((p) => p + 1) : undefined}
-                        aria-disabled={page === totalPages}
-                        aria-label={t('pagination.next')}
-                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
-                      >
-                        <span className="sr-only">{t('pagination.next')}</span>
-                        <ChevronRight className="size-4" aria-hidden />
-                      </PaginationLink>
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+              {!loading && !error && visibleItems.length > 0 && (
+                <FlagMatrix
+                  items={visibleItems}
+                  totalCount={visibleItems.length}
+                  visibleEnvironments={visibleEnvironments}
+                  sortField={filters.sortField}
+                  sortDirection={filters.sortDirection}
+                  onSortChange={setSort}
+                  activeSortEnv={filters.sortEnvironment}
+                />
               )}
             </>
           )}
         </div>
       </PageShell>
+
+      <FlagSyncReportDialog
+        open={syncReportOpen}
+        onOpenChange={setSyncReportOpen}
+        report={syncReport}
+      />
 
       {projectId && (
         <>

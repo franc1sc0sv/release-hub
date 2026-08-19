@@ -145,7 +145,7 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
 
     const existing = await tx.flagsmithFlag.findMany({
       where: { projectId },
-      select: { id: true, key: true, flagCreatedAt: true },
+      select: { id: true, key: true, flagCreatedAt: true, deletedAt: true },
     })
     const existingByKey = new Map(existing.map((flag) => [flag.key, flag]))
 
@@ -174,6 +174,13 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     }
 
     const toCreate = flags.filter((flag) => !existingByKey.has(flag.key))
+    const addedKeys = flags
+      .filter((flag) => {
+        const current = existingByKey.get(flag.key)
+        return current === undefined || current.deletedAt !== null
+      })
+      .map((flag) => flag.key)
+
     if (toCreate.length > 0) {
       await tx.flagsmithFlag.createMany({
         data: toCreate.map((flag) => ({
@@ -264,14 +271,22 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       }
     }
 
-    return { enabledChanges, valueChanges }
+    return { addedKeys, enabledChanges, valueChanges }
   }
 
-  softDeleteFlagsNotInKeys = async (projectId: string, keys: string[], tx: TxClient): Promise<void> => {
-    await tx.flagsmithFlag.updateMany({
+  softDeleteFlagsNotInKeys = async (projectId: string, keys: string[], tx: TxClient): Promise<string[]> => {
+    const removed = await tx.flagsmithFlag.findMany({
       where: { projectId, deletedAt: null, key: { notIn: keys } },
+      select: { id: true, key: true },
+    })
+    if (removed.length === 0) return []
+
+    await tx.flagsmithFlag.updateMany({
+      where: { id: { in: removed.map((flag) => flag.id) } },
       data: { deletedAt: new Date() },
     })
+
+    return removed.map((flag) => flag.key)
   }
 
   softDeleteFlagByKey = async (projectId: string, key: string, tx: TxClient): Promise<number> => {
@@ -674,6 +689,8 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     restrictIds: string[],
   ) {
     const direction = filters.sortDirection === SortDirection.ASC ? 'asc' : 'desc'
+    const limit = filters.limit
+    const offset = filters.offset
 
     let query = kysely
       .selectFrom('flagsmith_flags as flag')
@@ -681,11 +698,12 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       .where('flag.id', 'in', restrictIds)
 
     if (filters.sortField === FlagSortField.NAME) {
-      return query.orderBy('flag.key', direction).limit(filters.limit).offset(filters.offset)
+      const ordered = query.orderBy('flag.key', direction)
+      return limit === undefined ? ordered : ordered.limit(limit).offset(offset)
     }
 
     if (filters.sortField === FlagSortField.ENVIRONMENT && sortEnvironmentId) {
-      return query
+      const ordered = query
         .leftJoin('flagsmith_flag_states as sort_state', (join) =>
           join
             .onRef('sort_state.flag_id', '=', 'flag.id')
@@ -693,14 +711,10 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
         )
         .orderBy(sql`coalesce(sort_state.enabled, false)`, direction)
         .orderBy('flag.key', 'asc')
-        .limit(filters.limit)
-        .offset(filters.offset)
+      return limit === undefined ? ordered : ordered.limit(limit).offset(offset)
     }
 
-    return query
-      .orderBy('flag.flag_created_at', direction)
-      .orderBy('flag.key', 'asc')
-      .limit(filters.limit)
-      .offset(filters.offset)
+    const ordered = query.orderBy('flag.flag_created_at', direction).orderBy('flag.key', 'asc')
+    return limit === undefined ? ordered : ordered.limit(limit).offset(offset)
   }
 }

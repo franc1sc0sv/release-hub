@@ -551,6 +551,24 @@ type FlagStateType {
   staging: Boolean!
 }
 
+type FlagSyncDriftType {
+  environmentName: String!
+  flagKey: String!
+  newValue: String
+  previousValue: String
+}
+
+type FlagSyncReportType {
+  addedKeys: [String!]!
+  enabledChanges: [FlagSyncDriftType!]!
+  environmentsAdded: [String!]!
+  flagCount: Int!
+  inSync: Boolean!
+  removedKeys: [String!]!
+  syncedAt: DateTime!
+  valueChanges: [FlagSyncDriftType!]!
+}
+
 type FlagsResultType {
   environments: [String!]!
   items: [FlagRefType!]!
@@ -582,7 +600,7 @@ input GetFlagHistoryInput {
 
 input GetFlagsInput {
   activity: FlagActivityFilter
-  limit: Int = 100
+  limit: Int
   offset: Int = 0
   projectId: ID!
   search: String
@@ -758,7 +776,7 @@ type Mutation {
   setSlackChannel(channelId: String!, channelName: String!, projectId: ID!): SlackConnectionStatus!
   shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
   startSummaryGeneration(input: StartSummaryGenerationInput!): ReleaseObjectType!
-  syncFlagsmithFlags(projectId: ID!): Int!
+  syncFlagsmithFlags(projectId: ID!): FlagSyncReportType!
   syncGithubDeployments(releaseId: ID!): SyncGithubDeploymentsResultType!
   triggerFlagDigest(projectId: ID!): Boolean!
   unblockBranch(input: UnblockBranchInput!): Boolean!

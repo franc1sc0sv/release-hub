@@ -629,6 +629,7 @@ enum FlagsmithSyncSource {
   initial
   manual
   webhook
+  scheduled
 
   @@map("flagsmith_sync_source")
 }

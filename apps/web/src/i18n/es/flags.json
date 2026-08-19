@@ -36,6 +36,7 @@
       "label": "Estado de despliegue"
     },
     "activity": {
+      "button": "Actividad",
       "label": "Actividad",
       "all": "Todos"
     }
@@ -107,7 +108,24 @@
     "lastSynced": "Última sincronización {{time}}",
     "success_one": "Se sincronizó {{count}} flag desde Flagsmith",
     "success_other": "Se sincronizaron {{count}} flags desde Flagsmith",
-    "error": "No se pudieron sincronizar los flags de Flagsmith. Revisa tu token y URL en Configuración."
+    "error": "No se pudieron sincronizar los flags de Flagsmith. Revisa tu token y URL en Configuración.",
+    "report": {
+      "title": "Informe de sincronización",
+      "inSync": "Todo coincide con Flagsmith. No hubo cambios.",
+      "checkedCount_one": "{{count}} flag revisado",
+      "checkedCount_other": "{{count}} flags revisados",
+      "driftHeading": "Diferencias encontradas",
+      "flagsAdded": "Flags agregados",
+      "flagsRemoved": "Flags eliminados",
+      "environmentsAdded": "Entornos agregados",
+      "enabledChanges": "Cambios de activación",
+      "valueChanges": "Cambios de valor",
+      "columnFlag": "Flag",
+      "columnEnvironment": "Entorno",
+      "columnPrevious": "Anterior",
+      "columnNew": "Nuevo",
+      "close": "Cerrar"
+    }
   },
   "neverSynced": {
     "heading": "Aún no hay flags sincronizados",

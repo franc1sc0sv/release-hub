@@ -1,11 +1,6 @@
-import type { IFlagsmithResult, IFlagsmithProjectsResult, IAllEnvironmentFlagsResult, IFlagsmithEnvironmentNamesResult } from './integration.interfaces'
+import type { IFlagsmithProjectsResult, IAllEnvironmentFlagsResult, IFlagsmithEnvironmentNamesResult } from './integration.interfaces'
 
 export abstract class IFlagsmithClient {
-  abstract fetchFlags(
-    baseUrl: string,
-    apiKey: string,
-    projectId: string,
-  ): Promise<IFlagsmithResult>
   abstract listProjects(baseUrl: string, apiKey: string): Promise<IFlagsmithProjectsResult>
   abstract fetchAllEnvironmentFlags(
     baseUrl: string,

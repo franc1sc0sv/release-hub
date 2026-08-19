@@ -22,10 +22,7 @@
       "description": "Optional — feature flag matrix and parity",
       "connected": "Connected",
       "disconnected": "Not connected",
-      "connect": "Connect Flagsmith",
-      "syncNow": "Sync now",
-      "syncSuccess": "Synced {{count}} flags from Flagsmith.",
-      "syncError": "Couldn't sync flags from Flagsmith. Please try again."
+      "connect": "Connect Flagsmith"
     },
     "linear": {
       "label": "Linear",

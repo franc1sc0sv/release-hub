@@ -14,6 +14,7 @@ import { IProjectRepository } from '../../../project/interfaces/project.reposito
 import { IFlagsmithClient } from '../../interfaces/flagsmith-client.abstract'
 import { IFlagsmithFlagRepository } from '../../interfaces/flagsmith-flag.repository'
 import type { IAllEnvironmentFlagsData } from '../../interfaces/integration.interfaces'
+import type { IFlagSyncReport } from '../../interfaces/flagsmith-sync.interfaces'
 import {
   IFlagHistoryRepository,
   FLAG_HISTORY_PROJECT_SCOPE_KEY,
@@ -30,7 +31,7 @@ interface IPreparedSync {
 export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
   SyncFlagsmithFlagsCommand,
   IPreparedSync,
-  number
+  IFlagSyncReport
 > {
   constructor(
     protected readonly db: IDatabaseService,
@@ -92,7 +93,7 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
     tx: TxClient,
     _events: IDomainEvent[],
     prepared: IPreparedSync,
-  ): Promise<number> {
+  ): Promise<IFlagSyncReport> {
     const syncRun = await this.flagsmithFlagRepository.createSyncRun(
       { projectId: command.projectId, source: command.source },
       tx,
@@ -107,6 +108,9 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
     }
 
     const { environments, environmentDetails, flags } = prepared.data
+
+    const knownEnvironments = await this.flagsmithFlagRepository.findEnvironmentNames(command.projectId, tx)
+    const environmentsAdded = environments.filter((name) => !knownEnvironments.includes(name))
 
     for (let index = 0; index < environmentDetails.length; index += 1) {
       await this.flagsmithFlagRepository.upsertEnvironment(
@@ -135,7 +139,7 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
       tx,
     )
 
-    await this.flagsmithFlagRepository.softDeleteFlagsNotInKeys(
+    const removedKeys = await this.flagsmithFlagRepository.softDeleteFlagsNotInKeys(
       command.projectId,
       flags.map((flag) => flag.key),
       tx,
@@ -181,6 +185,13 @@ export class SyncFlagsmithFlagsHandler extends PreparedCommandHandler<
 
     await this.flagHistoryRepository.createMany(historyRows, tx)
 
-    return flags.length
+    return {
+      flagCount: flags.length,
+      addedKeys: diff.addedKeys,
+      removedKeys,
+      environmentsAdded,
+      enabledChanges: diff.enabledChanges,
+      valueChanges: diff.valueChanges,
+    }
   }
 }

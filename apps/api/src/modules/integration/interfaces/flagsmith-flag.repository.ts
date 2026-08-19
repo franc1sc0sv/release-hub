@@ -20,7 +20,7 @@ export abstract class IFlagsmithFlagRepository {
     IUpsertFlagsmithFlagWithStatesResult
   >
   abstract reconcileFlags: RepositoryMethod<[projectId: string, flags: IUpsertFlagsmithFlagData[]], IReconcileFlagsResult>
-  abstract softDeleteFlagsNotInKeys: RepositoryMethod<[projectId: string, keys: string[]], void>
+  abstract softDeleteFlagsNotInKeys: RepositoryMethod<[projectId: string, keys: string[]], string[]>
   abstract softDeleteFlagByKey: RepositoryMethod<[projectId: string, key: string], number>
   abstract findFlagMatrix: RepositoryMethod<[filters: IFlagsmithFlagMatrixFilters], IFlagsmithFlagMatrixResult>
   abstract findAllFlagsForProject: RepositoryMethod<

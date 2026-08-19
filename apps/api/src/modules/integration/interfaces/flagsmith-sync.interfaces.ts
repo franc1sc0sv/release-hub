@@ -29,7 +29,7 @@ export interface IFlagsmithFlagMatrixFilters {
   statuses: FlagDeploymentStatus[] | undefined
   activity: FlagActivityFilter | undefined
   watchedEnvironments: string[]
-  limit: number
+  limit: number | undefined
   offset: number
 }
 
@@ -108,6 +108,16 @@ export interface IFlagsmithFlagValueChange {
 }
 
 export interface IReconcileFlagsResult {
+  addedKeys: string[]
+  enabledChanges: IFlagsmithFlagStateChange[]
+  valueChanges: IFlagsmithFlagValueChange[]
+}
+
+export interface IFlagSyncReport {
+  flagCount: number
+  addedKeys: string[]
+  removedKeys: string[]
+  environmentsAdded: string[]
   enabledChanges: IFlagsmithFlagStateChange[]
   valueChanges: IFlagsmithFlagValueChange[]
 }

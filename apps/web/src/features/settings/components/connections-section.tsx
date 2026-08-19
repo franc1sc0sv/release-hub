@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import {
   Flag,
   Link2,
@@ -8,7 +7,6 @@ import {
   XCircle,
   Loader2,
   AlertTriangle,
-  RefreshCw,
 } from 'lucide-react'
 import { m, useReducedMotion } from 'motion/react'
 import { GlassCard } from '@/components/nebula/GlassCard'
@@ -50,7 +48,6 @@ import { getApiBase } from '@/lib/api-client'
 import { staggerContainer, slideUp } from '@/lib/animations'
 import { useConnectionSettings } from '../hooks/use-connection-settings'
 import { useLinearConnection } from '../hooks/use-linear-connection'
-import { useSyncFlagsmithFlags } from '@/features/flags/hooks/use-sync-flagsmith-flags'
 import { WebhookField } from './webhook-field'
 
 interface ConnectionsSectionProps {
@@ -103,7 +100,6 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
     clearRevealedFlagsmithSecret,
   } = useConnectionSettings(projectId)
   const linear = useLinearConnection(projectId)
-  const { sync: syncFlagsmithFlags, loading: syncingFlags } = useSyncFlagsmithFlags(projectId)
 
   const [dialog, setDialog] = useState<ConnectDialogState | null>(null)
 
@@ -204,16 +200,6 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
     }
   }
 
-  async function handleSyncFlagsmithFlags(): Promise<void> {
-    try {
-      const result = await syncFlagsmithFlags()
-      const count = result.data?.syncFlagsmithFlags ?? 0
-      toast.success(t('connections.flagsmith.syncSuccess', { count }))
-    } catch {
-      toast.error(t('connections.flagsmith.syncError'))
-    }
-  }
-
   if (loading) {
     return (
       <GlassCard>
@@ -269,19 +255,6 @@ export function ConnectionsSection({ projectId }: ConnectionsSectionProps) {
                         <CheckCircle2 className="mr-1 size-3" />
                         {t('connections.flagsmith.connected')}
                       </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => void handleSyncFlagsmithFlags()}
-                        disabled={syncingFlags}
-                      >
-                        {syncingFlags ? (
-                          <Loader2 className="mr-2 size-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="mr-2 size-4" />
-                        )}
-                        {t('connections.flagsmith.syncNow')}
-                      </Button>
                       <Can I={Action.UPDATE} a={Subject.PROJECT}>
                         <AlertDialog>
                           <AlertDialogTrigger

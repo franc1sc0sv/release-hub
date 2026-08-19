@@ -13,7 +13,7 @@ export class GetFlagsQuery {
     public readonly sortDirection: SortDirection,
     public readonly statuses: FlagDeploymentStatus[] | undefined,
     public readonly activity: FlagActivityFilter | undefined,
-    public readonly limit: number,
+    public readonly limit: number | undefined,
     public readonly offset: number,
   ) {}
 }

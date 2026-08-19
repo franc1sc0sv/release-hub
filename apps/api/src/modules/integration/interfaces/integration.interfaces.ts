@@ -45,24 +45,10 @@ export interface IUpdateConnectionSettingsData {
   flagsmithUrl?: string | null
 }
 
-export interface IFlagsmithEnvironmentFlag {
-  key: string
-  enabled: boolean
-}
-
-export interface IFlagsmithEnvironmentFlags {
-  staging: IFlagsmithEnvironmentFlag[]
-  production: IFlagsmithEnvironmentFlag[]
-}
-
 export interface IFlagsmithClientError {
   kind: 'network' | 'auth' | 'notFound' | 'unexpected'
   message: string
 }
-
-export type IFlagsmithResult =
-  | { ok: true; data: IFlagsmithEnvironmentFlags }
-  | { ok: false; error: IFlagsmithClientError }
 
 export interface IFlagsmithProject {
   id: string

@@ -1,4 +1,4 @@
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard'
@@ -10,6 +10,9 @@ import { Action, Subject } from '@release-hub/shared'
 import { FlagsResultType, FlagComparisonResultType } from '../types/flag-ref.type'
 import { ConnectionSettingsType } from '../types/connection-settings.type'
 import { RotateWebhookSecretResultType } from '../types/rotate-webhook-secret-result.type'
+import { FlagSyncReportType } from '../types/flag-sync-report.type'
+import { toFlagSyncReport } from '../types/flag-sync-report.mappers'
+import type { IFlagSyncReport } from '../interfaces/flagsmith-sync.interfaces'
 import { FlagsmithProjectType } from '../types/flagsmith-project.type'
 import { FlagsmithVerifyResult } from '../types/flagsmith-verify-result.type'
 import { UpdateConnectionSettingsInput } from '../types/update-connection-settings.input'
@@ -54,7 +57,7 @@ export class IntegrationResolver {
         input.sortDirection ?? SortDirection.DESC,
         input.statuses,
         input.activity,
-        input.limit ?? 100,
+        input.limit ?? undefined,
         input.offset ?? 0,
       ),
     )
@@ -146,15 +149,16 @@ export class IntegrationResolver {
     )
   }
 
-  @Mutation(() => Int)
+  @Mutation(() => FlagSyncReportType)
   @Can(Action.UPDATE, Subject.PROJECT)
-  syncFlagsmithFlags(
+  async syncFlagsmithFlags(
     @Args('projectId', { type: () => ID }) projectId: string,
     @CurrentUser() user: IJwtUser,
-  ): Promise<number> {
-    return this.commandBus.execute(
+  ): Promise<FlagSyncReportType> {
+    const report = await this.commandBus.execute<SyncFlagsmithFlagsCommand, IFlagSyncReport>(
       new SyncFlagsmithFlagsCommand(projectId, user.id, FlagsmithSyncSource.manual),
     )
+    return toFlagSyncReport(report)
   }
 
   @Mutation(() => RotateWebhookSecretResultType)

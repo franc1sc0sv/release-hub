@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql'
-import { IsOptional, IsString, IsInt, IsArray, IsEnum, Min, Max } from 'class-validator'
+import { IsOptional, IsString, IsInt, IsArray, IsEnum, Min } from 'class-validator'
 import { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import { SortDirection } from '../../../common/types/sort-direction.enum'
 import { FlagDeploymentStatus } from '../../../common/types/flag-deployment-status.enum'
@@ -40,11 +40,10 @@ export class GetFlagsInput {
   @IsEnum(FlagActivityFilter)
   activity?: FlagActivityFilter
 
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
+  @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(500)
   limit?: number
 
   @Field(() => Int, { nullable: true, defaultValue: 0 })

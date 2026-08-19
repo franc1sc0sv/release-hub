@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { IFlagsmithClient } from '../interfaces/flagsmith-client.abstract'
 import { stringifyFlagsmithValue } from '../utils/stringify-flagsmith-value'
 import type {
-  IFlagsmithResult,
   IFlagsmithProjectsResult,
-  IFlagsmithEnvironmentFlag,
   IFlagsmithClientError,
   IAllEnvironmentFlagsResult,
   IAllEnvironmentFlag,
@@ -26,10 +24,6 @@ interface FlagsmithFeatureStateResponse {
   enabled: boolean
   feature_state_value: string | number | boolean | null
 }
-
-type FetchEnvResult =
-  | { ok: true; flags: IFlagsmithEnvironmentFlag[] }
-  | { ok: false; error: IFlagsmithClientError }
 
 type FetchEnvRichResult =
   | {
@@ -70,41 +64,6 @@ export class FlagsmithClient extends IFlagsmithClient {
       return { ok: true, projects: projects.map((p) => ({ id: String(p.id), name: p.name })) }
     } catch {
       return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
-    }
-  }
-
-  async fetchFlags(
-    baseUrl: string,
-    apiKey: string,
-    projectId: string,
-  ): Promise<IFlagsmithResult> {
-    const base = baseUrl.replace(/\/$/, '')
-    const headers = { Authorization: `Token ${apiKey}`, 'Content-Type': 'application/json' }
-
-    const environmentsResult = await this.listEnvironments(base, headers, projectId)
-    if (!environmentsResult.ok) return { ok: false, error: environmentsResult.error }
-
-    const stagingEnv = environmentsResult.environments.find((e) => /staging/i.test(e.name))
-    const productionEnv = environmentsResult.environments.find((e) => /prod(uction)?/i.test(e.name))
-
-    const [stagingResult, productionResult] = await Promise.all([
-      stagingEnv
-        ? this.fetchEnvFlags(base, stagingEnv.api_key)
-        : Promise.resolve<FetchEnvResult>({ ok: true, flags: [] }),
-      productionEnv
-        ? this.fetchEnvFlags(base, productionEnv.api_key)
-        : Promise.resolve<FetchEnvResult>({ ok: true, flags: [] }),
-    ])
-
-    if (!stagingResult.ok) return { ok: false, error: stagingResult.error }
-    if (!productionResult.ok) return { ok: false, error: productionResult.error }
-
-    return {
-      ok: true,
-      data: {
-        staging: stagingResult.flags,
-        production: productionResult.flags,
-      },
     }
   }
 
@@ -198,35 +157,6 @@ export class FlagsmithClient extends IFlagsmithClient {
         | { results?: FlagsmithEnvironmentResponse[] }
         | FlagsmithEnvironmentResponse[]
       return { ok: true, environments: Array.isArray(body) ? body : (body.results ?? []) }
-    } catch {
-      return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
-    }
-  }
-
-  private async fetchEnvFlags(
-    base: string,
-    envApiKey: string,
-  ): Promise<FetchEnvResult> {
-    const headers = { 'X-Environment-Key': envApiKey, 'Content-Type': 'application/json' }
-    try {
-      const res = await fetch(`${base}/api/v1/flags/`, { headers })
-      if (res.status === 401 || res.status === 403) {
-        return { ok: false, error: { kind: 'auth', message: 'Invalid or expired Flagsmith API token' } }
-      }
-      if (res.status === 404) {
-        return { ok: false, error: { kind: 'notFound', message: `Environment not found` } }
-      }
-      if (!res.ok) {
-        return { ok: false, error: await this.unexpectedError(res) }
-      }
-      const body = (await res.json()) as
-        | { results?: FlagsmithFeatureStateResponse[] }
-        | FlagsmithFeatureStateResponse[]
-      const states = Array.isArray(body) ? body : (body.results ?? [])
-      return {
-        ok: true,
-        flags: states.map((s) => ({ key: s.feature.name, enabled: s.enabled })),
-      }
     } catch {
       return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
     }

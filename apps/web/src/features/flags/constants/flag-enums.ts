@@ -3,9 +3,22 @@ import type {
   FlagDeploymentStatus,
   FlagHistoryEventType,
   FlagHistorySource,
+  FlagSortField,
+  SortDirection,
 } from '@/generated/graphql'
 import type { StatusBadgeToneValue } from '@/components/nebula/StatusBadge'
 import { StatusBadgeTone } from '@/components/nebula/StatusBadge'
+
+export const FlagSortFieldValue = {
+  CREATED: 'CREATED',
+  ENVIRONMENT: 'ENVIRONMENT',
+  NAME: 'NAME',
+} as const satisfies Record<FlagSortField, FlagSortField>
+
+export const SortDirectionValue = {
+  ASC: 'ASC',
+  DESC: 'DESC',
+} as const satisfies Record<SortDirection, SortDirection>
 
 export const FlagDeploymentStatusValue = {
   SHIPPED_ON: 'SHIPPED_ON',

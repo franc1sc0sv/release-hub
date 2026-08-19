@@ -36,6 +36,7 @@
       "label": "Deployment status"
     },
     "activity": {
+      "button": "Activity",
       "label": "Activity",
       "all": "All"
     }
@@ -107,7 +108,24 @@
     "lastSynced": "Last synced {{time}}",
     "success_one": "Synced {{count}} flag from Flagsmith",
     "success_other": "Synced {{count}} flags from Flagsmith",
-    "error": "Could not sync flags from Flagsmith. Check your API token and URL in Settings."
+    "error": "Could not sync flags from Flagsmith. Check your API token and URL in Settings.",
+    "report": {
+      "title": "Sync report",
+      "inSync": "Everything matches Flagsmith. Nothing changed.",
+      "checkedCount_one": "{{count}} flag checked",
+      "checkedCount_other": "{{count}} flags checked",
+      "driftHeading": "Differences found",
+      "flagsAdded": "Flags added",
+      "flagsRemoved": "Flags removed",
+      "environmentsAdded": "Environments added",
+      "enabledChanges": "On/off changes",
+      "valueChanges": "Value changes",
+      "columnFlag": "Flag",
+      "columnEnvironment": "Environment",
+      "columnPrevious": "Previous",
+      "columnNew": "New",
+      "close": "Close"
+    }
   },
   "neverSynced": {
     "heading": "No flags synced yet",

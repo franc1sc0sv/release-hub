@@ -2,7 +2,26 @@ import { graphql } from '@/generated/gql'
 
 export const SYNC_FLAGSMITH_FLAGS = graphql(`
   mutation SyncFlagsmithFlags($projectId: ID!) {
-    syncFlagsmithFlags(projectId: $projectId)
+    syncFlagsmithFlags(projectId: $projectId) {
+      flagCount
+      addedKeys
+      removedKeys
+      environmentsAdded
+      enabledChanges {
+        flagKey
+        environmentName
+        previousValue
+        newValue
+      }
+      valueChanges {
+        flagKey
+        environmentName
+        previousValue
+        newValue
+      }
+      inSync
+      syncedAt
+    }
   }
 `)
 

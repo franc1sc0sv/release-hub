@@ -33,6 +33,7 @@ import { RotateFlagsmithWebhookSecretHandler } from './commands/rotate-flagsmith
 import { RotateGithubWebhookSecretHandler } from './commands/rotate-github-webhook-secret/rotate-github-webhook-secret.handler'
 import { HandleFlagsmithWebhookHandler } from './commands/handle-flagsmith-webhook/handle-flagsmith-webhook.handler'
 import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
+import { FlagsmithReconcileCronService } from './services/flagsmith-reconcile-cron.service'
 
 @Module({
   imports: [CqrsModule, ProjectModule, LinearAuthModule, FlagHistoryModule, OrganizationModule],
@@ -59,6 +60,7 @@ import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
     RotateGithubWebhookSecretHandler,
     HandleFlagsmithWebhookHandler,
     FlagsmithConnectedHandler,
+    FlagsmithReconcileCronService,
   ],
   exports: [
     IGitHubClient,
