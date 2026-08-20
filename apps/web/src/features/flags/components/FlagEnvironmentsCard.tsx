@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, es } from 'date-fns/locale'
 import { GlassCard } from '@/components/nebula/GlassCard'
+import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EnvStateCell } from './EnvStateCell'
 import type { GetFlagDetailQuery } from '@/generated/graphql'
@@ -11,9 +12,11 @@ type FlagDetailEnvironment = FlagDetail['flagsmith']['environments'][number]
 
 interface FlagEnvironmentRowProps {
   env: FlagDetailEnvironment
+  canToggle: boolean
+  onToggle: (environmentName: string, nextEnabled: boolean) => void
 }
 
-function FlagEnvironmentRow({ env }: FlagEnvironmentRowProps) {
+function FlagEnvironmentRow({ env, canToggle, onToggle }: FlagEnvironmentRowProps) {
   const { t, i18n } = useTranslation('flags')
   const locale = i18n.language.startsWith('es') ? es : enUS
 
@@ -31,15 +34,31 @@ function FlagEnvironmentRow({ env }: FlagEnvironmentRowProps) {
           time: formatDistanceToNow(new Date(env.updatedAt), { addSuffix: true, locale }),
         })}
       </span>
+      {canToggle && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+          onClick={() => onToggle(env.name, !env.enabled)}
+        >
+          {env.enabled ? t('write.actions.turnOff') : t('write.actions.turnOn')}
+        </Button>
+      )}
     </li>
   )
 }
 
 interface FlagEnvironmentsCardProps {
   environments: FlagDetailEnvironment[]
+  canToggle: boolean
+  onToggle: (environmentName: string, nextEnabled: boolean) => void
 }
 
-export function FlagEnvironmentsCard({ environments }: FlagEnvironmentsCardProps) {
+export function FlagEnvironmentsCard({
+  environments,
+  canToggle,
+  onToggle,
+}: FlagEnvironmentsCardProps) {
   const { t } = useTranslation('flags')
 
   return (
@@ -60,7 +79,12 @@ export function FlagEnvironmentsCard({ environments }: FlagEnvironmentsCardProps
         ) : (
           <ul className="space-y-0">
             {environments.map((env) => (
-              <FlagEnvironmentRow key={env.name} env={env} />
+              <FlagEnvironmentRow
+                key={env.name}
+                env={env}
+                canToggle={canToggle}
+                onToggle={onToggle}
+              />
             ))}
           </ul>
         )}

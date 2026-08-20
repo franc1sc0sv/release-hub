@@ -105,7 +105,7 @@ const FlagRow = memo(function FlagRow({
 
   return (
     <TableRow>
-      <TableCell className="pl-6">
+      <TableCell className="sticky left-0 z-10 bg-card pl-6">
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
@@ -164,59 +164,57 @@ export function FlagMatrix({
           </div>
         </CardHeader>
         <CardContent className="p-0 pb-2">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">
-                    <SortableHeader
-                      label={t('matrix.flag')}
-                      field="NAME"
-                      activeSortField={sortField}
-                      activeSortEnv={activeSortEnv}
-                      sortDirection={sortDirection}
-                      onSort={onSortChange}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader
-                      label={t('matrix.created')}
-                      field="CREATED"
-                      activeSortField={sortField}
-                      activeSortEnv={activeSortEnv}
-                      sortDirection={sortDirection}
-                      onSort={onSortChange}
-                    />
-                  </TableHead>
-                  <TableHead className="font-medium text-muted-foreground">{t('matrix.status')}</TableHead>
-                  {visibleEnvironments.map((env) => (
-                    <TableHead key={env}>
-                      <SortableHeader
-                        label={env}
-                        field="ENVIRONMENT"
-                        envName={env}
-                        activeSortField={sortField}
-                        activeSortEnv={activeSortEnv}
-                        sortDirection={sortDirection}
-                        onSort={onSortChange}
-                      />
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((flag) => (
-                  <FlagRow
-                    key={flag.key}
-                    flag={flag}
-                    visibleEnvironments={visibleEnvironments}
-                    onLabel={onLabel}
-                    offLabel={offLabel}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="sticky left-0 z-20 bg-card pl-6">
+                  <SortableHeader
+                    label={t('matrix.flag')}
+                    field="NAME"
+                    activeSortField={sortField}
+                    activeSortEnv={activeSortEnv}
+                    sortDirection={sortDirection}
+                    onSort={onSortChange}
                   />
+                </TableHead>
+                <TableHead>
+                  <SortableHeader
+                    label={t('matrix.created')}
+                    field="CREATED"
+                    activeSortField={sortField}
+                    activeSortEnv={activeSortEnv}
+                    sortDirection={sortDirection}
+                    onSort={onSortChange}
+                  />
+                </TableHead>
+                <TableHead className="font-medium text-muted-foreground">{t('matrix.status')}</TableHead>
+                {visibleEnvironments.map((env) => (
+                  <TableHead key={env}>
+                    <SortableHeader
+                      label={env}
+                      field="ENVIRONMENT"
+                      envName={env}
+                      activeSortField={sortField}
+                      activeSortEnv={activeSortEnv}
+                      sortDirection={sortDirection}
+                      onSort={onSortChange}
+                    />
+                  </TableHead>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((flag) => (
+                <FlagRow
+                  key={flag.key}
+                  flag={flag}
+                  visibleEnvironments={visibleEnvironments}
+                  onLabel={onLabel}
+                  offLabel={offLabel}
+                />
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </GlassCard>
     </m.div>

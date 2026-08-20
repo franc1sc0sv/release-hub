@@ -319,6 +319,7 @@ export default function FlagsPage() {
             onOpenChange={setCompareOpen}
             projectId={projectId}
             visibleEnvironments={visibleEnvironments}
+            onSynced={() => void refetch()}
           />
           <ExportFlagsDialog
             open={exportOpen}

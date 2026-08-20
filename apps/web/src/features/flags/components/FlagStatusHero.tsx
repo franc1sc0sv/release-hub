@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Link, generatePath, useParams } from 'react-router-dom'
-import { CheckCircle2, CircleDashed, Loader2, RadarIcon } from 'lucide-react'
+import { CheckCircle2, CircleDashed, Loader2, RadarIcon, Trash2 } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
+import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { StatusBadge } from '@/components/nebula/StatusBadge'
 import { GradientButton } from '@/components/nebula/GradientButton'
@@ -20,6 +21,8 @@ interface FlagStatusHeroProps {
   tracked: TrackedFlagDetail | null
   onRescan: () => void
   rescanning: boolean
+  canDelete: boolean
+  onDelete: () => void
 }
 
 export function FlagStatusHero({
@@ -28,6 +31,8 @@ export function FlagStatusHero({
   tracked,
   onRescan,
   rescanning,
+  canDelete,
+  onDelete,
 }: FlagStatusHeroProps) {
   const { t } = useTranslation('flags')
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
@@ -61,16 +66,28 @@ export function FlagStatusHero({
             </div>
           </div>
 
-          <Can I={Action.UPDATE} a={Subject.PROJECT}>
-            <GradientButton disabled={rescanning} onClick={onRescan}>
-              {rescanning ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <RadarIcon className="size-4" aria-hidden />
-              )}
-              {t('detail.coverage.button')}
-            </GradientButton>
-          </Can>
+          <div className="flex flex-wrap items-center gap-2">
+            {canDelete && (
+              <Button
+                variant="outline"
+                className="gap-2 text-destructive hover:text-destructive"
+                onClick={onDelete}
+              >
+                <Trash2 className="size-4" aria-hidden />
+                {t('write.actions.deleteFlag')}
+              </Button>
+            )}
+            <Can I={Action.UPDATE} a={Subject.PROJECT}>
+              <GradientButton disabled={rescanning} onClick={onRescan}>
+                {rescanning ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <RadarIcon className="size-4" aria-hidden />
+                )}
+                {t('detail.coverage.button')}
+              </GradientButton>
+            </Can>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3 border-t border-white/10 pt-4 sm:grid-cols-[140px_1fr]">

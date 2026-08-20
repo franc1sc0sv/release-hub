@@ -26,6 +26,7 @@ export const FlagDeploymentStatusValue = {
   IN_PROGRESS: 'IN_PROGRESS',
   CONFLICT: 'CONFLICT',
   UNTRACKED: 'UNTRACKED',
+  DELETED: 'DELETED',
 } as const satisfies Record<FlagDeploymentStatus, FlagDeploymentStatus>
 
 export const FLAG_DEPLOYMENT_STATUS_OPTIONS: FlagDeploymentStatus[] = [
@@ -34,6 +35,7 @@ export const FLAG_DEPLOYMENT_STATUS_OPTIONS: FlagDeploymentStatus[] = [
   FlagDeploymentStatusValue.IN_PROGRESS,
   FlagDeploymentStatusValue.CONFLICT,
   FlagDeploymentStatusValue.UNTRACKED,
+  FlagDeploymentStatusValue.DELETED,
 ]
 
 const FLAG_DEPLOYMENT_STATUS_TONE: Record<FlagDeploymentStatus, StatusBadgeToneValue> = {
@@ -42,6 +44,7 @@ const FLAG_DEPLOYMENT_STATUS_TONE: Record<FlagDeploymentStatus, StatusBadgeToneV
   IN_PROGRESS: StatusBadgeTone.AMBER,
   CONFLICT: StatusBadgeTone.ROSE,
   UNTRACKED: StatusBadgeTone.SLATE,
+  DELETED: StatusBadgeTone.ROSE,
 }
 
 export function flagDeploymentStatusTone(status: FlagDeploymentStatus): StatusBadgeToneValue {

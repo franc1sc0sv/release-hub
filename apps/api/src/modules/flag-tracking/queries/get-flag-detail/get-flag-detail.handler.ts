@@ -89,12 +89,16 @@ export class GetFlagDetailHandler extends BaseQueryHandler<GetFlagDetailQuery, F
         ? (flagsmithDetail?.environments.filter((env) => watchedEnvironments.includes(env.name)) ?? [])
         : (flagsmithDetail?.environments ?? [])
     const anyDisabled = relevantEnvironments.some((env) => !env.enabled)
-    const deploymentStatus = computeFlagDeploymentStatus(latestDecision?.decision ?? null, anyDisabled)
+    const isDeletedInFlagsmith = flagsmithDetail?.deletedAt != null
+    const deploymentStatus = isDeletedInFlagsmith
+      ? FlagDeploymentStatus.DELETED
+      : computeFlagDeploymentStatus(latestDecision?.decision ?? null, anyDisabled)
     const hasConflict = deploymentStatus === FlagDeploymentStatus.CONFLICT
 
     const flagsmithType = Object.assign(new FlagDetailFlagsmithType(), {
       exists: flagsmithDetail !== null,
       lastSyncedAt: flagsmithDetail?.lastSyncedAt ?? null,
+      deletedAt: flagsmithDetail?.deletedAt ?? null,
       environments: (flagsmithDetail?.environments ?? []).map((env) =>
         Object.assign(new FlagDetailFlagsmithEnvironmentType(), env),
       ),

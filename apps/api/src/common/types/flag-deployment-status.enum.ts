@@ -6,6 +6,7 @@ export const FlagDeploymentStatus = {
   IN_PROGRESS: 'in_progress',
   CONFLICT: 'conflict',
   UNTRACKED: 'untracked',
+  DELETED: 'deleted',
 } as const
 
 export type FlagDeploymentStatus = (typeof FlagDeploymentStatus)[keyof typeof FlagDeploymentStatus]

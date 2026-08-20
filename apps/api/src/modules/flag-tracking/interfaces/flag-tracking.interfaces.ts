@@ -141,3 +141,8 @@ export interface ILatestFlagDecisionForProject {
   decision: ReleaseFlagDecisionType
   decidedAt: Date | null
 }
+
+export interface IReleaseFlagEnvironmentState {
+  name: string
+  enabled: boolean
+}

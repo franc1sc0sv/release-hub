@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { GET_FLAG_DETAIL } from '../graphql/flags.queries'
 
 export function useFlagDetail(projectId: string, flagKey: string) {
-  const { data, loading, error } = useQuery(GET_FLAG_DETAIL, {
+  const { data, loading, error, refetch } = useQuery(GET_FLAG_DETAIL, {
     variables: { projectId, key: flagKey },
     skip: !projectId || !flagKey,
     fetchPolicy: 'cache-and-network',
@@ -12,5 +12,6 @@ export function useFlagDetail(projectId: string, flagKey: string) {
     flagDetail: data?.flagDetail ?? null,
     loading,
     error: error ?? null,
+    refetch,
   }
 }

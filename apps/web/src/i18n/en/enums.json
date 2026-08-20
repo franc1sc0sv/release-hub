@@ -51,7 +51,8 @@
     "SHIPPED_OFF": "Shipped, off",
     "IN_PROGRESS": "In progress",
     "CONFLICT": "Conflict",
-    "UNTRACKED": "Untracked"
+    "UNTRACKED": "Untracked",
+    "DELETED": "Deleted in Flagsmith"
   },
   "flagHistoryEventType": {
     "FLAG_CREATED": "Flag created",

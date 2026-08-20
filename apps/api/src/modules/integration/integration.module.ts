@@ -32,6 +32,8 @@ import { SyncFlagsmithFlagsHandler } from './commands/sync-flagsmith-flags/sync-
 import { RotateFlagsmithWebhookSecretHandler } from './commands/rotate-flagsmith-webhook-secret/rotate-flagsmith-webhook-secret.handler'
 import { RotateGithubWebhookSecretHandler } from './commands/rotate-github-webhook-secret/rotate-github-webhook-secret.handler'
 import { HandleFlagsmithWebhookHandler } from './commands/handle-flagsmith-webhook/handle-flagsmith-webhook.handler'
+import { SetFlagStatesHandler } from './commands/set-flag-states/set-flag-states.handler'
+import { DeleteFlagsHandler } from './commands/delete-flags/delete-flags.handler'
 import { FlagsmithConnectedHandler } from './events/flagsmith-connected.handler'
 import { FlagsmithReconcileCronService } from './services/flagsmith-reconcile-cron.service'
 
@@ -59,6 +61,8 @@ import { FlagsmithReconcileCronService } from './services/flagsmith-reconcile-cr
     RotateFlagsmithWebhookSecretHandler,
     RotateGithubWebhookSecretHandler,
     HandleFlagsmithWebhookHandler,
+    SetFlagStatesHandler,
+    DeleteFlagsHandler,
     FlagsmithConnectedHandler,
     FlagsmithReconcileCronService,
   ],

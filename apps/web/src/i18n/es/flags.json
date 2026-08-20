@@ -185,6 +185,59 @@
       "event": {
         "valueChange": "{{previous}} → {{next}}"
       }
+    },
+    "deleted": {
+      "heading": "Este flag fue eliminado en Flagsmith",
+      "description": "Release Hub conserva el registro y su historial. Los estados de entorno de abajo son los últimos que vimos antes de que el flag se eliminara."
+    }
+  },
+  "write": {
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "notInFlagsmith": "No está en Flagsmith",
+    "preview": {
+      "title": "Confirmar cambios de flags",
+      "description": "Revisa cada flag y entorno que va a cambiar. Desmarca una fila para dejarla como está.",
+      "empty": "No hay nada que cambiar: los flags seleccionados ya tienen ese estado.",
+      "selected": "{{count}} de {{total}} cambios seleccionados",
+      "confirm": "Aplicar cambios",
+      "rowLabel": "Incluir {{flag}} en {{environment}}"
+    },
+    "delete": {
+      "title": "Eliminar flags en Flagsmith",
+      "description": "Estos flags se eliminarán de Flagsmith. Desmarca una fila para conservarla.",
+      "warning": "La eliminación quita el flag de todos los entornos de Flagsmith. Esto no se puede deshacer.",
+      "environments": "Activo en {{envs}}",
+      "noEnvironments": "Desactivado en todos los entornos",
+      "selected": "{{count}} de {{total}} flags seleccionados",
+      "confirm": "Eliminar flags",
+      "rowLabel": "Incluir {{flag}}"
+    },
+    "result": {
+      "succeeded_one": "{{count}} cambio aplicado",
+      "succeeded_other": "{{count}} cambios aplicados",
+      "failed_one": "{{count}} cambio falló",
+      "failed_other": "{{count}} cambios fallaron",
+      "unknownError": "Flagsmith rechazó el cambio"
+    },
+    "actions": {
+      "syncEnvironments_one": "Sincronizar {{count}} cambio",
+      "syncEnvironments_other": "Sincronizar {{count}} cambios",
+      "enableIn": "Activar en",
+      "disableIn": "Desactivar en",
+      "delete": "Eliminar",
+      "environmentsLabel": "Entornos",
+      "review_one": "Revisar {{count}} entorno",
+      "review_other": "Revisar {{count}} entornos",
+      "selectedCount_one": "{{count}} flag seleccionado",
+      "selectedCount_other": "{{count}} flags seleccionados",
+      "selectFlag": "Seleccionar {{flag}}",
+      "toggleLabel": "Cambiar {{flag}} en {{environment}}",
+      "clearSelection": "Quitar selección",
+      "selectionBar": "Acciones de los flags seleccionados",
+      "turnOn": "Activar",
+      "turnOff": "Desactivar",
+      "deleteFlag": "Eliminar flag"
     }
   }
 }

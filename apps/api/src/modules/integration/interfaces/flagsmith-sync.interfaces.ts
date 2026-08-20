@@ -147,5 +147,25 @@ export interface IFlagsmithFlagDetail {
   id: string
   key: string
   lastSyncedAt: Date | null
+  deletedAt: Date | null
   environments: IFlagsmithFlagDetailEnvironmentState[]
+}
+
+export interface IFlagsmithEnvironmentCredential {
+  name: string
+  flagsmithApiKey: string
+}
+
+export interface ISetFlagStateTarget {
+  key: string
+  environmentName: string
+  enabled: boolean
+}
+
+export interface IFlagStateUpdate {
+  flagId: string
+  key: string
+  environmentName: string
+  previousEnabled: boolean
+  newEnabled: boolean
 }

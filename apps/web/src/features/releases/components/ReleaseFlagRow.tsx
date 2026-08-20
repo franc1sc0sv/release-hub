@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Link, generatePath, useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { EnvStateCell } from '@/features/flags/components/EnvStateCell'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import { ReleaseFlagDecisionSelect } from './ReleaseFlagDecisionSelect'
@@ -15,10 +17,25 @@ interface ReleaseFlagRowProps {
   flag: ReleaseFlagRowData
   canDecide: boolean
   showDecision: boolean
+  selectable: boolean
+  selected: boolean
+  onSelectedChange: (selected: boolean) => void
+  onToggleEnvironment: (environmentName: string, nextEnabled: boolean) => void
+  canWriteFlags: boolean
 }
 
-export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: ReleaseFlagRowProps) {
-  const { t } = useTranslation('releases')
+export function ReleaseFlagRow({
+  releaseId,
+  flag,
+  canDecide,
+  showDecision,
+  selectable,
+  selected,
+  onSelectedChange,
+  onToggleEnvironment,
+  canWriteFlags,
+}: ReleaseFlagRowProps) {
+  const { t } = useTranslation(['releases', 'flags'])
   const enumLabels = useEnumLabels()
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
@@ -27,7 +44,21 @@ export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: Rel
   )
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-t border-border py-3 first:border-t-0 first:pt-0">
+    <div
+      className={[
+        'flex flex-wrap items-center gap-3 border-t border-border py-3 first:border-t-0 first:pt-0',
+        selected ? '-mx-2 rounded-lg border-transparent bg-brand-indigo-bright/8 px-2' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {selectable && (
+        <Checkbox
+          checked={selected}
+          onCheckedChange={(checked) => onSelectedChange(checked === true)}
+          aria-label={t('flags:write.actions.selectFlag', { flag: flag.key })}
+        />
+      )}
       <div className="min-w-0 flex-1 space-y-1">
         <Link
           to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
@@ -62,6 +93,48 @@ export function ReleaseFlagRow({ releaseId, flag, canDecide, showDecision }: Rel
             </Badge>
           ))}
         </div>
+        {flag.environments.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            {flag.existsInFlagsmith ? (
+              flag.environments.map((environment) =>
+                canWriteFlags ? (
+                  <button
+                    key={environment.name}
+                    type="button"
+                    onClick={() => onToggleEnvironment(environment.name, !environment.enabled)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-2.5 py-1 transition-colors hover:border-brand-indigo-bright/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={t('flags:write.actions.toggleLabel', {
+                      flag: flag.key,
+                      environment: environment.name,
+                    })}
+                  >
+                    <span className="font-mono text-[11px] text-foreground">{environment.name}</span>
+                    <EnvStateCell
+                      enabled={environment.enabled}
+                      onLabel={t('flags:state.on')}
+                      offLabel={t('flags:state.off')}
+                    />
+                  </button>
+                ) : (
+                  <span
+                    key={environment.name}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-2.5 py-1"
+                  >
+                    <span className="font-mono text-[11px] text-foreground">{environment.name}</span>
+                    <EnvStateCell
+                      enabled={environment.enabled}
+                      onLabel={t('flags:state.on')}
+                      offLabel={t('flags:state.off')}
+                    />
+                  </span>
+                ),
+              )
+            ) : (
+              <span className="text-xs text-muted-foreground">{t('flags:write.notInFlagsmith')}</span>
+            )}
+          </div>
+        )}
+
         {prLinks.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
             {prLinks.map((change) => (

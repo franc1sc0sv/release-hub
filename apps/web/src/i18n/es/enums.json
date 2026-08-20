@@ -51,7 +51,8 @@
     "SHIPPED_OFF": "Lanzado, inactivo",
     "IN_PROGRESS": "En progreso",
     "CONFLICT": "Conflicto",
-    "UNTRACKED": "Sin rastrear"
+    "UNTRACKED": "Sin rastrear",
+    "DELETED": "Eliminado en Flagsmith"
   },
   "flagHistoryEventType": {
     "FLAG_CREATED": "Flag creado",

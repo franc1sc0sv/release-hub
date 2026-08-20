@@ -6,10 +6,11 @@ import type {
   IFlagBranchPresence,
   IPullRequestFlagChangeWithPullRequest,
   IReleaseFlagDecision,
+  IReleaseFlagEnvironmentState,
 } from '../interfaces/flag-tracking.interfaces'
 import type { IRelease } from '../../release/interfaces/release.interfaces'
 import { TrackedFlagType, TrackedFlagFeatureType, FlagBranchPresenceType } from './tracked-flag.type'
-import { ReleaseFlagType, ReleaseFlagChangeType } from './release-flag.type'
+import { ReleaseFlagType, ReleaseFlagChangeType, ReleaseFlagEnvironmentType } from './release-flag.type'
 import {
   TrackedFlagDetailType,
   FlagBranchPresenceDetailType,
@@ -63,6 +64,8 @@ export function toReleaseFlagType(
   changes: IPullRequestFlagChangeWithPullRequest[],
   decision: IReleaseFlagDecision | null,
   featureReleaseState: FeatureState | null,
+  environments: IReleaseFlagEnvironmentState[],
+  existsInFlagsmith: boolean,
 ): ReleaseFlagType {
   const type = new ReleaseFlagType()
   type.id = flag.id
@@ -82,6 +85,13 @@ export function toReleaseFlagType(
     ? suggestFeatureStateForDecision(decision?.decision ?? null)
     : null
   type.featureReleaseState = featureReleaseState
+  type.existsInFlagsmith = existsInFlagsmith
+  type.environments = environments.map((environment) => {
+    const environmentType = new ReleaseFlagEnvironmentType()
+    environmentType.name = environment.name
+    environmentType.enabled = environment.enabled
+    return environmentType
+  })
   return type
 }
 

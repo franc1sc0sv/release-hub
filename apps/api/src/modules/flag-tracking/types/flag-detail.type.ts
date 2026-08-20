@@ -25,6 +25,9 @@ export class FlagDetailFlagsmithType {
   @Field(() => GraphQLISODateTime, { nullable: true })
   lastSyncedAt!: Date | null
 
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  deletedAt!: Date | null
+
   @Field(() => [FlagDetailFlagsmithEnvironmentType])
   environments!: FlagDetailFlagsmithEnvironmentType[]
 }

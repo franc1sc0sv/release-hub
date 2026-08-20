@@ -185,6 +185,59 @@
       "event": {
         "valueChange": "{{previous}} → {{next}}"
       }
+    },
+    "deleted": {
+      "heading": "This flag was deleted in Flagsmith",
+      "description": "Release Hub keeps the record and its history. The environment states below are the last ones we saw before the flag was removed."
+    }
+  },
+  "write": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "notInFlagsmith": "Not in Flagsmith",
+    "preview": {
+      "title": "Confirm flag changes",
+      "description": "Review every flag and environment that will change. Untick a row to leave it as it is.",
+      "empty": "Nothing to change — the selected flags already have that state.",
+      "selected": "{{count}} of {{total}} changes selected",
+      "confirm": "Apply changes",
+      "rowLabel": "Include {{flag}} in {{environment}}"
+    },
+    "delete": {
+      "title": "Delete flags in Flagsmith",
+      "description": "These flags will be removed from Flagsmith. Untick a row to keep it.",
+      "warning": "Deletion removes the flag from every environment in Flagsmith. This cannot be undone.",
+      "environments": "Enabled in {{envs}}",
+      "noEnvironments": "Disabled everywhere",
+      "selected": "{{count}} of {{total}} flags selected",
+      "confirm": "Delete flags",
+      "rowLabel": "Include {{flag}}"
+    },
+    "result": {
+      "succeeded_one": "{{count}} change applied",
+      "succeeded_other": "{{count}} changes applied",
+      "failed_one": "{{count}} change failed",
+      "failed_other": "{{count}} changes failed",
+      "unknownError": "Flagsmith refused the change"
+    },
+    "actions": {
+      "syncEnvironments_one": "Sync {{count}} change",
+      "syncEnvironments_other": "Sync {{count}} changes",
+      "enableIn": "Enable in",
+      "disableIn": "Disable in",
+      "delete": "Delete",
+      "environmentsLabel": "Environments",
+      "review_one": "Review {{count}} environment",
+      "review_other": "Review {{count}} environments",
+      "selectedCount_one": "{{count}} flag selected",
+      "selectedCount_other": "{{count}} flags selected",
+      "selectFlag": "Select {{flag}}",
+      "toggleLabel": "Change {{flag}} in {{environment}}",
+      "clearSelection": "Clear selection",
+      "selectionBar": "Selected flag actions",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "deleteFlag": "Delete flag"
     }
   }
 }

@@ -280,6 +280,11 @@ type DeleteBranchOutcomeType {
   reason: String
 }
 
+input DeleteFlagsInput {
+  flagKeys: [String!]!
+  projectId: ID!
+}
+
 input DeleteGithubBranchesInput {
   branchNames: [String!]!
   overriddenBranchNames: [String!] = []
@@ -443,6 +448,7 @@ type FlagCoverageSummaryType {
 
 enum FlagDeploymentStatus {
   CONFLICT
+  DELETED
   IN_PROGRESS
   SHIPPED_OFF
   SHIPPED_ON
@@ -457,6 +463,7 @@ type FlagDetailFlagsmithEnvironmentType {
 }
 
 type FlagDetailFlagsmithType {
+  deletedAt: DateTime
   environments: [FlagDetailFlagsmithEnvironmentType!]!
   exists: Boolean!
   lastSyncedAt: DateTime
@@ -546,6 +553,12 @@ enum FlagSortField {
   NAME
 }
 
+input FlagStateTargetInput {
+  enabled: Boolean!
+  environmentName: String!
+  flagKey: String!
+}
+
 type FlagStateType {
   production: Boolean!
   staging: Boolean!
@@ -567,6 +580,19 @@ type FlagSyncReportType {
   removedKeys: [String!]!
   syncedAt: DateTime!
   valueChanges: [FlagSyncDriftType!]!
+}
+
+type FlagWriteReportType {
+  failed: Int!
+  results: [FlagWriteResultType!]!
+  succeeded: Int!
+}
+
+type FlagWriteResultType {
+  environmentName: String
+  error: String
+  flagKey: String!
+  ok: Boolean!
 }
 
 type FlagsResultType {
@@ -736,6 +762,7 @@ type Mutation {
   createRelease(input: CreateReleaseInput!): ReleaseObjectType!
   createSummaryProfile(input: CreateSummaryProfileInput!): SummaryProfileType!
   deleteFeature(id: ID!): Boolean!
+  deleteFlags(input: DeleteFlagsInput!): FlagWriteReportType!
   deleteGithubBranches(input: DeleteGithubBranchesInput!): [DeleteBranchOutcomeType!]!
   deleteOrganization(organizationId: ID!): Boolean!
   deleteProject(id: ID!): Boolean!
@@ -771,6 +798,7 @@ type Mutation {
   setFeatureState(input: SetFeatureStateInput!): FeatureType!
   setFeatureTags(input: SetFeatureTagsInput!): FeatureType!
   setFlagRegistry(input: SetFlagRegistryInput!): FlagRegistryConfigType!
+  setFlagStates(input: SetFlagStatesInput!): FlagWriteReportType!
   setReleaseFlagDecision(input: SetReleaseFlagDecisionInput!): ReleaseFlagDecisionResultType!
   setReleaseStatus(input: SetReleaseStatusInput!): ReleaseObjectType!
   setSlackChannel(channelId: String!, channelName: String!, projectId: ID!): SlackConnectionStatus!
@@ -1040,10 +1068,17 @@ enum ReleaseFlagDecisionType {
   SHIP_OFF
 }
 
+type ReleaseFlagEnvironmentType {
+  enabled: Boolean!
+  name: String!
+}
+
 type ReleaseFlagType {
   changes: [ReleaseFlagChangeType!]!
   decidedAt: DateTime
   decision: ReleaseFlagDecisionType
+  environments: [ReleaseFlagEnvironmentType!]!
+  existsInFlagsmith: Boolean!
   feature: TrackedFlagFeatureType
   featureReleaseState: FeatureState
   id: ID!
@@ -1162,6 +1197,11 @@ input SetFlagRegistryInput {
   branch: String
   path: String!
   projectId: ID!
+}
+
+input SetFlagStatesInput {
+  projectId: ID!
+  targets: [FlagStateTargetInput!]!
 }
 
 input SetReleaseFlagDecisionInput {

@@ -27,6 +27,15 @@ export class ReleaseFlagChangeType {
 }
 
 @ObjectType()
+export class ReleaseFlagEnvironmentType {
+  @Field(() => String)
+  name: string
+
+  @Field(() => Boolean)
+  enabled: boolean
+}
+
+@ObjectType()
 export class ReleaseFlagType {
   @Field(() => ID)
   id: string
@@ -51,4 +60,10 @@ export class ReleaseFlagType {
 
   @Field(() => FeatureState, { nullable: true })
   featureReleaseState: FeatureState | null
+
+  @Field(() => Boolean)
+  existsInFlagsmith: boolean
+
+  @Field(() => [ReleaseFlagEnvironmentType])
+  environments: ReleaseFlagEnvironmentType[]
 }

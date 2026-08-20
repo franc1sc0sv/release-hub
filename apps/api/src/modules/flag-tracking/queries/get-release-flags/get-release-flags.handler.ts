@@ -12,6 +12,7 @@ import { IFeatureInReleaseRepository } from '../../../release/interfaces/feature
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
 import { IPullRequestFlagChangeRepository } from '../../interfaces/pull-request-flag-change.repository'
 import { IReleaseFlagDecisionRepository } from '../../interfaces/release-flag-decision.repository'
+import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import { ReleaseFlagType } from '../../types/release-flag.type'
 import { toReleaseFlagType } from '../../types/flag-tracking.mappers'
 import { GetReleaseFlagsQuery } from './get-release-flags.query'
@@ -27,6 +28,7 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
     private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
+    private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
   ) {
     super(db)
   }
@@ -57,6 +59,19 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
     const featureStates = await this.featureInReleaseRepository.findByRelease(query.releaseId, tx)
     const stateByFeatureId = new Map(featureStates.map((row) => [row.featureId, row.state]))
 
+    const environmentNames = await this.flagsmithFlagRepository.findEnvironmentNames(release.projectId, tx)
+    const enabledStates = await this.flagsmithFlagRepository.findEnabledStatesForKeys(
+      release.projectId,
+      flags.map((flag) => flag.key),
+      tx,
+    )
+    const enabledByKey = new Map<string, Map<string, boolean>>()
+    for (const state of enabledStates) {
+      const byEnvironment = enabledByKey.get(state.key) ?? new Map<string, boolean>()
+      byEnvironment.set(state.environmentName, state.enabled)
+      enabledByKey.set(state.key, byEnvironment)
+    }
+
     const result: ReleaseFlagType[] = []
     for (const trackedFlagId of trackedFlagIds) {
       const flag = flagsById.get(trackedFlagId)
@@ -68,7 +83,15 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
         ? (stateByFeatureId.get(flag.feature.id) ?? null)
         : null
 
-      result.push(toReleaseFlagType(flag, flagChanges, decision, featureReleaseState))
+      const byEnvironment = enabledByKey.get(flag.key) ?? null
+      const environments = environmentNames.map((name) => ({
+        name,
+        enabled: byEnvironment?.get(name) ?? false,
+      }))
+
+      result.push(
+        toReleaseFlagType(flag, flagChanges, decision, featureReleaseState, environments, byEnvironment !== null),
+      )
     }
 
     return result

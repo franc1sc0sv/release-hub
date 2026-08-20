@@ -58,3 +58,5 @@ export interface IFlagsmithProject {
 export type IFlagsmithProjectsResult =
   | { ok: true; projects: IFlagsmithProject[] }
   | { ok: false; error: IFlagsmithClientError }
+
+export type IFlagsmithWriteResult = { ok: true } | { ok: false; error: IFlagsmithClientError }

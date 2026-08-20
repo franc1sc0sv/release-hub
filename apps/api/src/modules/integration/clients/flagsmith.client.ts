@@ -7,6 +7,7 @@ import type {
   IAllEnvironmentFlagsResult,
   IAllEnvironmentFlag,
   IFlagsmithEnvironmentNamesResult,
+  IFlagsmithWriteResult,
 } from '../interfaces/integration.interfaces'
 
 interface FlagsmithEnvironmentResponse {
@@ -34,6 +35,26 @@ type FetchEnvRichResult =
 
 type ListEnvironmentsResult =
   | { ok: true; environments: FlagsmithEnvironmentResponse[] }
+  | { ok: false; error: IFlagsmithClientError }
+
+interface FlagsmithEnvironmentFeatureStateResponse {
+  id: number
+  feature: number
+  environment: number
+  enabled: boolean
+  feature_state_value: string | number | boolean | null
+  multivariate_feature_state_values: unknown[]
+}
+
+interface FlagsmithFeatureIdResponse {
+  id: number
+  name: string
+}
+
+type ResolveIdResult = { ok: true; id: number | null } | { ok: false; error: IFlagsmithClientError }
+
+type FetchFeatureStateResult =
+  | { ok: true; state: FlagsmithEnvironmentFeatureStateResponse | null }
   | { ok: false; error: IFlagsmithClientError }
 
 @Injectable()
@@ -135,6 +156,143 @@ export class FlagsmithClient extends IFlagsmithClient {
     const result = await this.listEnvironments(base, headers, projectId)
     if (!result.ok) return { ok: false, error: result.error }
     return { ok: true, names: result.environments.map((e) => e.name) }
+  }
+
+  async setFeatureStateEnabled(
+    baseUrl: string,
+    apiKey: string,
+    environmentApiKey: string,
+    flagKey: string,
+    enabled: boolean,
+  ): Promise<IFlagsmithWriteResult> {
+    const base = baseUrl.replace(/\/$/, '')
+    const headers = { Authorization: `Token ${apiKey}`, 'Content-Type': 'application/json' }
+
+    const current = await this.fetchFeatureState(base, headers, environmentApiKey, flagKey)
+    if (!current.ok) return { ok: false, error: current.error }
+    if (current.state === null) {
+      return { ok: false, error: { kind: 'notFound', message: `Flag "${flagKey}" was not found in this environment` } }
+    }
+
+    const state = current.state
+
+    try {
+      const res = await fetch(
+        `${base}/api/v1/environments/${encodeURIComponent(environmentApiKey)}/featurestates/${state.id}/`,
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            id: state.id,
+            feature: state.feature,
+            environment: state.environment,
+            enabled,
+            feature_state_value: state.feature_state_value,
+            multivariate_feature_state_values: state.multivariate_feature_state_values,
+          }),
+        },
+      )
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: { kind: 'auth', message: 'The Flagsmith token cannot change this flag' } }
+      }
+      if (!res.ok) {
+        return { ok: false, error: await this.unexpectedError(res) }
+      }
+      return { ok: true }
+    } catch {
+      return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
+    }
+  }
+
+  async deleteFeature(
+    baseUrl: string,
+    apiKey: string,
+    projectId: string,
+    flagKey: string,
+  ): Promise<IFlagsmithWriteResult> {
+    const base = baseUrl.replace(/\/$/, '')
+    const headers = { Authorization: `Token ${apiKey}`, 'Content-Type': 'application/json' }
+
+    const featureId = await this.resolveFeatureId(base, headers, projectId, flagKey)
+    if (!featureId.ok) return { ok: false, error: featureId.error }
+    if (featureId.id === null) return { ok: true }
+
+    try {
+      const res = await fetch(
+        `${base}/api/v1/projects/${encodeURIComponent(projectId)}/features/${featureId.id}/`,
+        { method: 'DELETE', headers },
+      )
+      if (res.status === 404) return { ok: true }
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: { kind: 'auth', message: 'The Flagsmith token cannot delete this flag' } }
+      }
+      if (!res.ok) {
+        return { ok: false, error: await this.unexpectedError(res) }
+      }
+      return { ok: true }
+    } catch {
+      return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
+    }
+  }
+
+  private async fetchFeatureState(
+    base: string,
+    headers: Record<string, string>,
+    environmentApiKey: string,
+    flagKey: string,
+  ): Promise<FetchFeatureStateResult> {
+    try {
+      const res = await fetch(
+        `${base}/api/v1/environments/${encodeURIComponent(environmentApiKey)}/featurestates/?feature_name=${encodeURIComponent(flagKey)}`,
+        { headers },
+      )
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: { kind: 'auth', message: 'Invalid or expired Flagsmith API token' } }
+      }
+      if (res.status === 404) {
+        return { ok: true, state: null }
+      }
+      if (!res.ok) {
+        return { ok: false, error: await this.unexpectedError(res) }
+      }
+      const body = (await res.json()) as
+        | { results?: FlagsmithEnvironmentFeatureStateResponse[] }
+        | FlagsmithEnvironmentFeatureStateResponse[]
+      const results = Array.isArray(body) ? body : (body.results ?? [])
+      return { ok: true, state: results[0] ?? null }
+    } catch {
+      return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
+    }
+  }
+
+  private async resolveFeatureId(
+    base: string,
+    headers: Record<string, string>,
+    projectId: string,
+    flagKey: string,
+  ): Promise<ResolveIdResult> {
+    try {
+      const res = await fetch(
+        `${base}/api/v1/projects/${encodeURIComponent(projectId)}/features/?search=${encodeURIComponent(flagKey)}`,
+        { headers },
+      )
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: { kind: 'auth', message: 'Invalid or expired Flagsmith API token' } }
+      }
+      if (res.status === 404) {
+        return { ok: true, id: null }
+      }
+      if (!res.ok) {
+        return { ok: false, error: await this.unexpectedError(res) }
+      }
+      const body = (await res.json()) as
+        | { results?: FlagsmithFeatureIdResponse[] }
+        | FlagsmithFeatureIdResponse[]
+      const results = Array.isArray(body) ? body : (body.results ?? [])
+      return { ok: true, id: results.find((feature) => feature.name === flagKey)?.id ?? null }
+    } catch {
+      return { ok: false, error: { kind: 'network', message: 'Could not reach Flagsmith instance' } }
+    }
   }
 
   private async listEnvironments(

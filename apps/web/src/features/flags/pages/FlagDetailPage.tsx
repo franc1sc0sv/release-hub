@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import { useParams, Link, generatePath } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { m, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
-import { AlertCircle, ChevronRight, Flag as FlagIcon } from 'lucide-react'
+import { AlertCircle, ChevronRight, Flag as FlagIcon, Trash2 } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { EmptyState } from '@/components/nebula/EmptyState'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CardContent } from '@/components/ui/card'
+import { useAbility } from '@/context/ability.context'
+import { Action, Subject } from '@release-hub/shared'
 import { ROUTES } from '@/lib/routes'
 import { slideUp, staggerContainer } from '@/lib/animations'
 import { NebulaBackground } from '@/components/nebula/NebulaBackground'
@@ -19,6 +23,10 @@ import { FlagLinkedFeatureCard } from '../components/FlagLinkedFeatureCard'
 import { FlagReleaseAppearancesCard } from '../components/FlagReleaseAppearancesCard'
 import { FlagHistoryTimeline } from '../components/FlagHistoryTimeline'
 import { FlagDetailSkeleton } from '../components/FlagDetailSkeleton'
+import { FlagChangePreviewDialog } from '../components/FlagChangePreviewDialog'
+import { FlagDeleteConfirmDialog } from '../components/FlagDeleteConfirmDialog'
+import { useFlagWriteActions } from '../hooks/use-flag-write-actions'
+import type { FlagChangeTarget, FlagDeleteTarget } from '../types/flag-change-target'
 
 export default function FlagDetailPage() {
   const { organizationId, flagKey } = useParams<{ organizationId: string; flagKey: string }>()
@@ -28,8 +36,52 @@ export default function FlagDetailPage() {
 
   const projectId = activeProject?.id ?? ''
 
-  const { flagDetail, loading, error } = useFlagDetail(projectId, flagKey ?? '')
+  const ability = useAbility()
+  const { flagDetail, loading, error, refetch } = useFlagDetail(projectId, flagKey ?? '')
   const tracked = flagDetail?.tracked ?? null
+
+  const [changeTargets, setChangeTargets] = useState<FlagChangeTarget[] | null>(null)
+  const [deleteTargets, setDeleteTargets] = useState<FlagDeleteTarget[] | null>(null)
+  const { applyStates, deleteFlags, resetReport, report, pending } = useFlagWriteActions(projectId)
+
+  const deletedInFlagsmith = flagDetail?.flagsmith.deletedAt != null
+  const liveInFlagsmith = (flagDetail?.flagsmith.exists ?? false) && !deletedInFlagsmith
+  const canToggle = liveInFlagsmith && ability.can(Action.UPDATE, Subject.PROJECT)
+  const canDelete = liveInFlagsmith && ability.can(Action.MANAGE, Subject.PROJECT)
+
+  function openToggle(environmentName: string, nextEnabled: boolean): void {
+    const environment = flagDetail?.flagsmith.environments.find((env) => env.name === environmentName)
+    if (!environment || !flagDetail) return
+    setChangeTargets([
+      {
+        flagKey: flagDetail.key,
+        environmentName,
+        currentEnabled: environment.enabled,
+        nextEnabled,
+      },
+    ])
+  }
+
+  function openDelete(): void {
+    if (!flagDetail) return
+    setDeleteTargets([
+      {
+        flagKey: flagDetail.key,
+        environments: flagDetail.flagsmith.environments
+          .filter((env) => env.enabled)
+          .map((env) => env.name),
+      },
+    ])
+  }
+
+  function closeWriteDialogs(): void {
+    setChangeTargets(null)
+    setDeleteTargets(null)
+    if (report) {
+      resetReport()
+      void refetch()
+    }
+  }
 
   const { run: runCoverage, loading: rescanning } = useRunFlagCoverageForFlag(
     projectId,
@@ -120,6 +172,16 @@ export default function FlagDetailPage() {
               </m.div>
             )}
 
+            {deletedInFlagsmith && (
+              <m.div variants={slideUp}>
+                <Alert variant="destructive">
+                  <Trash2 className="size-4" aria-hidden />
+                  <AlertTitle>{t('detail.deleted.heading')}</AlertTitle>
+                  <AlertDescription>{t('detail.deleted.description')}</AlertDescription>
+                </Alert>
+              </m.div>
+            )}
+
             <m.div variants={slideUp}>
               <FlagStatusHero
                 flagKey={flagDetail.key}
@@ -127,6 +189,8 @@ export default function FlagDetailPage() {
                 tracked={tracked}
                 onRescan={() => void handleRescan()}
                 rescanning={rescanning}
+                canDelete={canDelete}
+                onDelete={openDelete}
               />
             </m.div>
 
@@ -134,7 +198,11 @@ export default function FlagDetailPage() {
               variants={slideUp}
               className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[2fr_1fr]"
             >
-              <FlagEnvironmentsCard environments={flagDetail.flagsmith.environments} />
+              <FlagEnvironmentsCard
+                environments={flagDetail.flagsmith.environments}
+                canToggle={canToggle}
+                onToggle={openToggle}
+              />
 
               <div className="space-y-4">
                 <FlagLinkedFeatureCard feature={tracked?.feature ?? null} />
@@ -152,6 +220,30 @@ export default function FlagDetailPage() {
             </m.div>
           </>
         )}
+
+        <FlagChangePreviewDialog
+          open={changeTargets !== null}
+          onOpenChange={(next) => {
+            if (!next) closeWriteDialogs()
+          }}
+          targets={changeTargets ?? []}
+          pending={pending}
+          report={report}
+          onConfirm={(selected) => void applyStates(selected)}
+          onClose={closeWriteDialogs}
+        />
+
+        <FlagDeleteConfirmDialog
+          open={deleteTargets !== null}
+          onOpenChange={(next) => {
+            if (!next) closeWriteDialogs()
+          }}
+          targets={deleteTargets ?? []}
+          pending={pending}
+          report={report}
+          onConfirm={(flagKeys) => void deleteFlags(flagKeys)}
+          onClose={closeWriteDialogs}
+        />
       </m.div>
     </NebulaBackground>
   )

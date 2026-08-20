@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, Loader2, RefreshCw } from 'lucide-react'
+import { CheckCircle2, Loader2, RefreshCw, ArrowLeftRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import { useLocalStorage } from '@/hooks/use-local-storage'
+import { Can } from '@/context/ability.context'
+import { Action, Subject } from '@release-hub/shared'
 import { useCompareFlags } from '../hooks/use-compare-flags'
+import { useFlagWriteActions } from '../hooks/use-flag-write-actions'
 import { EnvStateCell } from './EnvStateCell'
+import { FlagChangePreviewDialog } from './FlagChangePreviewDialog'
+import type { FlagChangeTarget } from '../types/flag-change-target'
 import type { FlagComparisonRowType } from '@/generated/graphql'
 
 interface CompareFlagsDialogProps {
@@ -19,6 +24,7 @@ interface CompareFlagsDialogProps {
   onOpenChange: (open: boolean) => void
   projectId: string
   visibleEnvironments: string[]
+  onSynced: () => void
 }
 
 interface DivergenceChipProps {
@@ -76,9 +82,12 @@ export function CompareFlagsDialog({
   onOpenChange,
   projectId,
   visibleEnvironments,
+  onSynced,
 }: CompareFlagsDialogProps) {
   const { t } = useTranslation('flags')
   const { compare, items, loading, called } = useCompareFlags()
+  const { applyStates, resetReport, report, pending } = useFlagWriteActions(projectId)
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const [persistedBaseline, setBaselineEnvs] = useLocalStorage<string[]>(
     `release-hub:flags:baseline:${projectId}`,
@@ -101,15 +110,36 @@ export function CompareFlagsDialog({
   const onInProdItems = items.filter((i) => i.baselineEnabled === true)
   const offInProdItems = items.filter((i) => i.baselineEnabled === false)
 
+  const syncTargets: FlagChangeTarget[] = items
+    .filter((item) => !item.baselineConflict && item.baselineEnabled !== null)
+    .flatMap((item) =>
+      item.divergences.map((divergence) => ({
+        flagKey: item.key,
+        environmentName: divergence.name,
+        currentEnabled: divergence.enabled,
+        nextEnabled: item.baselineEnabled === true,
+      })),
+    )
+
   function runCompare() {
     if (baselineEnv) {
       compare(projectId, [baselineEnv], comparedEnvs)
     }
   }
 
+  function closePreview() {
+    setPreviewOpen(false)
+    if (report) {
+      resetReport()
+      runCompare()
+      onSynced()
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col gap-4 sm:max-w-5xl">
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex max-h-[85vh] flex-col gap-4 sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle>{t('compare.title')}</DialogTitle>
           {baselineEnv && (
@@ -179,10 +209,23 @@ export function CompareFlagsDialog({
               ) : (
                 <span />
               )}
-              <Button variant="ghost" size="sm" className="gap-2" onClick={runCompare}>
-                <RefreshCw className="size-4" aria-hidden />
-                {t('compare.reRun')}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="gap-2" onClick={runCompare}>
+                  <RefreshCw className="size-4" aria-hidden />
+                  {t('compare.reRun')}
+                </Button>
+                <Can I={Action.UPDATE} a={Subject.PROJECT}>
+                  <Button
+                    size="sm"
+                    className="gap-2"
+                    disabled={syncTargets.length === 0}
+                    onClick={() => setPreviewOpen(true)}
+                  >
+                    <ArrowLeftRight className="size-4" aria-hidden />
+                    {t('write.actions.syncEnvironments', { count: syncTargets.length })}
+                  </Button>
+                </Can>
+              </div>
             </div>
 
             <div className="min-h-0 flex-1 overflow-auto">
@@ -231,7 +274,20 @@ export function CompareFlagsDialog({
             </div>
           </>
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <FlagChangePreviewDialog
+        open={previewOpen}
+        onOpenChange={(next) => {
+          if (!next) closePreview()
+        }}
+        targets={syncTargets}
+        pending={pending}
+        report={report}
+        onConfirm={(selected) => void applyStates(selected)}
+        onClose={closePreview}
+      />
+    </>
   )
 }

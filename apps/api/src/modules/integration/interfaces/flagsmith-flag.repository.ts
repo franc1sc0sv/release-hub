@@ -11,6 +11,9 @@ import type {
   IReconcileFlagsResult,
   IUpsertFlagsmithFlagWithStatesResult,
   IFlagsmithFlagDetail,
+  IFlagsmithEnvironmentCredential,
+  ISetFlagStateTarget,
+  IFlagStateUpdate,
 } from './flagsmith-sync.interfaces'
 
 export abstract class IFlagsmithFlagRepository {
@@ -38,6 +41,15 @@ export abstract class IFlagsmithFlagRepository {
   >
   abstract findFlagDetailByKey: RepositoryMethod<[projectId: string, key: string], IFlagsmithFlagDetail | null>
   abstract findEnvironmentNames: RepositoryMethod<[projectId: string], string[]>
+  abstract findEnvironmentCredentials: RepositoryMethod<[projectId: string], IFlagsmithEnvironmentCredential[]>
+  abstract softDeleteFlagsByKeys: RepositoryMethod<
+    [projectId: string, keys: string[]],
+    { key: string; flagId: string }[]
+  >
+  abstract setStatesEnabled: RepositoryMethod<
+    [projectId: string, targets: ISetFlagStateTarget[]],
+    IFlagStateUpdate[]
+  >
   abstract createSyncRun: RepositoryMethod<[data: ICreateFlagsmithSyncRunData], IFlagsmithSyncRun>
   abstract completeSyncRun: RepositoryMethod<[id: string, data: ICompleteFlagsmithSyncRunData], void>
   abstract failSyncRun: RepositoryMethod<[id: string, error: string], void>

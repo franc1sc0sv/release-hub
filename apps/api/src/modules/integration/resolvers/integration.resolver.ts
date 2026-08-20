@@ -29,6 +29,11 @@ import { UpdateConnectionSettingsCommand } from '../commands/update-connection-s
 import { SyncFlagsmithFlagsCommand } from '../commands/sync-flagsmith-flags/sync-flagsmith-flags.command'
 import { RotateFlagsmithWebhookSecretCommand } from '../commands/rotate-flagsmith-webhook-secret/rotate-flagsmith-webhook-secret.command'
 import { RotateGithubWebhookSecretCommand } from '../commands/rotate-github-webhook-secret/rotate-github-webhook-secret.command'
+import { SetFlagStatesCommand } from '../commands/set-flag-states/set-flag-states.command'
+import { DeleteFlagsCommand } from '../commands/delete-flags/delete-flags.command'
+import { SetFlagStatesInput } from '../commands/set-flag-states/set-flag-states.input'
+import { DeleteFlagsInput } from '../commands/delete-flags/delete-flags.input'
+import { FlagWriteReportType } from '../types/flag-write-report.type'
 import { FlagSortField } from '../../../common/types/flag-sort-field.enum'
 import { SortDirection } from '../../../common/types/sort-direction.enum'
 import { FlagsmithSyncSource } from '@release-hub/db'
@@ -168,6 +173,34 @@ export class IntegrationResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<RotateWebhookSecretResultType> {
     return this.commandBus.execute(new RotateFlagsmithWebhookSecretCommand(projectId, user.id))
+  }
+
+  @Mutation(() => FlagWriteReportType)
+  @Can(Action.UPDATE, Subject.PROJECT)
+  setFlagStates(
+    @Args('input', { type: () => SetFlagStatesInput }) input: SetFlagStatesInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<FlagWriteReportType> {
+    return this.commandBus.execute(
+      new SetFlagStatesCommand(
+        input.projectId,
+        user.id,
+        input.targets.map((target) => ({
+          key: target.flagKey,
+          environmentName: target.environmentName,
+          enabled: target.enabled,
+        })),
+      ),
+    )
+  }
+
+  @Mutation(() => FlagWriteReportType)
+  @Can(Action.MANAGE, Subject.PROJECT)
+  deleteFlags(
+    @Args('input', { type: () => DeleteFlagsInput }) input: DeleteFlagsInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<FlagWriteReportType> {
+    return this.commandBus.execute(new DeleteFlagsCommand(input.projectId, user.id, input.flagKeys))
   }
 
   @Mutation(() => ConnectionSettingsType)

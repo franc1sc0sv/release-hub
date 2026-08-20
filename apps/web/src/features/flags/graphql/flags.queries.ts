@@ -65,6 +65,7 @@ export const GET_FLAG_DETAIL = graphql(`
       flagsmith {
         exists
         lastSyncedAt
+        deletedAt
         environments {
           name
           enabled

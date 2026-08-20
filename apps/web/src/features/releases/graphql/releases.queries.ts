@@ -164,6 +164,11 @@ export const RELEASE_FLAGS = graphql(`
       decidedAt
       suggestedFeatureState
       featureReleaseState
+      existsInFlagsmith
+      environments {
+        name
+        enabled
+      }
       feature {
         id
         name

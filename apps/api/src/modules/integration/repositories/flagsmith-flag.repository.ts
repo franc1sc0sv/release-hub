@@ -25,6 +25,9 @@ import type {
   IUpsertFlagsmithFlagWithStatesResult,
   IUpsertFlagsmithFlagStateChangeResult,
   IFlagsmithFlagDetail,
+  IFlagsmithEnvironmentCredential,
+  ISetFlagStateTarget,
+  IFlagStateUpdate,
 } from '../interfaces/flagsmith-sync.interfaces'
 
 function toIFlagsmithSyncRun(row: {
@@ -315,10 +318,9 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       tx.flagsmithFlag.findMany({
         where: {
           projectId: filters.projectId,
-          deletedAt: null,
           ...(filters.search ? { key: { contains: filters.search, mode: 'insensitive' as const } } : {}),
         },
-        select: { id: true, key: true },
+        select: { id: true, key: true, deletedAt: true },
       }),
       this.resolveSortEnvironmentId(filters, tx),
     ])
@@ -335,6 +337,9 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
 
     const candidateIds = candidateFlags.map((flag) => flag.id)
     const keyByFlagId = new Map(candidateFlags.map((flag) => [flag.id, flag.key]))
+    const deletedFlagIds = new Set(
+      candidateFlags.filter((flag) => flag.deletedAt !== null).map((flag) => flag.id),
+    )
     const candidateKeys = [...new Set(candidateFlags.map((flag) => flag.key))]
 
     const watchedEnvironmentIds =
@@ -394,6 +399,10 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
 
     const deploymentStatusByFlagId = new Map<string, FlagDeploymentStatus>()
     for (const flagId of candidateIds) {
+      if (deletedFlagIds.has(flagId)) {
+        deploymentStatusByFlagId.set(flagId, FlagDeploymentStatus.DELETED)
+        continue
+      }
       const key = keyByFlagId.get(flagId)
       const trackedFlagId = key ? trackedFlagIdByKey.get(key) : undefined
       const decision = trackedFlagId ? (latestDecisionByTrackedFlagId.get(trackedFlagId) ?? null) : null
@@ -598,11 +607,12 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     tx: TxClient,
   ): Promise<IFlagsmithFlagDetail | null> => {
     const flag = await tx.flagsmithFlag.findFirst({
-      where: { projectId, key, deletedAt: null },
+      where: { projectId, key },
       select: {
         id: true,
         key: true,
         lastSyncedAt: true,
+        deletedAt: true,
         states: {
           select: {
             enabled: true,
@@ -619,6 +629,7 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
       id: flag.id,
       key: flag.key,
       lastSyncedAt: flag.lastSyncedAt,
+      deletedAt: flag.deletedAt,
       environments: flag.states.map((state) => ({
         name: state.environment.name,
         enabled: state.enabled,
@@ -626,6 +637,110 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
         updatedAt: state.updatedAt,
       })),
     }
+  }
+
+  findEnvironmentCredentials = async (
+    projectId: string,
+    tx: TxClient,
+  ): Promise<IFlagsmithEnvironmentCredential[]> => {
+    const rows = await tx.flagsmithEnvironment.findMany({
+      where: { projectId },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      select: { name: true, flagsmithApiKey: true },
+    })
+    return rows.map((row) => ({ name: row.name, flagsmithApiKey: row.flagsmithApiKey }))
+  }
+
+  softDeleteFlagsByKeys = async (
+    projectId: string,
+    keys: string[],
+    tx: TxClient,
+  ): Promise<{ key: string; flagId: string }[]> => {
+    if (keys.length === 0) return []
+
+    const rows = await tx.flagsmithFlag.findMany({
+      where: { projectId, deletedAt: null, key: { in: keys } },
+      select: { id: true, key: true },
+    })
+    if (rows.length === 0) return []
+
+    await tx.flagsmithFlag.updateMany({
+      where: { id: { in: rows.map((row) => row.id) } },
+      data: { deletedAt: new Date() },
+    })
+
+    return rows.map((row) => ({ key: row.key, flagId: row.id }))
+  }
+
+  setStatesEnabled = async (
+    projectId: string,
+    targets: ISetFlagStateTarget[],
+    tx: TxClient,
+  ): Promise<IFlagStateUpdate[]> => {
+    if (targets.length === 0) return []
+
+    const [flags, environments] = await Promise.all([
+      tx.flagsmithFlag.findMany({
+        where: { projectId, deletedAt: null, key: { in: targets.map((target) => target.key) } },
+        select: { id: true, key: true },
+      }),
+      tx.flagsmithEnvironment.findMany({
+        where: { projectId, name: { in: targets.map((target) => target.environmentName) } },
+        select: { id: true, name: true },
+      }),
+    ])
+
+    const flagIdByKey = new Map(flags.map((flag) => [flag.key, flag.id]))
+    const environmentIdByName = new Map(environments.map((environment) => [environment.name, environment.id]))
+
+    const states = await tx.flagsmithFlagState.findMany({
+      where: {
+        flagId: { in: flags.map((flag) => flag.id) },
+        environmentId: { in: environments.map((environment) => environment.id) },
+      },
+      select: { id: true, flagId: true, environmentId: true, enabled: true },
+    })
+
+    const stateByPair = new Map(states.map((state) => [`${state.flagId}:${state.environmentId}`, state]))
+    const updates: IFlagStateUpdate[] = []
+    const stateIdsToEnable: string[] = []
+    const stateIdsToDisable: string[] = []
+
+    for (const target of targets) {
+      const flagId = flagIdByKey.get(target.key)
+      const environmentId = environmentIdByName.get(target.environmentName)
+      if (!flagId || !environmentId) continue
+
+      const state = stateByPair.get(`${flagId}:${environmentId}`)
+      if (!state || state.enabled === target.enabled) continue
+
+      if (target.enabled) stateIdsToEnable.push(state.id)
+      else stateIdsToDisable.push(state.id)
+
+      updates.push({
+        flagId,
+        key: target.key,
+        environmentName: target.environmentName,
+        previousEnabled: state.enabled,
+        newEnabled: target.enabled,
+      })
+    }
+
+    if (stateIdsToEnable.length > 0) {
+      await tx.flagsmithFlagState.updateMany({
+        where: { id: { in: stateIdsToEnable } },
+        data: { enabled: true },
+      })
+    }
+
+    if (stateIdsToDisable.length > 0) {
+      await tx.flagsmithFlagState.updateMany({
+        where: { id: { in: stateIdsToDisable } },
+        data: { enabled: false },
+      })
+    }
+
+    return updates
   }
 
   findEnvironmentNames = async (projectId: string, tx: TxClient): Promise<string[]> => {

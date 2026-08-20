@@ -74,3 +74,33 @@ export const RUN_FLAG_COVERAGE_FOR_FLAG = graphql(`
     }
   }
 `)
+
+export const SET_FLAG_STATES = graphql(`
+  mutation SetFlagStates($input: SetFlagStatesInput!) {
+    setFlagStates(input: $input) {
+      succeeded
+      failed
+      results {
+        flagKey
+        environmentName
+        ok
+        error
+      }
+    }
+  }
+`)
+
+export const DELETE_FLAGS = graphql(`
+  mutation DeleteFlags($input: DeleteFlagsInput!) {
+    deleteFlags(input: $input) {
+      succeeded
+      failed
+      results {
+        flagKey
+        environmentName
+        ok
+        error
+      }
+    }
+  }
+`)
