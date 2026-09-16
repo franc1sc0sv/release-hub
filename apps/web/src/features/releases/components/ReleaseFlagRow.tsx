@@ -22,6 +22,7 @@ interface ReleaseFlagRowProps {
   onSelectedChange: (selected: boolean) => void
   onToggleEnvironment: (environmentName: string, nextEnabled: boolean) => void
   canWriteFlags: boolean
+  hiddenEnvironments: string[]
 }
 
 export function ReleaseFlagRow({
@@ -34,6 +35,7 @@ export function ReleaseFlagRow({
   onSelectedChange,
   onToggleEnvironment,
   canWriteFlags,
+  hiddenEnvironments,
 }: ReleaseFlagRowProps) {
   const { t } = useTranslation(['releases', 'flags'])
   const enumLabels = useEnumLabels()
@@ -41,6 +43,9 @@ export function ReleaseFlagRow({
 
   const prLinks = Array.from(
     new Map(flag.changes.map((change) => [change.prNumber, change])).values(),
+  )
+  const visibleEnvironments = flag.environments.filter(
+    (environment) => !hiddenEnvironments.includes(environment.name),
   )
 
   return (
@@ -93,10 +98,10 @@ export function ReleaseFlagRow({
             </Badge>
           ))}
         </div>
-        {flag.environments.length > 0 && (
+        {(visibleEnvironments.length > 0 || !flag.existsInFlagsmith) && (
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
             {flag.existsInFlagsmith ? (
-              flag.environments.map((environment) =>
+              visibleEnvironments.map((environment) =>
                 canWriteFlags ? (
                   <button
                     key={environment.name}

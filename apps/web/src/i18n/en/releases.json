@@ -418,7 +418,9 @@
       "added": "Added",
       "removed": "Removed",
       "addedEmpty": "No added flags match your search.",
-      "removedEmpty": "No removed flags match your search."
+      "removedEmpty": "No removed flags match your search.",
+      "deleteAllRemoved_one": "Delete {{count}} flag in Flagsmith",
+      "deleteAllRemoved_other": "Delete all {{count}} flags in Flagsmith"
     },
     "scan": {
       "button": "Scan PRs for flags",

@@ -244,7 +244,7 @@ export default function ReleaseViewPage() {
                   <ReleasePrsTab features={features} />
                 </TabsContent>
                 <TabsContent value="flags">
-                  <ReleaseFlagsTab releaseId={release.id} />
+                  <ReleaseFlagsTab releaseId={release.id} releaseStatus={release.status} />
                 </TabsContent>
               </>
             )}

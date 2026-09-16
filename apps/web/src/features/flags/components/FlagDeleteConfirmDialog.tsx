@@ -95,7 +95,7 @@ export function FlagDeleteConfirmDialog({
                       >
                         {target.flagKey}
                       </span>
-                      <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                      <span className="min-w-0 break-words font-mono text-xs text-muted-foreground">
                         {target.environments.length > 0
                           ? t('write.delete.environments', { envs: target.environments.join(', ') })
                           : t('write.delete.noEnvironments')}

@@ -15,12 +15,14 @@ interface ColumnVisibilityMenuProps {
   environments: string[]
   hiddenEnvs: string[]
   onToggle: (env: string, hidden: boolean) => void
+  label?: string
 }
 
 export function ColumnVisibilityMenu({
   environments,
   hiddenEnvs,
   onToggle,
+  label,
 }: ColumnVisibilityMenuProps) {
   const { t } = useTranslation('flags')
 
@@ -30,7 +32,7 @@ export function ColumnVisibilityMenu({
         className={buttonVariants({ variant: 'outline', size: 'sm' }) + ' gap-2'}
       >
         <Columns3 className="size-4" aria-hidden />
-        {t('columns.button')}
+        {label ?? t('columns.button')}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>

@@ -418,7 +418,9 @@
       "added": "Agregados",
       "removed": "Eliminados",
       "addedEmpty": "Ningún flag agregado coincide con tu búsqueda.",
-      "removedEmpty": "Ningún flag eliminado coincide con tu búsqueda."
+      "removedEmpty": "Ningún flag eliminado coincide con tu búsqueda.",
+      "deleteAllRemoved_one": "Eliminar {{count}} flag en Flagsmith",
+      "deleteAllRemoved_other": "Eliminar los {{count}} flags en Flagsmith"
     },
     "scan": {
       "button": "Escanear PRs por flags",

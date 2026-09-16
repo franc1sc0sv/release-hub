@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { SearchField } from '@/components/nebula/SearchField'
 import { Can, useAbility } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
+import { ColumnVisibilityMenu } from '@/features/flags/components/ColumnVisibilityMenu'
 import { EnvironmentActionMenu } from '@/features/flags/components/EnvironmentActionMenu'
 import { FlagChangePreviewDialog } from '@/features/flags/components/FlagChangePreviewDialog'
 import { FlagDeleteConfirmDialog } from '@/features/flags/components/FlagDeleteConfirmDialog'
@@ -17,13 +18,26 @@ import { useReleaseFlags } from '../hooks/useReleaseFlags'
 import { FlagScanButton } from './FlagScanButton'
 import { ReleaseFlagRow } from './ReleaseFlagRow'
 import { CarriedOverFlagsPanel } from './CarriedOverFlagsPanel'
-import { FlagChangeActionValue } from '../constants/release-enums'
-import type { ReleaseFlagsQuery } from '@/generated/graphql'
+import { FlagChangeActionValue, ReleaseStatusValue } from '../constants/release-enums'
+import type { ReleaseFlagsQuery, ReleaseStatus } from '@/generated/graphql'
 
 type ReleaseFlagRowData = ReleaseFlagsQuery['releaseFlags'][number]
 
+const SHIPPED_RELEASE_STATUSES: ReleaseStatus[] = [
+  ReleaseStatusValue.MERGED,
+  ReleaseStatusValue.DEPLOYED,
+]
+
+const DEFAULT_VISIBLE_ENVIRONMENT_TERMS = ['demo', 'production'] as const
+
+function isDefaultVisibleEnvironment(name: string): boolean {
+  const lowered = name.toLowerCase()
+  return DEFAULT_VISIBLE_ENVIRONMENT_TERMS.some((term) => lowered.includes(term))
+}
+
 interface ReleaseFlagsTabProps {
   releaseId: string
+  releaseStatus: ReleaseStatus
 }
 
 function isRemovedFlag(flag: ReleaseFlagRowData): boolean {
@@ -34,7 +48,7 @@ function isAddedFlag(flag: ReleaseFlagRowData): boolean {
   return !isRemovedFlag(flag)
 }
 
-export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
+export function ReleaseFlagsTab({ releaseId, releaseStatus }: ReleaseFlagsTabProps) {
   const { t } = useTranslation(['releases', 'flags'])
   const { projectId } = useParams<{ projectId: string }>()
   const ability = useAbility()
@@ -43,6 +57,7 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([])
   const [changeTargets, setChangeTargets] = useState<FlagChangeTarget[] | null>(null)
   const [deleteTargets, setDeleteTargets] = useState<FlagDeleteTarget[] | null>(null)
+  const [hiddenEnvsOverride, setHiddenEnvsOverride] = useState<string[] | null>(null)
 
   const { applyStates, deleteFlags, resetReport, report, pending } = useFlagWriteActions(projectId ?? '')
 
@@ -59,9 +74,22 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
   ).length
 
   const environments = flags[0]?.environments.map((environment) => environment.name) ?? []
+  const hiddenEnvs =
+    hiddenEnvsOverride ?? environments.filter((name) => !isDefaultVisibleEnvironment(name))
   const selectedFlags = flags.filter(
     (flag) => selectedKeys.includes(flag.key) && flag.existsInFlagsmith,
   )
+  const canBulkDeleteRemoved =
+    canDeleteFlags && SHIPPED_RELEASE_STATUSES.includes(releaseStatus)
+  const deletableRemovedFlags = removedFlags.filter((flag) => flag.existsInFlagsmith)
+
+  function toggleEnvironmentVisibility(environmentName: string, hidden: boolean) {
+    setHiddenEnvsOverride(
+      hidden
+        ? [...hiddenEnvs, environmentName]
+        : hiddenEnvs.filter((entry) => entry !== environmentName),
+    )
+  }
 
   function toggleSelected(key: string, selected: boolean) {
     setSelectedKeys((current) =>
@@ -99,9 +127,9 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
     ])
   }
 
-  function openDelete() {
+  function openDeleteFor(rows: ReleaseFlagRowData[]) {
     setDeleteTargets(
-      selectedFlags.map((flag) => ({
+      rows.map((flag) => ({
         flagKey: flag.key,
         environments: flag.environments
           .filter((environment) => environment.enabled)
@@ -135,6 +163,7 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
           openSingleToggle(flag, environmentName, nextEnabled)
         }
         canWriteFlags={canWriteFlags}
+        hiddenEnvironments={hiddenEnvs}
       />
     ))
   }
@@ -155,7 +184,17 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
           placeholder={t('flags.searchPlaceholder')}
           className="w-full max-w-xs"
         />
-        <FlagScanButton releaseId={releaseId} />
+        <div className="flex items-center gap-2">
+          {environments.length > 0 && (
+            <ColumnVisibilityMenu
+              environments={environments}
+              hiddenEnvs={hiddenEnvs}
+              onToggle={toggleEnvironmentVisibility}
+              label={t('flags:columns.label')}
+            />
+          )}
+          <FlagScanButton releaseId={releaseId} />
+        </div>
       </div>
 
       <CarriedOverFlagsPanel releaseId={releaseId} />
@@ -218,7 +257,24 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
                     <p className="text-sm text-muted-foreground">{t('flags.subTabs.removedEmpty')}</p>
                   </div>
                 ) : (
-                  <div>{renderRows(removedFlags, canDecide, false)}</div>
+                  <div>
+                    {canBulkDeleteRemoved && deletableRemovedFlags.length > 0 && (
+                      <div className="flex justify-end pb-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 text-destructive hover:text-destructive"
+                          onClick={() => openDeleteFor(deletableRemovedFlags)}
+                        >
+                          <Trash2 className="size-4" aria-hidden />
+                          {t('flags.subTabs.deleteAllRemoved', {
+                            count: deletableRemovedFlags.length,
+                          })}
+                        </Button>
+                      </div>
+                    )}
+                    {renderRows(removedFlags, canDecide, false)}
+                  </div>
                 )}
               </TabsContent>
             </Tabs>
@@ -250,7 +306,7 @@ export function ReleaseFlagsTab({ releaseId }: ReleaseFlagsTabProps) {
               variant="outline"
               size="sm"
               className="gap-2 text-destructive hover:text-destructive"
-              onClick={openDelete}
+              onClick={() => openDeleteFor(selectedFlags)}
             >
               <Trash2 className="size-4" aria-hidden />
               {t('flags:write.actions.delete')}
