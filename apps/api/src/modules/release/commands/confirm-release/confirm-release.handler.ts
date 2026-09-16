@@ -1,6 +1,7 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import { Logger } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
+import { FlagAction } from '@release-hub/db'
 import { Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
@@ -20,6 +21,9 @@ import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { IFeatureRepository } from '../../../feature/interfaces/feature.repository'
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
+import { IPullRequestFlagChangeRepository } from '../../../flag-tracking/interfaces/pull-request-flag-change.repository'
+import { ITrackedFlagRepository } from '../../../flag-tracking/interfaces/tracked-flag.repository'
+import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import type { IConfirmReleasePreparation } from '../../interfaces/release.interfaces'
 import { ReleaseObjectType } from '../../types/release.type'
 import { toReleaseObjectType } from '../../types/release.mappers'
@@ -32,6 +36,7 @@ interface IConfirmReleaseSource {
   compareRef: string
   releaseName: string
   prBody: string
+  existingPrUrl: string | null
   accessToken: string
   suggestedFeatureIds: string[]
   assignedFeatureIds: string[]
@@ -54,6 +59,9 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly featureRepository: IFeatureRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
+    private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
+    private readonly trackedFlagRepository: ITrackedFlagRepository,
+    private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
     private readonly gitHubClient: IGitHubClient,
     private readonly tokenResolver: IGithubTokenResolver,
   ) {
@@ -64,7 +72,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
     const source = await this.resolveSource(command)
 
     const prTitle = `Release ${source.releaseName}`
-    let prUrl: string | null = null
+    let prUrl = source.existingPrUrl
     try {
       const openedPr = await this.gitHubClient.openReleasePullRequest(
         source.repo,
@@ -124,6 +132,36 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
     return toReleaseObjectType(updated)
   }
 
+  private async assertAddedFlagsExistInFlagsmith(
+    projectId: string,
+    pullRequestIds: string[],
+    tx: TxClient,
+  ): Promise<void> {
+    const changes = await this.pullRequestFlagChangeRepository.findAllForPullRequestIds(
+      pullRequestIds,
+      tx,
+    )
+    const removedFlagIds = new Set(
+      changes.filter((change) => change.action === FlagAction.removed).map((change) => change.trackedFlagId),
+    )
+    const addedFlagIds = [...new Set(changes.map((change) => change.trackedFlagId))].filter(
+      (id) => !removedFlagIds.has(id),
+    )
+    if (addedFlagIds.length === 0) return
+
+    const flags = await this.trackedFlagRepository.findByIdsWithDetails(addedFlagIds, tx)
+    const keys = flags.map((flag) => flag.key)
+    const states = await this.flagsmithFlagRepository.findEnabledStatesForKeys(projectId, keys, tx)
+    const keysInFlagsmith = new Set(states.map((state) => state.key))
+    const missingKeys = keys.filter((key) => !keysInFlagsmith.has(key))
+    if (missingKeys.length === 0) return
+
+    throw new AppException(
+      `These added flags do not exist in Flagsmith yet: ${missingKeys.join(', ')}. Create them in Flagsmith, sync the flags, then confirm the release.`,
+      ErrorCode.VALIDATION_ERROR,
+    )
+  }
+
   private async resolveSource(command: ConfirmReleaseCommand): Promise<IConfirmReleaseSource> {
     return this.db.$transaction(async (tx) => {
       const release = await this.releaseRepository.findById(command.releaseId, tx)
@@ -166,6 +204,14 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
       const project = await this.projectRepository.findById(release.projectId, tx)
       if (!project) throw new NotFoundException('Project')
 
+      if (project.flagsmithEnabled) {
+        await this.assertAddedFlagsExistInFlagsmith(
+          release.projectId,
+          prs.map((pr) => pr.id),
+          tx,
+        )
+      }
+
       const accessToken = await this.tokenResolver.resolveForProject(release.projectId, command.userId, tx)
 
       return {
@@ -174,6 +220,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
         compareRef: release.compareRef,
         releaseName: release.name ?? release.compareRef,
         prBody: release.summary ? htmlToMarkdown(release.summary) : '',
+        existingPrUrl: release.prUrl,
         accessToken,
         suggestedFeatureIds: suggestedFeatures.map((f) => f.id),
         assignedFeatureIds,

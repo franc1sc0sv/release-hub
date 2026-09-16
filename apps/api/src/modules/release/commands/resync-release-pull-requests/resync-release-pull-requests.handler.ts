@@ -149,12 +149,14 @@ export class ResyncReleasePullRequestsHandler extends PreparedCommandHandler<
 
     if (prepared.newPullRequests.length > 0) {
       await this.releaseRepository.updateAiDraftStatus(command.releaseId, AiDraftStatus.PENDING, tx)
+      await this.releaseRepository.setStatus(command.releaseId, ReleaseStatus.DRAFT, tx)
 
       events.push(
         new ReleaseResyncedEvent(
           command.releaseId,
           prepared.projectId,
           prepared.newPullRequests.length,
+          command.userId,
         ),
       )
     }

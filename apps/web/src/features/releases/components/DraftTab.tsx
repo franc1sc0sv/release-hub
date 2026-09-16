@@ -58,8 +58,8 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
   const handleConfirm = useCallback(async () => {
     try {
       await confirmRelease({ variables: { input: { releaseId: release.id } } })
-    } catch {
-      toast.error(t('draft.confirmError'))
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : t('draft.confirmError'))
     }
   }, [confirmRelease, release.id, t])
 
@@ -124,7 +124,7 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
 
       {confirmError && (
         <p className="text-sm text-destructive" role="alert">
-          {t('draft.confirmError')}
+          {confirmError.message || t('draft.confirmError')}
         </p>
       )}
 

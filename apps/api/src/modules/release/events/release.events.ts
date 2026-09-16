@@ -22,6 +22,7 @@ export interface IReleaseResyncedEvent extends IDomainEvent {
   readonly releaseId: string
   readonly projectId: string
   readonly newPrCount: number
+  readonly actorId: string
   readonly occurredAt: Date
 }
 

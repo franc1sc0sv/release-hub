@@ -8,6 +8,7 @@ export class ReleaseResyncedEvent implements IReleaseResyncedEvent {
     readonly releaseId: string,
     readonly projectId: string,
     readonly newPrCount: number,
+    readonly actorId: string,
   ) {
     this.occurredAt = new Date()
   }
