@@ -1,8 +1,10 @@
 import 'reflect-metadata'
 import { config } from 'dotenv'
 import { existsSync } from 'fs'
+import { createConnection } from 'net'
 import { resolve } from 'path'
 import { Logger } from '@nestjs/common'
+import type { INestApplication } from '@nestjs/common'
 import type { IRawBodyRequest } from './modules/webhooks/interfaces/raw-body-request.interface'
 
 if (process.env.NODE_ENV !== 'production') {
@@ -10,6 +12,33 @@ if (process.env.NODE_ENV !== 'production') {
   if (localEnvFile) {
     config({ path: localEnvFile })
   }
+}
+
+const PORT_SCAN_LIMIT = 20
+const PORT_PROBE_MS = 500
+
+function isPortFree(port: number): Promise<boolean> {
+  return new Promise((done) => {
+    const probe = createConnection({ port, host: 'localhost' })
+    const finish = (free: boolean): void => {
+      probe.destroy()
+      done(free)
+    }
+    probe.setTimeout(PORT_PROBE_MS)
+    probe.once('connect', () => finish(false))
+    probe.once('timeout', () => finish(true))
+    probe.once('error', () => finish(true))
+  })
+}
+
+async function listenOnFreePort(app: INestApplication, preferred: number): Promise<number> {
+  for (let port = preferred; port < preferred + PORT_SCAN_LIMIT; port += 1) {
+    if (await isPortFree(port)) {
+      await app.listen(port)
+      return port
+    }
+  }
+  throw new Error(`No free port between ${preferred} and ${preferred + PORT_SCAN_LIMIT - 1}`)
 }
 
 function captureRawBodyForWebhooks(req: IRawBodyRequest, _res: unknown, buffer: Buffer): void {
@@ -46,7 +75,13 @@ async function bootstrap() {
     credentials: true,
     exposedHeaders: ['Content-Disposition'],
   })
-  await app.listen(process.env.PORT ?? 3001)
+  const preferredPort = Number(process.env.PORT ?? 3001)
+  const port = await listenOnFreePort(app, preferredPort)
+  new Logger('Bootstrap').log(
+    port === preferredPort
+      ? `API listening on http://localhost:${port}`
+      : `API listening on http://localhost:${port} (port ${preferredPort} was taken)`,
+  )
 }
 
 bootstrap().catch((err: unknown) => {

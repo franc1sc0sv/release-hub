@@ -315,7 +315,7 @@ Prompts live once and are reused across providers (`apps/api/src/modules/ai/prom
 
 ```bash
 # Development
-pnpm dev                          # Start all workspaces
+pnpm dev                          # Start API + web on free ports (scripts/dev.mjs)
 pnpm --filter @release-hub/api dev    # Start API only
 pnpm --filter @release-hub/web dev    # Start web only
 
@@ -333,6 +333,14 @@ docker compose up -d              # Start PostgreSQL
 # Build
 pnpm -r build                    # Build all packages
 ```
+
+## Dev Startup
+
+`pnpm dev` (`scripts/dev.mjs`) is the only command needed to run the app locally.
+
+- **Ports move as a pair.** It prefers `PORT` (API) and `WEB_PORT` (web) from the local env file, falls back to 3001 / 5173, and takes the next free port when one is busy. The chosen ports are passed to both apps (`CORS_ORIGIN`, `WEB_APP_URL`, `VITE_API_URL`, `VITE_WS_URL`), so the web always talks to the API that just started. The API does the same fallback when it is started on its own.
+- **Only the database is required.** The runner polls `/readyz` and prints whether the database answered. Nothing else is checked at boot.
+- **No email server needed.** `SMTP_HOST` / `MAIL_FROM` are required only when `NODE_ENV=production`. Without them — or when the SMTP host refuses the connection outside production — the email goes to the API log (recipient, subject and text body, login codes included) instead of being sent.
 
 ## Code Quality (non-negotiable)
 

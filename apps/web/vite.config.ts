@@ -26,6 +26,8 @@ export default defineConfig({
     format: 'es',
   },
   server: {
+    port: Number(process.env.WEB_PORT ?? 5173),
+    strictPort: Boolean(process.env.WEB_PORT),
     headers: crossOriginHeaders,
     allowedHosts: ['.ngrok-free.app'],
   },

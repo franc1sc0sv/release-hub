@@ -1,7 +1,17 @@
 import { plainToInstance } from 'class-transformer'
-import { IsIn, IsNotEmpty, IsOptional, IsString, MinLength, validateSync } from 'class-validator'
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateIf,
+  validateSync,
+} from 'class-validator'
 
 const NODE_ENVS = ['development', 'production', 'test'] as const
+
+const sendsEmail = (env: EnvironmentVariables): boolean => env.NODE_ENV === 'production'
 
 class EnvironmentVariables {
   @IsOptional()
@@ -24,13 +34,15 @@ class EnvironmentVariables {
   @IsNotEmpty()
   WEB_APP_URL!: string
 
+  @ValidateIf(sendsEmail)
   @IsString()
   @IsNotEmpty()
-  MAIL_FROM!: string
+  MAIL_FROM?: string
 
+  @ValidateIf(sendsEmail)
   @IsString()
   @IsNotEmpty()
-  SMTP_HOST!: string
+  SMTP_HOST?: string
 }
 
 export function validateEnv(config: Record<string, unknown>): Record<string, unknown> {

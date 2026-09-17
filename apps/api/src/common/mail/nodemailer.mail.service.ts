@@ -12,54 +12,60 @@ function toAbsoluteUrl(url: string): string {
   return `${WEB_APP_URL}/${url.replace(/^\/+/, '')}`
 }
 
+function createTransporter(): nodemailer.Transporter | null {
+  const host = process.env.SMTP_HOST
+  if (!host || !process.env.MAIL_FROM) return null
+
+  const smtpUser = process.env.SMTP_USER || undefined
+  const smtpPass = process.env.SMTP_PASS || undefined
+
+  return nodemailer.createTransport({
+    host,
+    port: parseInt(process.env.SMTP_PORT ?? '587', 10),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: smtpUser && smtpPass ? { user: smtpUser, pass: smtpPass } : undefined,
+  })
+}
+
 @Injectable()
 export class NodemailerMailService extends IMailService {
   private readonly logger = new Logger(NodemailerMailService.name)
-  private readonly transporter: ReturnType<typeof nodemailer.createTransport>
-  private readonly from: string
+  private readonly transporter = createTransporter()
+  private readonly from = process.env.MAIL_FROM ?? ''
 
   constructor() {
     super()
 
-    const mailFrom = process.env.MAIL_FROM
-    if (!mailFrom) throw new Error('MAIL_FROM environment variable is required')
-
-    this.from = mailFrom
-
-    const smtpUser = process.env.SMTP_USER || undefined
-    const smtpPass = process.env.SMTP_PASS || undefined
-
-    const host = process.env.SMTP_HOST
-    const port = parseInt(process.env.SMTP_PORT ?? '587', 10)
-    const secure = process.env.SMTP_SECURE === 'true'
-
-    this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      auth: smtpUser && smtpPass ? { user: smtpUser, pass: smtpPass } : undefined,
-    })
-
     this.logger.log(
-      `SMTP configured host=${host} port=${port} secure=${secure} auth=${smtpUser && smtpPass ? 'yes' : 'no'}`,
+      this.transporter
+        ? `SMTP configured host=${process.env.SMTP_HOST} port=${process.env.SMTP_PORT ?? '587'}`
+        : 'SMTP not configured — emails are written to this log instead of being sent',
     )
+  }
 
-    this.transporter
-      .verify()
-      .then(() => this.logger.log(`SMTP transport ready host=${host} port=${port}`))
-      .catch((error) =>
-        this.logger.error(
-          `SMTP transport verify failed host=${host} port=${port}: ${error instanceof Error ? error.message : String(error)}`,
-        ),
-      )
+  private logInsteadOfSending(message: nodemailer.SendMailOptions, reason: string): void {
+    this.logger.log(
+      `mail not sent (${reason}) to=${String(message.to)} subject=${String(message.subject)}\n${String(message.text)}`,
+    )
   }
 
   private async deliver(message: nodemailer.SendMailOptions): Promise<void> {
+    if (!this.transporter) {
+      this.logInsteadOfSending(message, 'SMTP not configured')
+      return
+    }
+
     this.logger.log(`sending mail to=${String(message.to)} subject=${String(message.subject)}`)
-    const info = await this.transporter.sendMail(message)
-    this.logger.log(
-      `mail sent messageId=${info.messageId} response=${info.response} accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`,
-    )
+
+    try {
+      const info = await this.transporter.sendMail(message)
+      this.logger.log(
+        `mail sent messageId=${info.messageId} response=${info.response} accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`,
+      )
+    } catch (error) {
+      if (process.env.NODE_ENV === 'production') throw error
+      this.logInsteadOfSending(message, error instanceof Error ? error.message : String(error))
+    }
   }
 
   async sendProjectInvitation(

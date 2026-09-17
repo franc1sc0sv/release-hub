@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "turbo dev",
-    "dev:log": "mkdir -p logs && FORCE_COLOR=0 turbo dev 2>&1 | tee logs/dev.log",
+    "dev": "node scripts/dev.mjs",
+    "dev:log": "mkdir -p logs && FORCE_COLOR=0 node scripts/dev.mjs 2>&1 | tee logs/dev.log",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
