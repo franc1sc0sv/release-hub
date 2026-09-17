@@ -97,8 +97,12 @@ export function ReleaseFlagsTab({ releaseId, releaseStatus }: ReleaseFlagsTabPro
     )
   }
 
-  function openStateChange(enabled: boolean, environmentNames: string[]) {
-    const targets = selectedFlags.flatMap((flag) =>
+  function openStateChange(
+    enabled: boolean,
+    environmentNames: string[],
+    rows: ReleaseFlagRowData[] = selectedFlags,
+  ) {
+    const targets = rows.flatMap((flag) =>
       flag.environments
         .filter(
           (environment) =>
@@ -162,6 +166,9 @@ export function ReleaseFlagsTab({ releaseId, releaseStatus }: ReleaseFlagsTabPro
         onToggleEnvironment={(environmentName, nextEnabled) =>
           openSingleToggle(flag, environmentName, nextEnabled)
         }
+        onEnableInEnvironments={(environmentNames) =>
+          openStateChange(true, environmentNames, [flag])
+        }
         canWriteFlags={canWriteFlags}
         hiddenEnvironments={hiddenEnvs}
       />
@@ -170,7 +177,7 @@ export function ReleaseFlagsTab({ releaseId, releaseStatus }: ReleaseFlagsTabPro
 
   return (
     <div className="space-y-4">
-      {!loading && !error && undecidedCount > 0 && (
+      {undecidedCount > 0 && (
         <Alert>
           <TriangleAlert className="size-4 text-amber-400" aria-hidden />
           <AlertTitle>{t('flags.pending.heading', { count: undecidedCount })}</AlertTitle>
@@ -206,7 +213,7 @@ export function ReleaseFlagsTab({ releaseId, releaseStatus }: ReleaseFlagsTabPro
         </div>
       )}
 
-      {error && !loading && (
+      {error && !loading && flags.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-10 text-center">
           <AlertCircle className="size-6 text-destructive" aria-hidden />
           <p className="text-sm text-muted-foreground">{t('flags.error')}</p>
@@ -220,7 +227,7 @@ export function ReleaseFlagsTab({ releaseId, releaseStatus }: ReleaseFlagsTabPro
         </div>
       )}
 
-      {!loading && !error && flags.length > 0 && (
+      {flags.length > 0 && (
         <Can I={Action.UPDATE} a={Subject.RELEASE} passThrough>
           {(canDecide) => (
             <Tabs defaultValue="added">

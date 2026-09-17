@@ -406,13 +406,6 @@
       "heading_other": "{{count}} flags necesitan una decisión",
       "description": "Indica qué pasa con cada flag en este release. Puedes lanzar el release antes de decidir."
     },
-    "suggestion": {
-      "label": "Estado sugerido para {{feature}}:",
-      "apply": "Aplicar a la funcionalidad",
-      "alreadyApplied": "Aplicado",
-      "applied": "Estado actualizado para {{feature}}",
-      "applyError": "No se pudo aplicar el estado sugerido"
-    },
     "subTabs": {
       "label": "Cambios de flags",
       "added": "Agregados",

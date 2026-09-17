@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next'
 import { Link, generatePath, useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { EnvironmentActionMenu } from '@/features/flags/components/EnvironmentActionMenu'
 import { EnvStateCell } from '@/features/flags/components/EnvStateCell'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import { ReleaseFlagDecisionSelect } from './ReleaseFlagDecisionSelect'
-import { FlagFeatureStateSuggestion } from './FlagFeatureStateSuggestion'
 import { FlagPrLinkChip } from './FlagPrLinkChip'
 import type { ReleaseFlagsQuery } from '@/generated/graphql'
 
@@ -21,6 +21,7 @@ interface ReleaseFlagRowProps {
   selected: boolean
   onSelectedChange: (selected: boolean) => void
   onToggleEnvironment: (environmentName: string, nextEnabled: boolean) => void
+  onEnableInEnvironments: (environmentNames: string[]) => void
   canWriteFlags: boolean
   hiddenEnvironments: string[]
 }
@@ -34,6 +35,7 @@ export function ReleaseFlagRow({
   selected,
   onSelectedChange,
   onToggleEnvironment,
+  onEnableInEnvironments,
   canWriteFlags,
   hiddenEnvironments,
 }: ReleaseFlagRowProps) {
@@ -47,6 +49,11 @@ export function ReleaseFlagRow({
   const visibleEnvironments = flag.environments.filter(
     (environment) => !hiddenEnvironments.includes(environment.name),
   )
+  const disabledEnvironments = flag.environments
+    .filter((environment) => !environment.enabled)
+    .map((environment) => environment.name)
+  const canEnableInEnvironments =
+    canWriteFlags && flag.existsInFlagsmith && disabledEnvironments.length > 0
 
   return (
     <div
@@ -98,7 +105,7 @@ export function ReleaseFlagRow({
             </Badge>
           ))}
         </div>
-        {(visibleEnvironments.length > 0 || !flag.existsInFlagsmith) && (
+        {(visibleEnvironments.length > 0 || canEnableInEnvironments || !flag.existsInFlagsmith) && (
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
             {flag.existsInFlagsmith ? (
               visibleEnvironments.map((environment) =>
@@ -137,6 +144,14 @@ export function ReleaseFlagRow({
             ) : (
               <span className="text-xs text-muted-foreground">{t('flags:write.notInFlagsmith')}</span>
             )}
+            {canEnableInEnvironments && (
+              <EnvironmentActionMenu
+                label={t('flags:write.actions.enableIn')}
+                environments={disabledEnvironments}
+                onApply={onEnableInEnvironments}
+                triggerClassName="h-auto rounded-full px-2.5 py-1 text-[11px] font-normal"
+              />
+            )}
           </div>
         )}
 
@@ -168,17 +183,6 @@ export function ReleaseFlagRow({
         </Badge>
       ) : (
         <span className="text-xs text-muted-foreground">{t('flags.noDecision')}</span>
-      )}
-
-      {showDecision && flag.feature && flag.suggestedFeatureState && (
-        <FlagFeatureStateSuggestion
-          releaseId={releaseId}
-          featureId={flag.feature.id}
-          featureName={flag.feature.name}
-          flagKey={flag.key}
-          suggestedState={flag.suggestedFeatureState}
-          currentState={flag.featureReleaseState}
-        />
       )}
     </div>
   )
