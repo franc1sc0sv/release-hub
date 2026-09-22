@@ -6,10 +6,15 @@ import { CreateOrgStage } from '@/features/onboarding/components/CreateOrgStage'
 import { InstallAppStage } from '@/features/onboarding/components/InstallAppStage'
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { GlassCard } from '@/components/nebula/GlassCard'
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ReceivedInvitationsList } from '@/features/collaboration/components/ReceivedInvitationsList'
+import { useMyInvitations } from '@/features/collaboration/hooks/use-my-invitations'
 
 export default function OnboardingPage() {
   const { t } = useTranslation('onboarding')
   const { organizations, activeOrg, loading } = useOrganization()
+  const { invitations } = useMyInvitations()
 
   if (loading && organizations.length === 0) {
     return (
@@ -42,6 +47,17 @@ export default function OnboardingPage() {
       <ThemeToggle />
       <div className="relative z-10 flex w-full flex-col items-center gap-8">
         <OnboardingProgress currentStep={needsOrg ? 'createOrg' : 'installApp'} />
+        {needsOrg && invitations.length > 0 && (
+          <GlassCard glow="magenta" className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="font-display">{t('invitations.title')}</CardTitle>
+              <CardDescription>{t('invitations.description')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ReceivedInvitationsList invitations={invitations} />
+            </CardContent>
+          </GlassCard>
+        )}
         {needsOrg ? <CreateOrgStage /> : <InstallAppStage />}
       </div>
     </main>

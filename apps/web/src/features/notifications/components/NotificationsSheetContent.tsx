@@ -13,12 +13,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import type { useNotifications } from '../hooks/use-notifications'
 import { NotificationListItem } from './NotificationListItem'
+import { ReceivedInvitationsList } from '@/features/collaboration/components/ReceivedInvitationsList'
+import type { MyInvitationsQuery } from '@/generated/graphql'
 
 const EXTERNAL_URL_PATTERN = /^https?:\/\//
 
 interface NotificationsSheetContentProps {
   unreadCount: number
   notifications: ReturnType<typeof useNotifications>
+  invitations: MyInvitationsQuery['myInvitations']
   onNavigate: () => void
   onReadStateChange: () => void
 }
@@ -26,6 +29,7 @@ interface NotificationsSheetContentProps {
 export function NotificationsSheetContent({
   unreadCount,
   notifications,
+  invitations,
   onNavigate,
   onReadStateChange,
 }: NotificationsSheetContentProps) {
@@ -47,6 +51,7 @@ export function NotificationsSheetContent({
 
   const hasUnread = unreadCount > 0
   const hasItems = items.length > 0
+  const hasInvitations = invitations.length > 0
 
   async function handleMarkAllRead(): Promise<void> {
     await markAllRead()
@@ -112,11 +117,12 @@ export function NotificationsSheetContent({
 
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-1 p-3">
+          {hasInvitations && <ReceivedInvitationsList invitations={invitations} onOpen={onNavigate} />}
           {loading ? (
             Array.from({ length: 5 }, (_, index) => (
               <Skeleton key={index} className="h-16 w-full rounded-[var(--radius-card)]" />
             ))
-          ) : items.length === 0 ? (
+          ) : !hasItems && !hasInvitations ? (
             <div className="py-6">
               <EmptyState
                 icon={<BellIcon className="size-6 text-brand-indigo-bright" aria-hidden />}

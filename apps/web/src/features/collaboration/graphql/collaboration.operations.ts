@@ -91,3 +91,18 @@ export const ACCEPT_INVITATION = graphql(`
     }
   }
 `)
+
+export const MY_INVITATIONS = graphql(`
+  query MyInvitations {
+    myInvitations {
+      id
+      token
+      organizationId
+      organizationName
+      inviterName
+      role
+      expiresAt
+      createdAt
+    }
+  }
+`)

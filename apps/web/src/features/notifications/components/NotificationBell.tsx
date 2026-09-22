@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sidebar'
 import { useUnreadNotificationsCount } from '../hooks/use-unread-notifications-count'
 import { useNotifications } from '../hooks/use-notifications'
+import { useMyInvitations } from '@/features/collaboration/hooks/use-my-invitations'
 import { NOTIFICATION_RECEIVED } from '../graphql/notifications.queries'
 import { NotificationsSheetContent } from './NotificationsSheetContent'
 
@@ -21,6 +22,8 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false)
   const { unreadCount, refetch: refetchUnreadCount } = useUnreadNotificationsCount()
   const notifications = useNotifications(!open)
+  const { invitations } = useMyInvitations()
+  const attentionCount = unreadCount + invitations.length
 
   useSubscription(NOTIFICATION_RECEIVED, {
     variables: { projectId: undefined },
@@ -34,7 +37,7 @@ export function NotificationBell() {
     },
   })
 
-  const badgeLabel = unreadCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : String(unreadCount)
+  const badgeLabel = attentionCount > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : String(attentionCount)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -45,14 +48,14 @@ export function NotificationBell() {
               <SidebarMenuButton
                 size="lg"
                 tooltip={t('bell.tooltip')}
-                aria-label={t('bell.ariaLabel', { count: unreadCount })}
+                aria-label={t('bell.ariaLabel', { count: attentionCount })}
               />
             }
           >
             <Bell className="!size-5" aria-hidden />
             <span>{t('bell.label')}</span>
           </SheetTrigger>
-          {unreadCount > 0 && (
+          {attentionCount > 0 && (
             <SidebarMenuBadge
               className="rounded-full bg-brand-magenta px-1.5 text-[10px] font-semibold text-white"
               aria-hidden
@@ -65,6 +68,7 @@ export function NotificationBell() {
       <NotificationsSheetContent
         unreadCount={unreadCount}
         notifications={notifications}
+        invitations={invitations}
         onNavigate={() => setOpen(false)}
         onReadStateChange={() => void refetchUnreadCount()}
       />

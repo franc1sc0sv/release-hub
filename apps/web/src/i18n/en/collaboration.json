@@ -35,5 +35,12 @@
     "error": "This invitation is invalid or has expired.",
     "mismatch": "This invitation was sent to a different email address. Sign in with the correct account to accept it.",
     "signInDifferent": "Sign in with a different account"
+  },
+  "receivedInvitations": {
+    "title": "Invitations",
+    "itemTitle": "{{inviter}} invited you to {{organization}}",
+    "itemRole": "Role: {{role}}",
+    "expires": "Expires {{time}}",
+    "accept": "Accept"
   }
 }

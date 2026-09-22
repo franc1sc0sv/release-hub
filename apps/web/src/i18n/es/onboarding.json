@@ -35,5 +35,9 @@
     "reconnectButton": "Reconectar GitHub",
     "reconnecting": "Redirigiendo a GitHub…"
   },
-  "loading": "Configurando tu espacio de trabajo…"
+  "loading": "Configurando tu espacio de trabajo…",
+  "invitations": {
+    "title": "Tienes invitaciones pendientes",
+    "description": "Únete a una organización que te invitó o crea la tuya abajo."
+  }
 }

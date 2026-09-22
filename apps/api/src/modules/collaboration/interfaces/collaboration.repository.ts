@@ -1,6 +1,13 @@
 import type { RepositoryMethod } from '../../../common/cqrs/types'
 import type { IBaseRepository } from '../../../common/cqrs/types'
-import type { IMembership, IMemberProfile, IInvitation, ICreateInvitationData, IUpdateMembershipData } from './collaboration.interfaces'
+import type {
+  IMembership,
+  IMemberProfile,
+  IInvitation,
+  IReceivedInvitation,
+  ICreateInvitationData,
+  IUpdateMembershipData,
+} from './collaboration.interfaces'
 import type { OrgRole } from '@release-hub/shared'
 
 export abstract class IMembershipRepository implements IBaseRepository<IMembership> {
@@ -20,6 +27,7 @@ export abstract class IInvitationRepository implements IBaseRepository<IInvitati
   abstract findByToken: RepositoryMethod<[token: string], IInvitation | null>
   abstract findPendingByOrgAndEmail: RepositoryMethod<[organizationId: string, email: string], IInvitation | null>
   abstract findAllByOrganization: RepositoryMethod<[organizationId: string], IInvitation[]>
+  abstract findActiveForEmail: RepositoryMethod<[email: string], IReceivedInvitation[]>
   abstract create: RepositoryMethod<[data: ICreateInvitationData], IInvitation>
   abstract accept: RepositoryMethod<[id: string], IInvitation>
   abstract revoke: RepositoryMethod<[id: string], IInvitation>

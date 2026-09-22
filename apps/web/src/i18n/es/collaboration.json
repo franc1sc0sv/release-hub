@@ -35,5 +35,12 @@
     "error": "Esta invitación no es válida o ha expirado.",
     "mismatch": "Esta invitación fue enviada a un correo electrónico diferente. Inicia sesión con la cuenta correcta para aceptarla.",
     "signInDifferent": "Iniciar sesión con otra cuenta"
+  },
+  "receivedInvitations": {
+    "title": "Invitaciones",
+    "itemTitle": "{{inviter}} te invitó a {{organization}}",
+    "itemRole": "Rol: {{role}}",
+    "expires": "Vence {{time}}",
+    "accept": "Aceptar"
   }
 }

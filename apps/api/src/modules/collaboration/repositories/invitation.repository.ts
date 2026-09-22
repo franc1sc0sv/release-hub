@@ -3,7 +3,11 @@ import type { TxClient } from '@release-hub/db'
 import type { InvitationStatus as PrismaInvitationStatus } from '@release-hub/db'
 import type { OrgRole } from '@release-hub/db'
 import { IInvitationRepository } from '../interfaces/collaboration.repository'
-import type { IInvitation, ICreateInvitationData } from '../interfaces/collaboration.interfaces'
+import type {
+  IInvitation,
+  IReceivedInvitation,
+  ICreateInvitationData,
+} from '../interfaces/collaboration.interfaces'
 import { InvitationStatus } from '../../../common/types/invitation-status.enum'
 
 @Injectable()
@@ -42,6 +46,32 @@ export class InvitationRepository extends IInvitationRepository {
       orderBy: { createdAt: 'desc' },
     })
     return rows.map((row) => this.toIInvitation(row))
+  }
+
+  findActiveForEmail = async (email: string, tx: TxClient): Promise<IReceivedInvitation[]> => {
+    const rows = await tx.invitation.findMany({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        status: InvitationStatus.PENDING,
+        expiresAt: { gt: new Date() },
+        organization: { deletedAt: null },
+      },
+      include: {
+        organization: { select: { name: true } },
+        invitedBy: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+    return rows.map((row) => ({
+      id: row.id,
+      token: row.token,
+      organizationId: row.organizationId,
+      organizationName: row.organization.name,
+      inviterName: row.invitedBy.name,
+      role: row.role,
+      expiresAt: row.expiresAt,
+      createdAt: row.createdAt,
+    }))
   }
 
   create = async (data: ICreateInvitationData, tx: TxClient): Promise<IInvitation> => {

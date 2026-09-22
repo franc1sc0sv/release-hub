@@ -987,6 +987,7 @@ type Query {
   listOrgMembers(organizationId: ID!): [OrganizationMemberType!]!
   listProjects: [ProjectType!]!
   me: UserProfileType!
+  myInvitations: [ReceivedInvitationType!]!
   myOrganizations: [OrganizationType!]!
   notificationPreferences(projectId: ID!): [NotificationPreferenceEntryType!]!
   notifications(input: NotificationsPageInput!): NotificationsPageType!
@@ -1005,6 +1006,17 @@ type Query {
   trackedFlags(projectId: ID!): [TrackedFlagType!]!
   unreadNotificationsCount: Int!
   verifyFlagsmithConnection(apiKey: String!, flagsmithProjectId: String!, projectId: ID!, url: String!): FlagsmithVerifyResult!
+}
+
+type ReceivedInvitationType {
+  createdAt: DateTime!
+  expiresAt: DateTime!
+  id: ID!
+  inviterName: String!
+  organizationId: ID!
+  organizationName: String!
+  role: OrgRole!
+  token: String!
 }
 
 type RefCommitType {

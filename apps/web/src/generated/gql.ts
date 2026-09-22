@@ -27,6 +27,7 @@ type Documents = {
     "\n  mutation RemoveMember($membershipId: ID!) {\n    removeMember(membershipId: $membershipId)\n  }\n": typeof types.RemoveMemberDocument,
     "\n  mutation RevokeInvitation($invitationId: ID!) {\n    revokeInvitation(invitationId: $invitationId)\n  }\n": typeof types.RevokeInvitationDocument,
     "\n  mutation AcceptInvitation($token: String!) {\n    acceptInvitation(token: $token) {\n      id\n      userId\n      organizationId\n      role\n      name\n      email\n      avatarUrl\n      createdAt\n      updatedAt\n    }\n  }\n": typeof types.AcceptInvitationDocument,
+    "\n  query MyInvitations {\n    myInvitations {\n      id\n      token\n      organizationId\n      organizationName\n      inviterName\n      role\n      expiresAt\n      createdAt\n    }\n  }\n": typeof types.MyInvitationsDocument,
     "\n  mutation CreateFeature($input: CreateFeatureInput!) {\n    createFeature(input: $input) {\n      id\n      projectId\n      name\n      description\n      kind\n      tags\n      createdAt\n      updatedAt\n    }\n  }\n": typeof types.CreateFeatureDocument,
     "\n  mutation SetFeatureState($input: SetFeatureStateInput!) {\n    setFeatureState(input: $input) {\n      id\n      currentState\n      updatedAt\n    }\n  }\n": typeof types.SetFeatureStateDocument,
     "\n  mutation SetFeatureReleaseState($input: SetFeatureReleaseStateInput!) {\n    setFeatureReleaseState(input: $input) {\n      featureId\n      releaseId\n      state\n      updatedAt\n    }\n  }\n": typeof types.SetFeatureReleaseStateDocument,
@@ -135,6 +136,7 @@ const documents: Documents = {
     "\n  mutation RemoveMember($membershipId: ID!) {\n    removeMember(membershipId: $membershipId)\n  }\n": types.RemoveMemberDocument,
     "\n  mutation RevokeInvitation($invitationId: ID!) {\n    revokeInvitation(invitationId: $invitationId)\n  }\n": types.RevokeInvitationDocument,
     "\n  mutation AcceptInvitation($token: String!) {\n    acceptInvitation(token: $token) {\n      id\n      userId\n      organizationId\n      role\n      name\n      email\n      avatarUrl\n      createdAt\n      updatedAt\n    }\n  }\n": types.AcceptInvitationDocument,
+    "\n  query MyInvitations {\n    myInvitations {\n      id\n      token\n      organizationId\n      organizationName\n      inviterName\n      role\n      expiresAt\n      createdAt\n    }\n  }\n": types.MyInvitationsDocument,
     "\n  mutation CreateFeature($input: CreateFeatureInput!) {\n    createFeature(input: $input) {\n      id\n      projectId\n      name\n      description\n      kind\n      tags\n      createdAt\n      updatedAt\n    }\n  }\n": types.CreateFeatureDocument,
     "\n  mutation SetFeatureState($input: SetFeatureStateInput!) {\n    setFeatureState(input: $input) {\n      id\n      currentState\n      updatedAt\n    }\n  }\n": types.SetFeatureStateDocument,
     "\n  mutation SetFeatureReleaseState($input: SetFeatureReleaseStateInput!) {\n    setFeatureReleaseState(input: $input) {\n      featureId\n      releaseId\n      state\n      updatedAt\n    }\n  }\n": types.SetFeatureReleaseStateDocument,
@@ -296,6 +298,10 @@ export function graphql(source: "\n  mutation RevokeInvitation($invitationId: ID
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation AcceptInvitation($token: String!) {\n    acceptInvitation(token: $token) {\n      id\n      userId\n      organizationId\n      role\n      name\n      email\n      avatarUrl\n      createdAt\n      updatedAt\n    }\n  }\n"): (typeof documents)["\n  mutation AcceptInvitation($token: String!) {\n    acceptInvitation(token: $token) {\n      id\n      userId\n      organizationId\n      role\n      name\n      email\n      avatarUrl\n      createdAt\n      updatedAt\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MyInvitations {\n    myInvitations {\n      id\n      token\n      organizationId\n      organizationName\n      inviterName\n      role\n      expiresAt\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  query MyInvitations {\n    myInvitations {\n      id\n      token\n      organizationId\n      organizationName\n      inviterName\n      role\n      expiresAt\n      createdAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

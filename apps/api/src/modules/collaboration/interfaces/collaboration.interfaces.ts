@@ -35,6 +35,17 @@ export interface IInvitation {
   updatedAt: Date
 }
 
+export interface IReceivedInvitation {
+  id: string
+  token: string
+  organizationId: string
+  organizationName: string
+  inviterName: string
+  role: OrgRole
+  expiresAt: Date
+  createdAt: Date
+}
+
 export interface ICreateInvitationData {
   email: string
   organizationId: string

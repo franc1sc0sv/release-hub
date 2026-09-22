@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation } from '@apollo/client/react'
+import { generatePath, useParams, useNavigate } from 'react-router-dom'
+import { useApolloClient, useMutation } from '@apollo/client/react'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import { useTranslation } from 'react-i18next'
 import { Loader2, AlertCircle, MailCheck, CheckCircle2 } from 'lucide-react'
@@ -14,7 +14,8 @@ import { GlassCard } from '@/components/nebula/GlassCard'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { AuthSubmitButton } from '@/features/auth/components/AuthSubmitButton'
 import { ROUTES } from '@/lib/routes'
-import { ACCEPT_INVITATION } from '../graphql/collaboration.operations'
+import { ACCEPT_INVITATION, MY_INVITATIONS } from '../graphql/collaboration.operations'
+import { MY_ORGANIZATIONS } from '@/features/organization/graphql/organization.operations'
 import { defineAbilityFor, type IOrgMembership, OrgRole } from '@release-hub/shared'
 import type { OrgRole as GqlOrgRole } from '@/generated/graphql'
 import { slideUp, easeSoft } from '@/lib/animations'
@@ -33,12 +34,13 @@ export function AcceptInvitationPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const setAbility = useSetAbility()
+  const client = useApolloClient()
   const [pageState, setPageState] = useState<PageState>('idle')
 
   const returnTo = `/invite/${token ?? ''}`
 
   const [acceptInvitation] = useMutation(ACCEPT_INVITATION, {
-    onCompleted(data) {
+    async onCompleted(data) {
       if (user) {
         const memberships: IOrgMembership[] = [
           {
@@ -49,7 +51,14 @@ export function AcceptInvitationPage() {
         setAbility(defineAbilityFor(memberships))
       }
       setPageState('success')
-      setTimeout(() => navigate('/'), 1500)
+      const organizationPath = generatePath(ROUTES.ORG_ROOT, {
+        organizationId: data.acceptInvitation.organizationId,
+      })
+      await Promise.all([
+        client.query({ query: MY_ORGANIZATIONS, fetchPolicy: 'network-only' }),
+        client.query({ query: MY_INVITATIONS, fetchPolicy: 'network-only' }),
+      ])
+      setTimeout(() => navigate(organizationPath), 1500)
     },
     onError(error) {
       const isForbidden =

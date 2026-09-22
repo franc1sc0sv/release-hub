@@ -1,6 +1,7 @@
-import type { IMemberProfile, IInvitation } from '../interfaces/collaboration.interfaces'
+import type { IMemberProfile, IInvitation, IReceivedInvitation } from '../interfaces/collaboration.interfaces'
 import { MemberType } from './member.type'
 import { InvitationType } from './invitation.type'
+import { ReceivedInvitationType } from './received-invitation.type'
 
 export function toMemberType(profile: IMemberProfile): MemberType {
   const out = new MemberType()
@@ -27,5 +28,18 @@ export function toInvitationType(invitation: IInvitation): InvitationType {
   out.invitedById = invitation.invitedById
   out.createdAt = invitation.createdAt
   out.updatedAt = invitation.updatedAt
+  return out
+}
+
+export function toReceivedInvitationType(invitation: IReceivedInvitation): ReceivedInvitationType {
+  const out = new ReceivedInvitationType()
+  out.id = invitation.id
+  out.token = invitation.token
+  out.organizationId = invitation.organizationId
+  out.organizationName = invitation.organizationName
+  out.inviterName = invitation.inviterName
+  out.role = invitation.role
+  out.expiresAt = invitation.expiresAt
+  out.createdAt = invitation.createdAt
   return out
 }

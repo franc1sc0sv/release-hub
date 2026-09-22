@@ -13,6 +13,7 @@ import { RemoveMemberHandler } from './commands/remove-member/remove-member.hand
 import { ChangeMemberRoleHandler } from './commands/change-member-role/change-member-role.handler'
 import { ListMembersHandler } from './queries/list-members/list-members.handler'
 import { ListInvitationsHandler } from './queries/list-invitations/list-invitations.handler'
+import { ListMyInvitationsHandler } from './queries/list-my-invitations/list-my-invitations.handler'
 import { SendProjectInvitationHandler } from './events/send-project-invitation.handler'
 import { MailModule } from '../../common/mail/mail.module'
 import { OrganizationModule } from '../organization/organization.module'
@@ -32,6 +33,7 @@ import { AuthModule } from '../auth/auth.module'
     ChangeMemberRoleHandler,
     ListMembersHandler,
     ListInvitationsHandler,
+    ListMyInvitationsHandler,
     SendProjectInvitationHandler,
   ],
 })
