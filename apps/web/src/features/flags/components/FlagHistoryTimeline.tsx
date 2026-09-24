@@ -6,6 +6,8 @@ import { enUS, es } from 'date-fns/locale'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
+  Archive,
+  ArchiveRestore,
   BellRing,
   CheckCircle2,
   ChevronLeft,
@@ -56,6 +58,8 @@ const EVENT_ICON: Record<FlagHistoryEventType, LucideIcon> = {
   [FlagHistoryEventTypeValue.DETECTED_DEFINITION]: FileCode,
   [FlagHistoryEventTypeValue.DETECTED_USAGE]: Code2,
   [FlagHistoryEventTypeValue.FIRST_SEEN_BRANCH]: GitBranch,
+  [FlagHistoryEventTypeValue.FLAG_CLOSED]: Archive,
+  [FlagHistoryEventTypeValue.FLAG_REOPENED]: ArchiveRestore,
 }
 
 const PAGE_SIZE = 50

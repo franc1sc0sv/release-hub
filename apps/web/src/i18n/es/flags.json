@@ -239,5 +239,23 @@
       "turnOff": "Desactivar",
       "deleteFlag": "Eliminar flag"
     }
+  },
+  "close": {
+    "open": "Cerrar flag",
+    "reopen": "Reabrir flag",
+    "title": "¿Cerrar {{flag}}?",
+    "description": "Un flag cerrado sale de las decisiones pendientes de todos los releases y deja de enviar recordatorios. Su historial y sus decisiones anteriores se conservan. Puedes reabrirlo después.",
+    "reasonLabel": "Motivo",
+    "reasonHint": {
+      "FULLY_ROLLED_OUT": "La funcionalidad está activa para todos. El siguiente paso es quitar el flag del código.",
+      "ABANDONED": "Cambiamos la decisión. El flag no se va a lanzar.",
+      "REMOVED_FROM_CODE": "La clave del flag ya no está en el código."
+    },
+    "deleteInFlagsmith": "También eliminarlo en Flagsmith (todos los entornos)",
+    "confirm": "Cerrar flag",
+    "closedBadge": "Cerrado · {{reason}}",
+    "closedToast": "Flag cerrado",
+    "reopenedToast": "Flag reabierto",
+    "error": "No se pudo actualizar el flag"
   }
 }

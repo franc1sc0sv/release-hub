@@ -106,6 +106,14 @@ enum ReleaseFlagDecisionType {
   @@map("release_flag_decision_type")
 }
 
+enum FlagClosedReason {
+  fully_rolled_out
+  abandoned
+  removed_from_code
+
+  @@map("flag_closed_reason")
+}
+
 enum TicketSource {
   LINEAR
   JIRA
@@ -197,6 +205,7 @@ model User {
   flagHistoryEvents       FlagHistoryEvent[]
   notifications           Notification[]
   featureStateEvents      FeatureStateEvent[]
+  closedTrackedFlags      TrackedFlag[]      @relation("TrackedFlagClosedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -519,12 +528,16 @@ model TrackedFlag {
   removedInPullRequestId String? @map("removed_in_pull_request_id")
   presentInCode         Boolean  @default(true) @map("present_in_code")
   lastRemindedAt        DateTime? @map("last_reminded_at")
+  closedAt              DateTime? @map("closed_at")
+  closedReason          FlagClosedReason? @map("closed_reason")
+  closedById            String?   @map("closed_by_id")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
   deletedAt             DateTime? @map("deleted_at")
 
   project           Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   feature           Feature?             @relation(fields: [featureId], references: [id], onDelete: SetNull)
+  closedBy          User?                @relation("TrackedFlagClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
   addedInPullRequest    PullRequest?     @relation("FlagAddedIn", fields: [addedInPullRequestId], references: [id], onDelete: SetNull)
   removedInPullRequest  PullRequest?     @relation("FlagRemovedIn", fields: [removedInPullRequestId], references: [id], onDelete: SetNull)
   branchPresence    FlagBranchPresence[]
@@ -811,6 +824,8 @@ enum FlagHistoryEventType {
   detected_definition
   detected_usage
   first_seen_branch
+  flag_closed
+  flag_reopened
 
   @@map("flag_history_event_type")
 }

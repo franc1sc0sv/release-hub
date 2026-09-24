@@ -3,11 +3,7 @@
   "subtitle": "Rastrea y lanza versiones",
   "new": "Nuevo release",
   "status": {
-    "draft": "Borrador",
-    "ready_to_release": "Listo para lanzar",
-    "merged": "Fusionado",
-    "deployed": "Desplegado",
-    "canceled": "Cancelado"
+    "label": "Estado del release"
   },
   "type": {
     "feature": "Release de funcionalidad",
@@ -149,23 +145,10 @@
     "tagsLabel": "Etiquetas del release",
     "prUrl": "Pull request",
     "prUrlAriaLabel": "Abrir pull request en GitHub",
-    "features": "Funcionalidades",
-    "loading": "Cargando release...",
-    "tabs": {
-      "label": "Secciones del release",
-      "overview": "Resumen",
-      "draft": "Borrador",
-      "summary": "Resumen cliente"
-    },
-    "innerTabs": {
-      "label": "Secciones del resumen",
-      "flags": "Feature flags",
-      "features": "Funcionalidades",
-      "prs": "PRs"
-    },
     "features": {
       "searchPlaceholder": "Buscar funcionalidades…"
     },
+    "loading": "Cargando release...",
     "prs": {
       "searchPlaceholder": "Buscar pull requests…",
       "empty": {
@@ -274,9 +257,8 @@
     "saveError": "No se pudo guardar el resumen",
     "lastSaved": "Guardado por última vez {{time}}",
     "mode": {
-      "label": "Modo de vista",
-      "read": "Leer",
-      "edit": "Editar"
+      "edit": "Editar",
+      "done": "Terminar edición"
     },
     "profile": {
       "label": "Perfil",
@@ -305,40 +287,11 @@
     "saveError": "No se pudo guardar el resumen"
   },
   "overview": {
-    "stats": {
-      "prs": "Pull requests",
-      "features": "Funcionalidades",
-      "commits": "Commits",
-      "tickets": "Tickets vinculados",
-      "flagChanges": "Cambios de flags"
-    },
     "featureBreakdown": {
-      "title": "Estado de funcionalidades",
-      "empty": "Aún no hay funcionalidades asignadas a este release."
-    },
-    "readiness": {
-      "title": "Listo para clientes",
-      "liveForClients": "En vivo para clientes",
-      "fraction": "{{live}} / {{total}}"
-    },
-    "summary": {
-      "ready": "Resumen para el cliente listo",
-      "notReady": "Aún no hay resumen para el cliente",
-      "lastEdited": "Editado {{time}}",
-      "open": "Abrir",
-      "create": "Crear"
-    },
-    "flagActivity": {
-      "title": "Actividad de flags",
-      "empty": "No hay cambios de feature flags en este release."
+      "title": "Estado de funcionalidades"
     }
   },
   "coverage": {
-    "title": "Cobertura",
-    "assignedOf": "{{assigned}} de {{total}} PRs asignados",
-    "incomplete": "Asigna todos los PRs a una funcionalidad antes de lanzar",
-    "ready": "Todos los PRs asignados — listo para producción",
-    "inReview": "En revisión",
     "blockedTooltip": "Todos los PRs deben estar asignados a una funcionalidad antes de lanzar",
     "flagBlockedTooltip": "Reconoce los problemas de paridad de flags antes de lanzar",
     "ship": "Lanzar release",
@@ -363,9 +316,6 @@
     "brand": "Release Hub",
     "reportTitle": "Resumen para el cliente",
     "generatedLabel": "Generado"
-  },
-  "status": {
-    "label": "Estado del release"
   },
   "toast": {
     "statusChanged": "Estado del release actualizado",
@@ -395,23 +345,12 @@
     "removedNote": "Eliminado",
     "searchPlaceholder": "Buscar flags…",
     "carriedOver": {
-      "heading_one": "{{count}} flag arrastrado de releases anteriores",
-      "heading_other": "{{count}} flags arrastrados de releases anteriores",
-      "description": "Estos flags vienen de releases anteriores. Dales una decisión aquí para cerrarlos — tu decisión queda en este release.",
-      "origin": "desde {{release}}",
-      "decidedHere": "Decidido en este release"
-    },
-    "pending": {
-      "heading_one": "{{count}} flag necesita una decisión",
-      "heading_other": "{{count}} flags necesitan una decisión",
-      "description": "Indica qué pasa con cada flag en este release. Puedes lanzar el release antes de decidir."
+      "origin": "desde {{release}}"
     },
     "subTabs": {
-      "label": "Cambios de flags",
       "added": "Agregados",
       "removed": "Eliminados",
       "addedEmpty": "Ningún flag agregado coincide con tu búsqueda.",
-      "removedEmpty": "Ningún flag eliminado coincide con tu búsqueda.",
       "deleteAllRemoved_one": "Eliminar {{count}} flag en Flagsmith",
       "deleteAllRemoved_other": "Eliminar los {{count}} flags en Flagsmith"
     },
@@ -423,6 +362,91 @@
     "toast": {
       "decisionSaved": "Decisión del flag guardada",
       "decisionError": "No se pudo guardar la decisión — revertido"
+    },
+    "decisionShort": {
+      "ENABLE_IN_RELEASE": "Activar",
+      "SHIP_OFF": "Lanzar apagado",
+      "IN_PROGRESS": "En progreso"
+    },
+    "decisionAriaLabel": "Decisión para {{flag}}"
+  },
+  "workspace": {
+    "navLabel": "Secciones del release",
+    "sections": {
+      "assign": "Asignar PRs",
+      "features": "Funcionalidades",
+      "prs": "Pull requests",
+      "flags": "Flags de este release",
+      "carryOver": "Decisiones pendientes",
+      "summary": "Resumen para el cliente"
+    },
+    "summaryReady": "Listo",
+    "summaryMissing": "Ninguno",
+    "readiness": {
+      "title": "Preparación",
+      "coverage": "Cobertura de PRs",
+      "flagDecisions": "Decisiones de flags",
+      "liveForClients": "Activo para clientes"
+    },
+    "metrics": {
+      "coverage": "Cobertura",
+      "prs": "PRs",
+      "live": "Activo",
+      "openFlags": "Flags abiertos"
+    },
+    "features": {
+      "description": "Abre una funcionalidad para ver sus pull requests y commits."
+    },
+    "prs": {
+      "description_one": "{{count}} pull request fusionado en este diff. Cada PR pertenece a una funcionalidad.",
+      "description_other": "{{count}} pull requests fusionados en este diff. Cada PR pertenece a una funcionalidad.",
+      "columns": {
+        "number": "PR",
+        "title": "Título",
+        "feature": "Funcionalidad",
+        "commits": "Commits",
+        "flags": "Flags"
+      }
+    },
+    "flags": {
+      "description": "Haz clic en una celda de entorno para preparar un cambio. Nada llega a Flagsmith hasta que lo apliques.",
+      "descriptionPending_one": "{{count}} flag necesita una decisión. Haz clic en una celda de entorno para preparar un cambio; nada llega a Flagsmith hasta que lo apliques.",
+      "descriptionPending_other": "{{count}} flags necesitan una decisión. Haz clic en una celda de entorno para preparar un cambio; nada llega a Flagsmith hasta que lo apliques.",
+      "removedEmpty": "Ningún flag se eliminó del código en este release.",
+      "closed": "Cerrado",
+      "columns": {
+        "flagAndDecision": "Flag y decisión"
+      },
+      "cell": {
+        "stagedOn": "Off → On",
+        "stagedOff": "On → Off",
+        "toggleLabel": "Preparar un cambio para {{flag}} en {{environment}}"
+      },
+      "tray": {
+        "label": "Cambios de flags preparados",
+        "count_one": "{{count}} preparado",
+        "count_other": "{{count}} preparados",
+        "on": "On",
+        "off": "Off",
+        "confirmProduction": "Incluye producción — lo confirmo",
+        "discard": "Descartar",
+        "apply_one": "Aplicar {{count}} cambio",
+        "apply_other": "Aplicar {{count}} cambios",
+        "applied_one": "{{count}} cambio aplicado en Flagsmith",
+        "applied_other": "{{count}} cambios aplicados en Flagsmith",
+        "partial_one": "{{failed}} cambio falló. Sigue preparado; pasa el cursor por la celda para ver el motivo.",
+        "partial_other": "{{failed}} cambios fallaron. Siguen preparados; pasa el cursor por la celda para ver el motivo.",
+        "error": "No se pudieron aplicar los cambios"
+      }
+    },
+    "carryOver": {
+      "description": "Flags de releases anteriores que aún necesitan una decisión. Los flags cerrados o eliminados en Flagsmith no aparecen aquí. Para cerrar un flag, usa la",
+      "flagsPageLink": "página de Flags",
+      "openCount_one": "{{count}} abierto",
+      "openCount_other": "{{count}} abiertos",
+      "empty": "Ningún flag de un release anterior necesita una decisión.",
+      "needsDecision": "Necesita una decisión",
+      "decidedHere": "Decidido en este release"
     }
   }
 }

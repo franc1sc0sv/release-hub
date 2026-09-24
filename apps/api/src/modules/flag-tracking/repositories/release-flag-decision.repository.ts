@@ -10,6 +10,7 @@ import type {
   IReleaseFlagDecision,
   ILatestInProgressFlagDecision,
   ILatestFlagDecisionForProject,
+  ICarryOverDecisionScope,
 } from '../interfaces/flag-tracking.interfaces'
 
 interface IReleaseFlagDecisionRow {
@@ -88,7 +89,7 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
     tx: TxClient,
   ): Promise<ILatestInProgressFlagDecision[]> => {
     const decisions = await tx.releaseFlagDecision.findMany({
-      where: { trackedFlag: { projectId, deletedAt: null, presentInCode: true } },
+      where: { trackedFlag: { projectId, deletedAt: null, presentInCode: true, closedAt: null } },
       orderBy: { updatedAt: 'desc' },
       select: {
         releaseId: true,
@@ -124,20 +125,31 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
     return [...latestByFlag.values()]
   }
 
-  findLatestDecisionsForProject = async (
+  findLatestDecisionsVisibleToRelease = async (
     projectId: string,
+    scope: ICarryOverDecisionScope,
     tx: TxClient,
   ): Promise<ILatestFlagDecisionForProject[]> => {
     const decisions = await tx.releaseFlagDecision.findMany({
       where: {
-        trackedFlag: { projectId, deletedAt: null, presentInCode: true },
-        release: { deletedAt: null },
+        trackedFlag: { projectId, deletedAt: null, presentInCode: true, closedAt: null },
+        release: {
+          deletedAt: null,
+          OR: [
+            { id: scope.releaseId },
+            {
+              createdAt: { lt: scope.createdBefore },
+              status: { notIn: [ReleaseStatus.draft, ReleaseStatus.canceled] },
+            },
+          ],
+        },
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [{ release: { createdAt: 'desc' } }, { updatedAt: 'desc' }],
       select: {
         releaseId: true,
         decision: true,
         decidedAt: true,
+        release: { select: { name: true, compareRef: true } },
         trackedFlag: {
           select: { id: true, key: true, featureId: true, feature: { select: { name: true } } },
         },
@@ -155,6 +167,7 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
         featureId: flag.featureId,
         featureName: flag.feature?.name ?? null,
         releaseId: decision.releaseId,
+        releaseName: decision.release.name ?? decision.release.compareRef,
         decision: decision.decision,
         decidedAt: decision.decidedAt,
       })

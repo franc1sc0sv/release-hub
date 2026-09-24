@@ -3,14 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
 import { useParams, Link, generatePath } from 'react-router-dom'
 import { m, useReducedMotion } from 'motion/react'
-import { AlertCircle, Bot, Check, Loader2, RefreshCcw, Sparkles } from 'lucide-react'
+import { AlertCircle, Bot, Check, Loader2, PenLine, RefreshCcw, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   Select,
   SelectContent,
@@ -21,6 +20,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
+import { useAbility } from '@/context/ability.context'
+import { Action, Subject } from '@release-hub/shared'
 import { isAiEnabled } from '@/lib/ai-availability'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/routes'
@@ -57,7 +58,7 @@ const RichTextEditor = lazy(() =>
   import('@/components/editor/RichTextEditor').then((mod) => ({ default: mod.RichTextEditor })),
 )
 
-interface SummaryTabProps {
+interface ReleaseSummarySectionProps {
   release: ReleaseNode
   features: FeatureNodes
 }
@@ -89,7 +90,7 @@ function SummaryGeneratingState({ reduceMotion }: { reduceMotion: boolean }) {
   )
 }
 
-export function SummaryTab({ release, features }: SummaryTabProps) {
+export function ReleaseSummarySection({ release, features }: ReleaseSummarySectionProps) {
   const { t } = useTranslation('releases')
   const { t: tAi } = useTranslation('ai')
   const enumLabels = useEnumLabels()
@@ -97,6 +98,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
   const aiEnabled = isAiEnabled()
   const { organizationId } = useParams<{ organizationId: string }>()
   const { profiles } = useSummaryProfiles(release.projectId)
+  const canEdit = useAbility().can(Action.UPDATE, Subject.RELEASE)
 
   const [mode, setMode] = useState<SummaryMode>('read')
   const [model, setModel] = useState<AiModel>(
@@ -210,13 +212,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
     : null
 
   return (
-    <Tabs
-      value={mode}
-      onValueChange={(v) => {
-        if (v === 'read' || v === 'edit') setMode(v)
-      }}
-      className="gap-6"
-    >
+    <div className="flex flex-col gap-6">
       <GlassCard glow={isGenerating ? 'magenta' : 'none'}>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
@@ -226,12 +222,6 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
             <CardTitle className="font-display text-base font-semibold">
               {t('summary.editor')}
             </CardTitle>
-            <TabsList aria-label={t('summary.mode.label')}>
-              <TabsTrigger value="read">{t('summary.mode.read')}</TabsTrigger>
-              <TabsTrigger value="edit" disabled={isGenerating}>
-                {t('summary.mode.edit')}
-              </TabsTrigger>
-            </TabsList>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -241,7 +231,24 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
               </span>
             )}
 
-            {mode === 'edit' && (
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isGenerating}
+                onClick={() => setMode(mode === 'edit' ? 'read' : 'edit')}
+                aria-pressed={mode === 'edit'}
+              >
+                {mode === 'edit' ? (
+                  <Check className="mr-1.5 size-3.5" aria-hidden />
+                ) : (
+                  <PenLine className="mr-1.5 size-3.5" aria-hidden />
+                )}
+                {mode === 'edit' ? t('summary.mode.done') : t('summary.mode.edit')}
+              </Button>
+            )}
+
+            {canEdit && mode === 'edit' && (
               <Button
                 size="sm"
                 onClick={handleSave}
@@ -263,7 +270,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
               hasSummary={hasSummary}
             />
 
-            {aiEnabled ? (
+            {!canEdit ? null : aiEnabled ? (
               isGenerating ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="size-4 animate-spin text-indigo-400" aria-hidden />
@@ -459,8 +466,8 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
         </CardHeader>
       </GlassCard>
 
-      <TabsContent value="read">
-        {isGenerating ? (
+      {mode === 'read' &&
+        (isGenerating ? (
           <SummaryGeneratingState reduceMotion={reduceMotion ?? false} />
         ) : (
           <div className="space-y-4">
@@ -471,7 +478,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
               >
                 <AlertCircle className="size-4 shrink-0 text-destructive" aria-hidden />
                 <span className="text-sm text-destructive">{t('summary.generateFailed')}</span>
-                {aiEnabled && (
+                {aiEnabled && canEdit && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -486,10 +493,9 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
             )}
             <SummaryDocument html={editorContent} />
           </div>
-        )}
-      </TabsContent>
+        ))}
 
-      <TabsContent value="edit">
+      {mode === 'edit' && (
         <GlassCard>
           <CardContent className="pt-6">
             <Suspense fallback={<Skeleton className="h-[220px] w-full rounded-[var(--radius-card)]" />}>
@@ -502,7 +508,7 @@ export function SummaryTab({ release, features }: SummaryTabProps) {
             </Suspense>
           </CardContent>
         </GlassCard>
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   )
 }

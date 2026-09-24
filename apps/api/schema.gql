@@ -182,6 +182,12 @@ type CarriedOverFlagType {
   trackedFlagId: ID!
 }
 
+input CloseTrackedFlagInput {
+  key: String!
+  projectId: ID!
+  reason: FlagClosedReason!
+}
+
 type CommitType {
   author: String!
   date: DateTime!
@@ -425,6 +431,12 @@ enum FlagChangeAction {
   unchanged
 }
 
+enum FlagClosedReason {
+  ABANDONED
+  FULLY_ROLLED_OUT
+  REMOVED_FROM_CODE
+}
+
 type FlagComparisonResultType {
   baselineEnvironments: [String!]!
   comparedEnvironments: [String!]!
@@ -508,10 +520,12 @@ enum FlagHistoryEventType {
   DETECTED_DEFINITION
   DETECTED_USAGE
   FIRST_SEEN_BRANCH
+  FLAG_CLOSED
   FLAG_CREATED
   FLAG_DELETED
   FLAG_DISABLED
   FLAG_ENABLED
+  FLAG_REOPENED
   FLAG_VALUE_CHANGED
   REMINDER_SENT
   SYNC_COMPLETED
@@ -751,6 +765,7 @@ type Mutation {
   assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
   blockBranch(input: BlockBranchInput!): BlockedBranchType!
   clearAllNotifications: Int!
+  closeTrackedFlag(input: CloseTrackedFlagInput!): TrackedFlagClosureType!
   completeGithubInstallation(input: CompleteGithubInstallationInput!): GithubInstallResultType!
   confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
   confirmReleaseAdditions(releaseId: ID!): ReleaseObjectType!
@@ -783,6 +798,7 @@ type Mutation {
   register(input: RegisterInput!): AuthTokensType!
   rejectSuggestedFeature(input: RejectSuggestedFeatureInput!): Boolean!
   removeMember(membershipId: ID!): Boolean!
+  reopenTrackedFlag(key: String!, projectId: ID!): TrackedFlagClosureType!
   requestLoginCode(input: RequestLoginCodeInput!): Boolean!
   resyncReleasePullRequests(releaseId: ID!): ResyncReleaseSummaryType!
   revokeInvitation(invitationId: ID!): Boolean!
@@ -1087,6 +1103,7 @@ type ReleaseFlagEnvironmentType {
 
 type ReleaseFlagType {
   changes: [ReleaseFlagChangeType!]!
+  closedAt: DateTime
   decidedAt: DateTime
   decision: ReleaseFlagDecisionType
   environments: [ReleaseFlagEnvironmentType!]!
@@ -1100,6 +1117,7 @@ type ReleaseFlagType {
 
 type ReleaseObjectType {
   aiDraftStatus: AiDraftStatus!
+  allowedNextStatuses: [ReleaseStatus!]!
   baseRef: String!
   compareRef: String!
   createdAt: DateTime!
@@ -1326,6 +1344,13 @@ enum TicketSource {
   LINEAR
 }
 
+type TrackedFlagClosureType {
+  closedAt: DateTime
+  closedReason: FlagClosedReason
+  id: ID!
+  key: String!
+}
+
 type TrackedFlagDeliveryType {
   inDefaultBranch: Boolean!
   shippedReleaseVersions: [String!]!
@@ -1333,6 +1358,8 @@ type TrackedFlagDeliveryType {
 
 type TrackedFlagDetailType {
   branchPresences: [FlagBranchPresenceDetailType!]!
+  closedAt: DateTime
+  closedReason: FlagClosedReason
   delivery: TrackedFlagDeliveryType!
   feature: TrackedFlagFeatureType
   id: ID!

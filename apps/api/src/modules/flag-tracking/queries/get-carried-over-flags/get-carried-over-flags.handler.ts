@@ -61,10 +61,19 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
       tx,
     )
 
-    const decisions = await this.releaseFlagDecisionRepository.findLatestDecisionsForProject(
+    const visibleDecisions = await this.releaseFlagDecisionRepository.findLatestDecisionsVisibleToRelease(
       release.projectId,
+      { releaseId: release.id, createdBefore: release.createdAt },
       tx,
     )
+    const deletedInFlagsmith = new Set(
+      await this.flagsmithFlagRepository.findKeysDeletedInFlagsmith(
+        release.projectId,
+        visibleDecisions.map((decision) => decision.key),
+        tx,
+      ),
+    )
+    const decisions = visibleDecisions.filter((decision) => !deletedInFlagsmith.has(decision.key))
     if (decisions.length === 0) return []
 
     const prs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
@@ -105,16 +114,13 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
       )
       if (!decidedInThisRelease && !CARRIED_OVER_STATUSES.includes(deploymentStatus)) continue
 
-      const originRelease = await this.releaseRepository.findById(decision.releaseId, tx)
-      if (!originRelease) continue
-
       const carried = new CarriedOverFlagType()
       carried.trackedFlagId = decision.trackedFlagId
       carried.key = decision.key
       carried.featureId = decision.featureId
       carried.featureName = decision.featureName
       carried.originReleaseId = decision.releaseId
-      carried.originReleaseName = originRelease.name ?? originRelease.compareRef
+      carried.originReleaseName = decision.releaseName
       carried.decision = decision.decision
       carried.deploymentStatus = deploymentStatus
       carried.decidedAt = decision.decidedAt

@@ -31,6 +31,7 @@ export abstract class IFlagsmithFlagRepository {
     { environments: string[]; flags: IFlagsmithFlagRecord[]; lastSyncedAt: Date | null }
   >
   abstract findLatestCompletedSyncRun: RepositoryMethod<[projectId: string], IFlagsmithSyncRun | null>
+  abstract findKeysDeletedInFlagsmith: RepositoryMethod<[projectId: string, keys: string[]], string[]>
   abstract findEnabledStatesForKeys: RepositoryMethod<
     [projectId: string, keys: string[]],
     { key: string; environmentName: string; enabled: boolean }[]

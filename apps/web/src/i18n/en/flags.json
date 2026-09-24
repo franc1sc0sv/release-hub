@@ -239,5 +239,23 @@
       "turnOff": "Turn off",
       "deleteFlag": "Delete flag"
     }
+  },
+  "close": {
+    "open": "Close flag",
+    "reopen": "Reopen flag",
+    "title": "Close {{flag}}?",
+    "description": "A closed flag leaves carry-over decisions in every release and stops reminders. Its history and past decisions stay. You can reopen it later.",
+    "reasonLabel": "Reason",
+    "reasonHint": {
+      "FULLY_ROLLED_OUT": "The feature is on for everyone. Remove the flag from code next.",
+      "ABANDONED": "We changed our decision. The flag will not ship.",
+      "REMOVED_FROM_CODE": "The flag key is gone from the codebase."
+    },
+    "deleteInFlagsmith": "Also delete it in Flagsmith (all environments)",
+    "confirm": "Close flag",
+    "closedBadge": "Closed · {{reason}}",
+    "closedToast": "Flag closed",
+    "reopenedToast": "Flag reopened",
+    "error": "Could not update the flag"
   }
 }

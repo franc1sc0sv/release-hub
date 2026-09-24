@@ -69,7 +69,9 @@
     "COVERAGE_SCAN": "Coverage scan",
     "DETECTED_DEFINITION": "Detected in code (definition)",
     "DETECTED_USAGE": "Detected in code (usage)",
-    "FIRST_SEEN_BRANCH": "First seen on branch"
+    "FIRST_SEEN_BRANCH": "First seen on branch",
+    "FLAG_CLOSED": "Flag closed",
+    "FLAG_REOPENED": "Flag reopened"
   },
   "flagHistorySource": {
     "WEBHOOK": "Webhook",
@@ -133,5 +135,10 @@
   "summaryExampleKind": {
     "GOOD": "Good example",
     "BAD": "Bad example"
+  },
+  "flagClosedReason": {
+    "FULLY_ROLLED_OUT": "Fully rolled out",
+    "ABANDONED": "Abandoned",
+    "REMOVED_FROM_CODE": "Removed from code"
   }
 }

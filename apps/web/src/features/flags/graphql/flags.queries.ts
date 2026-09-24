@@ -77,6 +77,8 @@ export const GET_FLAG_DETAIL = graphql(`
         id
         key
         presentInCode
+        closedAt
+        closedReason
         delivery {
           inDefaultBranch
           shippedReleaseVersions

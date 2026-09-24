@@ -1,3 +1,4 @@
+import { MANUAL_RELEASE_STATUS_TRANSITIONS } from '../../../common/types/release-status-transitions'
 import type { IPullRequest, ICommit, IRelease, ITicketLink } from '../interfaces/release.interfaces'
 import type { IGitHubMergedPr } from '../../integration/interfaces/github-client.interface'
 import type { IPullRequestFlagChangeWithPullRequest } from '../../flag-tracking/interfaces/flag-tracking.interfaces'
@@ -68,6 +69,7 @@ export function toReleaseObjectType(release: IRelease): ReleaseObjectType {
   type.baseRef = release.baseRef
   type.compareRef = release.compareRef
   type.status = release.status
+  type.allowedNextStatuses = MANUAL_RELEASE_STATUS_TRANSITIONS[release.status]
   type.aiDraftStatus = release.aiDraftStatus
   type.prUrl = release.prUrl
   type.tags = release.tags

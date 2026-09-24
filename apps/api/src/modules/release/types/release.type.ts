@@ -23,6 +23,9 @@ export class ReleaseObjectType {
   @Field(() => ReleaseStatus)
   status: ReleaseStatus
 
+  @Field(() => [ReleaseStatus])
+  allowedNextStatuses: ReleaseStatus[]
+
   @Field(() => AiDraftStatus)
   aiDraftStatus: AiDraftStatus
 

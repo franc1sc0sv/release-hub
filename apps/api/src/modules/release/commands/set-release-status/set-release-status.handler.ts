@@ -9,6 +9,7 @@ import { AppException } from '../../../../common/errors/app.exception'
 import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { ReleaseStatus } from '../../../../common/types/release-status.enum'
+import { canTransitionReleaseStatus } from '../../../../common/types/release-status-transitions'
 import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../interfaces/release.repository'
@@ -50,6 +51,15 @@ export class SetReleaseStatusHandler extends BaseCommandHandler<SetReleaseStatus
     if (release.status === ReleaseStatus.DEPLOYED) {
       throw new AppException(
         'A deployed release is locked and its status cannot be changed.',
+        ErrorCode.CONFLICT,
+      )
+    }
+
+    if (!canTransitionReleaseStatus(release.status, command.status)) {
+      throw new AppException(
+        release.status === ReleaseStatus.DRAFT && command.status === ReleaseStatus.READY_TO_RELEASE
+          ? 'Confirm the release to move it out of draft.'
+          : `A release cannot move from ${release.status} to ${command.status}.`,
         ErrorCode.CONFLICT,
       )
     }

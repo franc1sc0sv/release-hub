@@ -1,5 +1,10 @@
 import type { RepositoryMethod, IBaseRepository } from '../../../common/cqrs/types'
-import type { ITrackedFlag, ICreateTrackedFlagData, ITrackedFlagWithDetails } from './flag-tracking.interfaces'
+import type {
+  ITrackedFlag,
+  ICreateTrackedFlagData,
+  ITrackedFlagWithDetails,
+  ISetTrackedFlagClosureData,
+} from './flag-tracking.interfaces'
 
 export abstract class ITrackedFlagRepository implements IBaseRepository<ITrackedFlag> {
   abstract findById: RepositoryMethod<[id: string], ITrackedFlag | null>
@@ -17,5 +22,6 @@ export abstract class ITrackedFlagRepository implements IBaseRepository<ITracked
   >
   abstract setRemovedInPullRequest: RepositoryMethod<[trackedFlagId: string, pullRequestId: string], void>
   abstract setPresentInCode: RepositoryMethod<[trackedFlagId: string, presentInCode: boolean], void>
+  abstract setClosure: RepositoryMethod<[trackedFlagId: string, data: ISetTrackedFlagClosureData], ITrackedFlag>
   abstract findAllForProject: RepositoryMethod<[projectId: string], ITrackedFlagWithDetails[]>
 }

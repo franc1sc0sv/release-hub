@@ -6,6 +6,8 @@ import { BaseCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
 import { IEventEmitter } from '../../../../common/events/event-emitter.abstract'
 import { NotFoundException } from '../../../../common/errors'
+import { AppException } from '../../../../common/errors/app.exception'
+import { ErrorCode } from '../../../../common/errors/error-codes.enum'
 import type { IDomainEvent } from '../../../../common/cqrs/types'
 import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
@@ -63,6 +65,9 @@ export class SetReleaseFlagDecisionHandler extends BaseCommandHandler<
 
     const trackedFlag = await this.trackedFlagRepository.findById(command.trackedFlagId, tx)
     if (!trackedFlag) throw new NotFoundException('TrackedFlag')
+    if (trackedFlag.closedAt !== null) {
+      throw new AppException('This flag is closed. Reopen it on the Flags page first.', ErrorCode.CONFLICT)
+    }
 
     const decision = await this.releaseFlagDecisionRepository.upsertByReleaseAndFlag(
       {

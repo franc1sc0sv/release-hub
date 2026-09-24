@@ -26,6 +26,9 @@ import { FlagDetailSkeleton } from '../components/FlagDetailSkeleton'
 import { FlagChangePreviewDialog } from '../components/FlagChangePreviewDialog'
 import { FlagDeleteConfirmDialog } from '../components/FlagDeleteConfirmDialog'
 import { useFlagWriteActions } from '../hooks/use-flag-write-actions'
+import { useFlagClosure } from '../hooks/use-flag-closure'
+import { CloseFlagDialog } from '../components/CloseFlagDialog'
+import type { CloseFlagRequest } from '../components/CloseFlagDialog'
 import type { FlagChangeTarget, FlagDeleteTarget } from '../types/flag-change-target'
 
 export default function FlagDetailPage() {
@@ -43,6 +46,8 @@ export default function FlagDetailPage() {
   const [changeTargets, setChangeTargets] = useState<FlagChangeTarget[] | null>(null)
   const [deleteTargets, setDeleteTargets] = useState<FlagDeleteTarget[] | null>(null)
   const { applyStates, deleteFlags, resetReport, report, pending } = useFlagWriteActions(projectId)
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false)
+  const closure = useFlagClosure(projectId, flagKey ?? '')
 
   const deletedInFlagsmith = flagDetail?.flagsmith.deletedAt != null
   const liveInFlagsmith = (flagDetail?.flagsmith.exists ?? false) && !deletedInFlagsmith
@@ -80,6 +85,30 @@ export default function FlagDetailPage() {
     if (report) {
       resetReport()
       void refetch()
+    }
+  }
+
+  async function handleCloseFlag(request: CloseFlagRequest): Promise<void> {
+    try {
+      await closure.close(request.reason)
+      if (request.deleteInFlagsmith && flagDetail) {
+        await deleteFlags([flagDetail.key])
+        resetReport()
+        void refetch()
+      }
+      setCloseDialogOpen(false)
+      toast.success(t('close.closedToast'))
+    } catch (closeError) {
+      toast.error(closeError instanceof Error && closeError.message ? closeError.message : t('close.error'))
+    }
+  }
+
+  async function handleReopenFlag(): Promise<void> {
+    try {
+      await closure.reopen()
+      toast.success(t('close.reopenedToast'))
+    } catch (reopenError) {
+      toast.error(reopenError instanceof Error && reopenError.message ? reopenError.message : t('close.error'))
     }
   }
 
@@ -191,6 +220,9 @@ export default function FlagDetailPage() {
                 rescanning={rescanning}
                 canDelete={canDelete}
                 onDelete={openDelete}
+                onCloseFlag={() => setCloseDialogOpen(true)}
+                onReopenFlag={() => void handleReopenFlag()}
+                closurePending={closure.pending}
               />
             </m.div>
 
@@ -210,6 +242,7 @@ export default function FlagDetailPage() {
                   <FlagReleaseAppearancesCard
                     releases={tracked.releases}
                     trackedFlagId={tracked.id}
+                    flagKey={tracked.key}
                   />
                 )}
               </div>
@@ -231,6 +264,15 @@ export default function FlagDetailPage() {
           report={report}
           onConfirm={(selected) => void applyStates(selected)}
           onClose={closeWriteDialogs}
+        />
+
+        <CloseFlagDialog
+          open={closeDialogOpen}
+          onOpenChange={setCloseDialogOpen}
+          flagKey={flagDetail?.key ?? flagKey ?? ''}
+          pending={closure.pending || pending}
+          canDeleteInFlagsmith={canDelete}
+          onConfirm={(request) => void handleCloseFlag(request)}
         />
 
         <FlagDeleteConfirmDialog

@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMutation, useQuery } from '@apollo/client/react'
+import { useMutation } from '@apollo/client/react'
 import { m, useReducedMotion } from 'motion/react'
-import { Bot, Check, ChevronDown, ExternalLink, Layers, Loader2, Rocket, Sparkles, X } from 'lucide-react'
+import { Bot, Check, ChevronDown, Layers, Loader2, Rocket, Sparkles, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,16 +10,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent } from '@/components/ui/card'
-import { CoverageMeter } from './CoverageMeter'
 import { RegenerateDraftButton } from './RegenerateDraftButton'
 import { PrAssignmentRow } from './PrAssignmentRow'
 import { slideUp, staggerContainer } from '@/lib/animations'
 import {
-  CONFIRM_RELEASE,
   ACCEPT_SUGGESTED_FEATURE,
   REJECT_SUGGESTED_FEATURE,
 } from '../graphql/releases.mutations'
-import { GET_RELEASE_TREE, GET_COVERAGE } from '../graphql/releases.queries'
+import { GET_RELEASE_TREE } from '../graphql/releases.queries'
 import { AiDraftStatusValue } from '../constants/release-enums'
 import { FeatureKindValue } from '@/features/features/constants/feature-enums'
 import { isAiEnabled } from '@/lib/ai-availability'
@@ -28,13 +26,13 @@ import type { GetReleaseTreeQuery } from '@/generated/graphql'
 type ReleaseNode = GetReleaseTreeQuery['getReleaseTree']['release']
 type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
 type FeatureNode = FeatureNodes[number]
-interface DraftTabProps {
+interface AssignPrsSectionProps {
   release: ReleaseNode
   features: FeatureNodes
   projectId: string
 }
 
-export function DraftTab({ release, features, projectId }: DraftTabProps) {
+export function AssignPrsSection({ release, features, projectId }: AssignPrsSectionProps) {
   const { t } = useTranslation('releases')
   const reduceMotion = useReducedMotion()
   const aiEnabled = isAiEnabled()
@@ -44,24 +42,6 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
     release.aiDraftStatus === AiDraftStatusValue.RUNNING
 
   const isReady = release.aiDraftStatus === AiDraftStatusValue.READY
-
-  const [confirmRelease, { loading: confirming, data: confirmData, error: confirmError }] =
-    useMutation(CONFIRM_RELEASE)
-
-  const { data: coverageData } = useQuery(GET_COVERAGE, {
-    variables: { releaseId: release.id },
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const coverageReady = coverageData?.getCoverage?.ready ?? false
-
-  const handleConfirm = useCallback(async () => {
-    try {
-      await confirmRelease({ variables: { input: { releaseId: release.id } } })
-    } catch (error) {
-      toast.error(error instanceof Error && error.message ? error.message : t('draft.confirmError'))
-    }
-  }, [confirmRelease, release.id, t])
 
   if (isDrafting) {
     return <DraftingState reduceMotion={reduceMotion ?? false} />
@@ -77,56 +57,12 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
       animate="visible"
       className="space-y-8"
     >
-      <m.div variants={slideUp} className="flex items-center justify-between gap-3">
+      <m.div variants={slideUp} className="flex items-center justify-end gap-3">
         <RegenerateDraftButton
           releaseId={release.id}
           aiDraftStatus={release.aiDraftStatus}
         />
-        <Button
-          size="sm"
-          disabled={!coverageReady || confirming || Boolean(confirmData)}
-          onClick={handleConfirm}
-          className="bg-primary text-white shadow-glow-indigo hover:shadow-glow-lg disabled:opacity-50"
-        >
-          {confirming ? (
-            <>
-              <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
-              {t('draft.confirming')}
-            </>
-          ) : (
-            <>
-              <Rocket className="mr-1.5 size-3.5" aria-hidden />
-              {t('draft.confirm')}
-            </>
-          )}
-        </Button>
       </m.div>
-
-      {confirmData?.confirmRelease?.prUrl && (
-        <m.div
-          variants={slideUp}
-          className="flex items-center gap-2 rounded-[var(--radius-card)] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3"
-          role="status"
-        >
-          <Check className="size-4 shrink-0 text-emerald-400" aria-hidden />
-          <span className="text-sm text-emerald-300">{t('draft.confirmed')}</span>
-          <a
-            href={confirmData.confirmRelease.prUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto flex items-center gap-1 text-xs text-emerald-300 underline underline-offset-2 hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {t('view.prUrl')}
-            <ExternalLink className="size-3" aria-hidden />
-          </a>
-        </m.div>
-      )}
-
-      {confirmError && (
-        <p className="text-sm text-destructive" role="alert">
-          {confirmError.message || t('draft.confirmError')}
-        </p>
-      )}
 
       {!aiEnabled && (
         <m.div
@@ -138,10 +74,6 @@ export function DraftTab({ release, features, projectId }: DraftTabProps) {
           <span className="text-sm text-muted-foreground">{t('draft.manualAssignHint')}</span>
         </m.div>
       )}
-
-      <m.div variants={slideUp}>
-        <CoverageMeter releaseId={release.id} releaseStatus={release.status} />
-      </m.div>
 
       {suggestedFeatures.length > 0 && (
         <m.div variants={slideUp} className="space-y-4">

@@ -30,6 +30,7 @@ export const GET_RELEASE_TREE = graphql(`
         baseRef
         compareRef
         status
+        allowedNextStatuses
         tags
         prUrl
         summary
@@ -163,6 +164,7 @@ export const RELEASE_FLAGS = graphql(`
       decision
       decidedAt
       existsInFlagsmith
+      closedAt
       environments {
         name
         enabled

@@ -1,5 +1,6 @@
 import type {
   FlagActivityFilter,
+  FlagClosedReason,
   FlagDeploymentStatus,
   FlagHistoryEventType,
   FlagHistorySource,
@@ -72,7 +73,21 @@ export const FlagHistoryEventTypeValue = {
   DETECTED_DEFINITION: 'DETECTED_DEFINITION',
   DETECTED_USAGE: 'DETECTED_USAGE',
   FIRST_SEEN_BRANCH: 'FIRST_SEEN_BRANCH',
+  FLAG_CLOSED: 'FLAG_CLOSED',
+  FLAG_REOPENED: 'FLAG_REOPENED',
 } as const satisfies Record<FlagHistoryEventType, FlagHistoryEventType>
+
+export const FlagClosedReasonValue = {
+  FULLY_ROLLED_OUT: 'FULLY_ROLLED_OUT',
+  ABANDONED: 'ABANDONED',
+  REMOVED_FROM_CODE: 'REMOVED_FROM_CODE',
+} as const satisfies Record<FlagClosedReason, FlagClosedReason>
+
+export const FLAG_CLOSED_REASON_OPTIONS: FlagClosedReason[] = [
+  FlagClosedReasonValue.FULLY_ROLLED_OUT,
+  FlagClosedReasonValue.ABANDONED,
+  FlagClosedReasonValue.REMOVED_FROM_CODE,
+]
 
 export const FlagHistorySourceValue = {
   WEBHOOK: 'WEBHOOK',

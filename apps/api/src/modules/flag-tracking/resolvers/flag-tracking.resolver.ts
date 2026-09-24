@@ -31,6 +31,10 @@ import { GetFlagHistoryQuery } from '../queries/get-flag-history/get-flag-histor
 import { GetFlagDetailQuery } from '../queries/get-flag-detail/get-flag-detail.query'
 import { GetFlagHistoryInput, FlagHistoryPageType } from '../types/flag-history.type'
 import { FlagDetailType } from '../types/flag-detail.type'
+import { TrackedFlagClosureType } from '../types/tracked-flag-closure.type'
+import { CloseTrackedFlagInput } from '../commands/close-tracked-flag/close-tracked-flag.input'
+import { CloseTrackedFlagCommand } from '../commands/close-tracked-flag/close-tracked-flag.command'
+import { ReopenTrackedFlagCommand } from '../commands/reopen-tracked-flag/reopen-tracked-flag.command'
 
 @Resolver()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -88,6 +92,27 @@ export class FlagTrackingResolver {
     return this.commandBus.execute(
       new SetReleaseFlagDecisionCommand(input.releaseId, input.trackedFlagId, input.decision, user.id),
     )
+  }
+
+  @Mutation(() => TrackedFlagClosureType)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  closeTrackedFlag(
+    @Args('input', { type: () => CloseTrackedFlagInput }) input: CloseTrackedFlagInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<TrackedFlagClosureType> {
+    return this.commandBus.execute(
+      new CloseTrackedFlagCommand(input.projectId, input.key, input.reason, user.id),
+    )
+  }
+
+  @Mutation(() => TrackedFlagClosureType)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  reopenTrackedFlag(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('key', { type: () => String }) key: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<TrackedFlagClosureType> {
+    return this.commandBus.execute(new ReopenTrackedFlagCommand(projectId, key, user.id))
   }
 
   @Query(() => [TrackedFlagType])

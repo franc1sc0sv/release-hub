@@ -86,6 +86,7 @@ export function toReleaseFlagType(
     : null
   type.featureReleaseState = featureReleaseState
   type.existsInFlagsmith = existsInFlagsmith
+  type.closedAt = flag.closedAt
   type.environments = environments.map((environment) => {
     const environmentType = new ReleaseFlagEnvironmentType()
     environmentType.name = environment.name
@@ -128,6 +129,8 @@ export function buildTrackedFlagDetailType(
   type.id = flag.id
   type.key = flag.key
   type.presentInCode = flag.presentInCode
+  type.closedAt = flag.closedAt
+  type.closedReason = flag.closedReason
 
   if (flag.feature !== null) {
     const featureType = new TrackedFlagFeatureType()

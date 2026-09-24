@@ -4,6 +4,7 @@ import type {
   ICreateReleaseFlagDecisionData,
   ILatestInProgressFlagDecision,
   ILatestFlagDecisionForProject,
+  ICarryOverDecisionScope,
 } from './flag-tracking.interfaces'
 
 export interface IActiveEnableDecisionForFlag {
@@ -25,8 +26,8 @@ export abstract class IReleaseFlagDecisionRepository implements IBaseRepository<
     [projectId: string, excludeReleaseId: string | null],
     ILatestInProgressFlagDecision[]
   >
-  abstract findLatestDecisionsForProject: RepositoryMethod<
-    [projectId: string],
+  abstract findLatestDecisionsVisibleToRelease: RepositoryMethod<
+    [projectId: string, scope: ICarryOverDecisionScope],
     ILatestFlagDecisionForProject[]
   >
   abstract findActiveEnableDecisionForFlag: RepositoryMethod<

@@ -9,11 +9,9 @@ import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ROUTES } from '@/lib/routes'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
-import { releaseStatusTone, releaseFlagDecisionTone } from '@/features/releases/constants/release-enums'
-import { ReleaseFlagDecisionSelect } from '@/features/releases/components/ReleaseFlagDecisionSelect'
+import { releaseStatusTone } from '@/features/releases/constants/release-enums'
+import { FlagDecisionControl } from '@/features/releases/components/FlagDecisionControl'
 import type { GetFlagDetailQuery } from '@/generated/graphql'
-
-const DECISION_REFETCH_QUERIES = ['GetFlagDetail', 'GetFlagHistory']
 
 type TrackedFlagDetail = NonNullable<NonNullable<GetFlagDetailQuery['flagDetail']>['tracked']>
 type FlagRelease = TrackedFlagDetail['releases'][number]
@@ -21,9 +19,10 @@ type FlagRelease = TrackedFlagDetail['releases'][number]
 interface FlagReleaseRowProps {
   release: FlagRelease
   trackedFlagId: string
+  flagKey: string
 }
 
-function FlagReleaseRow({ release, trackedFlagId }: FlagReleaseRowProps) {
+function FlagReleaseRow({ release, trackedFlagId, flagKey }: FlagReleaseRowProps) {
   const enumLabels = useEnumLabels()
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
@@ -55,20 +54,15 @@ function FlagReleaseRow({ release, trackedFlagId }: FlagReleaseRowProps) {
       </Link>
 
       <Can I={Action.UPDATE} a={Subject.RELEASE} passThrough>
-        {(canDecide) =>
-          canDecide ? (
-            <ReleaseFlagDecisionSelect
-              releaseId={release.releaseId}
-              trackedFlagId={trackedFlagId}
-              decision={release.decision}
-              refetchQueries={DECISION_REFETCH_QUERIES}
-            />
-          ) : release.decision ? (
-            <StatusBadge tone={releaseFlagDecisionTone(release.decision)}>
-              {enumLabels.releaseFlagDecision(release.decision)}
-            </StatusBadge>
-          ) : null
-        }
+        {(canDecide) => (
+          <FlagDecisionControl
+            releaseId={release.releaseId}
+            trackedFlagId={trackedFlagId}
+            flagKey={flagKey}
+            decision={release.decision}
+            canDecide={canDecide}
+          />
+        )}
       </Can>
     </li>
   )
@@ -77,11 +71,13 @@ function FlagReleaseRow({ release, trackedFlagId }: FlagReleaseRowProps) {
 interface FlagReleaseAppearancesCardProps {
   releases: FlagRelease[]
   trackedFlagId: string
+  flagKey: string
 }
 
 export function FlagReleaseAppearancesCard({
   releases,
   trackedFlagId,
+  flagKey,
 }: FlagReleaseAppearancesCardProps) {
   const { t } = useTranslation('flags')
 
@@ -107,6 +103,7 @@ export function FlagReleaseAppearancesCard({
                 key={release.releaseId}
                 release={release}
                 trackedFlagId={trackedFlagId}
+                flagKey={flagKey}
               />
             ))}
           </ul>

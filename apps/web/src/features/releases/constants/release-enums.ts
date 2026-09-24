@@ -16,14 +16,6 @@ export const ReleaseStatusValue = {
   CANCELED: 'CANCELED',
 } as const satisfies Record<ReleaseStatus, ReleaseStatus>
 
-export const RELEASE_STATUS_OPTIONS: ReleaseStatus[] = [
-  ReleaseStatusValue.DRAFT,
-  ReleaseStatusValue.READY_TO_RELEASE,
-  ReleaseStatusValue.MERGED,
-  ReleaseStatusValue.DEPLOYED,
-  ReleaseStatusValue.CANCELED,
-]
-
 export const RELEASE_STATUS_TEXT_CLASS: Record<ReleaseStatus, string> = {
   DRAFT: 'text-slate-300',
   READY_TO_RELEASE: 'text-indigo-300',

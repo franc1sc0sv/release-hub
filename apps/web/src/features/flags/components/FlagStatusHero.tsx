@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link, generatePath, useParams } from 'react-router-dom'
-import { CheckCircle2, CircleDashed, Loader2, RadarIcon, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, CheckCircle2, CircleDashed, Loader2, RadarIcon, Trash2 } from 'lucide-react'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
@@ -9,6 +9,7 @@ import { GradientButton } from '@/components/nebula/GradientButton'
 import { Can } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
 import { ROUTES } from '@/lib/routes'
+import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { deriveFlagLifecycleStatus } from '../lib/flag-lifecycle'
 import { FlagDeploymentStatusBadge } from './FlagDeploymentStatusBadge'
 import type { FlagDeploymentStatus, GetFlagDetailQuery } from '@/generated/graphql'
@@ -23,6 +24,9 @@ interface FlagStatusHeroProps {
   rescanning: boolean
   canDelete: boolean
   onDelete: () => void
+  onCloseFlag: () => void
+  onReopenFlag: () => void
+  closurePending: boolean
 }
 
 export function FlagStatusHero({
@@ -33,8 +37,13 @@ export function FlagStatusHero({
   rescanning,
   canDelete,
   onDelete,
+  onCloseFlag,
+  onReopenFlag,
+  closurePending,
 }: FlagStatusHeroProps) {
   const { t } = useTranslation('flags')
+  const enumLabels = useEnumLabels()
+  const closedReason = tracked?.closedReason ?? null
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   const presentInCode = tracked?.presentInCode ?? false
@@ -63,10 +72,34 @@ export function FlagStatusHero({
                   ? t('detail.currentStatus.presentInCode')
                   : t('detail.currentStatus.notPresentInCode')}
               </StatusBadge>
+              {closedReason && (
+                <StatusBadge tone="slate" icon={Archive}>
+                  {t('close.closedBadge', { reason: enumLabels.flagClosedReason(closedReason) })}
+                </StatusBadge>
+              )}
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {tracked && (
+              <Can I={Action.UPDATE} a={Subject.RELEASE}>
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  disabled={closurePending}
+                  onClick={closedReason ? onReopenFlag : onCloseFlag}
+                >
+                  {closurePending ? (
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                  ) : closedReason ? (
+                    <ArchiveRestore className="size-4" aria-hidden />
+                  ) : (
+                    <Archive className="size-4" aria-hidden />
+                  )}
+                  {closedReason ? t('close.reopen') : t('close.open')}
+                </Button>
+              </Can>
+            )}
             {canDelete && (
               <Button
                 variant="outline"

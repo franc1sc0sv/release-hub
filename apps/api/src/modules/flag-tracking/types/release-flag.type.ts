@@ -64,6 +64,9 @@ export class ReleaseFlagType {
   @Field(() => Boolean)
   existsInFlagsmith: boolean
 
+  @Field(() => Date, { nullable: true })
+  closedAt: Date | null
+
   @Field(() => [ReleaseFlagEnvironmentType])
   environments: ReleaseFlagEnvironmentType[]
 }

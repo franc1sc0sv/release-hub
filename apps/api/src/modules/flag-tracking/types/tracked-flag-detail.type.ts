@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
+import { FlagClosedReason } from '../../../common/types/flag-closed-reason.enum'
 import { ReleaseStatus } from '../../../common/types/release-status.enum'
 import { FlagChangeAction } from '../../../common/types/flag-change-action.enum'
 import { FlagReferenceKind } from '../../../common/types/flag-reference-kind.enum'
@@ -81,6 +82,12 @@ export class TrackedFlagDetailType {
 
   @Field(() => Boolean)
   presentInCode: boolean
+
+  @Field(() => Date, { nullable: true })
+  closedAt: Date | null
+
+  @Field(() => FlagClosedReason, { nullable: true })
+  closedReason: FlagClosedReason | null
 
   @Field(() => TrackedFlagFeatureType, { nullable: true })
   feature: TrackedFlagFeatureType | null

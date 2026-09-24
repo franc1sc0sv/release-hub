@@ -1,3 +1,4 @@
+import type { FlagClosedReason } from '../../../common/types/flag-closed-reason.enum'
 import type { FlagAction, FlagReferenceKind, ReleaseFlagDecisionType } from '@release-hub/db'
 
 export interface ITrackedFlag {
@@ -8,8 +9,16 @@ export interface ITrackedFlag {
   addedInPullRequestId: string | null
   removedInPullRequestId: string | null
   presentInCode: boolean
+  closedAt: Date | null
+  closedReason: FlagClosedReason | null
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ISetTrackedFlagClosureData {
+  closedAt: Date | null
+  closedReason: FlagClosedReason | null
+  closedById: string | null
 }
 
 export interface ICreateTrackedFlagData {
@@ -138,8 +147,14 @@ export interface ILatestFlagDecisionForProject {
   featureId: string | null
   featureName: string | null
   releaseId: string
+  releaseName: string
   decision: ReleaseFlagDecisionType
   decidedAt: Date | null
+}
+
+export interface ICarryOverDecisionScope {
+  releaseId: string
+  createdBefore: Date
 }
 
 export interface IReleaseFlagEnvironmentState {

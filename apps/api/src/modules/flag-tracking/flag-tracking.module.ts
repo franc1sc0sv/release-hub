@@ -18,6 +18,8 @@ import { SetFlagRegistryHandler } from './commands/set-flag-registry/set-flag-re
 import { RunFlagCoverageHandler } from './commands/run-flag-coverage/run-flag-coverage.handler'
 import { RunFlagCoverageForFlagHandler } from './commands/run-flag-coverage-for-flag/run-flag-coverage-for-flag.handler'
 import { ScanReleasePullRequestsHandler } from './commands/scan-release-pull-requests/scan-release-pull-requests.handler'
+import { CloseTrackedFlagHandler } from './commands/close-tracked-flag/close-tracked-flag.handler'
+import { ReopenTrackedFlagHandler } from './commands/reopen-tracked-flag/reopen-tracked-flag.handler'
 import { SetReleaseFlagDecisionHandler } from './commands/set-release-flag-decision/set-release-flag-decision.handler'
 import { GetTrackedFlagsHandler } from './queries/get-tracked-flags/get-tracked-flags.handler'
 import { GetTrackedFlagDetailHandler } from './queries/get-tracked-flag-detail/get-tracked-flag-detail.handler'
@@ -49,6 +51,8 @@ import { ScanFlagsOnReleaseResyncedHandler } from './events/scan-flags-on-releas
     RunFlagCoverageForFlagHandler,
     ScanReleasePullRequestsHandler,
     SetReleaseFlagDecisionHandler,
+    CloseTrackedFlagHandler,
+    ReopenTrackedFlagHandler,
     GetTrackedFlagsHandler,
     GetTrackedFlagDetailHandler,
     GetReleaseFlagsHandler,

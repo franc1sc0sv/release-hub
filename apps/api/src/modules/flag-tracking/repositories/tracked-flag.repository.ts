@@ -6,7 +6,9 @@ import type {
   ICreateTrackedFlagData,
   ITrackedFlagWithDetails,
   IFlagBranchPresence,
+  ISetTrackedFlagClosureData,
 } from '../interfaces/flag-tracking.interfaces'
+import type { FlagClosedReason } from '../../../common/types/flag-closed-reason.enum'
 
 interface ITrackedFlagRow {
   id: string
@@ -16,6 +18,8 @@ interface ITrackedFlagRow {
   addedInPullRequestId: string | null
   removedInPullRequestId: string | null
   presentInCode: boolean
+  closedAt: Date | null
+  closedReason: FlagClosedReason | null
   createdAt: Date
   updatedAt: Date
 }
@@ -43,6 +47,8 @@ function toITrackedFlag(row: ITrackedFlagRow): ITrackedFlag {
     addedInPullRequestId: row.addedInPullRequestId,
     removedInPullRequestId: row.removedInPullRequestId,
     presentInCode: row.presentInCode,
+    closedAt: row.closedAt,
+    closedReason: row.closedReason,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   }
@@ -172,6 +178,15 @@ export class TrackedFlagRepository extends ITrackedFlagRepository {
       where: { id: trackedFlagId },
       data: { presentInCode },
     })
+  }
+
+  setClosure = async (
+    trackedFlagId: string,
+    data: ISetTrackedFlagClosureData,
+    tx: TxClient,
+  ): Promise<ITrackedFlag> => {
+    const row = await tx.trackedFlag.update({ where: { id: trackedFlagId }, data })
+    return toITrackedFlag(row)
   }
 
   findAllForProject = async (projectId: string, tx: TxClient): Promise<ITrackedFlagWithDetails[]> => {

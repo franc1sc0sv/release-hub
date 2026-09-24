@@ -77,7 +77,7 @@ export class NotificationReadRepository extends INotificationReadRepository {
     const decisions = await tx.releaseFlagDecision.findMany({
       where: {
         decision: ReleaseFlagDecisionType.in_progress,
-        trackedFlag: { projectId, deletedAt: null },
+        trackedFlag: { projectId, deletedAt: null, closedAt: null },
       },
       orderBy: { updatedAt: 'desc' },
       select: {
@@ -126,7 +126,7 @@ export class NotificationReadRepository extends INotificationReadRepository {
     const decisions = await tx.releaseFlagDecision.findMany({
       where: {
         decision: ReleaseFlagDecisionType.in_progress,
-        trackedFlag: { projectId, deletedAt: null },
+        trackedFlag: { projectId, deletedAt: null, closedAt: null },
       },
       orderBy: { updatedAt: 'desc' },
       select: { trackedFlagId: true, trackedFlag: { select: { id: true, key: true } } },
@@ -197,7 +197,7 @@ export class NotificationReadRepository extends INotificationReadRepository {
     tx: TxClient,
   ): Promise<IShipOffReminderCandidate[]> => {
     const decisions = await tx.releaseFlagDecision.findMany({
-      where: { trackedFlag: { projectId, deletedAt: null } },
+      where: { trackedFlag: { projectId, deletedAt: null, closedAt: null } },
       orderBy: { updatedAt: 'desc' },
       select: {
         trackedFlagId: true,
@@ -250,7 +250,7 @@ export class NotificationReadRepository extends INotificationReadRepository {
     tx: TxClient,
   ): Promise<IEnableOffConflictCandidate[]> => {
     const decisions = await tx.releaseFlagDecision.findMany({
-      where: { trackedFlag: { projectId, deletedAt: null } },
+      where: { trackedFlag: { projectId, deletedAt: null, closedAt: null } },
       orderBy: { updatedAt: 'desc' },
       select: {
         trackedFlagId: true,

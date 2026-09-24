@@ -104,3 +104,25 @@ export const DELETE_FLAGS = graphql(`
     }
   }
 `)
+
+export const CLOSE_TRACKED_FLAG = graphql(`
+  mutation CloseTrackedFlag($input: CloseTrackedFlagInput!) {
+    closeTrackedFlag(input: $input) {
+      id
+      key
+      closedAt
+      closedReason
+    }
+  }
+`)
+
+export const REOPEN_TRACKED_FLAG = graphql(`
+  mutation ReopenTrackedFlag($projectId: ID!, $key: String!) {
+    reopenTrackedFlag(projectId: $projectId, key: $key) {
+      id
+      key
+      closedAt
+      closedReason
+    }
+  }
+`)

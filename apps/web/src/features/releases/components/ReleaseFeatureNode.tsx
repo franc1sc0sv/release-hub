@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { ChevronDown, Layers } from 'lucide-react'
@@ -13,10 +13,9 @@ type FeatureNode = GetReleaseTreeQuery['getReleaseTree']['features'][number]
 interface ReleaseFeatureNodeProps {
   node: FeatureNode
   releaseId: string
-  badge?: ReactNode
 }
 
-export function ReleaseFeatureNode({ node, releaseId, badge }: ReleaseFeatureNodeProps) {
+export function ReleaseFeatureNode({ node, releaseId }: ReleaseFeatureNodeProps) {
   const { t } = useTranslation('releases')
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
@@ -42,7 +41,6 @@ export function ReleaseFeatureNode({ node, releaseId, badge }: ReleaseFeatureNod
             <span className="font-display font-semibold text-foreground">
               {feature.name}
             </span>
-            {badge}
             <span className="text-xs text-muted-foreground">{prCountLabel}</span>
           </div>
 
