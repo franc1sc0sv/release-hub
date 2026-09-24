@@ -479,17 +479,17 @@
       },
       "internal": {
         "title": "Flags lanzados apagados — {{release}}",
-        "intro_one": "{{count}} flag se lanzó con la funcionalidad apagada y no estaba en el resumen para el cliente.",
-        "intro_other": "{{count}} flags se lanzaron con la funcionalidad apagada y no estaban en el resumen para el cliente.",
+        "intro_one": "{{count}} flag se lanzó con la funcionalidad apagada. No estaba en el resumen para el cliente.",
+        "intro_other": "{{count}} flags se lanzaron con la funcionalidad apagada. No estaban en el resumen para el cliente.",
         "feature": "Funcionalidad",
         "decidedIn": "Decidido en",
         "pullRequest": "PR",
         "noFeature": "Sin funcionalidad",
         "noPullRequest": "Sin PR registrado",
         "thisRelease": "este release",
-        "featureDescription": "Sobre la funcionalidad",
-        "flagDescription": "Qué hace el flag",
-        "noDescription": "Sin descripción todavía"
+        "noDescription": "Sin descripción todavía",
+        "summary": "Resumen",
+        "allDecidedIn": "Todos se decidieron en {{release}}."
       },
       "copyForSlack": "Copiar para Slack",
       "copiedForSlack": "Copiado con formato de Slack. Pégalo en un mensaje."

@@ -479,17 +479,17 @@
       },
       "internal": {
         "title": "Shipped-off flags — {{release}}",
-        "intro_one": "{{count}} flag was shipped with the feature switched off and was not in the client summary.",
-        "intro_other": "{{count}} flags were shipped with the feature switched off and were not in the client summary.",
+        "intro_one": "{{count}} flag shipped with the feature switched off. It was not in the client summary.",
+        "intro_other": "{{count}} flags shipped with the feature switched off. They were not in the client summary.",
         "feature": "Feature",
         "decidedIn": "Decided in",
         "pullRequest": "PR",
         "noFeature": "No feature",
         "noPullRequest": "No PR recorded",
         "thisRelease": "this release",
-        "featureDescription": "About the feature",
-        "flagDescription": "What the flag does",
-        "noDescription": "No description yet"
+        "noDescription": "No description yet",
+        "summary": "Summary",
+        "allDecidedIn": "All were decided in {{release}}."
       },
       "copyForSlack": "Copy for Slack",
       "copiedForSlack": "Copied with Slack formatting. Paste it into a message."

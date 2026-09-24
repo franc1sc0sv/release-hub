@@ -68,9 +68,9 @@ export function ShippedOffReportDialog({ releaseName, flags }: ShippedOffReportD
           noFeature: t('workspace.shippedOffReport.internal.noFeature'),
           noPullRequest: t('workspace.shippedOffReport.internal.noPullRequest'),
           thisRelease: t('workspace.shippedOffReport.internal.thisRelease'),
-          featureDescription: t('workspace.shippedOffReport.internal.featureDescription'),
-          flagDescription: t('workspace.shippedOffReport.internal.flagDescription'),
+          summary: t('workspace.shippedOffReport.internal.summary'),
           noDescription: t('workspace.shippedOffReport.internal.noDescription'),
+          allDecidedIn: (release) => t('workspace.shippedOffReport.internal.allDecidedIn', { release }),
         })
 
   async function handleCopy() {

@@ -27,9 +27,9 @@ export interface IShippedOffInternalLabels {
   noFeature: string
   noPullRequest: string
   thisRelease: string
-  featureDescription: string
-  flagDescription: string
+  summary: string
   noDescription: string
+  allDecidedIn: (release: string) => string
 }
 
 export interface IShippedOffReport {
@@ -154,59 +154,77 @@ export function buildClientShippedOffReport(
   return { html: html.join(''), text: text.join('\n'), slack: slack.join('\n') }
 }
 
+const SHORT_SUMMARY_LENGTH = 180
+const CONVENTIONAL_PREFIX = /^[a-z]+(\([^)]*\))?!?$/i
+
+function shortSummary(text: string | null | undefined): string | null {
+  const sentences = toParagraphs(text).join(' ').split(/(?<=[.!?])\s+/).filter(Boolean)
+  if (sentences.length === 0) return null
+  const [first, ...rest] = sentences
+  if (first.length > SHORT_SUMMARY_LENGTH) {
+    const cut = first.slice(0, SHORT_SUMMARY_LENGTH)
+    return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:—-]+$/, '')}…`
+  }
+  let summary = first
+  for (const sentence of rest) {
+    if (summary.length + sentence.length + 1 > SHORT_SUMMARY_LENGTH) break
+    summary = `${summary} ${sentence}`
+  }
+  return summary
+}
+
+function shortPullRequestTitle(title: string): string {
+  const prefix = title.split(':')[0].trim()
+  return CONVENTIONAL_PREFIX.test(prefix) ? prefix : title
+}
+
+function sortByFeature(flags: CarriedOverFlag[]): CarriedOverFlag[] {
+  return [...flags].sort((a, b) => {
+    if (a.featureName === null || b.featureName === null) return Number(a.featureName === null) - Number(b.featureName === null)
+    return a.featureName.localeCompare(b.featureName)
+  })
+}
+
+function decidedInLabel(flag: CarriedOverFlag, labels: IShippedOffInternalLabels): string {
+  return flag.decidedInThisRelease ? labels.thisRelease : flag.originReleaseName
+}
+
 export function buildInternalShippedOffReport(
   flags: CarriedOverFlag[],
   labels: IShippedOffInternalLabels,
 ): IShippedOffReport {
-  const sorted = [...flags].sort((a, b) => {
-    if (a.featureName === null || b.featureName === null) return Number(a.featureName === null) - Number(b.featureName === null)
-    return a.featureName.localeCompare(b.featureName)
-  })
-  const html: string[] = [`<h2>${escapeHtml(labels.title)}</h2>`, `<p>${escapeHtml(labels.intro)}</p>`, '<ul>']
-  const text: string[] = [labels.title, '', labels.intro, '']
-  const slack: string[] = [slackBold(labels.title), labels.intro]
+  const sorted = sortByFeature(flags)
+  const decidedInValues = new Set(sorted.map((flag) => decidedInLabel(flag, labels)))
+  const sharedDecidedIn = decidedInValues.size === 1 ? [...decidedInValues][0] : null
+  const intro = sharedDecidedIn ? `${labels.intro} ${labels.allDecidedIn(sharedDecidedIn)}` : labels.intro
 
-  for (const flag of sorted) {
-    const feature = flag.featureName ?? labels.noFeature
-    const featureDescription = toParagraphs(flag.featureDescription).join(' ') || labels.noDescription
-    const description = flagDescription(flag).join(' ') || labels.noDescription
-    const decidedIn = flag.decidedInThisRelease ? labels.thisRelease : flag.originReleaseName
+  const html: string[] = [`<h2>${escapeHtml(labels.title)}</h2>`, `<p>${escapeHtml(intro)}</p>`, '<ol>']
+  const text: string[] = [labels.title, intro]
+  const slack: string[] = [slackBold(labels.title), intro]
+
+  sorted.forEach((flag, index) => {
+    const decidedIn = sharedDecidedIn ? '' : ` · ${labels.decidedIn}: ${decidedInLabel(flag, labels)}`
+    const feature = `${flag.featureName ?? labels.noFeature}${decidedIn}`
+    const summary = shortSummary(flag.addedInPullRequest?.summary) ?? labels.noDescription
     const pr = flag.addedInPullRequest
-    const prText = pr ? `#${pr.number} ${pr.title}${pr.url ? ` (${pr.url})` : ''}` : labels.noPullRequest
-    const prSlack = pr ? `#${pr.number} ${pr.title}${pr.url ? ` — ${pr.url}` : ''}` : labels.noPullRequest
-    const prHtml = pr
-      ? pr.url
-        ? `<a href="${escapeHtml(pr.url)}">#${pr.number} ${escapeHtml(pr.title)}</a>`
-        : `#${pr.number} ${escapeHtml(pr.title)}`
-      : escapeHtml(labels.noPullRequest)
+    const prText = pr ? `#${pr.number} ${shortPullRequestTitle(pr.title)}` : labels.noPullRequest
+    const prHtml = pr?.url ? `<a href="${escapeHtml(pr.url)}">${escapeHtml(prText)}</a>` : escapeHtml(prText)
 
     html.push(
       `<li><p><code>${escapeHtml(flag.key)}</code></p>` +
-        `<p><strong>${escapeHtml(labels.feature)}:</strong> ${escapeHtml(feature)} · ` +
-        `<strong>${escapeHtml(labels.decidedIn)}:</strong> ${escapeHtml(decidedIn)}</p>` +
-        (flag.featureName
-          ? `<p><strong>${escapeHtml(labels.featureDescription)}:</strong> ${escapeHtml(featureDescription)}</p>`
-          : '') +
-        `<p><strong>${escapeHtml(labels.flagDescription)}:</strong> ${escapeHtml(description)}</p>` +
+        `<p><strong>${escapeHtml(labels.feature)}:</strong> ${escapeHtml(feature)}</p>` +
+        `<p><strong>${escapeHtml(labels.summary)}:</strong> ${escapeHtml(summary)}</p>` +
         `<p><strong>${escapeHtml(labels.pullRequest)}:</strong> ${prHtml}</p></li>`,
     )
-    text.push(
-      `- ${flag.key}`,
-      `  ${labels.feature}: ${feature} · ${labels.decidedIn}: ${decidedIn}`,
-      ...(flag.featureName ? [`  ${labels.featureDescription}: ${featureDescription}`] : []),
-      `  ${labels.flagDescription}: ${description}`,
-      `  ${labels.pullRequest}: ${prText}`,
-    )
-    slack.push(
-      '',
-      `• \`${flag.key}\``,
-      `     ${slackBold(`${labels.feature}:`)} ${feature}  ·  ${slackBold(`${labels.decidedIn}:`)} ${decidedIn}`,
-      ...(flag.featureName ? [`     ${slackBold(`${labels.featureDescription}:`)} ${featureDescription}`] : []),
-      `     ${slackBold(`${labels.flagDescription}:`)} ${description}`,
-      `     ${slackBold(`${labels.pullRequest}:`)} ${prSlack}`,
-    )
-  }
+    const lines = [
+      `${labels.feature}: ${feature}`,
+      `${labels.summary}: ${summary}`,
+      `${labels.pullRequest}: ${prText}`,
+    ]
+    text.push('', `${index + 1}. ${flag.key}`, ...lines)
+    slack.push('', `${index + 1}. \`${flag.key}\``, ...lines)
+  })
 
-  html.push('</ul>')
+  html.push('</ol>')
   return { html: html.join(''), text: text.join('\n'), slack: slack.join('\n') }
 }
