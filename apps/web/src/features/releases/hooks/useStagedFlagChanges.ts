@@ -43,17 +43,24 @@ export function useStagedFlagChanges() {
     })
   }
 
-  function stageEnabled(flag: IStageableFlag, environmentNames: string[]) {
+  function stageState(flags: IStageableFlag[], environmentNames: string[], enabled: boolean) {
     setStaged((current) => {
       const next = new Map(current)
-      for (const environment of flag.environments) {
-        if (environment.enabled || !environmentNames.includes(environment.name)) continue
-        next.set(stageId(flag.key, environment.name), {
-          flagKey: flag.key,
-          environmentName: environment.name,
-          currentEnabled: false,
-          nextEnabled: true,
-        })
+      for (const flag of flags) {
+        for (const environment of flag.environments) {
+          if (!environmentNames.includes(environment.name)) continue
+          const id = stageId(flag.key, environment.name)
+          if (environment.enabled === enabled) {
+            next.delete(id)
+            continue
+          }
+          next.set(id, {
+            flagKey: flag.key,
+            environmentName: environment.name,
+            currentEnabled: environment.enabled,
+            nextEnabled: enabled,
+          })
+        }
       }
       return next
     })
@@ -75,7 +82,7 @@ export function useStagedFlagChanges() {
     isStaged: (flagKey: string, environmentName: string) => staged.has(stageId(flagKey, environmentName)),
     failureFor: (flagKey: string, environmentName: string) => failures.get(stageId(flagKey, environmentName)) ?? null,
     toggle,
-    stageEnabled,
+    stageState,
     clear,
     settle,
   }

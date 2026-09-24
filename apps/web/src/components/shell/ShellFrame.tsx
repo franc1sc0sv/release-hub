@@ -48,7 +48,7 @@ function ShellFrameInner({ sidebarHeader, nav, fallbackTitle }: ShellFrameProps)
         </SidebarFooter>
       </Sidebar>
 
-      <SidebarInset className="min-w-0">
+      <SidebarInset className="h-svh min-w-0 overflow-hidden md:h-[calc(100svh-1rem)]">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Breadcrumb>
@@ -83,7 +83,7 @@ function ShellFrameInner({ sidebarHeader, nav, fallbackTitle }: ShellFrameProps)
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="min-w-0 flex-1 overflow-auto p-6">
+        <main className="min-h-0 min-w-0 flex-1 overflow-auto p-6">
           <Outlet />
         </main>
       </SidebarInset>

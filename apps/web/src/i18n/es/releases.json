@@ -437,6 +437,10 @@
         "partial_one": "{{failed}} cambio falló. Sigue preparado; pasa el cursor por la celda para ver el motivo.",
         "partial_other": "{{failed}} cambios fallaron. Siguen preparados; pasa el cursor por la celda para ver el motivo.",
         "error": "No se pudieron aplicar los cambios"
+      },
+      "bulk": {
+        "label_one": "Preparar para el flag listado ({{count}}):",
+        "label_other": "Preparar para los {{count}} flags listados:"
       }
     },
     "carryOver": {

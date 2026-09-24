@@ -437,6 +437,10 @@
         "partial_one": "{{failed}} change failed. It stays staged — hover the cell to see why.",
         "partial_other": "{{failed}} changes failed. They stay staged — hover the cell to see why.",
         "error": "Could not apply the changes"
+      },
+      "bulk": {
+        "label_one": "Stage for the {{count}} listed flag:",
+        "label_other": "Stage for all {{count}} listed flags:"
       }
     },
     "carryOver": {

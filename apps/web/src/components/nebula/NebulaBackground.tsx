@@ -9,7 +9,7 @@ interface NebulaBackgroundProps {
 export function NebulaBackground({ children, className }: NebulaBackgroundProps) {
   return (
     <div className={cn('relative min-h-full bg-background', className)}>
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 h-full">{children}</div>
     </div>
   )
 }

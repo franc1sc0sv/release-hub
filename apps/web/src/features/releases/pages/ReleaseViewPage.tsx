@@ -95,7 +95,7 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
   const navItems = available.map(buildNavItem)
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-6">
       <ReleaseWorkspaceHeader
         release={release}
         stats={stats}
@@ -106,15 +106,15 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
 
       <NewPrsReviewPanel release={release} features={features} projectId={projectId} />
 
-      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
-        <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+      <div className="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[260px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-8">
+        <aside className="space-y-4 lg:overflow-y-auto">
           <ReleaseSectionNav items={navItems} active={section} onSelect={selectSection} />
           <div className="hidden lg:block">
             <ReleaseReadinessCard stats={stats} />
           </div>
         </aside>
 
-        <main className="min-w-0">
+        <main className="min-w-0 lg:overflow-y-auto lg:pr-2">
           {section === ReleaseSectionValue.ASSIGN && (
             <AssignPrsSection release={release} features={features} projectId={projectId} />
           )}
@@ -201,14 +201,14 @@ export default function ReleaseViewPage() {
   })
 
   return (
-    <NebulaBackground className="p-6">
+    <NebulaBackground className="h-full">
       <m.div
         variants={staggerContainer}
         initial={reduceMotion ? 'visible' : 'hidden'}
         animate="visible"
-        className="mx-auto max-w-7xl"
+        className="mx-auto h-full max-w-7xl"
       >
-        <m.div variants={slideUp}>
+        <m.div variants={slideUp} className="h-full">
           <ReleaseWorkspace tree={tree} projectId={projectId} releasesPath={releasesPath} />
         </m.div>
       </m.div>

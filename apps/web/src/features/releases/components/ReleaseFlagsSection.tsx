@@ -15,6 +15,7 @@ import { Action, Subject } from '@release-hub/shared'
 import { ROUTES } from '@/lib/routes'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { ColumnVisibilityMenu } from '@/features/flags/components/ColumnVisibilityMenu'
+import { EnvironmentActionMenu } from '@/features/flags/components/EnvironmentActionMenu'
 import { FlagDeleteConfirmDialog } from '@/features/flags/components/FlagDeleteConfirmDialog'
 import { useFlagWriteActions } from '@/features/flags/hooks/use-flag-write-actions'
 import type { FlagDeleteTarget } from '@/features/flags/types/flag-change-target'
@@ -66,6 +67,7 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
   const removedFlags = filteredFlags.filter(isRemovedReleaseFlag)
   const undecidedCount = flags.filter((flag) => needsReleaseFlagDecision(flag) && flag.decision === null).length
   const deletableRemovedFlags = removedFlags.filter((flag) => flag.existsInFlagsmith)
+  const writableFlags = filteredFlags.filter((flag) => flag.existsInFlagsmith)
   const canBulkDeleteRemoved = canDeleteFlags && SHIPPED_RELEASE_STATUSES.includes(releaseStatus)
 
   function toggleEnvironmentVisibility(environmentName: string, hidden: boolean) {
@@ -76,7 +78,7 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
 
   function handleDecided(flag: ReleaseFlag, decision: ReleaseFlagDecisionType) {
     if (decision !== ReleaseFlagDecisionTypeValue.ENABLE_IN_RELEASE || !canWriteFlags || !flag.existsInFlagsmith) return
-    staging.stageEnabled(flag, visibleEnvironments)
+    staging.stageState([flag], visibleEnvironments, true)
   }
 
   async function handleApply() {
@@ -218,6 +220,24 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
           </>
         }
       />
+
+      {canWriteFlags && writableFlags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {t('workspace.flags.bulk.label', { count: writableFlags.length })}
+          </span>
+          <EnvironmentActionMenu
+            label={t('flags:write.actions.enableIn')}
+            environments={environments}
+            onApply={(environmentNames) => staging.stageState(writableFlags, environmentNames, true)}
+          />
+          <EnvironmentActionMenu
+            label={t('flags:write.actions.disableIn')}
+            environments={environments}
+            onApply={(environmentNames) => staging.stageState(writableFlags, environmentNames, false)}
+          />
+        </div>
+      )}
 
       {loading && flags.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-10">
