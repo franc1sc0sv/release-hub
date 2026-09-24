@@ -170,6 +170,7 @@ enum BranchSignalFilter {
 
 type CarriedOverFlagPullRequestType {
   number: Int!
+  summary: String
   title: String!
   url: String
 }
@@ -180,6 +181,7 @@ type CarriedOverFlagType {
   decidedInThisRelease: Boolean!
   decision: ReleaseFlagDecisionType!
   deploymentStatus: FlagDeploymentStatus!
+  featureDescription: String
   featureId: ID
   featureKind: FeatureKind
   featureName: String

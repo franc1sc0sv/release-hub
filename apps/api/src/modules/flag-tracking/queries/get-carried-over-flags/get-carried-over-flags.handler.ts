@@ -120,6 +120,7 @@ export class GetCarriedOverFlagsHandler extends BaseQueryHandler<
       carried.featureId = decision.featureId
       carried.featureName = decision.featureName
       carried.featureKind = decision.featureKind
+      carried.featureDescription = decision.featureDescription
       carried.addedInPullRequest = decision.addedInPullRequest
       carried.originReleaseId = decision.releaseId
       carried.originReleaseName = decision.releaseName

@@ -148,6 +148,7 @@ export interface ILatestFlagDecisionForProject {
   featureId: string | null
   featureName: string | null
   featureKind: FeatureKind | null
+  featureDescription: string | null
   addedInPullRequest: IFlagPullRequestReference | null
   releaseId: string
   releaseName: string
@@ -158,6 +159,7 @@ export interface ILatestFlagDecisionForProject {
 export interface IFlagPullRequestReference {
   number: number
   title: string
+  summary: string | null
   url: string | null
 }
 

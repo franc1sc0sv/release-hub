@@ -155,9 +155,9 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
             id: true,
             key: true,
             featureId: true,
-            feature: { select: { name: true, kind: true } },
+            feature: { select: { name: true, kind: true, description: true } },
             addedInPullRequest: {
-              select: { number: true, title: true, release: { select: { project: { select: { repo: true } } } } },
+              select: { number: true, title: true, summary: true, release: { select: { project: { select: { repo: true } } } } },
             },
           },
         },
@@ -175,10 +175,12 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
         featureId: flag.featureId,
         featureName: flag.feature?.name ?? null,
         featureKind: flag.feature?.kind ?? null,
+        featureDescription: flag.feature?.description ?? null,
         addedInPullRequest: flag.addedInPullRequest
           ? {
               number: flag.addedInPullRequest.number,
               title: flag.addedInPullRequest.title,
+              summary: flag.addedInPullRequest.summary,
               url: flag.addedInPullRequest.release.project.repo
                 ? `https://github.com/${flag.addedInPullRequest.release.project.repo}/pull/${flag.addedInPullRequest.number}`
                 : null,

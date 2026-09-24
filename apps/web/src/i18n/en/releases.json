@@ -486,8 +486,13 @@
         "pullRequest": "PR",
         "noFeature": "No feature",
         "noPullRequest": "No PR recorded",
-        "thisRelease": "this release"
-      }
+        "thisRelease": "this release",
+        "featureDescription": "About the feature",
+        "flagDescription": "What the flag does",
+        "noDescription": "No description yet"
+      },
+      "copyForSlack": "Copy for Slack",
+      "copiedForSlack": "Copied with Slack formatting. Paste it into a message."
     }
   }
 }

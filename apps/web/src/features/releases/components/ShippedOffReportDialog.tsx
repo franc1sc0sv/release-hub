@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Copy, FileDown, FileText, Loader2 } from 'lucide-react'
+import { Copy, FileDown, FileText, Loader2, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -68,12 +68,24 @@ export function ShippedOffReportDialog({ releaseName, flags }: ShippedOffReportD
           noFeature: t('workspace.shippedOffReport.internal.noFeature'),
           noPullRequest: t('workspace.shippedOffReport.internal.noPullRequest'),
           thisRelease: t('workspace.shippedOffReport.internal.thisRelease'),
+          featureDescription: t('workspace.shippedOffReport.internal.featureDescription'),
+          flagDescription: t('workspace.shippedOffReport.internal.flagDescription'),
+          noDescription: t('workspace.shippedOffReport.internal.noDescription'),
         })
 
   async function handleCopy() {
     try {
       await copyReport(report.html, report.text)
       toast.success(t('workspace.shippedOffReport.copied'))
+    } catch {
+      toast.error(t('workspace.shippedOffReport.copyFailed'))
+    }
+  }
+
+  async function handleCopyForSlack() {
+    try {
+      await navigator.clipboard.writeText(report.slack)
+      toast.success(t('workspace.shippedOffReport.copiedForSlack'))
     } catch {
       toast.error(t('workspace.shippedOffReport.copyFailed'))
     }
@@ -144,6 +156,10 @@ export function ShippedOffReportDialog({ releaseName, flags }: ShippedOffReportD
           <Button variant="outline" onClick={() => void handleCopy()} className="gap-2">
             <Copy className="size-4" aria-hidden />
             {t('workspace.shippedOffReport.copy')}
+          </Button>
+          <Button variant="outline" onClick={() => void handleCopyForSlack()} className="gap-2">
+            <MessageSquare className="size-4" aria-hidden />
+            {t('workspace.shippedOffReport.copyForSlack')}
           </Button>
           <Button onClick={() => void handleExport()} disabled={exporting} className="gap-2">
             {exporting ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <FileDown className="size-4" aria-hidden />}

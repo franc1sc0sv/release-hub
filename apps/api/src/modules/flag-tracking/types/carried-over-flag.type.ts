@@ -13,6 +13,9 @@ export class CarriedOverFlagPullRequestType {
   title: string
 
   @Field(() => String, { nullable: true })
+  summary: string | null
+
+  @Field(() => String, { nullable: true })
   url: string | null
 }
 
@@ -32,6 +35,9 @@ export class CarriedOverFlagType {
 
   @Field(() => FeatureKind, { nullable: true })
   featureKind: FeatureKind | null
+
+  @Field(() => String, { nullable: true })
+  featureDescription: string | null
 
   @Field(() => CarriedOverFlagPullRequestType, { nullable: true })
   addedInPullRequest: CarriedOverFlagPullRequestType | null
