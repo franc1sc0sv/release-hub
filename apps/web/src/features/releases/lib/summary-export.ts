@@ -116,8 +116,12 @@ function buildDocumentMarkup(args: ExportSummaryDocumentArgs): string {
   </div>`
 }
 
+export function reportPdfFilename(releaseName: string, suffix: string): string {
+  return `${slug(releaseName)}-${suffix}.pdf`
+}
+
 export function summaryPdfFilename(releaseName: string): string {
-  return `${slug(releaseName)}-summary.pdf`
+  return reportPdfFilename(releaseName, 'summary')
 }
 
 function collectPageBreaks(container: HTMLElement, scale: number): number[] {

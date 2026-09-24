@@ -168,12 +168,20 @@ enum BranchSignalFilter {
   UNREFERENCED
 }
 
+type CarriedOverFlagPullRequestType {
+  number: Int!
+  title: String!
+  url: String
+}
+
 type CarriedOverFlagType {
+  addedInPullRequest: CarriedOverFlagPullRequestType
   decidedAt: DateTime
   decidedInThisRelease: Boolean!
   decision: ReleaseFlagDecisionType!
   deploymentStatus: FlagDeploymentStatus!
   featureId: ID
+  featureKind: FeatureKind
   featureName: String
   featureReleaseState: FeatureState
   key: String!

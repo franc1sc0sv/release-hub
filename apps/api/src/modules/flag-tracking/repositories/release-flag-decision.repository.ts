@@ -151,7 +151,15 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
         decidedAt: true,
         release: { select: { name: true, compareRef: true } },
         trackedFlag: {
-          select: { id: true, key: true, featureId: true, feature: { select: { name: true } } },
+          select: {
+            id: true,
+            key: true,
+            featureId: true,
+            feature: { select: { name: true, kind: true } },
+            addedInPullRequest: {
+              select: { number: true, title: true, release: { select: { project: { select: { repo: true } } } } },
+            },
+          },
         },
       },
     })
@@ -166,6 +174,16 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
         key: flag.key,
         featureId: flag.featureId,
         featureName: flag.feature?.name ?? null,
+        featureKind: flag.feature?.kind ?? null,
+        addedInPullRequest: flag.addedInPullRequest
+          ? {
+              number: flag.addedInPullRequest.number,
+              title: flag.addedInPullRequest.title,
+              url: flag.addedInPullRequest.release.project.repo
+                ? `https://github.com/${flag.addedInPullRequest.release.project.repo}/pull/${flag.addedInPullRequest.number}`
+                : null,
+            }
+          : null,
         releaseId: decision.releaseId,
         releaseName: decision.release.name ?? decision.release.compareRef,
         decision: decision.decision,

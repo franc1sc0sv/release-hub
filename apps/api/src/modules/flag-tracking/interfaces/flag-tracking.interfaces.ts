@@ -1,3 +1,4 @@
+import type { FeatureKind } from '../../../common/types/feature-kind.enum'
 import type { FlagClosedReason } from '../../../common/types/flag-closed-reason.enum'
 import type { FlagAction, FlagReferenceKind, ReleaseFlagDecisionType } from '@release-hub/db'
 
@@ -146,10 +147,18 @@ export interface ILatestFlagDecisionForProject {
   key: string
   featureId: string | null
   featureName: string | null
+  featureKind: FeatureKind | null
+  addedInPullRequest: IFlagPullRequestReference | null
   releaseId: string
   releaseName: string
   decision: ReleaseFlagDecisionType
   decidedAt: Date | null
+}
+
+export interface IFlagPullRequestReference {
+  number: number
+  title: string
+  url: string | null
 }
 
 export interface ICarryOverDecisionScope {

@@ -451,6 +451,43 @@
       "empty": "No flag from an earlier release needs a decision.",
       "needsDecision": "Needs a decision",
       "decidedHere": "Decided in this release"
+    },
+    "shippedOffReport": {
+      "button_one": "Shipped-off report ({{count}})",
+      "button_other": "Shipped-off report ({{count}})",
+      "dialogTitle": "Shipped-off report",
+      "dialogDescription_one": "{{count}} carried-over flag is shipped but switched off. Share it with the client, or keep the internal version with its PR.",
+      "dialogDescription_other": "{{count}} carried-over flags are shipped but switched off. Share them with the client, or keep the internal version with the PRs.",
+      "audienceLabel": "Report audience",
+      "audience": {
+        "client": "Client",
+        "internal": "Internal"
+      },
+      "copy": "Copy",
+      "copied": "Report copied — paste it into your email or doc",
+      "copyFailed": "Could not copy the report",
+      "pdfTitle": {
+        "client": "Shipped-off features",
+        "internal": "Shipped-off flags — internal"
+      },
+      "client": {
+        "title": "Features ready but switched off — {{release}}",
+        "intro": "In addition to the updates we already shared, the features below are in the product today but stay switched off. Nothing changes for your users until we turn them on together.",
+        "statusLine": "Status: shipped and switched off. It becomes available when we enable it for you.",
+        "otherGroup": "Other improvements",
+        "outro": "Tell us when you want any of these features switched on, and we will plan it with you."
+      },
+      "internal": {
+        "title": "Shipped-off flags — {{release}}",
+        "intro_one": "{{count}} flag was shipped with the feature switched off and was not in the client summary.",
+        "intro_other": "{{count}} flags were shipped with the feature switched off and were not in the client summary.",
+        "feature": "Feature",
+        "decidedIn": "Decided in",
+        "pullRequest": "PR",
+        "noFeature": "No feature",
+        "noPullRequest": "No PR recorded",
+        "thisRelease": "this release"
+      }
     }
   }
 }

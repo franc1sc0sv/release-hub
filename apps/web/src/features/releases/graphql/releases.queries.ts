@@ -145,6 +145,12 @@ export const CARRIED_OVER_FLAGS = graphql(`
       key
       featureId
       featureName
+      featureKind
+      addedInPullRequest {
+        number
+        title
+        url
+      }
       originReleaseId
       originReleaseName
       decision

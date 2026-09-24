@@ -14,6 +14,7 @@ import { FlagDeploymentStatusValue } from '@/features/flags/constants/flag-enums
 import { featureStateTone } from '@/features/features/constants/feature-enums'
 import { FlagDecisionControl } from './FlagDecisionControl'
 import { ReleaseSectionHeading } from './ReleaseSectionHeading'
+import { ShippedOffReportDialog } from './ShippedOffReportDialog'
 import { CARRIED_OVER_FLAGS } from '../graphql/releases.queries'
 import type { CarriedOverFlagsQuery, FlagDeploymentStatus } from '@/generated/graphql'
 
@@ -118,9 +119,10 @@ function groupByStatus(flags: CarriedOverFlag[]) {
 
 interface CarryOverDecisionsSectionProps {
   releaseId: string
+  releaseName: string
 }
 
-export function CarryOverDecisionsSection({ releaseId }: CarryOverDecisionsSectionProps) {
+export function CarryOverDecisionsSection({ releaseId, releaseName }: CarryOverDecisionsSectionProps) {
   const { t } = useTranslation('releases')
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
   const { data, loading } = useQuery(CARRIED_OVER_FLAGS, {
@@ -131,6 +133,7 @@ export function CarryOverDecisionsSection({ releaseId }: CarryOverDecisionsSecti
   const flags = data?.carriedOverFlags ?? []
   const open = flags.filter((flag) => !flag.decidedInThisRelease)
   const decided = flags.filter((flag) => flag.decidedInThisRelease)
+  const shippedOff = flags.filter((flag) => flag.deploymentStatus === FlagDeploymentStatusValue.SHIPPED_OFF)
 
   return (
     <section aria-labelledby="release-carry-over-heading" className="space-y-5">
@@ -148,7 +151,14 @@ export function CarryOverDecisionsSection({ releaseId }: CarryOverDecisionsSecti
             </Link>
           </>
         }
-        actions={open.length > 0 && <StatusBadge tone={StatusBadgeTone.AMBER}>{t('workspace.carryOver.openCount', { count: open.length })}</StatusBadge>}
+        actions={
+          <>
+            {open.length > 0 && (
+              <StatusBadge tone={StatusBadgeTone.AMBER}>{t('workspace.carryOver.openCount', { count: open.length })}</StatusBadge>
+            )}
+            <ShippedOffReportDialog releaseName={releaseName} flags={shippedOff} />
+          </>
+        }
       />
 
       {!loading && flags.length === 0 && (

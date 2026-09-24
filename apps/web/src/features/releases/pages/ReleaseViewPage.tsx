@@ -125,7 +125,7 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
           {section === ReleaseSectionValue.FLAGS && (
             <ReleaseFlagsSection releaseId={release.id} releaseStatus={release.status} />
           )}
-          {section === ReleaseSectionValue.CARRY_OVER && <CarryOverDecisionsSection releaseId={release.id} />}
+          {section === ReleaseSectionValue.CARRY_OVER && <CarryOverDecisionsSection releaseId={release.id} releaseName={release.name ?? `${release.baseRef} → ${release.compareRef}`} />}
           {section === ReleaseSectionValue.SUMMARY && <ReleaseSummarySection release={release} features={features} />}
         </main>
       </div>

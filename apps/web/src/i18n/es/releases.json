@@ -451,6 +451,43 @@
       "empty": "Ningún flag de un release anterior necesita una decisión.",
       "needsDecision": "Necesita una decisión",
       "decidedHere": "Decidido en este release"
+    },
+    "shippedOffReport": {
+      "button_one": "Reporte de apagados ({{count}})",
+      "button_other": "Reporte de apagados ({{count}})",
+      "dialogTitle": "Reporte de flags lanzados apagados",
+      "dialogDescription_one": "{{count}} flag arrastrado se lanzó pero está apagado. Compártelo con el cliente o guarda la versión interna con su PR.",
+      "dialogDescription_other": "{{count}} flags arrastrados se lanzaron pero están apagados. Compártelos con el cliente o guarda la versión interna con los PRs.",
+      "audienceLabel": "Audiencia del reporte",
+      "audience": {
+        "client": "Cliente",
+        "internal": "Interno"
+      },
+      "copy": "Copiar",
+      "copied": "Reporte copiado — pégalo en tu correo o documento",
+      "copyFailed": "No se pudo copiar el reporte",
+      "pdfTitle": {
+        "client": "Funcionalidades lanzadas apagadas",
+        "internal": "Flags lanzados apagados — interno"
+      },
+      "client": {
+        "title": "Funcionalidades listas pero apagadas — {{release}}",
+        "intro": "Además de las novedades que ya compartimos, las siguientes funcionalidades ya están en el producto pero siguen apagadas. Nada cambia para tus usuarios hasta que las activemos juntos.",
+        "statusLine": "Estado: lanzada y apagada. Estará disponible cuando la activemos para ti.",
+        "otherGroup": "Otras mejoras",
+        "outro": "Avísanos cuándo quieres activar alguna de estas funcionalidades y lo planificamos contigo."
+      },
+      "internal": {
+        "title": "Flags lanzados apagados — {{release}}",
+        "intro_one": "{{count}} flag se lanzó con la funcionalidad apagada y no estaba en el resumen para el cliente.",
+        "intro_other": "{{count}} flags se lanzaron con la funcionalidad apagada y no estaban en el resumen para el cliente.",
+        "feature": "Funcionalidad",
+        "decidedIn": "Decidido en",
+        "pullRequest": "PR",
+        "noFeature": "Sin funcionalidad",
+        "noPullRequest": "Sin PR registrado",
+        "thisRelease": "este release"
+      }
     }
   }
 }
