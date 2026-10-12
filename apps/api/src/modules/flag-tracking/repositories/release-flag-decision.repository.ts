@@ -65,6 +65,10 @@ export class ReleaseFlagDecisionRepository extends IReleaseFlagDecisionRepositor
     return rows.map(toIReleaseFlagDecision)
   }
 
+  deleteByReleaseAndFlag = async (releaseId: string, trackedFlagId: string, tx: TxClient): Promise<void> => {
+    await tx.releaseFlagDecision.deleteMany({ where: { releaseId, trackedFlagId } })
+  }
+
   upsertByReleaseAndFlag = async (
     data: ICreateReleaseFlagDecisionData,
     tx: TxClient,

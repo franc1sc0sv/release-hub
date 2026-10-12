@@ -166,6 +166,12 @@ export const CONFIRM_RELEASE_ADDITIONS = graphql(`
   }
 `)
 
+export const CLEAR_RELEASE_FLAG_DECISION = graphql(`
+  mutation ClearReleaseFlagDecision($input: ClearReleaseFlagDecisionInput!) {
+    clearReleaseFlagDecision(input: $input)
+  }
+`)
+
 export const SET_RELEASE_FLAG_DECISION = graphql(`
   mutation SetReleaseFlagDecision($input: SetReleaseFlagDecisionInput!) {
     setReleaseFlagDecision(input: $input) {

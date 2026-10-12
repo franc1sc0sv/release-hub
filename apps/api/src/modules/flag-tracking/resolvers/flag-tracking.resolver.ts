@@ -22,6 +22,8 @@ import { RunFlagCoverageForFlagCommand } from '../commands/run-flag-coverage-for
 import { ScanReleasePullRequestsCommand } from '../commands/scan-release-pull-requests/scan-release-pull-requests.command'
 import { SetReleaseFlagDecisionInput } from '../commands/set-release-flag-decision/set-release-flag-decision.input'
 import { SetReleaseFlagDecisionCommand } from '../commands/set-release-flag-decision/set-release-flag-decision.command'
+import { ClearReleaseFlagDecisionInput } from '../commands/clear-release-flag-decision/clear-release-flag-decision.input'
+import { ClearReleaseFlagDecisionCommand } from '../commands/clear-release-flag-decision/clear-release-flag-decision.command'
 import { GetTrackedFlagsQuery } from '../queries/get-tracked-flags/get-tracked-flags.query'
 import { GetTrackedFlagDetailQuery } from '../queries/get-tracked-flag-detail/get-tracked-flag-detail.query'
 import { GetReleaseFlagsQuery } from '../queries/get-release-flags/get-release-flags.query'
@@ -91,6 +93,17 @@ export class FlagTrackingResolver {
   ): Promise<ReleaseFlagDecisionResultType> {
     return this.commandBus.execute(
       new SetReleaseFlagDecisionCommand(input.releaseId, input.trackedFlagId, input.decision, user.id),
+    )
+  }
+
+  @Mutation(() => Boolean)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  clearReleaseFlagDecision(
+    @Args('input', { type: () => ClearReleaseFlagDecisionInput }) input: ClearReleaseFlagDecisionInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<boolean> {
+    return this.commandBus.execute(
+      new ClearReleaseFlagDecisionCommand(input.releaseId, input.trackedFlagId, user.id),
     )
   }
 

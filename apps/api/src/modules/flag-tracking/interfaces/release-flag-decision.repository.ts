@@ -22,6 +22,7 @@ export abstract class IReleaseFlagDecisionRepository implements IBaseRepository<
   abstract findAllForRelease: RepositoryMethod<[releaseId: string], IReleaseFlagDecision[]>
   abstract findAllForTrackedFlag: RepositoryMethod<[trackedFlagId: string], IReleaseFlagDecision[]>
   abstract upsertByReleaseAndFlag: RepositoryMethod<[data: ICreateReleaseFlagDecisionData], IReleaseFlagDecision>
+  abstract deleteByReleaseAndFlag: RepositoryMethod<[releaseId: string, trackedFlagId: string], void>
   abstract findLatestInProgressForProject: RepositoryMethod<
     [projectId: string, excludeReleaseId: string | null],
     ILatestInProgressFlagDecision[]
