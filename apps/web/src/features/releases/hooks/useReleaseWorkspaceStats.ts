@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useQuery } from '@apollo/client/react'
 import { CARRIED_OVER_FLAGS, GET_COVERAGE } from '../graphql/releases.queries'
 import { useReleaseFlags } from './useReleaseFlags'
@@ -47,7 +48,7 @@ export function useReleaseWorkspaceStats(
   release: ReleaseNode,
   features: FeatureNodes,
 ): IReleaseWorkspaceStats {
-  const { data: coverageData } = useQuery(GET_COVERAGE, {
+  const { data: coverageData, refetch: refetchCoverage } = useQuery(GET_COVERAGE, {
     variables: { releaseId: release.id },
     fetchPolicy: 'cache-and-network',
   })
@@ -59,6 +60,10 @@ export function useReleaseWorkspaceStats(
 
   const acceptedFeatures = features.filter((node) => !node.feature.suggested)
   const prs = features.flatMap((node) => node.prs)
+
+  useEffect(() => {
+    refetchCoverage()
+  }, [refetchCoverage, prs.length, release.aiDraftStatus])
   const tickets = new Set(
     prs.flatMap((pr) => pr.tickets.map((ticket) => `${ticket.source}:${ticket.issueId}`)),
   )
