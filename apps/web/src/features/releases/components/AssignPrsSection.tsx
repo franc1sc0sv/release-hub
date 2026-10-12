@@ -49,19 +49,28 @@ export function AssignPrsSection({ release, features, projectId }: AssignPrsSect
 
   const suggestedFeatures = features.filter((n) => n.feature.suggested)
   const assignedFeatures = features.filter((n) => !n.feature.suggested)
+  const hasSuggested = suggestedFeatures.length > 0
+  const hasAssigned = assignedFeatures.length > 0
 
   return (
     <m.div
       variants={staggerContainer}
       initial={reduceMotion ? 'visible' : 'hidden'}
       animate="visible"
-      className="space-y-8"
+      className="space-y-4"
     >
-      <m.div variants={slideUp} className="flex items-center justify-end gap-3">
-        <RegenerateDraftButton
-          releaseId={release.id}
-          aiDraftStatus={release.aiDraftStatus}
-        />
+      <m.div variants={slideUp} className="flex items-center justify-between gap-3">
+        {hasSuggested ? (
+          <SuggestedHeading />
+        ) : (
+          hasAssigned && <AssignedHeading />
+        )}
+        <div className="ml-auto">
+          <RegenerateDraftButton
+            releaseId={release.id}
+            aiDraftStatus={release.aiDraftStatus}
+          />
+        </div>
       </m.div>
 
       {!aiEnabled && (
@@ -75,32 +84,22 @@ export function AssignPrsSection({ release, features, projectId }: AssignPrsSect
         </m.div>
       )}
 
-      {suggestedFeatures.length > 0 && (
-        <m.div variants={slideUp} className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-fuchsia-400" aria-hidden />
-            <h2 className="font-display text-base font-semibold text-foreground">
-              {t('draft.suggested.heading')}
-            </h2>
-          </div>
-          <div className="space-y-3">
-            {suggestedFeatures.map((node) => (
-              <SuggestedFeatureCard
-                key={node.feature.id}
-                node={node}
-                releaseId={release.id}
-                projectId={projectId}
-              />
-            ))}
-          </div>
+      {hasSuggested && (
+        <m.div variants={slideUp} className="space-y-3">
+          {suggestedFeatures.map((node) => (
+            <SuggestedFeatureCard
+              key={node.feature.id}
+              node={node}
+              releaseId={release.id}
+              projectId={projectId}
+            />
+          ))}
         </m.div>
       )}
 
-      {assignedFeatures.length > 0 && (
-        <m.div variants={slideUp} className="space-y-4">
-          <h2 className="font-display text-base font-semibold text-foreground">
-            {t('draft.prsByFeature')}
-          </h2>
+      {hasAssigned && (
+        <m.div variants={slideUp} className={hasSuggested ? 'space-y-4 pt-4' : 'space-y-4'}>
+          {hasSuggested && <AssignedHeading />}
           <div className="space-y-3">
             {assignedFeatures.map((node) => (
               <DraftFeatureSection
@@ -128,6 +127,29 @@ export function AssignPrsSection({ release, features, projectId }: AssignPrsSect
       )}
 
     </m.div>
+  )
+}
+
+function SuggestedHeading() {
+  const { t } = useTranslation('releases')
+
+  return (
+    <div className="flex items-center gap-2">
+      <Sparkles className="size-4 text-fuchsia-400" aria-hidden />
+      <h2 className="font-display text-base font-semibold text-foreground">
+        {t('draft.suggested.heading')}
+      </h2>
+    </div>
+  )
+}
+
+function AssignedHeading() {
+  const { t } = useTranslation('releases')
+
+  return (
+    <h2 className="font-display text-base font-semibold text-foreground">
+      {t('draft.prsByFeature')}
+    </h2>
   )
 }
 
