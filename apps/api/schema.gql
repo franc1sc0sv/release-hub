@@ -192,6 +192,11 @@ type CarriedOverFlagType {
   trackedFlagId: ID!
 }
 
+input ClearReleaseFlagDecisionInput {
+  releaseId: ID!
+  trackedFlagId: ID!
+}
+
 input CloseTrackedFlagInput {
   key: String!
   projectId: ID!
@@ -775,6 +780,7 @@ type Mutation {
   assignPrToFeature(input: AssignPrToFeatureInput!): Boolean!
   blockBranch(input: BlockBranchInput!): BlockedBranchType!
   clearAllNotifications: Int!
+  clearReleaseFlagDecision(input: ClearReleaseFlagDecisionInput!): Boolean!
   closeTrackedFlag(input: CloseTrackedFlagInput!): TrackedFlagClosureType!
   completeGithubInstallation(input: CompleteGithubInstallationInput!): GithubInstallResultType!
   confirmRelease(input: ConfirmReleaseInput!): ReleaseObjectType!
@@ -1286,6 +1292,7 @@ enum SortDirection {
 
 input StartSummaryGenerationInput {
   featureIds: [ID!]
+  includeInternalLinks: Boolean! = false
   model: String
   releaseId: ID!
   summaryProfileId: ID

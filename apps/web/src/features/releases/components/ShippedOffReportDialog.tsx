@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { copyRichText } from '@/lib/copy-rich-text'
 import { SummaryDocument } from './SummaryDocument'
 import { exportSummaryDocumentPdf, reportPdfFilename } from '../lib/summary-export'
 import {
@@ -30,19 +31,6 @@ const AUDIENCE_OPTIONS: ShippedOffAudience[] = [ShippedOffAudienceValue.CLIENT, 
 interface ShippedOffReportDialogProps {
   releaseName: string
   flags: CarriedOverFlag[]
-}
-
-async function copyReport(html: string, text: string) {
-  if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        'text/html': new Blob([html], { type: 'text/html' }),
-        'text/plain': new Blob([text], { type: 'text/plain' }),
-      }),
-    ])
-    return
-  }
-  await navigator.clipboard.writeText(text)
 }
 
 export function ShippedOffReportDialog({ releaseName, flags }: ShippedOffReportDialogProps) {
@@ -75,7 +63,7 @@ export function ShippedOffReportDialog({ releaseName, flags }: ShippedOffReportD
 
   async function handleCopy() {
     try {
-      await copyReport(report.html, report.text)
+      await copyRichText(report.html, report.text)
       toast.success(t('workspace.shippedOffReport.copied'))
     } catch {
       toast.error(t('workspace.shippedOffReport.copyFailed'))

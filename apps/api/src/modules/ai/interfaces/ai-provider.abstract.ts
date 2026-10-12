@@ -57,6 +57,17 @@ export interface IAiSummaryProfile {
   badExamples: IAiSummaryProfileExample[]
 }
 
+export interface IAiSummaryFlag {
+  key: string
+  url: string
+}
+
+export interface IAiSummaryPullRequest {
+  summary: string
+  url: string | null
+  flags: IAiSummaryFlag[]
+}
+
 export interface IAiStreamSummaryInput {
   releaseTitle: string
   model: string | null
@@ -69,6 +80,9 @@ export interface IAiStreamSummaryInput {
     kind: string
     statusLine: string
     prSummaries: string[]
+    url: string | null
+    flags: IAiSummaryFlag[]
+    pullRequests: IAiSummaryPullRequest[]
   }>
 }
 

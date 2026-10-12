@@ -157,8 +157,8 @@ function DraftingState({ reduceMotion }: { reduceMotion: boolean }) {
   const { t } = useTranslation('releases')
 
   return (
-    <GlassCard glow="indigo">
-      <CardContent className="flex flex-col items-center gap-4 py-16">
+    <GlassCard glow="indigo" className="flex-1">
+      <CardContent className="flex flex-1 flex-col items-center justify-center gap-4 py-16">
         <div className="flex size-14 items-center justify-center rounded-full bg-indigo-500/20">
           <m.div
             animate={reduceMotion ? {} : { rotate: 360 }}

@@ -10,6 +10,7 @@ import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
 import { CardContent } from '@/components/ui/card'
 import { ROUTES } from '@/lib/routes'
 import { slideUp, staggerContainer } from '@/lib/animations'
+import { cn } from '@/lib/utils'
 import { useProject } from '@/context/project.context'
 import { useAutoCollapsedSidebar } from '@/hooks/use-auto-collapsed-sidebar'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
@@ -93,6 +94,9 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
   }
 
   const navItems = available.map(buildNavItem)
+  const isAiWorking =
+    (section === ReleaseSectionValue.ASSIGN && DRAFTING_STATUSES.has(release.aiDraftStatus)) ||
+    (section === ReleaseSectionValue.SUMMARY && release.summaryStatus === AiSummaryStatusValue.GENERATING)
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-6">
@@ -106,7 +110,12 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
 
       <NewPrsReviewPanel release={release} features={features} projectId={projectId} />
 
-      <div className="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[260px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-8">
+      <div
+        className={cn(
+          'grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8',
+          !isAiWorking && 'lg:min-h-0 lg:flex-1 lg:grid-rows-[minmax(0,1fr)]',
+        )}
+      >
         <aside className="space-y-4 lg:overflow-y-auto">
           <ReleaseSectionNav items={navItems} active={section} onSelect={selectSection} />
           <div className="hidden lg:block">
@@ -114,7 +123,7 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
           </div>
         </aside>
 
-        <main className="min-w-0 lg:overflow-y-auto lg:pr-2">
+        <main className={cn('min-w-0 lg:overflow-y-auto lg:pr-2', isAiWorking && 'lg:flex lg:flex-col')}>
           {section === ReleaseSectionValue.ASSIGN && (
             <AssignPrsSection release={release} features={features} projectId={projectId} />
           )}

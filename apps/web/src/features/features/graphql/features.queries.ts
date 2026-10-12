@@ -65,6 +65,10 @@ export const GET_FEATURE = graphql(`
           author
           date
         }
+        flagChanges {
+          flagKey
+          action
+        }
       }
       snapshots {
         releaseId

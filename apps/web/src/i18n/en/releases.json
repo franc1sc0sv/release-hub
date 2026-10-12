@@ -270,7 +270,16 @@
       "hint": "Select at least one feature to generate a summary",
       "notIncluded": "Not included",
       "excludedReason": "Can't be added — this feature is {{state}} and hasn't shipped yet. Set it to a released state to include it."
-    }
+    },
+    "copyCode": "Click to copy",
+    "copyCodeAriaLabel": "Copy {{value}}",
+    "codeCopied": "Copied {{value}}",
+    "copyCodeFailed": "Could not copy",
+    "includeInternalLinks": "Include internal links",
+    "flagLinkCount": "Feature flags {{linked}}/{{total}}",
+    "flagLinksComplete": "Every flag added in this release is linked in the summary.",
+    "flagLinksMissing_one": "{{count}} flag added in this release is not in the summary:",
+    "flagLinksMissing_other": "{{count}} flags added in this release are not in the summary:"
   },
   "prSummary": {
     "title": "AI summary",
@@ -311,6 +320,9 @@
   "export": {
     "pdf": "Export PDF",
     "exporting": "Exporting...",
+    "copy": "Copy",
+    "copied": "Summary copied",
+    "copyFailed": "Could not copy the summary",
     "noSummary": "Generate the summary first before exporting",
     "downloadFailed": "Download failed",
     "brand": "Release Hub",
@@ -342,6 +354,8 @@
     "decisionLabel": "Flag decision",
     "decisionPlaceholder": "Set decision",
     "noDecision": "No decision yet",
+    "clearDecision": "Clear decision",
+    "clearDecisionAriaLabel": "Clear the decision for {{flag}}",
     "removedNote": "Removed",
     "searchPlaceholder": "Search flags…",
     "carriedOver": {
@@ -361,7 +375,9 @@
     },
     "toast": {
       "decisionSaved": "Flag decision saved",
-      "decisionError": "Could not save decision — reverted"
+      "decisionError": "Could not save decision — reverted",
+      "decisionCleared": "Decision cleared",
+      "clearError": "Could not clear decision — reverted"
     },
     "decisionShort": {
       "ENABLE_IN_RELEASE": "Enable",

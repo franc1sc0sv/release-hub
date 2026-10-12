@@ -1,3 +1,4 @@
+import type { FlagAction, FlagReferenceKind } from '@release-hub/db'
 import type { FeatureKind } from '../../../common/types/feature-kind.enum'
 import type { FeatureState } from '../../../common/types/feature-state.enum'
 import type {
@@ -59,6 +60,12 @@ export interface IFeatureTicketLink {
   confidence: number
 }
 
+export interface IFeaturePrFlagChange {
+  flagKey: string
+  action: FlagAction
+  kind: FlagReferenceKind
+}
+
 export interface IFeaturePullRequest {
   id: string
   number: number
@@ -72,6 +79,7 @@ export interface IFeaturePullRequest {
   aiRationale: string | null
   commits: IFeatureCommit[]
   tickets: IFeatureTicketLink[]
+  flagChanges: IFeaturePrFlagChange[]
 }
 
 export interface IFeatureDetail {

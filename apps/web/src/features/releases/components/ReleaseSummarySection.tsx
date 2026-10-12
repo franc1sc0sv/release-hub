@@ -7,6 +7,9 @@ import { AlertCircle, Bot, Check, Loader2, PenLine, RefreshCcw, Sparkles } from 
 import { toast } from 'sonner'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
 import { GlassCard } from '@/components/nebula/GlassCard'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -19,6 +22,7 @@ import {
 } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { useAbility } from '@/context/ability.context'
 import { Action, Subject } from '@release-hub/shared'
@@ -29,7 +33,9 @@ import { SummaryExportControls } from './SummaryExportControls'
 import { SummaryDocument } from './SummaryDocument'
 import { SAVE_RELEASE_SUMMARY, START_SUMMARY_GENERATION } from '../graphql/releases.mutations'
 import { GET_RELEASE_TREE } from '../graphql/releases.queries'
-import { AiSummaryStatusValue } from '../constants/release-enums'
+import { AiSummaryStatusValue, FlagChangeActionValue } from '../constants/release-enums'
+import { useReleaseFlags } from '../hooks/useReleaseFlags'
+import { hasInternalLinks, missingFlagKeys } from '../lib/summary-flag-links'
 import { FeatureKindValue } from '@/features/features/constants/feature-enums'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { useSummaryProfiles } from '@/features/summary-profiles/hooks/use-summary-profiles'
@@ -40,14 +46,14 @@ type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
 type SummaryMode = 'read' | 'edit'
 
 const AI_MODELS = [
-  'claude-haiku-4-5-20251001',
-  'claude-sonnet-4-5',
-  'claude-opus-4-5',
+  'claude-haiku-5-5',
+  'claude-sonnet-5-5',
+  'claude-opus-5-5',
 ] as const
 
 type AiModel = (typeof AI_MODELS)[number]
 
-const DEFAULT_MODEL: AiModel = 'claude-haiku-4-5-20251001'
+const DEFAULT_MODEL: AiModel = 'claude-haiku-5-5'
 const NONE_PROFILE_VALUE = 'none' as const
 
 function resolveFeatureState(node: FeatureNodes[number]): FeatureState {
@@ -67,8 +73,8 @@ function SummaryGeneratingState({ reduceMotion }: { reduceMotion: boolean }) {
   const { t } = useTranslation('releases')
 
   return (
-    <GlassCard glow="indigo">
-      <CardContent className="flex flex-col items-center gap-4 py-16">
+    <GlassCard glow="indigo" className="flex-1">
+      <CardContent className="flex flex-1 flex-col items-center justify-center gap-4 py-16">
         <div className="flex size-14 items-center justify-center rounded-full bg-indigo-500/20">
           <m.div
             animate={reduceMotion ? {} : { rotate: 360 }}
@@ -106,6 +112,13 @@ export function ReleaseSummarySection({ release, features }: ReleaseSummarySecti
   )
   const [profileId, setProfileId] = useState<string>(release.summaryProfileId ?? NONE_PROFILE_VALUE)
   const [generateOpen, setGenerateOpen] = useState(false)
+  const [includeInternalLinks, setIncludeInternalLinks] = useState(() =>
+    hasInternalLinks(release.summary ?? '', window.location.origin),
+  )
+  const { flags: releaseFlags } = useReleaseFlags(release.id)
+  const addedFlagKeys = releaseFlags
+    .filter((flag) => flag.changes.some((change) => change.action === FlagChangeActionValue.added))
+    .map((flag) => flag.key)
   const [editorContent, setEditorContent] = useState<string>(release.summary ?? '')
   const [savedAt, setSavedAt] = useState<string | null>(release.summaryEditedAt ?? null)
 
@@ -166,13 +179,14 @@ export function ReleaseSummarySection({ release, features }: ReleaseSummarySecti
             model,
             summaryProfileId: profileId === NONE_PROFILE_VALUE ? null : profileId,
             featureIds: Array.from(selectedFeatureIds),
+            includeInternalLinks,
           },
         },
       })
     } catch {
       toast.error(tAi('summary.error'))
     }
-  }, [startGeneration, release.id, model, profileId, selectedFeatureIds, tAi])
+  }, [startGeneration, release.id, model, profileId, selectedFeatureIds, includeInternalLinks, tAi])
 
   const handleSave = useCallback(async () => {
     try {
@@ -194,6 +208,7 @@ export function ReleaseSummarySection({ release, features }: ReleaseSummarySecti
   }, [saveSummary, release.id, editorContent, model, profileId, t])
 
   const hasSummary = editorContent.length > 0 && editorContent !== '<p></p>'
+  const missingFlags = missingFlagKeys(editorContent, addedFlagKeys)
   const noneSelected = selectedFeatureIds.size === 0
   const releaseName = release.name ?? `${release.baseRef} → ${release.compareRef}`
 
@@ -212,7 +227,7 @@ export function ReleaseSummarySection({ release, features }: ReleaseSummarySecti
     : null
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-6">
       <GlassCard glow={isGenerating ? 'magenta' : 'none'}>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
@@ -229,6 +244,39 @@ export function ReleaseSummarySection({ release, features }: ReleaseSummarySecti
               <span className="text-xs text-muted-foreground">
                 {t('summary.lastSaved', { time: formattedSavedAt })}
               </span>
+            )}
+
+            {hasSummary && addedFlagKeys.length > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<span tabIndex={0} className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />}
+                  >
+                    <StatusBadge tone={missingFlags.length === 0 ? StatusBadgeTone.EMERALD : StatusBadgeTone.AMBER}>
+                      {t('summary.flagLinkCount', {
+                        linked: addedFlagKeys.length - missingFlags.length,
+                        total: addedFlagKeys.length,
+                      })}
+                    </StatusBadge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm">
+                    {missingFlags.length === 0 ? (
+                      t('summary.flagLinksComplete')
+                    ) : (
+                      <div className="space-y-1">
+                        <p>{t('summary.flagLinksMissing', { count: missingFlags.length })}</p>
+                        <ul className="space-y-0.5">
+                          {missingFlags.map((key) => (
+                            <li key={key} className="break-all font-mono text-xs">
+                              {key}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
 
             {canEdit && (
@@ -364,6 +412,18 @@ export function ReleaseSummarySection({ release, features }: ReleaseSummarySecti
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="summary-include-internal-links" className="text-xs font-medium text-muted-foreground">
+                        {t('summary.includeInternalLinks')}
+                      </Label>
+                      <Switch
+                        id="summary-include-internal-links"
+                        size="sm"
+                        checked={includeInternalLinks}
+                        onCheckedChange={setIncludeInternalLinks}
+                      />
                     </div>
 
                     {features.length > 0 && (

@@ -12,19 +12,33 @@ import type {
   IAiPrSummaryResult,
 } from '../interfaces/ai-provider.abstract'
 import { SummaryChunkType } from '../types/summary-chunk.type'
+import { escapeHtml } from '../../../common/text/escape-html'
+import {
+  allFeatureFlags,
+  featureTitleLink,
+  flagsInline,
+  flagsParagraph,
+  pullRequestTitleLink,
+  usesPullRequestItems,
+} from '../prompts/summary-links'
 
-const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
+const DEFAULT_MODEL = 'claude-haiku-5-5'
+const DRAFT_MODEL = 'claude-sonnet-5-5'
 
 const STRICT_JSON_SYSTEM_PROMPT =
   'You output only strict JSON matching the requested shape. No prose, no markdown, no code fences.'
 
+const NO_DASH_RULE =
+  'Never use em dashes or en dashes anywhere in the text. Use a colon, a comma, or a new sentence instead.'
+
 const HTML_SUMMARY_SYSTEM_PROMPT = [
   'You write client-facing release documents as valid HTML fragments.',
   'You may use ONLY these tags: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <code>, <blockquote>, <a>, and <span style="color:...">.',
-  'Never use any other tag — no <h1>, <div>, <table>, <img>, <script>, <style>, <button>, <br> — and no markdown syntax (no #, *, -, `, etc).',
+  'Never use any other tag (no <h1>, <div>, <table>, <img>, <script>, <style>, <button>, <br>) and no markdown syntax (no #, *, -, `, etc).',
   'The only inline style allowed is color on a <span>, and its value must be exactly one of: #6366f1, #8b5cf6, #ec1e8c, var(--muted-foreground), var(--foreground). Use a colored span sparingly, only for the rare, meaningful highlight.',
   'Follow the requested structure and separators exactly.',
-  'Output only the raw HTML fragment — no preamble, no meta-commentary, no code fences, no explanation of what you did.',
+  NO_DASH_RULE,
+  'Output only the raw HTML fragment: no preamble, no meta-commentary, no code fences, no explanation of what you did.',
 ].join(' ')
 
 const SUMMARY_SENTINEL = '@@@'
@@ -46,13 +60,13 @@ function buildPromptA(input: IAiSuggestInput): string {
     'You assign exactly one feature to a single merged pull request for a software release.',
     'Each candidate feature is like a SKILL defined by its NAME and DESCRIPTION: the description states what work belongs to that feature. Read the pull request and pick the ONE feature whose description best matches what the PR actually does.',
     'Rules:',
-    '- The feature DESCRIPTION is the primary matching signal — match on meaning and intent, not surface keywords. Name and tags are secondary hints.',
-    '- BUG RULE (highest precedence): If the PR\'s primary purpose is fixing a defect or bug — indicated by titles containing "[Bug]" or "[BUG]", or descriptions/commit messages containing words like "incorrect", "not working", "fails", "wrong", "regression", "defect", "fix" referring to broken behaviour — AND a candidate feature named "Bugs" is present in the list, you MUST assign that PR to the "Bugs" feature with confidence >= 0.9. This rule overrides all other matching logic.',
+    '- The feature DESCRIPTION is the primary matching signal: match on meaning and intent, not surface keywords. Name and tags are secondary hints.',
+    '- BUG RULE (highest precedence): If the PR\'s primary purpose is fixing a defect or bug: indicated by titles containing "[Bug]" or "[BUG]", or descriptions/commit messages containing words like "incorrect", "not working", "fails", "wrong", "regression", "defect", "fix" referring to broken behaviour: AND a candidate feature named "Bugs" is present in the list, you MUST assign that PR to the "Bugs" feature with confidence >= 0.9. This rule overrides all other matching logic.',
     '- Prefer a feature with kind "product" when one genuinely fits the PR. Use a feature with kind "default" (infrastructure, tests, chores, and other non-product work) only when no product feature fits.',
     '- Choose ONLY from the provided feature ids. Never invent an id.',
     '- "confidence" is how well the PR matches the chosen feature description: 0 = pure guess, 1 = certain.',
     '- NO-MATCH RULE: If no provided candidate feature genuinely fits the PR (confidence would be below 0.4 for every candidate), set "featureId" to an empty string "" and include "suggestedFeatureName" and "suggestedFeatureDescription" in the response.',
-    '  - "suggestedFeatureName": a concise, human-readable product-feature name. Do NOT use the PR title verbatim — derive a feature-level name that describes the capability or area of work.',
+    '  - "suggestedFeatureName": a concise, human-readable product-feature name. Do NOT use the PR title verbatim: derive a feature-level name that describes the capability or area of work.',
     '  - "suggestedFeatureDescription": a 1-3 sentence skill-like description that states what work belongs to this feature, written so future PRs can be matched to it by description.',
     '',
     'Pull request:',
@@ -63,7 +77,7 @@ function buildPromptA(input: IAiSuggestInput): string {
     `  changed_files: ${input.changedPaths.join(', ') || 'none'}`,
     `  linked_ticket: ${input.linkedTicketTitle ?? 'none'}`,
     '',
-    'Candidate features (JSON array — match the PR against each "description"):',
+    'Candidate features (JSON array: match the PR against each "description"):',
     candidates,
     '',
     'Respond with exactly this JSON object and nothing else:',
@@ -82,7 +96,8 @@ function buildPromptPrSummary(input: IAiPrSummaryInput): string {
   return [
     'You write a concise, factual engineering resume of what a merged pull request ships.',
     'Summarise what changed and why, drawing on commit messages, the PR body, and linked ticket context.',
-    'Write for an engineer reading a release log — no jargon, no filler.',
+    'Write for an engineer reading a release log: no jargon, no filler.',
+    NO_DASH_RULE,
     '',
     `PR title: ${input.prTitle}`,
     `PR body: ${input.prBody ?? 'none'}`,
@@ -104,7 +119,7 @@ function appendProfileBlock(lines: string[], profile: IAiSummaryProfile): void {
   if (profile.outputTemplate) {
     lines.push(
       '',
-      'OUTPUT TEMPLATE (a whole-document exemplar — match its style and structure, not its literal content):',
+      'OUTPUT TEMPLATE (a whole-document exemplar: match its style and structure, not its literal content):',
       profile.outputTemplate,
     )
   }
@@ -131,31 +146,50 @@ function buildPromptReleaseNotes(input: IAiStreamSummaryInput): string {
 
   const workText = input.features
     .map((f) => {
-      const items = f.prSummaries.length > 0 ? f.prSummaries : [f.description]
-      return [
+      const header = [
         `- feature: ${f.name}`,
         `  type: ${f.kind}`,
+        `  title html (use exactly, you may only change the visible title text): ${featureTitleLink(f, f.name)}`,
+      ]
+      if (usesPullRequestItems(f) && f.pullRequests.length > 0) {
+        return [
+          ...header,
+          '  shipped items (one nested <li> each):',
+          ...f.pullRequests.map((pr) =>
+            [
+              `    * ${pr.summary}`,
+              `      item start html (replace TITLE with a 2-6 word title): ${pullRequestTitleLink(pr.url, 'TITLE')}`,
+              `      item flags html (put exactly at the end of this item's <li>, unchanged): ${flagsInline(pr.flags) || 'none'}`,
+            ].join('\n'),
+          ),
+        ].join('\n')
+      }
+      const items = f.prSummaries.length > 0 ? f.prSummaries : [f.description]
+      return [
+        ...header,
+        `  flags html (put exactly at the end of this feature's <li>, unchanged): ${flagsParagraph(f.flags) || 'none'}`,
         '  shipped items:',
-        ...items.map((s) => `    * ${s}`),
+        ...items.map((item) => `    * ${item}`),
       ].join('\n')
     })
     .join('\n')
 
   const lines = [
     'You write a client-facing release notes document as styled HTML.',
-    'Voice: clear, warm, factual. Plain, client-facing language only — never use ticket IDs, PR numbers, branch names, feature-flag keys, or internal jargon.',
+    'Voice: clear, warm, factual. Plain, client-facing language only: never use ticket IDs, PR numbers, branch names, feature-flag keys, or internal jargon in your own sentences. The provided flags html is the only place flag keys may appear.',
     'Output only the raw HTML fragment: no preamble, no sign-off, no meta-commentary, no code fences.',
     '',
-    'STRUCTURE — produce ONLY these two sections, in this exact order, and include a section only if it has at least one item:',
+    'STRUCTURE: produce ONLY these two sections, in this exact order, and include a section only if it has at least one item:',
     '  <h2>Features</h2> then a <ul> listing the new client-facing capabilities.',
     '  <h2>Bug Fixes</h2> then a <ul> listing the fixes.',
     'Create no other section or heading. Never output an availability or status line (e.g. "in development, planned for an upcoming release").',
     'You may optionally open with a single short intro sentence in one <p> before the sections.',
     '',
-    'CLASSIFY each provided item into those two sections — include ALL provided items, they were chosen deliberately, so never drop one:',
-    '  - The feature named "Bugs" holds bug fixes → one <li> per shipped item under Bug Fixes, phrased "Fixed a bug/issue where ...".',
-    '  - Every other provided feature is a client-facing change → one <li> under Features, leading with the client benefit; add a short quoted example when it helps.',
-    '  - Use one <li> per shipped item; never merge unrelated items into a single bullet.',
+    'ONE <li> PER FEATURE: a feature groups several pull requests; include ALL provided features, they were chosen deliberately, so never drop one:',
+    '  - Start each <li> with that feature\'s title html exactly as given (keep its href when it has one; never add a link when it has none); you may only reword the visible title into client language.',
+    '  - The feature named "Bugs" holds bug fixes → its one <li> goes under Bug Fixes: the title html, then a nested <ul> with one <li> per shipped item. Each nested <li> starts with its item start html (TITLE replaced by a 2-6 word title), then a colon and "Fixed a bug/issue where ...", then its item flags html at the very end when it is not none.',
+    '  - Every other feature is a client-facing change → its one <li> goes under Features: the title html, a colon, then 1-3 sentences that combine its shipped items, leading with the client benefit.',
+    '  - When a feature has flags html, end its <li> with that exact HTML. Never write flag links yourself and never add one for a feature whose flags html is none.',
     '',
     `Release: ${input.releaseTitle}`,
     `Release tags (context only): ${tagsLine}`,
@@ -179,7 +213,7 @@ function buildPromptB(input: IAiStreamSummaryInput): string {
       const context = f.prSummaries.length > 0 ? f.prSummaries.join(' ') : f.description
       return [
         `Feature ${i + 1}: ${f.name}`,
-        `  Availability (already shown to the reader — do not restate it): ${f.statusLine}`,
+        `  Availability (already shown to the reader: do not restate it): ${f.statusLine}`,
         `  What shipped: ${context}`,
       ].join('\n')
     })
@@ -197,7 +231,8 @@ function buildPromptB(input: IAiStreamSummaryInput): string {
     '  1. A 2-3 sentence introduction to the whole release, written as styled HTML (e.g. a <p>, optionally with <strong>/<em> or a single sparing colored <span> highlight).',
     `  2. A line containing only ${SUMMARY_SENTINEL}`,
     `  3. One styled HTML body for EACH feature below, in the SAME ORDER, with a line containing only ${SUMMARY_SENTINEL} between consecutive bodies.`,
-    'For each feature, write only the body — do not repeat the feature name or its availability line, both are already rendered above your text. You may use headings (<h3>), lists, emphasis, and a rare colored highlight to structure the body. Exactly one body per feature.',
+    'Never write links or feature-flag keys yourself.',
+    'For each feature, write only the body: do not repeat the feature name or its availability line, both are already rendered above your text. You may use headings (<h3>), lists, emphasis, and a rare colored highlight to structure the body. Exactly one body per feature.',
     '',
     `Release: ${input.releaseTitle}`,
     `Release tags (context only): ${tagsLine}`,
@@ -234,13 +269,6 @@ function normalizeSuggestion(parsed: Partial<IAiSuggestResult>): Omit<IAiSuggest
 function normalizePrSummary(parsed: Partial<IAiPrSummaryResult>): Omit<IAiPrSummaryResult, 'usage'> {
   const summary = typeof parsed.summary === 'string' ? parsed.summary : ''
   return { summary }
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
 }
 
 function stripFences(text: string): string {
@@ -350,7 +378,7 @@ function* openSection(
   const feature = index >= 0 && index < features.length ? features[index] : null
   if (feature) {
     yield {
-      chunk: `<h2>${escapeHtml(feature.name)}</h2><p><em>${escapeHtml(feature.statusLine)}</em></p>`,
+      chunk: `<h2>${featureTitleLink(feature, feature.name)}</h2><p><em>${escapeHtml(feature.statusLine)}</em></p>`,
       done: false,
     }
   }
@@ -361,9 +389,12 @@ function* closeSection(
   index: number,
   hadText: boolean,
 ): Generator<SummaryChunkType> {
-  if (!hadText && index >= 0 && index < features.length) {
+  if (index < 0 || index >= features.length) return
+  if (!hadText) {
     yield { chunk: `<p>${escapeHtml(fallbackSummary(features[index]))}</p>`, done: false }
   }
+  const flags = flagsParagraph(allFeatureFlags(features[index]))
+  if (flags) yield { chunk: flags, done: false }
 }
 
 @Injectable()
@@ -372,7 +403,7 @@ export class DevAiProvider extends IAiProvider {
 
   async suggest(input: IAiSuggestInput): Promise<IAiSuggestResult> {
     const prompt = buildPromptA(input)
-    const { text, usage } = await runQueryWithRetry(prompt, DEFAULT_MODEL, this.logger)
+    const { text, usage } = await runQueryWithRetry(prompt, DRAFT_MODEL, this.logger)
     const raw = extractJson(text)
     if (!raw) {
       throw new Error(`No JSON found in Agent SDK output after retry: ${text.slice(0, 200)}`)
@@ -383,7 +414,7 @@ export class DevAiProvider extends IAiProvider {
 
   async summarizePullRequest(input: IAiPrSummaryInput): Promise<IAiPrSummaryResult> {
     const prompt = buildPromptPrSummary(input)
-    const { text, usage } = await runQueryWithRetry(prompt, DEFAULT_MODEL, this.logger)
+    const { text, usage } = await runQueryWithRetry(prompt, DRAFT_MODEL, this.logger)
     const raw = extractJson(text)
     if (!raw) {
       return { summary: '', usage }

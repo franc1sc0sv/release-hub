@@ -371,6 +371,6 @@ export class AiDraftRunner {
     if (ticketTitle) parts.push(ticketTitle.trim())
     if (prTitle) parts.push(prTitle.trim())
     if (prBody) parts.push(prBody.trim().slice(0, 300))
-    return parts.join(' — ').slice(0, 500)
+    return parts.join('. ').slice(0, 500)
   }
 }

@@ -270,7 +270,16 @@
       "hint": "Selecciona al menos una funcionalidad para generar el resumen",
       "notIncluded": "No incluida",
       "excludedReason": "No se puede agregar — esta funcionalidad está {{state}} y aún no se ha lanzado. Cámbiala a un estado lanzado para incluirla."
-    }
+    },
+    "copyCode": "Clic para copiar",
+    "copyCodeAriaLabel": "Copiar {{value}}",
+    "codeCopied": "Copiado {{value}}",
+    "copyCodeFailed": "No se pudo copiar",
+    "includeInternalLinks": "Incluir enlaces internos",
+    "flagLinkCount": "Feature flags {{linked}}/{{total}}",
+    "flagLinksComplete": "Todos los flags agregados en este lanzamiento están enlazados en el resumen.",
+    "flagLinksMissing_one": "{{count}} flag agregado en este lanzamiento no está en el resumen:",
+    "flagLinksMissing_other": "{{count}} flags agregados en este lanzamiento no están en el resumen:"
   },
   "prSummary": {
     "title": "Resumen IA",
@@ -311,6 +320,9 @@
   "export": {
     "pdf": "Exportar PDF",
     "exporting": "Exportando...",
+    "copy": "Copiar",
+    "copied": "Resumen copiado",
+    "copyFailed": "No se pudo copiar el resumen",
     "noSummary": "Genera el resumen primero antes de exportar",
     "downloadFailed": "Descarga fallida",
     "brand": "Release Hub",
@@ -342,6 +354,8 @@
     "decisionLabel": "Decisión del flag",
     "decisionPlaceholder": "Definir decisión",
     "noDecision": "Sin decisión aún",
+    "clearDecision": "Quitar decisión",
+    "clearDecisionAriaLabel": "Quitar la decisión de {{flag}}",
     "removedNote": "Eliminado",
     "searchPlaceholder": "Buscar flags…",
     "carriedOver": {
@@ -361,7 +375,9 @@
     },
     "toast": {
       "decisionSaved": "Decisión del flag guardada",
-      "decisionError": "No se pudo guardar la decisión — revertido"
+      "decisionError": "No se pudo guardar la decisión — revertido",
+      "decisionCleared": "Decisión quitada",
+      "clearError": "No se pudo quitar la decisión — revertido"
     },
     "decisionShort": {
       "ENABLE_IN_RELEASE": "Activar",

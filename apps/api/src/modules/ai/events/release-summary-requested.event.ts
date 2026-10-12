@@ -10,6 +10,7 @@ export class ReleaseSummaryRequestedEvent implements IReleaseSummaryRequestedEve
     readonly model: string | null,
     readonly summaryProfileId: string | null,
     readonly featureIds: string[] | null,
+    readonly includeInternalLinks: boolean,
   ) {
     this.occurredAt = new Date()
   }

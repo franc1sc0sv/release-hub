@@ -84,6 +84,7 @@ export class StartSummaryGenerationHandler extends PreparedCommandHandler<
         command.model,
         command.summaryProfileId,
         command.featureIds,
+        command.includeInternalLinks,
       ),
     )
 

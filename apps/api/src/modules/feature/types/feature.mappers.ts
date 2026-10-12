@@ -5,7 +5,7 @@ import { FeatureTimelineEntryType } from './feature-timeline.type'
 import { FeatureInReleaseType } from './feature-in-release.type'
 import { FlagStateType } from './flag-state.type'
 import { FeatureKind } from '../../../common/types/feature-kind.enum'
-import { PullRequestType } from '../../release/types/pull-request.type'
+import { PullRequestType, ReleasePrFlagChangeType } from '../../release/types/pull-request.type'
 import { CommitType } from '../../release/types/commit.type'
 import { TicketLinkType } from '../../release/types/ticket-link.type'
 import { toReleaseObjectType } from '../../release/types/release.mappers'
@@ -59,7 +59,13 @@ function toFeaturePullRequestType(pr: IFeaturePullRequest): PullRequestType {
   type.aiRationale = pr.aiRationale
   type.commits = pr.commits.map(toCommitType)
   type.tickets = pr.tickets.map(toTicketLinkType)
-  type.flagChanges = []
+  type.flagChanges = pr.flagChanges.map((change) => {
+    const flagChange = new ReleasePrFlagChangeType()
+    flagChange.flagKey = change.flagKey
+    flagChange.action = change.action
+    flagChange.kind = change.kind
+    return flagChange
+  })
   return type
 }
 

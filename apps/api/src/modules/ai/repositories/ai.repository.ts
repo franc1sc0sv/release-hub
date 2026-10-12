@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
+import { FlagAction } from '@release-hub/db'
 import { FeatureState } from '../../../common/types/feature-state.enum'
 import { IAiRepository } from '../interfaces/ai.repository'
 import type {
   IAiPullRequestContext,
   IAiFeatureContext,
   IAiReleaseContext,
+  IAiFeaturePullRequestContext,
 } from '../interfaces/ai.repository'
 
 @Injectable()
@@ -70,6 +72,8 @@ export class AiRepository extends IAiRepository {
         flagProduction: latest?.flagProduction ?? null,
         tags: f.tags,
         prSummaries: [],
+        addedFlagKeys: [],
+        pullRequests: [],
       }
     })
   }
@@ -81,7 +85,7 @@ export class AiRepository extends IAiRepository {
   ): Promise<IAiReleaseContext | null> => {
     const release = await tx.release.findFirst({
       where: { id: releaseId, deletedAt: null },
-      select: { id: true, name: true, compareRef: true, projectId: true, tags: true },
+      select: { id: true, name: true, compareRef: true, projectId: true, tags: true, project: { select: { organizationId: true, repo: true } } },
     })
 
     if (!release) return null
@@ -90,6 +94,12 @@ export class AiRepository extends IAiRepository {
       where: { releaseId, featureId: { not: null } },
       select: {
         summary: true,
+        number: true,
+        title: true,
+        flagChanges: {
+          where: { action: FlagAction.added },
+          select: { trackedFlag: { select: { key: true } } },
+        },
         feature: {
           select: {
             id: true,
@@ -118,6 +128,8 @@ export class AiRepository extends IAiRepository {
     )
 
     const featureSummaries = new Map<string, string[]>()
+    const featureFlagKeys = new Map<string, Set<string>>()
+    const featurePullRequests = new Map<string, IAiFeaturePullRequestContext[]>()
     for (const pr of assignedPrs) {
       if (!pr.featureId) continue
       const existing = featureSummaries.get(pr.featureId) ?? []
@@ -125,6 +137,16 @@ export class AiRepository extends IAiRepository {
         existing.push(pr.summary.trim())
       }
       featureSummaries.set(pr.featureId, existing)
+      const flagKeys = featureFlagKeys.get(pr.featureId) ?? new Set<string>()
+      for (const change of pr.flagChanges) flagKeys.add(change.trackedFlag.key)
+      featureFlagKeys.set(pr.featureId, flagKeys)
+      const pullRequests = featurePullRequests.get(pr.featureId) ?? []
+      pullRequests.push({
+        summary: pr.summary?.trim() || pr.title,
+        number: pr.number,
+        addedFlagKeys: [...new Set(pr.flagChanges.map((change) => change.trackedFlag.key))].sort(),
+      })
+      featurePullRequests.set(pr.featureId, pullRequests)
     }
 
     const features: IAiFeatureContext[] = []
@@ -145,6 +167,8 @@ export class AiRepository extends IAiRepository {
         flagProduction: ledger?.flagProduction ?? null,
         tags: feature.tags,
         prSummaries: featureSummaries.get(feature.id) ?? [],
+        addedFlagKeys: [...(featureFlagKeys.get(feature.id) ?? [])].sort(),
+        pullRequests: featurePullRequests.get(feature.id) ?? [],
       })
     }
 
@@ -152,6 +176,8 @@ export class AiRepository extends IAiRepository {
       id: release.id,
       name: release.name ?? '',
       compareRef: release.compareRef,
+      repo: release.project.repo,
+      organizationId: release.project.organizationId,
       projectId: release.projectId,
       tags: release.tags,
       features,

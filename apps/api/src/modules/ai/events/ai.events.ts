@@ -7,5 +7,6 @@ export interface IReleaseSummaryRequestedEvent extends IDomainEvent {
   readonly model: string | null
   readonly summaryProfileId: string | null
   readonly featureIds: string[] | null
+  readonly includeInternalLinks: boolean
   readonly occurredAt: Date
 }

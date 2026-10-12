@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { FileDown, Loader2 } from 'lucide-react'
+import { Copy, FileDown, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -9,7 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { exportSummaryDocumentPdf, summaryPdfFilename } from '../lib/summary-export'
+import { copyRichText } from '@/lib/copy-rich-text'
+import { buildSummaryClipboard, exportSummaryDocumentPdf, summaryPdfFilename } from '../lib/summary-export'
 
 interface SummaryExportControlsProps {
   releaseName: string
@@ -44,6 +45,16 @@ export function SummaryExportControls({ releaseName, html, hasSummary }: Summary
     }
   }
 
+  async function handleCopy() {
+    const clipboard = buildSummaryClipboard(releaseName, html)
+    try {
+      await copyRichText(clipboard.html, clipboard.text)
+      toast.success(t('export.copied'))
+    } catch {
+      toast.error(t('export.copyFailed'))
+    }
+  }
+
   const isActuallyDisabled = !hasSummary && !exporting
 
   if (isActuallyDisabled) {
@@ -51,16 +62,16 @@ export function SummaryExportControls({ releaseName, html, hasSummary }: Summary
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger render={<span tabIndex={0} className="inline-flex" />}>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-disabled
-              tabIndex={-1}
-              className="pointer-events-none opacity-50"
-            >
-              <FileDown className="mr-1.5 size-3.5" aria-hidden />
-              {t('export.pdf')}
-            </Button>
+            <div className="pointer-events-none flex items-center gap-2 opacity-50">
+              <Button variant="outline" size="sm" aria-disabled tabIndex={-1}>
+                <Copy className="mr-1.5 size-3.5" aria-hidden />
+                {t('export.copy')}
+              </Button>
+              <Button variant="outline" size="sm" aria-disabled tabIndex={-1}>
+                <FileDown className="mr-1.5 size-3.5" aria-hidden />
+                {t('export.pdf')}
+              </Button>
+            </div>
           </TooltipTrigger>
           <TooltipContent>{t('export.noSummary')}</TooltipContent>
         </Tooltip>
@@ -69,19 +80,25 @@ export function SummaryExportControls({ releaseName, html, hasSummary }: Summary
   }
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleExport}
-      disabled={exporting}
-      aria-label={exporting ? t('export.exporting') : t('export.pdf')}
-    >
-      {exporting ? (
-        <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
-      ) : (
-        <FileDown className="mr-1.5 size-3.5" aria-hidden />
-      )}
-      {exporting ? t('export.exporting') : t('export.pdf')}
-    </Button>
+    <div className="flex items-center gap-2">
+      <Button variant="outline" size="sm" onClick={() => void handleCopy()}>
+        <Copy className="mr-1.5 size-3.5" aria-hidden />
+        {t('export.copy')}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleExport}
+        disabled={exporting}
+        aria-label={exporting ? t('export.exporting') : t('export.pdf')}
+      >
+        {exporting ? (
+          <Loader2 className="mr-1.5 size-3.5 animate-spin" aria-hidden />
+        ) : (
+          <FileDown className="mr-1.5 size-3.5" aria-hidden />
+        )}
+        {exporting ? t('export.exporting') : t('export.pdf')}
+      </Button>
+    </div>
   )
 }

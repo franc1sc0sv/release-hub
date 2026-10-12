@@ -12,6 +12,9 @@ import { IReleaseRepository } from '../../release/interfaces/release.repository'
 import { ISummaryProfileRepository } from '../../summary-profile/interfaces/summary-profile.repository'
 import { IAiRepository } from '../interfaces/ai.repository'
 import type { IAiReleaseContext } from '../interfaces/ai.repository'
+import { FeatureKind } from '../../../common/types/feature-kind.enum'
+import { replaceDashes } from '../../../common/text/replace-dashes'
+import { ensureSummaryReferences, featureInReleaseUrl, flagUrl, pullRequestUrl } from '../prompts/summary-links'
 import { IAiProvider } from '../interfaces/ai-provider.abstract'
 import type { IAiSummaryProfile } from '../interfaces/ai-provider.abstract'
 import { featureStateToClientLine } from '../prompts/availability-line'
@@ -20,6 +23,7 @@ interface IAiSummaryRunOptions {
   model: string | null
   summaryProfileId: string | null
   featureIds: string[] | null
+  includeInternalLinks: boolean
 }
 
 @Injectable()
@@ -55,7 +59,7 @@ export class AiSummaryRunner {
       LogEvent.AI_SUMMARY_STARTED,
     )
 
-    const accumulated = await this.streamSummary(releaseContext, profile, options.model)
+    const accumulated = await this.streamSummary(releaseContext, profile, options.model, options.includeInternalLinks)
 
     await this.db.$transaction(async (tx) => {
       await this.releaseRepository.updateSummary(
@@ -83,6 +87,7 @@ export class AiSummaryRunner {
     releaseContext: IAiReleaseContext,
     profile: IAiSummaryProfile | null,
     model: string | null,
+    includeInternalLinks: boolean,
   ): Promise<string> {
     const releaseTitle = releaseContext.name || releaseContext.compareRef
 
@@ -96,6 +101,32 @@ export class AiSummaryRunner {
       )
     }
 
+    const linkScope = {
+      organizationId: releaseContext.organizationId,
+      projectId: releaseContext.projectId,
+      releaseId: releaseContext.id,
+    }
+    const toFlags = (keys: string[]) =>
+      includeInternalLinks ? keys.map((key) => ({ key, url: flagUrl(linkScope, key) })) : []
+    const features = sourceFeatures.map((f) => {
+      const flagsPerPullRequest = f.kind === FeatureKind.DEFAULT
+      return {
+      featureId: f.id,
+      name: f.name,
+      description: f.description,
+      kind: f.kind,
+      statusLine: featureStateToClientLine(f.state, f.flagStaging, f.flagProduction),
+      prSummaries: f.prSummaries,
+      url: includeInternalLinks ? featureInReleaseUrl(linkScope, f.id) : null,
+      flags: flagsPerPullRequest ? [] : toFlags(f.addedFlagKeys),
+      pullRequests: f.pullRequests.map((pr) => ({
+        summary: pr.summary,
+        url: includeInternalLinks && flagsPerPullRequest ? pullRequestUrl(releaseContext.repo, pr.number) : null,
+        flags: flagsPerPullRequest ? toFlags(pr.addedFlagKeys) : [],
+      })),
+      }
+    })
+
     let accumulated = ''
 
     for await (const chunk of this.aiProvider.streamSummary({
@@ -103,21 +134,15 @@ export class AiSummaryRunner {
       model,
       tags: releaseContext.tags,
       profile,
-      features: sourceFeatures.map((f) => ({
-        featureId: f.id,
-        name: f.name,
-        description: f.description,
-        kind: f.kind,
-        statusLine: featureStateToClientLine(f.state, f.flagStaging, f.flagProduction),
-        prSummaries: f.prSummaries,
-      })),
+      features,
     })) {
       if (chunk.chunk.length > 0) {
         accumulated += chunk.chunk
       }
     }
 
-    return accumulated
+    const withoutDashes = replaceDashes(accumulated)
+    return includeInternalLinks ? ensureSummaryReferences(withoutDashes, features) : withoutDashes
   }
 
   private async loadProfile(

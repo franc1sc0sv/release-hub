@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import type { TxClient } from '@release-hub/db'
+import type { FlagAction, FlagReferenceKind, TxClient } from '@release-hub/db'
 import {
   ReleaseStatus as PrismaReleaseStatus,
   FeatureState as PrismaFeatureState,
@@ -121,6 +121,7 @@ export class FeatureRepository extends IFeatureRepository {
       include: {
         commits: { orderBy: { committedAt: 'asc' } },
         ticketLinks: true,
+        flagChanges: { include: { trackedFlag: { select: { key: true } } } },
       },
     })
     return rows.map((r) => this.toIFeaturePullRequest(r))
@@ -277,6 +278,7 @@ export class FeatureRepository extends IFeatureRepository {
     aiRationale: string | null
     commits: Array<{ id: string; pullRequestId: string; sha: string; message: string; author: string; committedAt: Date }>
     ticketLinks: Array<{ issueId: string; source: string; url: string; title: string; confidence: number }>
+    flagChanges: Array<{ action: FlagAction; kind: FlagReferenceKind; trackedFlag: { key: string } }>
   }): IFeaturePullRequest {
     return {
       id: row.id,
@@ -291,6 +293,11 @@ export class FeatureRepository extends IFeatureRepository {
       aiRationale: row.aiRationale,
       commits: row.commits.map((c) => this.toIFeatureCommit(c)),
       tickets: row.ticketLinks.map((t) => this.toIFeatureTicketLink(t)).filter((t): t is IFeatureTicketLink => t !== null),
+      flagChanges: row.flagChanges.map((change) => ({
+        flagKey: change.trackedFlag.key,
+        action: change.action,
+        kind: change.kind,
+      })),
     }
   }
 

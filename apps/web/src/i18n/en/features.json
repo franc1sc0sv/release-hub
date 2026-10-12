@@ -51,7 +51,9 @@
     "prCount_other": "{{count}} pull requests",
     "commits": "Commits",
     "baseRef": "Base",
-    "compareRef": "Compare"
+    "compareRef": "Compare",
+    "addedFlags_one": "{{count}} feature flag added:",
+    "addedFlags_other": "{{count}} feature flags added:"
   },
   "detail": {
     "noReleasesHeading": "No releases yet",

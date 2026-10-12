@@ -1,17 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, generatePath, useParams } from 'react-router-dom'
+import { Link, generatePath, useLocation, useParams } from 'react-router-dom'
 import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { format } from 'date-fns'
-import { ChevronDown, GitBranch, GitMerge } from 'lucide-react'
+import { ChevronDown, Flag, GitBranch, GitMerge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
 import { EmptyState } from '@/components/nebula/EmptyState'
 import { useEnumLabels } from '@/hooks/use-enum-labels'
 import { TicketChip } from '@/features/releases/components/TicketChip'
 import { featureStateTone } from '../constants/feature-enums'
-import { ReleaseStatusValue } from '@/features/releases/constants/release-enums'
+import { FlagChangeActionValue } from '@/features/releases/constants/release-enums'
 import { ROUTES } from '@/lib/routes'
+import { cn } from '@/lib/utils'
 import type { GetFeatureQuery, FeatureState } from '@/generated/graphql'
 
 type FeatureRelease = GetFeatureQuery['getFeature']['releases'][number]
@@ -168,14 +169,57 @@ function FlagStatePills({ flagState }: FlagStatePillsProps) {
   )
 }
 
+export function releaseAnchorId(releaseId: string): string {
+  return `release-${releaseId}`
+}
+
+function addedFlagKeys(prs: FeaturePr[]): string[] {
+  const keys = prs.flatMap((pr) =>
+    pr.flagChanges
+      .filter((change) => change.action === FlagChangeActionValue.added)
+      .map((change) => change.flagKey),
+  )
+  return [...new Set(keys)].sort()
+}
+
+interface AddedFlagLinksProps {
+  flagKeys: string[]
+}
+
+function AddedFlagLinks({ flagKeys }: AddedFlagLinksProps) {
+  const { t } = useTranslation('features')
+  const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+      <Flag className="size-3.5 text-amber-300" aria-hidden />
+      <span>{t('tree.addedFlags', { count: flagKeys.length })}</span>
+      {flagKeys.map((flagKey) => (
+        <Link
+          key={flagKey}
+          to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+            organizationId: organizationId ?? '',
+            projectId: projectId ?? '',
+            flagKey,
+          })}
+          className="break-all rounded-[var(--radius-button)] font-mono text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {flagKey}
+        </Link>
+      ))}
+    </div>
+  )
+}
+
 interface ReleaseGroupProps {
   release: FeatureRelease
   prs: FeaturePr[]
   snapshotState: FeatureState | null
   snapshotFlagState: FeatureSnapshot['flagState'] | null
+  targeted: boolean
 }
 
-function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: ReleaseGroupProps) {
+function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState, targeted }: ReleaseGroupProps) {
   const { t } = useTranslation('features')
   const enumLabels = useEnumLabels()
   const [open, setOpen] = useState(true)
@@ -185,10 +229,17 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
   const formattedDate = format(new Date(release.createdAt), 'MMM d, yyyy')
 
   const prCountLabel = t('tree.prCount', { count: prs.length })
+  const flagKeys = addedFlagKeys(prs)
   const toggleLabel = open ? t('tree.prCount', { count: prs.length }) : prCountLabel
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/4">
+    <div
+      id={releaseAnchorId(release.id)}
+      className={cn(
+        'scroll-mt-6 rounded-[var(--radius-card)] border bg-white/4',
+        targeted ? 'border-brand-indigo-bright/60' : 'border-white/12',
+      )}
+    >
       <div className="flex items-start gap-3 px-5 py-4">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 border border-indigo-500/30">
           <GitBranch className="size-4 text-indigo-400" aria-hidden />
@@ -223,6 +274,7 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState }: Releas
             </time>
           </div>
           {snapshotFlagState && <FlagStatePills flagState={snapshotFlagState} />}
+          {flagKeys.length > 0 && <AddedFlagLinks flagKeys={flagKeys} />}
         </div>
 
         <button
@@ -272,14 +324,19 @@ interface FeatureDetailTreeProps {
 
 export function FeatureDetailTree({ releases, prs, snapshots }: FeatureDetailTreeProps) {
   const { t } = useTranslation('features')
+  const { hash } = useLocation()
+  const reduceMotion = useReducedMotion()
 
-  const deployedReleases = releases.filter((r) => r.status === ReleaseStatusValue.DEPLOYED)
+  useEffect(() => {
+    if (!hash) return
+    document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' })
+  }, [hash, reduceMotion])
 
   const snapshotByReleaseId = new Map<string, FeatureSnapshot>(
     snapshots.map((snapshot) => [snapshot.releaseId, snapshot]),
   )
 
-  if (deployedReleases.length === 0) {
+  if (releases.length === 0) {
     return (
       <EmptyState
         icon={<GitBranch className="size-7 text-muted-foreground" aria-hidden />}
@@ -291,7 +348,7 @@ export function FeatureDetailTree({ releases, prs, snapshots }: FeatureDetailTre
 
   return (
     <div className="space-y-3">
-      {deployedReleases.map((release) => {
+      {releases.map((release) => {
         const releasePrs = prs.filter((pr) => pr.releaseId === release.id)
         const snapshot = snapshotByReleaseId.get(release.id) ?? null
         return (
@@ -301,6 +358,7 @@ export function FeatureDetailTree({ releases, prs, snapshots }: FeatureDetailTre
             prs={releasePrs}
             snapshotState={snapshot?.state ?? null}
             snapshotFlagState={snapshot?.flagState ?? null}
+            targeted={hash === `#${releaseAnchorId(release.id)}`}
           />
         )
       })}

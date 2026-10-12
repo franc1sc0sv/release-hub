@@ -81,6 +81,7 @@ export class AiResolver {
         input.model,
         input.summaryProfileId,
         input.featureIds,
+        input.includeInternalLinks,
       ),
     )
   }

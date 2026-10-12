@@ -5,5 +5,6 @@ export class StartSummaryGenerationCommand {
     readonly model: string | null,
     readonly summaryProfileId: string | null,
     readonly featureIds: string[] | null,
+    readonly includeInternalLinks: boolean,
   ) {}
 }

@@ -24,6 +24,7 @@ export class AiSummaryReleaseRequestedHandler {
         model: event.model,
         summaryProfileId: event.summaryProfileId,
         featureIds: event.featureIds,
+        includeInternalLinks: event.includeInternalLinks,
       })
     } catch (error) {
       this.logger.error(

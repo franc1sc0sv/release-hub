@@ -1,5 +1,5 @@
 import { Field, ID, InputType } from '@nestjs/graphql'
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 @InputType()
 export class StartSummaryGenerationInput {
@@ -23,4 +23,8 @@ export class StartSummaryGenerationInput {
   @IsOptional()
   @IsString({ each: true })
   featureIds: string[] | null
+
+  @Field(() => Boolean, { defaultValue: false })
+  @IsBoolean()
+  includeInternalLinks: boolean
 }

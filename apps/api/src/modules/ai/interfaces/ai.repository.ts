@@ -17,6 +17,12 @@ export interface IAiPullRequestContext {
   projectId: string
 }
 
+export interface IAiFeaturePullRequestContext {
+  summary: string
+  number: number
+  addedFlagKeys: string[]
+}
+
 export interface IAiFeatureContext {
   id: string
   name: string
@@ -27,12 +33,16 @@ export interface IAiFeatureContext {
   flagProduction: boolean | null
   tags: string[]
   prSummaries: string[]
+  addedFlagKeys: string[]
+  pullRequests: IAiFeaturePullRequestContext[]
 }
 
 export interface IAiReleaseContext {
   id: string
   name: string
   compareRef: string
+  repo: string
+  organizationId: string
   projectId: string
   tags: string[]
   features: IAiFeatureContext[]
