@@ -4,6 +4,7 @@ export const FlagDeploymentStatus = {
   SHIPPED_ON: 'shipped_on',
   SHIPPED_OFF: 'shipped_off',
   IN_PROGRESS: 'in_progress',
+  ABANDONED: 'abandoned',
   CONFLICT: 'conflict',
   UNTRACKED: 'untracked',
   DELETED: 'deleted',

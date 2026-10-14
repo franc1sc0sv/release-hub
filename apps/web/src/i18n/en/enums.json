@@ -50,6 +50,7 @@
     "SHIPPED_ON": "Shipped, on",
     "SHIPPED_OFF": "Shipped, off",
     "IN_PROGRESS": "In progress",
+    "ABANDONED": "Abandoned",
     "CONFLICT": "Conflict",
     "UNTRACKED": "Untracked",
     "DELETED": "Deleted in Flagsmith"
@@ -63,6 +64,7 @@
     "DECISION_ENABLE_IN_RELEASE": "Decision: enable in release",
     "DECISION_SHIP_OFF": "Decision: ship off",
     "DECISION_IN_PROGRESS": "Decision: in progress",
+    "DECISION_ABANDONED": "Decision: abandoned",
     "CONFLICT_DETECTED": "Conflict detected",
     "REMINDER_SENT": "Reminder sent",
     "SYNC_COMPLETED": "Sync completed",
@@ -82,7 +84,8 @@
   "releaseFlagDecision": {
     "ENABLE_IN_RELEASE": "Enable in release",
     "SHIP_OFF": "Ship off",
-    "IN_PROGRESS": "In progress"
+    "IN_PROGRESS": "In progress",
+    "ABANDONED": "Abandoned"
   },
   "ticketSource": {
     "LINEAR": "Linear",

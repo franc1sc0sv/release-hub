@@ -7,6 +7,7 @@ import { NotFoundException } from '../../../../common/errors'
 import { authorizeProjectAction } from '../../../../common/authz/authorize-org-action'
 import { IOrganizationRepository } from '../../../organization/interfaces/organization.repository'
 import { IReleaseRepository } from '../../../release/interfaces/release.repository'
+import { IProjectRepository } from '../../../project/interfaces/project.repository'
 import { IPullRequestRepository } from '../../../release/interfaces/pull-request.repository'
 import { IFeatureInReleaseRepository } from '../../../release/interfaces/feature-in-release.repository'
 import { ITrackedFlagRepository } from '../../interfaces/tracked-flag.repository'
@@ -23,6 +24,7 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
     protected readonly db: IDatabaseService,
     private readonly organizationRepository: IOrganizationRepository,
     private readonly releaseRepository: IReleaseRepository,
+    private readonly projectRepository: IProjectRepository,
     private readonly pullRequestRepository: IPullRequestRepository,
     private readonly trackedFlagRepository: ITrackedFlagRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
@@ -43,6 +45,7 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
       tx,
     )
 
+    const project = await this.projectRepository.findById(release.projectId, tx)
     const prs = await this.pullRequestRepository.findAllByRelease(query.releaseId, tx)
     const prIds = prs.map((pr) => pr.id)
 
@@ -90,7 +93,14 @@ export class GetReleaseFlagsHandler extends BaseQueryHandler<GetReleaseFlagsQuer
       }))
 
       result.push(
-        toReleaseFlagType(flag, flagChanges, decision, featureReleaseState, environments, byEnvironment !== null),
+        toReleaseFlagType(
+          flag,
+          flagChanges,
+          decision,
+          featureReleaseState,
+          environments,
+          project?.flagsmithEnabled ? byEnvironment !== null : null,
+        ),
       )
     }
 

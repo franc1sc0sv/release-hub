@@ -173,39 +173,46 @@ export function releaseAnchorId(releaseId: string): string {
   return `release-${releaseId}`
 }
 
-function addedFlagKeys(prs: FeaturePr[]): string[] {
-  const keys = prs.flatMap((pr) =>
-    pr.flagChanges
+type FeatureFlagChange = FeaturePr['flagChanges'][number]
+
+function addedFlagChanges(prs: FeaturePr[]): FeatureFlagChange[] {
+  const byKey = new Map(
+    prs
+      .flatMap((pr) => pr.flagChanges)
       .filter((change) => change.action === FlagChangeActionValue.added)
-      .map((change) => change.flagKey),
+      .map((change) => [change.flagKey, change]),
   )
-  return [...new Set(keys)].sort()
+  return [...byKey.values()].sort((a, b) => a.flagKey.localeCompare(b.flagKey))
 }
 
 interface AddedFlagLinksProps {
-  flagKeys: string[]
+  flagChanges: FeatureFlagChange[]
 }
 
-function AddedFlagLinks({ flagKeys }: AddedFlagLinksProps) {
-  const { t } = useTranslation('features')
+function AddedFlagLinks({ flagChanges }: AddedFlagLinksProps) {
+  const { t } = useTranslation(['features', 'flags'])
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
 
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
       <Flag className="size-3.5 text-amber-300" aria-hidden />
-      <span>{t('tree.addedFlags', { count: flagKeys.length })}</span>
-      {flagKeys.map((flagKey) => (
-        <Link
-          key={flagKey}
-          to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
-            organizationId: organizationId ?? '',
-            projectId: projectId ?? '',
-            flagKey,
-          })}
-          className="break-all rounded-[var(--radius-button)] font-mono text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {flagKey}
-        </Link>
+      <span>{t('tree.addedFlags', { count: flagChanges.length })}</span>
+      {flagChanges.map((change) => (
+        <span key={change.flagKey} className="inline-flex items-center gap-1.5">
+          <Link
+            to={generatePath(ROUTES.PROJECT_FLAG_DETAIL, {
+              organizationId: organizationId ?? '',
+              projectId: projectId ?? '',
+              flagKey: change.flagKey,
+            })}
+            className="break-all rounded-[var(--radius-button)] font-mono text-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {change.flagKey}
+          </Link>
+          {change.existsInFlagsmith === false && (
+            <StatusBadge tone={StatusBadgeTone.AMBER}>{t('flags:write.notInFlagsmith')}</StatusBadge>
+          )}
+        </span>
       ))}
     </div>
   )
@@ -229,7 +236,7 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState, targeted
   const formattedDate = format(new Date(release.createdAt), 'MMM d, yyyy')
 
   const prCountLabel = t('tree.prCount', { count: prs.length })
-  const flagKeys = addedFlagKeys(prs)
+  const flagChanges = addedFlagChanges(prs)
   const toggleLabel = open ? t('tree.prCount', { count: prs.length }) : prCountLabel
 
   return (
@@ -274,7 +281,7 @@ function ReleaseGroup({ release, prs, snapshotState, snapshotFlagState, targeted
             </time>
           </div>
           {snapshotFlagState && <FlagStatePills flagState={snapshotFlagState} />}
-          {flagKeys.length > 0 && <AddedFlagLinks flagKeys={flagKeys} />}
+          {flagChanges.length > 0 && <AddedFlagLinks flagChanges={flagChanges} />}
         </div>
 
         <button

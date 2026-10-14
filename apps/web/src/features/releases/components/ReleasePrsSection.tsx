@@ -4,6 +4,7 @@ import { Link, generatePath, useParams } from 'react-router-dom'
 import { GitMerge, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard } from '@/components/nebula/GlassCard'
+import { StatusBadge, StatusBadgeTone } from '@/components/nebula/StatusBadge'
 import { SearchField } from '@/components/nebula/SearchField'
 import { CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -35,7 +36,7 @@ function flattenPrs(features: FeatureNodes): FlattenedPr[] {
 }
 
 export function ReleasePrsSection({ features }: ReleasePrsSectionProps) {
-  const { t } = useTranslation('releases')
+  const { t } = useTranslation(['releases', 'flags'])
   const enumLabels = useEnumLabels()
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>()
   const [search, setSearch] = useState('')
@@ -143,6 +144,9 @@ export function ReleasePrsSection({ features }: ReleasePrsSectionProps) {
                             <Badge variant="outline" className="rounded-full font-mono text-[10px] uppercase tracking-wide">
                               {enumLabels.flagAction(change.action)}
                             </Badge>
+                            {change.existsInFlagsmith === false && (
+                              <StatusBadge tone={StatusBadgeTone.AMBER}>{t('flags:write.notInFlagsmith')}</StatusBadge>
+                            )}
                           </span>
                         ))}
                       </div>

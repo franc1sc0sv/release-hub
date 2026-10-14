@@ -7,6 +7,7 @@ export function computeFlagDeploymentStatus(
 ): FlagDeploymentStatus {
   if (decision === ReleaseFlagDecisionType.SHIP_OFF) return FlagDeploymentStatus.SHIPPED_OFF
   if (decision === ReleaseFlagDecisionType.in_progress) return FlagDeploymentStatus.IN_PROGRESS
+  if (decision === ReleaseFlagDecisionType.abandoned) return FlagDeploymentStatus.ABANDONED
   if (decision === ReleaseFlagDecisionType.ENABLE_IN_RELEASE) {
     return hasConflict ? FlagDeploymentStatus.CONFLICT : FlagDeploymentStatus.SHIPPED_ON
   }

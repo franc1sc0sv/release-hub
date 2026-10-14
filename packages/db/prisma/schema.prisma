@@ -102,6 +102,7 @@ enum ReleaseFlagDecisionType {
   ENABLE_IN_RELEASE
   SHIP_OFF
   in_progress
+  abandoned
 
   @@map("release_flag_decision_type")
 }
@@ -817,6 +818,7 @@ enum FlagHistoryEventType {
   decision_enable_in_release
   decision_ship_off
   decision_in_progress
+  decision_abandoned
   conflict_detected
   reminder_sent
   sync_completed

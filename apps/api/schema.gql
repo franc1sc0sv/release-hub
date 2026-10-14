@@ -474,6 +474,7 @@ type FlagCoverageSummaryType {
 }
 
 enum FlagDeploymentStatus {
+  ABANDONED
   CONFLICT
   DELETED
   IN_PROGRESS
@@ -529,6 +530,7 @@ type FlagHistoryEventEntryType {
 enum FlagHistoryEventType {
   CONFLICT_DETECTED
   COVERAGE_SCAN
+  DECISION_ABANDONED
   DECISION_ENABLE_IN_RELEASE
   DECISION_IN_PROGRESS
   DECISION_SHIP_OFF
@@ -1107,6 +1109,7 @@ type ReleaseFlagDecisionResultType {
 }
 
 enum ReleaseFlagDecisionType {
+  ABANDONED
   ENABLE_IN_RELEASE
   IN_PROGRESS
   SHIP_OFF
@@ -1123,7 +1126,7 @@ type ReleaseFlagType {
   decidedAt: DateTime
   decision: ReleaseFlagDecisionType
   environments: [ReleaseFlagEnvironmentType!]!
-  existsInFlagsmith: Boolean!
+  existsInFlagsmith: Boolean
   feature: TrackedFlagFeatureType
   featureReleaseState: FeatureState
   id: ID!
@@ -1155,6 +1158,7 @@ type ReleaseObjectType {
 
 type ReleasePrFlagChangeType {
   action: FlagChangeAction!
+  existsInFlagsmith: Boolean
   flagKey: String!
   kind: FlagReferenceKind!
 }

@@ -363,7 +363,6 @@
     },
     "subTabs": {
       "added": "Added",
-      "removed": "Removed",
       "addedEmpty": "No added flags match your search.",
       "deleteAllRemoved_one": "Delete {{count}} flag in Flagsmith",
       "deleteAllRemoved_other": "Delete all {{count}} flags in Flagsmith"
@@ -382,7 +381,8 @@
     "decisionShort": {
       "ENABLE_IN_RELEASE": "Enable",
       "SHIP_OFF": "Ship off",
-      "IN_PROGRESS": "In progress"
+      "IN_PROGRESS": "In progress",
+      "ABANDONED": "Abandoned"
     },
     "decisionAriaLabel": "Decision for {{flag}}"
   },
@@ -428,7 +428,11 @@
       "description": "Click an environment cell to stage a change. Nothing goes to Flagsmith until you apply.",
       "descriptionPending_one": "{{count}} flag needs a decision. Click an environment cell to stage a change; nothing goes to Flagsmith until you apply.",
       "descriptionPending_other": "{{count}} flags need a decision. Click an environment cell to stage a change; nothing goes to Flagsmith until you apply.",
-      "removedEmpty": "No flag was removed from code in this release.",
+      "toDelete": "To delete from Flagsmith",
+      "toDeleteEmpty": "No flag to delete. Flags removed from code and flags marked abandoned show here.",
+      "deleteOne": "Delete in Flagsmith",
+      "deleteOneAria": "Delete {{flag}} in Flagsmith",
+      "draftDeleteWarning": "This release is not shipped yet. Production code can still read these flags. Delete them only if no deployed code uses them.",
       "closed": "Closed",
       "columns": {
         "flagAndDecision": "Flag and decision"

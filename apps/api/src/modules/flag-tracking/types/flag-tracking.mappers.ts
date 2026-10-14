@@ -65,7 +65,7 @@ export function toReleaseFlagType(
   decision: IReleaseFlagDecision | null,
   featureReleaseState: FeatureState | null,
   environments: IReleaseFlagEnvironmentState[],
-  existsInFlagsmith: boolean,
+  existsInFlagsmith: boolean | null,
 ): ReleaseFlagType {
   const type = new ReleaseFlagType()
   type.id = flag.id

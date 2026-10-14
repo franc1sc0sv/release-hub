@@ -5,10 +5,10 @@ import { FeatureTimelineEntryType } from './feature-timeline.type'
 import { FeatureInReleaseType } from './feature-in-release.type'
 import { FlagStateType } from './flag-state.type'
 import { FeatureKind } from '../../../common/types/feature-kind.enum'
-import { PullRequestType, ReleasePrFlagChangeType } from '../../release/types/pull-request.type'
+import { PullRequestType } from '../../release/types/pull-request.type'
 import { CommitType } from '../../release/types/commit.type'
 import { TicketLinkType } from '../../release/types/ticket-link.type'
-import { toReleaseObjectType } from '../../release/types/release.mappers'
+import { toReleaseObjectType, toReleasePrFlagChangeType } from '../../release/types/release.mappers'
 import { deriveClientAvailability } from './client-availability.map'
 
 export function toFeatureType(feature: IFeature): FeatureType {
@@ -45,7 +45,7 @@ function toCommitType(commit: IFeatureCommit): CommitType {
   return type
 }
 
-function toFeaturePullRequestType(pr: IFeaturePullRequest): PullRequestType {
+function toFeaturePullRequestType(pr: IFeaturePullRequest, flagsmithKeys: ReadonlySet<string> | null): PullRequestType {
   const type = new PullRequestType()
   type.id = pr.id
   type.number = pr.number
@@ -59,13 +59,7 @@ function toFeaturePullRequestType(pr: IFeaturePullRequest): PullRequestType {
   type.aiRationale = pr.aiRationale
   type.commits = pr.commits.map(toCommitType)
   type.tickets = pr.tickets.map(toTicketLinkType)
-  type.flagChanges = pr.flagChanges.map((change) => {
-    const flagChange = new ReleasePrFlagChangeType()
-    flagChange.flagKey = change.flagKey
-    flagChange.action = change.action
-    flagChange.kind = change.kind
-    return flagChange
-  })
+  type.flagChanges = pr.flagChanges.map((change) => toReleasePrFlagChangeType(change, flagsmithKeys))
   return type
 }
 
@@ -103,7 +97,7 @@ export function toFeatureDetailType(detail: IFeatureDetail): FeatureDetailType {
   const type = new FeatureDetailType()
   type.feature = toFeatureType(detail.feature)
   type.releases = detail.releases.map(toReleaseObjectType)
-  type.prs = detail.prs.map(toFeaturePullRequestType)
+  type.prs = detail.prs.map((pr) => toFeaturePullRequestType(pr, detail.flagsmithKeys))
   type.snapshots = detail.snapshots.map(toFeatureReleaseSnapshotType)
   type.timeline = detail.timeline.map(toFeatureTimelineEntryType)
   return type

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
+import { IntegrationModule } from '../integration/integration.module'
 import { ProjectModule } from '../project/project.module'
 import { ReleaseModule } from '../release/release.module'
 import { ProjectTagModule } from '../project-tag/project-tag.module'
@@ -24,7 +25,7 @@ import { DeleteFeatureHandler } from './commands/delete-feature/delete-feature.h
 import { PromoteFeaturesOnReleaseDeployedHandler } from './events/promote-features-on-release-deployed.handler'
 
 @Module({
-  imports: [CqrsModule, ProjectModule, ReleaseModule, ProjectTagModule, OrganizationModule],
+  imports: [CqrsModule, ProjectModule, ReleaseModule, ProjectTagModule, OrganizationModule, IntegrationModule],
   providers: [
     FeatureResolver,
     { provide: IFeatureRepository, useClass: FeatureRepository },

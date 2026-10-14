@@ -567,6 +567,15 @@ export class FlagsmithFlagRepository extends IFlagsmithFlagRepository {
     return rows.map((row) => row.key)
   }
 
+  findExistingKeys = async (projectId: string, keys: string[], tx: TxClient): Promise<string[]> => {
+    if (keys.length === 0) return []
+    const rows = await tx.flagsmithFlag.findMany({
+      where: { projectId, deletedAt: null, key: { in: keys } },
+      select: { key: true },
+    })
+    return rows.map((row) => row.key)
+  }
+
   findEnabledStatesForKeys = async (
     projectId: string,
     keys: string[],

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@apollo/client/react'
 import { CARRIED_OVER_FLAGS, GET_COVERAGE } from '../graphql/releases.queries'
 import { useReleaseFlags } from './useReleaseFlags'
-import { FlagChangeActionValue } from '../constants/release-enums'
+import { FlagChangeActionValue, ReleaseFlagDecisionTypeValue } from '../constants/release-enums'
 import { FeatureKindValue, FeatureStateValue } from '@/features/features/constants/feature-enums'
 import type { FeatureState, GetReleaseTreeQuery, ReleaseFlagsQuery } from '@/generated/graphql'
 
@@ -40,8 +40,12 @@ export function isRemovedReleaseFlag(flag: ReleaseFlag): boolean {
   return flag.changes.some((change) => change.action === FlagChangeActionValue.removed)
 }
 
+export function isToDeleteReleaseFlag(flag: ReleaseFlag): boolean {
+  return isRemovedReleaseFlag(flag) || flag.decision === ReleaseFlagDecisionTypeValue.ABANDONED
+}
+
 export function needsReleaseFlagDecision(flag: ReleaseFlag): boolean {
-  return !isRemovedReleaseFlag(flag) && flag.closedAt === null
+  return !isRemovedReleaseFlag(flag) && flag.closedAt === null && flag.existsInFlagsmith !== false
 }
 
 export function useReleaseWorkspaceStats(

@@ -62,18 +62,21 @@ export const ReleaseFlagDecisionTypeValue = {
   ENABLE_IN_RELEASE: 'ENABLE_IN_RELEASE',
   SHIP_OFF: 'SHIP_OFF',
   IN_PROGRESS: 'IN_PROGRESS',
+  ABANDONED: 'ABANDONED',
 } as const satisfies Record<ReleaseFlagDecisionType, ReleaseFlagDecisionType>
 
 export const RELEASE_FLAG_DECISION_OPTIONS: ReleaseFlagDecisionType[] = [
   ReleaseFlagDecisionTypeValue.ENABLE_IN_RELEASE,
   ReleaseFlagDecisionTypeValue.SHIP_OFF,
   ReleaseFlagDecisionTypeValue.IN_PROGRESS,
+  ReleaseFlagDecisionTypeValue.ABANDONED,
 ]
 
 const RELEASE_FLAG_DECISION_TONE: Record<ReleaseFlagDecisionType, StatusBadgeToneValue> = {
   ENABLE_IN_RELEASE: StatusBadgeTone.EMERALD,
   SHIP_OFF: StatusBadgeTone.SLATE,
   IN_PROGRESS: StatusBadgeTone.AMBER,
+  ABANDONED: StatusBadgeTone.ROSE,
 }
 
 export function releaseFlagDecisionTone(decision: ReleaseFlagDecisionType): StatusBadgeToneValue {

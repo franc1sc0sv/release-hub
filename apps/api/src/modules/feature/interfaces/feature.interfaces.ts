@@ -88,6 +88,7 @@ export interface IFeatureDetail {
   prs: IFeaturePullRequest[]
   snapshots: IFeatureInRelease[]
   timeline: IFeatureStateEvent[]
+  flagsmithKeys: ReadonlySet<string> | null
 }
 
 export interface IMinimalPullRequest {

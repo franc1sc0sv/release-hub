@@ -61,8 +61,8 @@ export class ReleaseFlagType {
   @Field(() => FeatureState, { nullable: true })
   featureReleaseState: FeatureState | null
 
-  @Field(() => Boolean)
-  existsInFlagsmith: boolean
+  @Field(() => Boolean, { nullable: true })
+  existsInFlagsmith: boolean | null
 
   @Field(() => Date, { nullable: true })
   closedAt: Date | null

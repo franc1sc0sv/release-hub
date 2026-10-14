@@ -27,11 +27,15 @@ function toTicketLinkType(ticket: ITicketLink): TicketLinkType {
   return type
 }
 
-function toReleasePrFlagChangeType(change: IPullRequestFlagChangeWithPullRequest): ReleasePrFlagChangeType {
+export function toReleasePrFlagChangeType(
+  change: Pick<IPullRequestFlagChangeWithPullRequest, 'flagKey' | 'action' | 'kind'>,
+  flagsmithKeys: ReadonlySet<string> | null,
+): ReleasePrFlagChangeType {
   const type = new ReleasePrFlagChangeType()
   type.flagKey = change.flagKey
   type.action = change.action
   type.kind = change.kind
+  type.existsInFlagsmith = flagsmithKeys ? flagsmithKeys.has(change.flagKey) : null
   return type
 }
 
@@ -39,6 +43,7 @@ export function toPullRequestType(
   pr: IPullRequest,
   repo: string = '',
   flagChanges: IPullRequestFlagChangeWithPullRequest[] = [],
+  flagsmithKeys: ReadonlySet<string> | null = null,
 ): PullRequestType {
   const type = new PullRequestType()
   type.id = pr.id
@@ -57,7 +62,7 @@ export function toPullRequestType(
   type.commits = pr.commits.map(toCommitType)
   type.tickets = pr.ticketLinks.map(toTicketLinkType)
   type.url = repo ? `https://github.com/${repo}/pull/${pr.number}` : ''
-  type.flagChanges = flagChanges.map(toReleasePrFlagChangeType)
+  type.flagChanges = flagChanges.map((change) => toReleasePrFlagChangeType(change, flagsmithKeys))
   return type
 }
 

@@ -68,6 +68,7 @@ export const GET_FEATURE = graphql(`
         flagChanges {
           flagKey
           action
+          existsInFlagsmith
         }
       }
       snapshots {

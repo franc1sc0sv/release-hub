@@ -9,6 +9,7 @@ export const FlagHistoryEventType = {
   DECISION_ENABLE_IN_RELEASE: 'decision_enable_in_release',
   DECISION_SHIP_OFF: 'decision_ship_off',
   DECISION_IN_PROGRESS: 'decision_in_progress',
+  DECISION_ABANDONED: 'decision_abandoned',
   CONFLICT_DETECTED: 'conflict_detected',
   REMINDER_SENT: 'reminder_sent',
   SYNC_COMPLETED: 'sync_completed',

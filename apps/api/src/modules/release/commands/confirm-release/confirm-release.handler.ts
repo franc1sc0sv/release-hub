@@ -1,7 +1,7 @@
 import { CommandHandler } from '@nestjs/cqrs'
 import { Logger } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { FlagAction } from '@release-hub/db'
+import { FlagAction, ReleaseFlagDecisionType } from '@release-hub/db'
 import { Action, Subject } from '@release-hub/shared'
 import { PreparedCommandHandler } from '../../../../common/cqrs'
 import { IDatabaseService } from '../../../../common/database/database.abstract'
@@ -23,6 +23,7 @@ import { IFeatureRepository } from '../../../feature/interfaces/feature.reposito
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import { IPullRequestFlagChangeRepository } from '../../../flag-tracking/interfaces/pull-request-flag-change.repository'
 import { ITrackedFlagRepository } from '../../../flag-tracking/interfaces/tracked-flag.repository'
+import { IReleaseFlagDecisionRepository } from '../../../flag-tracking/interfaces/release-flag-decision.repository'
 import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import type { IConfirmReleasePreparation } from '../../interfaces/release.interfaces'
 import { ReleaseObjectType } from '../../types/release.type'
@@ -61,6 +62,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
     private readonly trackedFlagRepository: ITrackedFlagRepository,
+    private readonly releaseFlagDecisionRepository: IReleaseFlagDecisionRepository,
     private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
     private readonly gitHubClient: IGitHubClient,
     private readonly tokenResolver: IGithubTokenResolver,
@@ -134,6 +136,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
 
   private async assertAddedFlagsExistInFlagsmith(
     projectId: string,
+    releaseId: string,
     pullRequestIds: string[],
     tx: TxClient,
   ): Promise<void> {
@@ -141,11 +144,15 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
       pullRequestIds,
       tx,
     )
-    const removedFlagIds = new Set(
-      changes.filter((change) => change.action === FlagAction.removed).map((change) => change.trackedFlagId),
-    )
+    const decisions = await this.releaseFlagDecisionRepository.findAllForRelease(releaseId, tx)
+    const skippedFlagIds = new Set([
+      ...changes.filter((change) => change.action === FlagAction.removed).map((change) => change.trackedFlagId),
+      ...decisions
+        .filter((decision) => decision.decision === ReleaseFlagDecisionType.abandoned)
+        .map((decision) => decision.trackedFlagId),
+    ])
     const addedFlagIds = [...new Set(changes.map((change) => change.trackedFlagId))].filter(
-      (id) => !removedFlagIds.has(id),
+      (id) => !skippedFlagIds.has(id),
     )
     if (addedFlagIds.length === 0) return
 
@@ -207,6 +214,7 @@ export class ConfirmReleaseHandler extends PreparedCommandHandler<
       if (project.flagsmithEnabled) {
         await this.assertAddedFlagsExistInFlagsmith(
           release.projectId,
+          release.id,
           prs.map((pr) => pr.id),
           tx,
         )

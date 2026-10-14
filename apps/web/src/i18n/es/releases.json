@@ -363,7 +363,6 @@
     },
     "subTabs": {
       "added": "Agregados",
-      "removed": "Eliminados",
       "addedEmpty": "Ningún flag agregado coincide con tu búsqueda.",
       "deleteAllRemoved_one": "Eliminar {{count}} flag en Flagsmith",
       "deleteAllRemoved_other": "Eliminar los {{count}} flags en Flagsmith"
@@ -382,7 +381,8 @@
     "decisionShort": {
       "ENABLE_IN_RELEASE": "Activar",
       "SHIP_OFF": "Lanzar apagado",
-      "IN_PROGRESS": "En progreso"
+      "IN_PROGRESS": "En progreso",
+      "ABANDONED": "Abandonado"
     },
     "decisionAriaLabel": "Decisión para {{flag}}"
   },
@@ -428,7 +428,11 @@
       "description": "Haz clic en una celda de entorno para preparar un cambio. Nada llega a Flagsmith hasta que lo apliques.",
       "descriptionPending_one": "{{count}} flag necesita una decisión. Haz clic en una celda de entorno para preparar un cambio; nada llega a Flagsmith hasta que lo apliques.",
       "descriptionPending_other": "{{count}} flags necesitan una decisión. Haz clic en una celda de entorno para preparar un cambio; nada llega a Flagsmith hasta que lo apliques.",
-      "removedEmpty": "Ningún flag se eliminó del código en este release.",
+      "toDelete": "Por eliminar de Flagsmith",
+      "toDeleteEmpty": "No hay flags por eliminar. Aquí aparecen las flags quitadas del código y las marcadas como abandonadas.",
+      "deleteOne": "Eliminar en Flagsmith",
+      "deleteOneAria": "Eliminar {{flag}} en Flagsmith",
+      "draftDeleteWarning": "Esta release aún no se ha lanzado. El código en producción todavía puede leer estas flags. Elimínalas solo si ningún código desplegado las usa.",
       "closed": "Cerrado",
       "columns": {
         "flagAndDecision": "Flag y decisión"

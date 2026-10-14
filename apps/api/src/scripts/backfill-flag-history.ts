@@ -5,6 +5,7 @@ const DECISION_HISTORY_EVENT_TYPE: Record<ReleaseFlagDecisionType, FlagHistoryEv
   [ReleaseFlagDecisionType.ENABLE_IN_RELEASE]: FlagHistoryEventType.decision_enable_in_release,
   [ReleaseFlagDecisionType.SHIP_OFF]: FlagHistoryEventType.decision_ship_off,
   [ReleaseFlagDecisionType.in_progress]: FlagHistoryEventType.decision_in_progress,
+  [ReleaseFlagDecisionType.abandoned]: FlagHistoryEventType.decision_abandoned,
 }
 
 async function backfillDecisions(): Promise<number> {

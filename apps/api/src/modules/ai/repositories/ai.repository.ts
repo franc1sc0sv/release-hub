@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
-import { FlagAction } from '@release-hub/db'
+import { FlagAction, ReleaseFlagDecisionType } from '@release-hub/db'
 import { FeatureState } from '../../../common/types/feature-state.enum'
 import { IAiRepository } from '../interfaces/ai.repository'
 import type {
@@ -97,7 +97,12 @@ export class AiRepository extends IAiRepository {
         number: true,
         title: true,
         flagChanges: {
-          where: { action: FlagAction.added },
+          where: {
+            action: FlagAction.added,
+            trackedFlag: {
+              releaseDecisions: { none: { releaseId, decision: ReleaseFlagDecisionType.abandoned } },
+            },
+          },
           select: { trackedFlag: { select: { key: true } } },
         },
         feature: {

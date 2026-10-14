@@ -51,6 +51,7 @@ const EVENT_ICON: Record<FlagHistoryEventType, LucideIcon> = {
   [FlagHistoryEventTypeValue.DECISION_ENABLE_IN_RELEASE]: Rocket,
   [FlagHistoryEventTypeValue.DECISION_SHIP_OFF]: ShieldOff,
   [FlagHistoryEventTypeValue.DECISION_IN_PROGRESS]: CircleDashed,
+  [FlagHistoryEventTypeValue.DECISION_ABANDONED]: Trash2,
   [FlagHistoryEventTypeValue.CONFLICT_DETECTED]: AlertTriangle,
   [FlagHistoryEventTypeValue.REMINDER_SENT]: BellRing,
   [FlagHistoryEventTypeValue.SYNC_COMPLETED]: RefreshCw,

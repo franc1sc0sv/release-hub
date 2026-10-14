@@ -19,6 +19,7 @@ import { RunFlagCoverageHandler } from './commands/run-flag-coverage/run-flag-co
 import { RunFlagCoverageForFlagHandler } from './commands/run-flag-coverage-for-flag/run-flag-coverage-for-flag.handler'
 import { ScanReleasePullRequestsHandler } from './commands/scan-release-pull-requests/scan-release-pull-requests.handler'
 import { CloseTrackedFlagHandler } from './commands/close-tracked-flag/close-tracked-flag.handler'
+import { CloseAbandonedReleaseFlagsHandler } from './commands/close-abandoned-release-flags/close-abandoned-release-flags.handler'
 import { ReopenTrackedFlagHandler } from './commands/reopen-tracked-flag/reopen-tracked-flag.handler'
 import { ClearReleaseFlagDecisionHandler } from './commands/clear-release-flag-decision/clear-release-flag-decision.handler'
 import { SetReleaseFlagDecisionHandler } from './commands/set-release-flag-decision/set-release-flag-decision.handler'
@@ -31,6 +32,7 @@ import { GetFlagHistoryHandler } from './queries/get-flag-history/get-flag-histo
 import { GetFlagDetailHandler } from './queries/get-flag-detail/get-flag-detail.handler'
 import { ScanFlagsOnReleaseCreatedHandler } from './events/scan-flags-on-release-created.handler'
 import { ScanFlagsOnReleaseResyncedHandler } from './events/scan-flags-on-release-resynced.handler'
+import { CloseAbandonedFlagsOnReleaseShippedHandler } from './events/close-abandoned-flags-on-release-shipped.handler'
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { ScanFlagsOnReleaseResyncedHandler } from './events/scan-flags-on-releas
     SetReleaseFlagDecisionHandler,
     ClearReleaseFlagDecisionHandler,
     CloseTrackedFlagHandler,
+    CloseAbandonedReleaseFlagsHandler,
     ReopenTrackedFlagHandler,
     GetTrackedFlagsHandler,
     GetTrackedFlagDetailHandler,
@@ -64,6 +67,7 @@ import { ScanFlagsOnReleaseResyncedHandler } from './events/scan-flags-on-releas
     GetFlagDetailHandler,
     ScanFlagsOnReleaseCreatedHandler,
     ScanFlagsOnReleaseResyncedHandler,
+    CloseAbandonedFlagsOnReleaseShippedHandler,
   ],
   exports: [IPullRequestFlagChangeRepository, ITrackedFlagRepository, FlagHistoryModule],
 })

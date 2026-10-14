@@ -9,6 +9,8 @@ import { IOrganizationRepository } from '../../../organization/interfaces/organi
 import { IFeatureRepository } from '../../interfaces/feature.repository'
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import { IFeatureStateEventRepository } from '../../interfaces/feature-state-event.repository'
+import { IProjectRepository } from '../../../project/interfaces/project.repository'
+import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import { FeatureDetailType } from '../../types/feature-detail.type'
 import { toFeatureDetailType } from '../../types/feature.mappers'
 import { GetFeatureQuery } from './get-feature.query'
@@ -21,6 +23,8 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
     private readonly featureRepository: IFeatureRepository,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
     private readonly featureStateEventRepository: IFeatureStateEventRepository,
+    private readonly projectRepository: IProjectRepository,
+    private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
   ) {
     super(db)
   }
@@ -45,6 +49,12 @@ export class GetFeatureHandler extends BaseQueryHandler<GetFeatureQuery, Feature
       this.featureStateEventRepository.findAllByFeature(query.featureId, tx),
     ])
 
-    return toFeatureDetailType({ feature, releases, prs, snapshots, timeline })
+    const project = await this.projectRepository.findById(feature.projectId, tx)
+    const flagKeys = [...new Set(prs.flatMap((pr) => pr.flagChanges.map((change) => change.flagKey)))]
+    const flagsmithKeys = project?.flagsmithEnabled
+      ? new Set(await this.flagsmithFlagRepository.findExistingKeys(feature.projectId, flagKeys, tx))
+      : null
+
+    return toFeatureDetailType({ feature, releases, prs, snapshots, timeline, flagsmithKeys })
   }
 }

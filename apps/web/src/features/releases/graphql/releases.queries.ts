@@ -93,6 +93,7 @@ export const GET_RELEASE_TREE = graphql(`
             flagKey
             action
             kind
+            existsInFlagsmith
           }
         }
       }

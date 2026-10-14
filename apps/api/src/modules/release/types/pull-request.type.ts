@@ -14,6 +14,9 @@ export class ReleasePrFlagChangeType {
 
   @Field(() => FlagReferenceKind)
   kind: FlagReferenceKind
+
+  @Field(() => Boolean, { nullable: true })
+  existsInFlagsmith: boolean | null
 }
 
 @ObjectType()

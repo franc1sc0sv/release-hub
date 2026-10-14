@@ -12,6 +12,7 @@ import { IReleaseRepository } from '../../interfaces/release.repository'
 import { IPullRequestRepository } from '../../interfaces/pull-request.repository'
 import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release.repository'
 import { IPullRequestFlagChangeRepository } from '../../../flag-tracking/interfaces/pull-request-flag-change.repository'
+import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import { ReleaseTreeType, ReleaseFeatureNodeType } from '../../types/release-tree.type'
 import { FlagStateType } from '../../../feature/types/flag-state.type'
 import { toReleaseObjectType, toPullRequestType } from '../../types/release.mappers'
@@ -34,6 +35,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
     private readonly featureInReleaseRepository: IFeatureInReleaseRepository,
     private readonly featureRepository: IFeatureRepository,
     private readonly pullRequestFlagChangeRepository: IPullRequestFlagChangeRepository,
+    private readonly flagsmithFlagRepository: IFlagsmithFlagRepository,
   ) {
     super(db)
   }
@@ -71,6 +73,15 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
       },
       new Map(),
     )
+    const flagsmithKeys = project?.flagsmithEnabled
+      ? new Set(
+          await this.flagsmithFlagRepository.findExistingKeys(
+            release.projectId,
+            [...new Set(flagChanges.map((change) => change.flagKey))],
+            tx,
+          ),
+        )
+      : null
 
     const ledgerEntries = await this.featureInReleaseRepository.findByRelease(query.releaseId, tx)
     const ledgerByFeatureId = new Map<string, IFeatureInRelease>(
@@ -108,7 +119,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
         node.excludedFromSummary = isExcludedFromSummary(feature.kind, state)
         node.flagState = flagState
         node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) =>
-          toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? []),
+          toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? [], flagsmithKeys),
         )
         return node
       })

@@ -24,6 +24,7 @@ interface FlagDeleteConfirmDialogProps {
   report: FlagWriteReport | null
   onConfirm: (flagKeys: string[]) => void
   onClose: () => void
+  notice?: string
 }
 
 export function FlagDeleteConfirmDialog({
@@ -34,6 +35,7 @@ export function FlagDeleteConfirmDialog({
   report,
   onConfirm,
   onClose,
+  notice,
 }: FlagDeleteConfirmDialogProps) {
   const { t } = useTranslation('flags')
   const [excluded, setExcluded] = useState<string[]>([])
@@ -73,6 +75,12 @@ export function FlagDeleteConfirmDialog({
               <TriangleAlert className="size-4" aria-hidden />
               <AlertDescription>{t('write.delete.warning')}</AlertDescription>
             </Alert>
+            {notice && (
+              <Alert>
+                <TriangleAlert className="size-4" aria-hidden />
+                <AlertDescription>{notice}</AlertDescription>
+              </Alert>
+            )}
 
             <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
               <ul className="space-y-2 pr-1">

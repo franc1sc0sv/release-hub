@@ -21,7 +21,7 @@ import { useFlagWriteActions } from '@/features/flags/hooks/use-flag-write-actio
 import type { FlagDeleteTarget } from '@/features/flags/types/flag-change-target'
 import { useReleaseFlags } from '../hooks/useReleaseFlags'
 import { useStagedFlagChanges } from '../hooks/useStagedFlagChanges'
-import { isRemovedReleaseFlag, needsReleaseFlagDecision } from '../hooks/useReleaseWorkspaceStats'
+import { isRemovedReleaseFlag, isToDeleteReleaseFlag, needsReleaseFlagDecision } from '../hooks/useReleaseWorkspaceStats'
 import { FlagScanButton } from './FlagScanButton'
 import { FlagPrLinkChip } from './FlagPrLinkChip'
 import { FlagDecisionControl } from './FlagDecisionControl'
@@ -63,12 +63,12 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
 
   const normalizedSearch = search.trim().toLowerCase()
   const filteredFlags = flags.filter((flag) => flag.key.toLowerCase().includes(normalizedSearch))
-  const addedFlags = filteredFlags.filter((flag) => !isRemovedReleaseFlag(flag))
-  const removedFlags = filteredFlags.filter(isRemovedReleaseFlag)
+  const addedFlags = filteredFlags.filter((flag) => !isToDeleteReleaseFlag(flag))
+  const toDeleteFlags = filteredFlags.filter(isToDeleteReleaseFlag)
   const undecidedCount = flags.filter((flag) => needsReleaseFlagDecision(flag) && flag.decision === null).length
-  const deletableRemovedFlags = removedFlags.filter((flag) => flag.existsInFlagsmith)
-  const writableFlags = filteredFlags.filter((flag) => flag.existsInFlagsmith)
-  const canBulkDeleteRemoved = canDeleteFlags && SHIPPED_RELEASE_STATUSES.includes(releaseStatus)
+  const deletableFlags = toDeleteFlags.filter((flag) => flag.existsInFlagsmith === true)
+  const writableFlags = filteredFlags.filter((flag) => flag.existsInFlagsmith === true)
+  const releaseShipped = SHIPPED_RELEASE_STATUSES.includes(releaseStatus)
 
   function toggleEnvironmentVisibility(environmentName: string, hidden: boolean) {
     setHiddenEnvsOverride(
@@ -77,7 +77,7 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
   }
 
   function handleDecided(flag: ReleaseFlag, decision: ReleaseFlagDecisionType) {
-    if (decision !== ReleaseFlagDecisionTypeValue.ENABLE_IN_RELEASE || !canWriteFlags || !flag.existsInFlagsmith) return
+    if (decision !== ReleaseFlagDecisionTypeValue.ENABLE_IN_RELEASE || !canWriteFlags || flag.existsInFlagsmith !== true) return
     staging.stageState([flag], visibleEnvironments, true)
   }
 
@@ -104,6 +104,15 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
     }
   }
 
+  function openDeleteDialog(targetFlags: ReleaseFlag[]) {
+    setDeleteTargets(
+      targetFlags.map((flag) => ({
+        flagKey: flag.key,
+        environments: flag.environments.filter((entry) => entry.enabled).map((entry) => entry.name),
+      })),
+    )
+  }
+
   function closeDeleteDialog() {
     setDeleteTargets(null)
     if (report) {
@@ -112,8 +121,45 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
     }
   }
 
-  function renderRow(flag: ReleaseFlag, removed: boolean) {
-    const editable = canWriteFlags && flag.existsInFlagsmith
+  function renderStatus(flag: ReleaseFlag, toDelete: boolean) {
+    if (flag.existsInFlagsmith === false) {
+      return <StatusBadge tone={StatusBadgeTone.AMBER}>{t('flags:write.notInFlagsmith')}</StatusBadge>
+    }
+    const removed = isRemovedReleaseFlag(flag)
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        {removed ? (
+          <Badge variant="outline" className="rounded-full">{enumLabels.flagAction(FlagChangeActionValue.removed)}</Badge>
+        ) : flag.closedAt ? (
+          <StatusBadge tone={StatusBadgeTone.SLATE}>{t('workspace.flags.closed')}</StatusBadge>
+        ) : (
+          <FlagDecisionControl
+            releaseId={releaseId}
+            trackedFlagId={flag.id}
+            flagKey={flag.key}
+            decision={flag.decision}
+            canDecide={canDecide}
+            onDecided={(decision) => handleDecided(flag, decision)}
+          />
+        )}
+        {toDelete && canDeleteFlags && flag.existsInFlagsmith === true && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-destructive hover:text-destructive"
+            aria-label={t('workspace.flags.deleteOneAria', { flag: flag.key })}
+            onClick={() => openDeleteDialog([flag])}
+          >
+            <Trash2 className="size-3.5" aria-hidden />
+            {t('workspace.flags.deleteOne')}
+          </Button>
+        )}
+      </div>
+    )
+  }
+
+  function renderRow(flag: ReleaseFlag, toDelete: boolean) {
+    const editable = canWriteFlags && flag.existsInFlagsmith === true
     const prLinks = [...new Map(flag.changes.map((change) => [change.prNumber, change])).values()]
 
     return (
@@ -134,26 +180,12 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
             {prLinks.map((change) => (
               <FlagPrLinkChip key={change.prNumber} prNumber={change.prNumber} prTitle={change.prTitle} prUrl={change.prUrl} />
             ))}
-            {!flag.existsInFlagsmith && <span>{t('flags:write.notInFlagsmith')}</span>}
           </div>
-          <div className="mt-2.5">
-            {removed ? (
-              <Badge variant="outline" className="rounded-full">{enumLabels.flagAction(FlagChangeActionValue.removed)}</Badge>
-            ) : flag.closedAt ? (
-              <StatusBadge tone={StatusBadgeTone.SLATE}>{t('workspace.flags.closed')}</StatusBadge>
-            ) : (
-              <FlagDecisionControl
-                releaseId={releaseId}
-                trackedFlagId={flag.id}
-                flagKey={flag.key}
-                decision={flag.decision}
-                canDecide={canDecide}
-                onDecided={(decision) => handleDecided(flag, decision)}
-              />
-            )}
-          </div>
+          <div className="mt-2.5">{renderStatus(flag, toDelete)}</div>
         </TableCell>
-        {visibleEnvironments.map((environmentName) => {
+        {flag.existsInFlagsmith === false ? (
+          <TableCell colSpan={visibleEnvironments.length} />
+        ) : visibleEnvironments.map((environmentName) => {
           const environment = flag.environments.find((entry) => entry.name === environmentName)
           return (
             <TableCell key={environmentName} className="w-24 px-1">
@@ -284,35 +316,28 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
               ) : (
                 addedFlags.map((flag) => renderRow(flag, false))
               )}
-              {renderGroupHeader(t('flags.subTabs.removed'), removedFlags.length, StatusBadgeTone.ROSE)}
-              {removedFlags.length === 0 ? (
+              {renderGroupHeader(t('workspace.flags.toDelete'), toDeleteFlags.length, StatusBadgeTone.ROSE)}
+              {toDeleteFlags.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={visibleEnvironments.length + 1} className="text-xs text-muted-foreground">
-                    {t('workspace.flags.removedEmpty')}
+                    {t('workspace.flags.toDeleteEmpty')}
                   </TableCell>
                 </TableRow>
               ) : (
-                removedFlags.map((flag) => renderRow(flag, true))
+                toDeleteFlags.map((flag) => renderRow(flag, true))
               )}
             </TableBody>
           </Table>
-          {canBulkDeleteRemoved && deletableRemovedFlags.length > 0 && (
+          {canDeleteFlags && deletableFlags.length > 0 && (
             <div className="flex justify-end border-t border-white/8 px-4 py-3">
               <Button
                 variant="outline"
                 size="sm"
                 className="gap-2 text-destructive hover:text-destructive"
-                onClick={() =>
-                  setDeleteTargets(
-                    deletableRemovedFlags.map((flag) => ({
-                      flagKey: flag.key,
-                      environments: flag.environments.filter((entry) => entry.enabled).map((entry) => entry.name),
-                    })),
-                  )
-                }
+                onClick={() => openDeleteDialog(deletableFlags)}
               >
                 <Trash2 className="size-4" aria-hidden />
-                {t('flags.subTabs.deleteAllRemoved', { count: deletableRemovedFlags.length })}
+                {t('flags.subTabs.deleteAllRemoved', { count: deletableFlags.length })}
               </Button>
             </div>
           )}
@@ -338,6 +363,7 @@ export function ReleaseFlagsSection({ releaseId, releaseStatus }: ReleaseFlagsSe
         report={report}
         onConfirm={(flagKeys) => void deleteFlags(flagKeys)}
         onClose={closeDeleteDialog}
+        notice={releaseShipped ? undefined : t('workspace.flags.draftDeleteWarning')}
       />
     </section>
   )
