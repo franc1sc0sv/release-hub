@@ -13,6 +13,7 @@ import type {
 } from '../interfaces/ai-provider.abstract'
 import { SummaryChunkType } from '../types/summary-chunk.type'
 import { escapeHtml } from '../../../common/text/escape-html'
+import { extractJson } from '../../../common/text/extract-json'
 import {
   allFeatureFlags,
   featureTitleLink,
@@ -273,11 +274,6 @@ function normalizePrSummary(parsed: Partial<IAiPrSummaryResult>): Omit<IAiPrSumm
 
 function stripFences(text: string): string {
   return text.replace(/```html/gi, '').replace(/```/g, '')
-}
-
-function extractJson(text: string): string | null {
-  const match = text.match(/\{[\s\S]*\}/)
-  return match ? match[0] : null
 }
 
 function toIAiUsage(result: SDKResultMessage): IAiUsage {

@@ -125,7 +125,12 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
 
         <main className={cn('min-w-0 lg:overflow-y-auto lg:pr-2', isAiWorking && 'lg:flex lg:flex-col')}>
           {section === ReleaseSectionValue.ASSIGN && (
-            <AssignPrsSection release={release} features={features} projectId={projectId} />
+            <AssignPrsSection
+              release={release}
+              features={features}
+              unassignedPrs={tree.unassignedPrs}
+              projectId={projectId}
+            />
           )}
           {section === ReleaseSectionValue.FEATURES && (
             <ReleaseFeaturesSection features={features} releaseId={release.id} stateBreakdown={stats.stateBreakdown} />

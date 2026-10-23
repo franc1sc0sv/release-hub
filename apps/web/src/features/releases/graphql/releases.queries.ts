@@ -97,6 +97,42 @@ export const GET_RELEASE_TREE = graphql(`
           }
         }
       }
+      unassignedPrs {
+        id
+        number
+        title
+        url
+        body
+        author
+        mergedAt
+        releaseId
+        featureId
+        pendingAddition
+        aiConfidence
+        aiRationale
+        summary
+        summaryEditedAt
+        tickets {
+          issueId
+          source
+          url
+          title
+          description
+          confidence
+        }
+        commits {
+          sha
+          message
+          author
+          date
+        }
+        flagChanges {
+          flagKey
+          action
+          kind
+          existsInFlagsmith
+        }
+      }
     }
   }
 `)

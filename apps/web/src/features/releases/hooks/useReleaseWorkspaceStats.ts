@@ -85,7 +85,7 @@ export function useReleaseWorkspaceStats(
   const coverage = coverageData?.getCoverage
 
   return {
-    prCount: prs.length,
+    prCount: coverage?.total ?? prs.length,
     featureCount: acceptedFeatures.length,
     commitCount: prs.reduce((sum, pr) => sum + pr.commits.length, 0),
     ticketCount: tickets.size,

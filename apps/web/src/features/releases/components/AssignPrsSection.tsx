@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@apollo/client/react'
 import { m, useReducedMotion } from 'motion/react'
-import { Bot, Check, ChevronDown, Layers, Loader2, Rocket, Sparkles, X } from 'lucide-react'
+import { Bot, Check, ChevronDown, CircleAlert, Layers, Loader2, Rocket, Sparkles, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,13 +26,15 @@ import type { GetReleaseTreeQuery } from '@/generated/graphql'
 type ReleaseNode = GetReleaseTreeQuery['getReleaseTree']['release']
 type FeatureNodes = GetReleaseTreeQuery['getReleaseTree']['features']
 type FeatureNode = FeatureNodes[number]
+type UnassignedPrs = GetReleaseTreeQuery['getReleaseTree']['unassignedPrs']
 interface AssignPrsSectionProps {
   release: ReleaseNode
   features: FeatureNodes
+  unassignedPrs: UnassignedPrs
   projectId: string
 }
 
-export function AssignPrsSection({ release, features, projectId }: AssignPrsSectionProps) {
+export function AssignPrsSection({ release, features, unassignedPrs, projectId }: AssignPrsSectionProps) {
   const { t } = useTranslation('releases')
   const reduceMotion = useReducedMotion()
   const aiEnabled = isAiEnabled()
@@ -84,6 +86,12 @@ export function AssignPrsSection({ release, features, projectId }: AssignPrsSect
         </m.div>
       )}
 
+      {unassignedPrs.length > 0 && (
+        <m.div variants={slideUp}>
+          <UnassignedPrsCard prs={unassignedPrs} releaseId={release.id} projectId={projectId} />
+        </m.div>
+      )}
+
       {hasSuggested && (
         <m.div variants={slideUp} className="space-y-3">
           {suggestedFeatures.map((node) => (
@@ -113,7 +121,7 @@ export function AssignPrsSection({ release, features, projectId }: AssignPrsSect
         </m.div>
       )}
 
-      {features.length === 0 && isReady && (
+      {features.length === 0 && unassignedPrs.length === 0 && isReady && (
         <GlassCard>
           <CardContent className="flex flex-col items-center gap-4 py-16">
             <div className="flex size-14 items-center justify-center rounded-full bg-indigo-500/20">
@@ -177,6 +185,42 @@ function DraftingState({ reduceMotion }: { reduceMotion: boolean }) {
         </div>
       </CardContent>
     </GlassCard>
+  )
+}
+
+interface UnassignedPrsCardProps {
+  prs: UnassignedPrs
+  releaseId: string
+  projectId: string
+}
+
+function UnassignedPrsCard({ prs, releaseId, projectId }: UnassignedPrsCardProps) {
+  const { t } = useTranslation('releases')
+
+  return (
+    <section
+      aria-labelledby="unassigned-prs-heading"
+      className="rounded-[var(--radius-card)] border border-amber-500/30 bg-amber-500/5"
+    >
+      <div className="flex items-start gap-3 px-5 py-4">
+        <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/15">
+          <CircleAlert className="size-4 text-amber-400" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1">
+          <h3 id="unassigned-prs-heading" className="font-display font-semibold text-foreground">
+            {t('draft.unassigned.heading')}
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            {t('draft.unassigned.description', { count: prs.length })}
+          </p>
+        </div>
+      </div>
+      <div className="space-y-3 border-t border-amber-500/15 px-4 pb-4 pt-3">
+        {prs.map((pr) => (
+          <PrAssignmentRow key={pr.id} pr={pr} featureName="" releaseId={releaseId} projectId={projectId} />
+        ))}
+      </div>
+    </section>
   )
 }
 

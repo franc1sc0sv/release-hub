@@ -33,4 +33,7 @@ export class ReleaseTreeType {
 
   @Field(() => [ReleaseFeatureNodeType])
   features: ReleaseFeatureNodeType[]
+
+  @Field(() => [PullRequestType])
+  unassignedPrs: PullRequestType[]
 }

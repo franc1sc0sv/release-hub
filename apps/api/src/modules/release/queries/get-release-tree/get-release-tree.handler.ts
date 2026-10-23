@@ -14,6 +14,7 @@ import { IFeatureInReleaseRepository } from '../../interfaces/feature-in-release
 import { IPullRequestFlagChangeRepository } from '../../../flag-tracking/interfaces/pull-request-flag-change.repository'
 import { IFlagsmithFlagRepository } from '../../../integration/interfaces/flagsmith-flag.repository'
 import { ReleaseTreeType, ReleaseFeatureNodeType } from '../../types/release-tree.type'
+import type { PullRequestType } from '../../types/pull-request.type'
 import { FlagStateType } from '../../../feature/types/flag-state.type'
 import { toReleaseObjectType, toPullRequestType } from '../../types/release.mappers'
 import { toFeatureType } from '../../../feature/types/feature.mappers'
@@ -61,7 +62,7 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
     const assignedPrs = allPrs.filter((pr) => pr.featureId !== null)
 
     const flagChanges = await this.pullRequestFlagChangeRepository.findAllForPullRequestIds(
-      assignedPrs.map((pr) => pr.id),
+      allPrs.map((pr) => pr.id),
       tx,
     )
     const flagChangesByPullRequestId = flagChanges.reduce<Map<string, IPullRequestFlagChangeWithPullRequest[]>>(
@@ -87,6 +88,9 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
     const ledgerByFeatureId = new Map<string, IFeatureInRelease>(
       ledgerEntries.map((entry) => [entry.featureId, entry]),
     )
+
+    const toPrType = (pr: IPullRequest): PullRequestType =>
+      toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? [], flagsmithKeys)
 
     const featureIds = [...new Set(assignedPrs.map((pr) => pr.featureId as string))]
 
@@ -118,15 +122,14 @@ export class GetReleaseTreeHandler extends BaseQueryHandler<GetReleaseTreeQuery,
         node.clientAvailabilityKey = deriveClientAvailability(state, flagState)
         node.excludedFromSummary = isExcludedFromSummary(feature.kind, state)
         node.flagState = flagState
-        node.prs = (prsByFeatureId.get(feature.id) ?? []).map((pr) =>
-          toPullRequestType(pr, project?.repo ?? '', flagChangesByPullRequestId.get(pr.id) ?? [], flagsmithKeys),
-        )
+        node.prs = (prsByFeatureId.get(feature.id) ?? []).map(toPrType)
         return node
       })
 
     const tree = new ReleaseTreeType()
     tree.release = toReleaseObjectType(release)
     tree.features = featureNodes
+    tree.unassignedPrs = allPrs.filter((pr) => pr.featureId === null).map(toPrType)
     return tree
   }
 

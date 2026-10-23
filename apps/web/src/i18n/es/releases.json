@@ -214,6 +214,11 @@
       "descriptionLabel": "Descripción",
       "descriptionPlaceholder": "Describe qué hace esta funcionalidad…"
     },
+    "unassigned": {
+      "heading": "Pull requests sin funcionalidad",
+      "description_one": "El borrador no pudo asignar este pull request. Selecciona una funcionalidad.",
+      "description_other": "El borrador no pudo asignar estos {{count}} pull requests. Selecciona una funcionalidad para cada uno."
+    },
     "prsByFeature": "Pull requests por funcionalidad",
     "manualAssignHint": "La IA no está disponible en este entorno — asigna cada pull request a una funcionalidad manualmente abajo.",
     "noFeatures": "No se encontraron funcionalidades para este release. Agrega pull requests fusionados primero.",

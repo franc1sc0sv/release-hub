@@ -214,6 +214,11 @@
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Describe what this feature does…"
     },
+    "unassigned": {
+      "heading": "Pull requests without a feature",
+      "description_one": "The draft could not assign this pull request. Select a feature for it.",
+      "description_other": "The draft could not assign these {{count}} pull requests. Select a feature for each one."
+    },
     "prsByFeature": "Pull requests by feature",
     "manualAssignHint": "AI is unavailable in this environment — assign each pull request to a feature manually below.",
     "noFeatures": "No features found for this release. Add some merged pull requests first.",

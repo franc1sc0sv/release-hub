@@ -1180,6 +1180,7 @@ enum ReleaseStatus {
 type ReleaseTreeType {
   features: [ReleaseFeatureNodeType!]!
   release: ReleaseObjectType!
+  unassignedPrs: [PullRequestType!]!
 }
 
 type ReleasesPageType {
