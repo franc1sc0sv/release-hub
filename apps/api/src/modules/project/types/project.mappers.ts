@@ -36,6 +36,8 @@ export function toProjectType(project: IProject): ProjectType {
   type.connectionHealth = toConnectionHealth(project)
   type.flagReminderIntervalDays = project.flagReminderIntervalDays
   type.conflictEnvironments = project.conflictEnvironments
+  type.defaultParentBranch = project.defaultParentBranch
+  type.branchUpdateMethod = project.branchUpdateMethod
   type.ownerId = project.ownerId
   type.createdAt = project.createdAt
   type.updatedAt = project.updatedAt

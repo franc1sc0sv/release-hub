@@ -519,5 +519,25 @@
       "copyForSlack": "Copy for Slack",
       "copiedForSlack": "Copied with Slack formatting. Paste it into a message."
     }
+  },
+  "branchUpdate": {
+    "button": "Update from {{branch}}",
+    "buttonNoParent": "Update from parent",
+    "behind_one": "{{count}} behind",
+    "behind_other": "{{count}} behind",
+    "upToDate": "Up to date with {{branch}}",
+    "selectParent": "Select a parent branch to update from",
+    "rebaseBlocked_one": "This release branch has {{count}} commit that {{branch}} does not have. Rebase it in a terminal.",
+    "rebaseBlocked_other": "This release branch has {{count}} commits that {{branch}} does not have. Rebase it in a terminal.",
+    "added_one": "Added {{count}} commit from {{branch}}",
+    "added_other": "Added {{count}} commits from {{branch}}",
+    "upToDateToast": "Already up to date",
+    "error": "Failed to update the release branch",
+    "changeParent": "Change parent branch",
+    "parentLabel": "Parent branch",
+    "parentPlaceholder": "Select a parent branch",
+    "detected": "detected",
+    "detectedHint": "Detected automatically. Pick another branch if this is wrong.",
+    "sourceRefError": "Failed to change the parent branch"
   }
 }

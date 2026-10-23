@@ -220,3 +220,23 @@ export const UPDATE_PROJECT_CONFLICT_ENVIRONMENTS = graphql(`
     }
   }
 `)
+
+export const GET_PROJECT_RELEASE_BRANCHES = graphql(`
+  query GetProjectReleaseBranches($id: ID!) {
+    getProject(id: $id) {
+      id
+      branchUpdateMethod
+      defaultParentBranch
+    }
+  }
+`)
+
+export const UPDATE_PROJECT_RELEASE_BRANCHES = graphql(`
+  mutation UpdateProjectReleaseBranches($input: UpdateProjectInput!) {
+    updateProject(input: $input) {
+      id
+      branchUpdateMethod
+      defaultParentBranch
+    }
+  }
+`)

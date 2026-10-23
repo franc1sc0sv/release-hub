@@ -1,5 +1,5 @@
 import { Field, ID, InputType } from '@nestjs/graphql'
-import { IsArray, IsNotEmpty, IsString, ArrayMaxSize, MaxLength } from 'class-validator'
+import { IsArray, IsNotEmpty, IsOptional, IsString, ArrayMaxSize, MaxLength } from 'class-validator'
 
 @InputType()
 export class CreateReleaseInput {
@@ -19,6 +19,13 @@ export class CreateReleaseInput {
   @IsNotEmpty()
   @MaxLength(255)
   compareRef: string
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  sourceRef?: string
 
   @Field(() => [String], { nullable: true })
   @IsArray()

@@ -184,3 +184,23 @@ export const SET_RELEASE_FLAG_DECISION = graphql(`
     }
   }
 `)
+
+export const UPDATE_RELEASE_BRANCH = graphql(`
+  mutation UpdateReleaseBranch($input: UpdateReleaseBranchInput!) {
+    updateReleaseBranch(input: $input) {
+      commitsAdded
+      headSha
+      method
+      sourceRef
+    }
+  }
+`)
+
+export const SET_RELEASE_SOURCE_REF = graphql(`
+  mutation SetReleaseSourceRef($input: SetReleaseSourceRefInput!) {
+    setReleaseSourceRef(input: $input) {
+      id
+      sourceRef
+    }
+  }
+`)

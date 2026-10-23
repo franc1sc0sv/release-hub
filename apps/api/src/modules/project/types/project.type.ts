@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql'
+import { BranchUpdateMethod } from '../../../common/types/branch-update-method.enum'
 import { ProjectIntegrationsType } from './project-integrations.type'
 import { ConnectionHealthType } from './connection-health.type'
 
@@ -27,6 +28,12 @@ export class ProjectType {
 
   @Field(() => [String])
   conflictEnvironments: string[]
+
+  @Field(() => String, { nullable: true })
+  defaultParentBranch: string | null
+
+  @Field(() => BranchUpdateMethod)
+  branchUpdateMethod: BranchUpdateMethod
 
   @Field(() => String)
   ownerId: string

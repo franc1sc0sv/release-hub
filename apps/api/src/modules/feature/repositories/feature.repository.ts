@@ -192,6 +192,7 @@ export class FeatureRepository extends IFeatureRepository {
     name: string | null
     baseRef: string
     compareRef: string
+    sourceRef: string | null
     status: string
     aiDraftStatus: string
     prUrl: string | null
@@ -212,6 +213,7 @@ export class FeatureRepository extends IFeatureRepository {
       name: row.name,
       baseRef: row.baseRef,
       compareRef: row.compareRef,
+      sourceRef: row.sourceRef,
       status: prismaToAppReleaseStatus[row.status] ?? ReleaseStatus.DRAFT,
       aiDraftStatus: prismaToAppAiDraftStatus[row.aiDraftStatus] ?? AiDraftStatus.PENDING,
       prUrl: row.prUrl,

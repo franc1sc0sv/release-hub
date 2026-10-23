@@ -1,5 +1,7 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql'
-import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
+
+import { BranchUpdateMethod } from '../../../common/types/branch-update-method.enum'
 
 @InputType()
 export class UpdateProjectInput {
@@ -33,4 +35,15 @@ export class UpdateProjectInput {
   @IsArray()
   @IsString({ each: true })
   conflictEnvironments?: string[]
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  defaultParentBranch?: string | null
+
+  @Field(() => BranchUpdateMethod, { nullable: true })
+  @IsOptional()
+  @IsEnum(BranchUpdateMethod)
+  branchUpdateMethod?: BranchUpdateMethod
 }

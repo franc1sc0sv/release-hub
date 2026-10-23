@@ -1,12 +1,18 @@
 import type {
   AiDraftStatus,
   AiSummaryStatus,
+  BranchUpdateMethod,
   FlagChangeAction,
   ReleaseFlagDecisionType,
   ReleaseStatus,
 } from '@/generated/graphql'
 import type { StatusBadgeToneValue } from '@/components/nebula/StatusBadge'
 import { StatusBadgeTone } from '@/components/nebula/StatusBadge'
+
+export const BranchUpdateMethodValue = {
+  MERGE: 'MERGE',
+  REBASE: 'REBASE',
+} as const satisfies Record<BranchUpdateMethod, BranchUpdateMethod>
 
 export const ReleaseStatusValue = {
   DRAFT: 'DRAFT',

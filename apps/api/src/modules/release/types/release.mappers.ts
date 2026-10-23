@@ -73,6 +73,7 @@ export function toReleaseObjectType(release: IRelease): ReleaseObjectType {
   type.name = release.name
   type.baseRef = release.baseRef
   type.compareRef = release.compareRef
+  type.sourceRef = release.sourceRef
   type.status = release.status
   type.allowedNextStatuses = MANUAL_RELEASE_STATUS_TRANSITIONS[release.status]
   type.aiDraftStatus = release.aiDraftStatus

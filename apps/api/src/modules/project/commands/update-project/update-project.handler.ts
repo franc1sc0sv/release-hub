@@ -14,6 +14,12 @@ import { toProjectType } from '../../types/project.mappers'
 import { ProjectUpdatedEvent } from '../../events/project-updated.event'
 import { UpdateProjectCommand } from './update-project.command'
 
+function normalizeParentBranch(value: string | null | undefined): string | null | undefined {
+  if (value === undefined) return undefined
+  const trimmed = value?.trim() ?? ''
+  return trimmed.length > 0 ? trimmed : null
+}
+
 @CommandHandler(UpdateProjectCommand)
 export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectCommand, ProjectType> {
   constructor(
@@ -51,6 +57,8 @@ export class UpdateProjectHandler extends BaseCommandHandler<UpdateProjectComman
         repo: command.repo,
         flagReminderIntervalDays: command.flagReminderIntervalDays,
         conflictEnvironments: command.conflictEnvironments,
+        defaultParentBranch: normalizeParentBranch(command.defaultParentBranch),
+        branchUpdateMethod: command.branchUpdateMethod,
       },
       tx,
     )

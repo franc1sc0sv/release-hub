@@ -22,6 +22,7 @@ type ReleaseRow = {
   name: string | null
   baseRef: string
   compareRef: string
+  sourceRef: string | null
   status: string
   aiDraftStatus: string
   prUrl: string | null
@@ -136,6 +137,7 @@ export class ReleaseRepository extends IReleaseRepository {
         name: data.name,
         baseRef: data.baseRef,
         compareRef: data.compareRef,
+        sourceRef: data.sourceRef,
         tags: data.tags,
         status: ReleaseStatus.DRAFT,
         aiDraftStatus: AiDraftStatus.PENDING,
@@ -163,6 +165,14 @@ export class ReleaseRepository extends IReleaseRepository {
     const row = await tx.release.update({
       where: { id },
       data: { status, prUrl },
+    })
+    return this.toIRelease(row)
+  }
+
+  setSourceRef = async (id: string, sourceRef: string, tx: TxClient): Promise<IRelease> => {
+    const row = await tx.release.update({
+      where: { id },
+      data: { sourceRef },
     })
     return this.toIRelease(row)
   }
@@ -268,6 +278,7 @@ export class ReleaseRepository extends IReleaseRepository {
       name: row.name,
       baseRef: row.baseRef,
       compareRef: row.compareRef,
+      sourceRef: row.sourceRef,
       status: STATUS_MAP[row.status] ?? ReleaseStatus.DRAFT,
       aiDraftStatus: AI_STATUS_MAP[row.aiDraftStatus] ?? AiDraftStatus.PENDING,
       prUrl: row.prUrl,

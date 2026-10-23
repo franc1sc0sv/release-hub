@@ -243,3 +243,16 @@ export const IN_PROGRESS_FLAG_REMINDERS = graphql(`
   }
 `)
 
+
+export const GET_RELEASE_BRANCH_STATUS = graphql(`
+  query GetReleaseBranchStatus($releaseId: ID!) {
+    releaseBranchStatus(releaseId: $releaseId) {
+      behindBy
+      canFastForward
+      detected
+      ownCommits
+      sourceRef
+      updateMethod
+    }
+  }
+`)

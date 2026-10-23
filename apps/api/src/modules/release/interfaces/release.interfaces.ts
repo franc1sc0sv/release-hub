@@ -66,6 +66,7 @@ export interface IRelease {
   name: string | null
   baseRef: string
   compareRef: string
+  sourceRef: string | null
   status: ReleaseStatus
   aiDraftStatus: AiDraftStatus
   prUrl: string | null
@@ -86,6 +87,7 @@ export interface ICreateReleaseData {
   name: string
   baseRef: string
   compareRef: string
+  sourceRef: string | null
   tags: string[]
   createdById: string
 }

@@ -114,6 +114,7 @@ export class CreateReleaseHandler extends PreparedCommandHandler<
         name: command.compareRef,
         baseRef: command.baseRef,
         compareRef: command.compareRef,
+        sourceRef: command.sourceRef,
         tags: command.tags,
         createdById: command.userId,
       },

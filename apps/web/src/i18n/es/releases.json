@@ -519,5 +519,28 @@
       "copyForSlack": "Copiar para Slack",
       "copiedForSlack": "Copiado con formato de Slack. Pégalo en un mensaje."
     }
+  },
+  "branchUpdate": {
+    "button": "Actualizar desde {{branch}}",
+    "buttonNoParent": "Actualizar desde la rama padre",
+    "behind_one": "{{count}} atrás",
+    "behind_many": "{{count}} atrás",
+    "behind_other": "{{count}} atrás",
+    "upToDate": "Al día con {{branch}}",
+    "selectParent": "Selecciona una rama padre desde la que actualizar",
+    "rebaseBlocked_one": "Esta rama de release tiene {{count}} commit que {{branch}} no tiene. Haz rebase en una terminal.",
+    "rebaseBlocked_many": "Esta rama de release tiene {{count}} commits que {{branch}} no tiene. Haz rebase en una terminal.",
+    "rebaseBlocked_other": "Esta rama de release tiene {{count}} commits que {{branch}} no tiene. Haz rebase en una terminal.",
+    "added_one": "Se agregó {{count}} commit desde {{branch}}",
+    "added_many": "Se agregaron {{count}} commits desde {{branch}}",
+    "added_other": "Se agregaron {{count}} commits desde {{branch}}",
+    "upToDateToast": "Ya está al día",
+    "error": "No se pudo actualizar la rama de release",
+    "changeParent": "Cambiar rama padre",
+    "parentLabel": "Rama padre",
+    "parentPlaceholder": "Selecciona una rama padre",
+    "detected": "detectada",
+    "detectedHint": "Detectada automáticamente. Elige otra rama si no es correcta.",
+    "sourceRefError": "No se pudo cambiar la rama padre"
   }
 }

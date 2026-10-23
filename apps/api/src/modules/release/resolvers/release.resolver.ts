@@ -12,6 +12,8 @@ import { ReleaseTreeType } from '../types/release-tree.type'
 import { CoverageType } from '../types/coverage.type'
 import { PullRequestType } from '../types/pull-request.type'
 import { ExportResultType } from '../types/export-result.type'
+import { ReleaseBranchStatusType } from '../types/release-branch-status.type'
+import { UpdateReleaseBranchResultType } from '../types/update-release-branch-result.type'
 import { ResyncReleaseSummaryType } from '../types/resync-release-summary.type'
 import { ReleasesPageType } from '../types/releases-page.type'
 import { ReleasePullRequestsPageType } from '../types/release-pull-requests-page.type'
@@ -24,6 +26,11 @@ import { ConfirmReleaseInput } from '../commands/confirm-release/confirm-release
 import { ShipReleaseInput } from '../commands/ship-release/ship-release.input'
 import { SaveReleaseSummaryInput } from '../commands/save-release-summary/save-release-summary.input'
 import { SavePrSummaryInput } from '../commands/save-pr-summary/save-pr-summary.input'
+import { SetReleaseSourceRefInput } from '../commands/set-release-source-ref/set-release-source-ref.input'
+import { SetReleaseSourceRefCommand } from '../commands/set-release-source-ref/set-release-source-ref.command'
+import { UpdateReleaseBranchInput } from '../commands/update-release-branch/update-release-branch.input'
+import { UpdateReleaseBranchCommand } from '../commands/update-release-branch/update-release-branch.command'
+import { GetReleaseBranchStatusQuery } from '../queries/get-release-branch-status/get-release-branch-status.query'
 import { GetReleasesPageQuery } from '../queries/get-releases-page/get-releases-page.query'
 import { GetReleaseQuery } from '../queries/get-release/get-release.query'
 import { GetReleaseTreeQuery } from '../queries/get-release-tree/get-release-tree.query'
@@ -72,6 +79,16 @@ export class ReleaseResolver {
     return this.queryBus.execute(new GetReleaseTreeQuery(user.id, id))
   }
 
+  @Query(() => ReleaseBranchStatusType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.READ, Subject.RELEASE)
+  releaseBranchStatus(
+    @Args('releaseId', { type: () => ID }) releaseId: string,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleaseBranchStatusType> {
+    return this.queryBus.execute(new GetReleaseBranchStatusQuery(user.id, releaseId))
+  }
+
   @Query(() => CoverageType)
   @UseGuards(PoliciesGuard)
   @Can(Action.READ, Subject.RELEASE)
@@ -96,6 +113,7 @@ export class ReleaseResolver {
         input.baseRef,
         input.compareRef,
         input.tags ?? [],
+        input.sourceRef ?? null,
       ),
     )
   }
@@ -207,6 +225,26 @@ export class ReleaseResolver {
     @CurrentUser() user: IJwtUser,
   ): Promise<ResyncReleaseSummaryType> {
     return this.commandBus.execute(new ResyncReleasePullRequestsCommand(user.id, releaseId))
+  }
+
+  @Mutation(() => ReleaseObjectType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  setReleaseSourceRef(
+    @Args('input', { type: () => SetReleaseSourceRefInput }) input: SetReleaseSourceRefInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<ReleaseObjectType> {
+    return this.commandBus.execute(new SetReleaseSourceRefCommand(user.id, input.releaseId, input.sourceRef))
+  }
+
+  @Mutation(() => UpdateReleaseBranchResultType)
+  @UseGuards(PoliciesGuard)
+  @Can(Action.UPDATE, Subject.RELEASE)
+  updateReleaseBranch(
+    @Args('input', { type: () => UpdateReleaseBranchInput }) input: UpdateReleaseBranchInput,
+    @CurrentUser() user: IJwtUser,
+  ): Promise<UpdateReleaseBranchResultType> {
+    return this.commandBus.execute(new UpdateReleaseBranchCommand(user.id, input.releaseId))
   }
 
   @Mutation(() => ReleaseObjectType)

@@ -1,4 +1,5 @@
 import type { IDomainEvent } from '../../../common/cqrs/types'
+import type { BranchUpdateMethod } from '../../../common/types/branch-update-method.enum'
 
 export interface IReleaseCreatedEvent extends IDomainEvent {
   readonly eventName: 'release.created'
@@ -30,5 +31,16 @@ export interface IReleaseDeployedEvent extends IDomainEvent {
   readonly eventName: 'release.deployed'
   readonly releaseId: string
   readonly projectId: string
+  readonly occurredAt: Date
+}
+
+export interface IReleaseBranchUpdatedEvent extends IDomainEvent {
+  readonly eventName: 'release.branch_updated'
+  readonly releaseId: string
+  readonly projectId: string
+  readonly sourceRef: string
+  readonly method: BranchUpdateMethod
+  readonly commitsAdded: number
+  readonly actorId: string
   readonly occurredAt: Date
 }

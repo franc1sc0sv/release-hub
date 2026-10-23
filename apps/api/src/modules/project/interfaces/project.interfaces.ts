@@ -1,3 +1,5 @@
+import type { BranchUpdateMethod } from '../../../common/types/branch-update-method.enum'
+
 export interface IProjectIntegrations {
   github: boolean
   linear: boolean
@@ -17,6 +19,8 @@ export interface IProject {
   slackEnabled: boolean
   flagReminderIntervalDays: number
   conflictEnvironments: string[]
+  defaultParentBranch: string | null
+  branchUpdateMethod: BranchUpdateMethod
   ownerId: string
   createdAt: Date
   updatedAt: Date
@@ -38,6 +42,8 @@ export interface IUpdateProjectData {
   repo?: string
   flagReminderIntervalDays?: number
   conflictEnvironments?: string[]
+  defaultParentBranch?: string | null
+  branchUpdateMethod?: BranchUpdateMethod
 }
 
 export interface IProjectIntegrationSettings {

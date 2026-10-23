@@ -42,6 +42,7 @@ const STEP_KEYS = [
 interface WizardState {
   baseRef: string
   compareRef: string
+  sourceRef: string | null
   tags: string[]
 }
 
@@ -53,7 +54,7 @@ export function ReleaseWizard() {
   const tagInputId = useId()
 
   const [step, setStep] = useState(1)
-  const [state, setState] = useState<WizardState>({ baseRef: '', compareRef: '', tags: [] })
+  const [state, setState] = useState<WizardState>({ baseRef: '', compareRef: '', sourceRef: null, tags: [] })
   const [createBranchOpen, setCreateBranchOpen] = useState(false)
   const [tagInput, setTagInput] = useState('')
 
@@ -89,6 +90,7 @@ export function ReleaseWizard() {
             baseRef: state.baseRef,
             compareRef: state.compareRef,
             tags: state.tags,
+            sourceRef: state.sourceRef,
           },
         },
       })
@@ -141,7 +143,7 @@ export function ReleaseWizard() {
               baseRef={state.baseRef}
               compareRef={state.compareRef}
               onBaseChange={(v) => setState((prev) => ({ ...prev, baseRef: v }))}
-              onCompareChange={(v) => setState((prev) => ({ ...prev, compareRef: v }))}
+              onCompareChange={(v) => setState((prev) => ({ ...prev, compareRef: v, sourceRef: null }))}
               onCreateBranch={() => setCreateBranchOpen(true)}
             />
             <div className="mt-6 flex justify-end">
@@ -220,7 +222,9 @@ export function ReleaseWizard() {
         onOpenChange={setCreateBranchOpen}
         projectId={projectId}
         defaultFromRef={state.baseRef}
-        onCreated={(name) => setState((prev) => ({ ...prev, compareRef: name }))}
+        onCreated={(name, fromRef) =>
+          setState((prev) => ({ ...prev, compareRef: name, sourceRef: fromRef }))
+        }
       />
     </div>
   )

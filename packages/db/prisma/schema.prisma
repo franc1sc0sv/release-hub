@@ -54,6 +54,13 @@ enum ReleaseType {
   @@map("release_type")
 }
 
+enum BranchUpdateMethod {
+  rebase
+  merge
+
+  @@map("branch_update_method")
+}
+
 enum AiDraftStatus {
   pending
   running
@@ -339,6 +346,8 @@ model Project {
   flagRegistryBranch String? @map("flag_registry_branch")
   flagReminderIntervalDays Int @default(7) @map("flag_reminder_interval_days")
   conflictEnvironments String[] @default([]) @map("conflict_environments")
+  defaultParentBranch  String? @map("default_parent_branch")
+  branchUpdateMethod   BranchUpdateMethod @default(rebase) @map("branch_update_method")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
@@ -414,6 +423,7 @@ model Release {
   name             String?
   baseRef          String        @map("base_ref")
   compareRef       String        @map("compare_ref")
+  sourceRef        String?       @map("source_ref")
   status           ReleaseStatus @default(draft)
   aiDraftStatus    AiDraftStatus @default(pending) @map("ai_draft_status")
   prUrl            String?       @map("pr_url")

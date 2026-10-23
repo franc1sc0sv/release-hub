@@ -5,5 +5,6 @@ export class CreateReleaseCommand {
     readonly baseRef: string,
     readonly compareRef: string,
     readonly tags: string[],
+    readonly sourceRef: string | null,
   ) {}
 }

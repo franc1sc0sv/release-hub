@@ -18,6 +18,8 @@ export function useFlagReminderInterval(projectId: string) {
           name: undefined,
           repo: undefined,
           conflictEnvironments: undefined,
+          branchUpdateMethod: undefined,
+          defaultParentBranch: undefined,
         },
       },
     })

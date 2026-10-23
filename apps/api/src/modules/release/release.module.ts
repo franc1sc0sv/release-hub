@@ -24,6 +24,9 @@ import { GetCoverageHandler } from './queries/get-coverage/get-coverage.handler'
 import { ExportSummaryHandler } from './queries/export-summary/export-summary.handler'
 import { GetInProgressFlagRemindersHandler } from './queries/get-in-progress-flag-reminders/get-in-progress-flag-reminders.handler'
 import { GetReleasePullRequestsPageHandler } from './queries/get-release-pull-requests-page/get-release-pull-requests-page.handler'
+import { GetReleaseBranchStatusHandler } from './queries/get-release-branch-status/get-release-branch-status.handler'
+import { SetReleaseSourceRefHandler } from './commands/set-release-source-ref/set-release-source-ref.handler'
+import { UpdateReleaseBranchHandler } from './commands/update-release-branch/update-release-branch.handler'
 import { CreateReleaseHandler } from './commands/create-release/create-release.handler'
 import { UpdateReleaseHandler } from './commands/update-release/update-release.handler'
 import { ConfirmReleaseHandler } from './commands/confirm-release/confirm-release.handler'
@@ -61,6 +64,9 @@ import { HandleGithubDeploymentWebhookHandler } from './commands/handle-github-d
     ExportSummaryHandler,
     GetInProgressFlagRemindersHandler,
     GetReleasePullRequestsPageHandler,
+    GetReleaseBranchStatusHandler,
+    SetReleaseSourceRefHandler,
+    UpdateReleaseBranchHandler,
     CreateReleaseHandler,
     UpdateReleaseHandler,
     ConfirmReleaseHandler,

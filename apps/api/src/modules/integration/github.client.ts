@@ -11,6 +11,7 @@ import {
   type IGithubRepository,
   type IGitHubBranch,
   type IGitHubRefComparison,
+  type IGitHubMergeResult,
   type IGitHubFileTree,
   type IGitHubPullRequestFile,
   type IGitHubBranchSearchResult,
@@ -567,6 +568,68 @@ export class GitHubClient extends IGitHubClient {
     } catch (error) {
       this.mapOctokitError(error)
     }
+  }
+
+  async fastForwardBranch(repo: string, branch: string, sha: string, accessToken: string): Promise<void> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      await octokit.git.updateRef({
+        owner,
+        repo: repoName,
+        ref: `heads/${branch}`,
+        sha,
+        force: false,
+      })
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+
+    this.clearBranchCaches(repo)
+  }
+
+  async mergeBranch(
+    repo: string,
+    baseBranch: string,
+    headBranch: string,
+    commitMessage: string,
+    accessToken: string,
+  ): Promise<IGitHubMergeResult> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    let result: IGitHubMergeResult
+    try {
+      const response = await octokit.repos.merge({
+        owner,
+        repo: repoName,
+        base: baseBranch,
+        head: headBranch,
+        commit_message: commitMessage,
+      })
+      result =
+        response.status === 201
+          ? { merged: true, sha: response.data.sha }
+          : { merged: false, sha: null }
+    } catch (error) {
+      if ((error as { status?: number }).status === 409) {
+        throw new AppException(
+          `Merge conflict: ${headBranch} cannot be merged into ${baseBranch} automatically. Resolve the conflicts in a terminal.`,
+          ErrorCode.CONFLICT,
+        )
+      }
+      this.mapOctokitError(error)
+    }
+
+    this.clearBranchCaches(repo)
+    return result
   }
 
   async getDefaultBranch(repo: string, accessToken: string): Promise<string> {

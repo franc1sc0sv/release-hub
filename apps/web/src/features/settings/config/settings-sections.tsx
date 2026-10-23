@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
-import { Plug, Bell, Flag, Tags, FileText, type LucideIcon } from 'lucide-react'
+import { Plug, Bell, Flag, Tags, FileText, GitBranch, type LucideIcon } from 'lucide-react'
 import { ConnectionsSection } from '../components/connections-section'
 import { NotificationPreferencesSection } from '../components/notification-preferences-section'
 import { FlagTrackingSection } from '../components/flag-tracking-section'
+import { ReleaseBranchesSection } from '../components/release-branches-section'
 import { TagsSection } from '../components/tags-section'
 import { SummaryProfilesSection } from '@/features/summary-profiles/components/summary-profiles-section'
 
@@ -35,6 +36,13 @@ export const SETTINGS_SECTIONS = [
     descriptionKey: 'descriptions.flagTracking',
     icon: Flag,
     render: (projectId) => <FlagTrackingSection projectId={projectId} />,
+  },
+  {
+    slug: 'release-branches',
+    labelKey: 'sections.releaseBranches',
+    descriptionKey: 'descriptions.releaseBranches',
+    icon: GitBranch,
+    render: (projectId) => <ReleaseBranchesSection projectId={projectId} />,
   },
   {
     slug: 'tags',

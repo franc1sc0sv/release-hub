@@ -22,7 +22,7 @@ interface CreateBranchDialogProps {
   onOpenChange: (open: boolean) => void
   projectId: string
   defaultFromRef: string
-  onCreated: (branchName: string) => void
+  onCreated: (branchName: string, fromRef: string) => void
 }
 
 export function CreateBranchDialog({
@@ -69,7 +69,7 @@ export function CreateBranchDialog({
         variables: { input: { projectId, name: trimmed, fromRef } },
       })
       if (data) {
-        onCreated(data.createGithubBranch.name)
+        onCreated(data.createGithubBranch.name, fromRef)
         handleOpenChange(false)
       }
     } catch (err) {

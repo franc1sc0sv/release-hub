@@ -7,14 +7,16 @@
     "flagTracking": "Seguimiento de feature flags",
     "tags": "Taxonomía de etiquetas",
     "summaryProfiles": "Perfiles de resumen",
-    "project": "Proyecto"
+    "project": "Proyecto",
+    "releaseBranches": "Ramas de release"
   },
   "descriptions": {
     "connections": "Integraciones para diffs de ramas, paridad de flags y notificaciones.",
     "notifications": "Elige qué eventos de releases y flags recibes, y dónde llegan.",
     "flagTracking": "Recordatorios de apagado y el registro de flags del escaneo de código.",
     "tags": "La taxonomía de etiquetas que agrupa las features en cada resumen de release.",
-    "summaryProfiles": "Plantillas, reglas y ejemplos reutilizables que definen cómo se redactan los resúmenes de release."
+    "summaryProfiles": "Plantillas, reglas y ejemplos reutilizables que definen cómo se redactan los resúmenes de release.",
+    "releaseBranches": "De dónde salen las ramas de release y cómo reciben commits nuevos."
   },
   "connections": {
     "flagsmith": {
@@ -143,5 +145,29 @@
     "heading": "Configuración",
     "description": "Configura las conexiones y preferencias de tu proyecto."
   },
-  "loading": "Cargando configuración..."
+  "loading": "Cargando configuración...",
+  "releaseBranches": {
+    "title": "Ramas de release",
+    "description": "Las ramas de release se crean desde una rama padre. Estos valores definen desde qué rama se actualizan los releases y cómo.",
+    "parentBranch": {
+      "label": "Rama padre predeterminada",
+      "placeholder": "Detectar automáticamente",
+      "clear": "Quitar la rama padre predeterminada",
+      "hint": "Se usa cuando un release no tiene rama padre propia. Déjala vacía para detectarla."
+    },
+    "method": {
+      "label": "Método de actualización",
+      "REBASE": {
+        "label": "Rebase",
+        "help": "Avanza la rama de release (fast-forward). Se detiene cuando la rama de release tiene commits propios."
+      },
+      "MERGE": {
+        "label": "Merge",
+        "help": "Fusiona la rama padre en la rama de release con un commit de merge."
+      }
+    },
+    "save": "Guardar ramas de release",
+    "saveSuccess": "Configuración de ramas de release guardada",
+    "saveError": "No se pudo guardar la configuración de ramas de release"
+  }
 }

@@ -54,6 +54,11 @@ export interface IGitHubRefComparison {
   commits: IGitHubRefCommit[]
 }
 
+export interface IGitHubMergeResult {
+  merged: boolean
+  sha: string | null
+}
+
 export interface IGitHubFileTree {
   paths: string[]
   truncated: boolean
@@ -157,6 +162,21 @@ export abstract class IGitHubClient {
     compareRef: string,
     accessToken: string,
   ): Promise<IGitHubRefComparison>
+
+  abstract fastForwardBranch(
+    repo: string,
+    branch: string,
+    sha: string,
+    accessToken: string,
+  ): Promise<void>
+
+  abstract mergeBranch(
+    repo: string,
+    baseBranch: string,
+    headBranch: string,
+    commitMessage: string,
+    accessToken: string,
+  ): Promise<IGitHubMergeResult>
 
   abstract getDefaultBranch(repo: string, accessToken: string): Promise<string>
 

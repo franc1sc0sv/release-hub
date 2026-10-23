@@ -188,6 +188,10 @@ export type BranchSignalFilter =
   | 'OPEN_PR'
   | 'UNREFERENCED';
 
+export type BranchUpdateMethod =
+  | 'MERGE'
+  | 'REBASE';
+
 export type CarriedOverFlagPullRequestType = {
   __typename?: 'CarriedOverFlagPullRequestType';
   number: Scalars['Int']['output'];
@@ -304,6 +308,7 @@ export type CreateReleaseInput = {
   baseRef: Scalars['String']['input'];
   compareRef: Scalars['String']['input'];
   projectId: Scalars['ID']['input'];
+  sourceRef: InputMaybe<Scalars['String']['input']>;
   tags: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
@@ -878,6 +883,7 @@ export type Mutation = {
   setFlagRegistry: FlagRegistryConfigType;
   setFlagStates: FlagWriteReportType;
   setReleaseFlagDecision: ReleaseFlagDecisionResultType;
+  setReleaseSourceRef: ReleaseObjectType;
   setReleaseStatus: ReleaseObjectType;
   setSlackChannel: SlackConnectionStatus;
   shipRelease: ReleaseObjectType;
@@ -892,6 +898,7 @@ export type Mutation = {
   updateOrganization: OrganizationType;
   updateProject: ProjectType;
   updateRelease: ReleaseObjectType;
+  updateReleaseBranch: UpdateReleaseBranchResultType;
   updateSlackNotificationSettings: SlackConnectionStatus;
   updateSummaryProfile: SummaryProfileType;
 };
@@ -1175,6 +1182,11 @@ export type MutationSetReleaseFlagDecisionArgs = {
 };
 
 
+export type MutationSetReleaseSourceRefArgs = {
+  input: SetReleaseSourceRefInput;
+};
+
+
 export type MutationSetReleaseStatusArgs = {
   input: SetReleaseStatusInput;
 };
@@ -1244,6 +1256,11 @@ export type MutationUpdateProjectArgs = {
 
 export type MutationUpdateReleaseArgs = {
   input: UpdateReleaseInput;
+};
+
+
+export type MutationUpdateReleaseBranchArgs = {
+  input: UpdateReleaseBranchInput;
 };
 
 
@@ -1364,9 +1381,11 @@ export type ProjectTagType = {
 
 export type ProjectType = {
   __typename?: 'ProjectType';
+  branchUpdateMethod: BranchUpdateMethod;
   conflictEnvironments: Array<Scalars['String']['output']>;
   connectionHealth: ConnectionHealthType;
   createdAt: Scalars['DateTime']['output'];
+  defaultParentBranch: Maybe<Scalars['String']['output']>;
   flagReminderIntervalDays: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   integrations: ProjectIntegrationsType;
@@ -1440,6 +1459,7 @@ export type Query = {
   notificationPreferences: Array<NotificationPreferenceEntryType>;
   notifications: NotificationsPageType;
   projectTags: Array<ProjectTagType>;
+  releaseBranchStatus: ReleaseBranchStatusType;
   releaseFlags: Array<ReleaseFlagType>;
   releasePullRequestsPage: ReleasePullRequestsPageType;
   repoFileSearch: Array<Scalars['String']['output']>;
@@ -1649,6 +1669,11 @@ export type QueryProjectTagsArgs = {
 };
 
 
+export type QueryReleaseBranchStatusArgs = {
+  releaseId: Scalars['ID']['input'];
+};
+
+
 export type QueryReleaseFlagsArgs = {
   releaseId: Scalars['ID']['input'];
 };
@@ -1764,6 +1789,16 @@ export type RejectSuggestedFeatureInput = {
   featureId: Scalars['ID']['input'];
 };
 
+export type ReleaseBranchStatusType = {
+  __typename?: 'ReleaseBranchStatusType';
+  behindBy: Scalars['Int']['output'];
+  canFastForward: Scalars['Boolean']['output'];
+  detected: Scalars['Boolean']['output'];
+  ownCommits: Scalars['Int']['output'];
+  sourceRef: Maybe<Scalars['String']['output']>;
+  updateMethod: BranchUpdateMethod;
+};
+
 export type ReleaseFeatureNodeType = {
   __typename?: 'ReleaseFeatureNodeType';
   clientAvailabilityKey: Scalars['String']['output'];
@@ -1834,6 +1869,7 @@ export type ReleaseObjectType = {
   name: Maybe<Scalars['String']['output']>;
   prUrl: Maybe<Scalars['String']['output']>;
   projectId: Scalars['ID']['output'];
+  sourceRef: Maybe<Scalars['String']['output']>;
   status: ReleaseStatus;
   summary: Maybe<Scalars['String']['output']>;
   summaryEditedAt: Maybe<Scalars['DateTime']['output']>;
@@ -1953,6 +1989,11 @@ export type SetReleaseFlagDecisionInput = {
   decision: ReleaseFlagDecisionType;
   releaseId: Scalars['ID']['input'];
   trackedFlagId: Scalars['ID']['input'];
+};
+
+export type SetReleaseSourceRefInput = {
+  releaseId: Scalars['ID']['input'];
+  sourceRef: Scalars['String']['input'];
 };
 
 export type SetReleaseStatusInput = {
@@ -2167,11 +2208,25 @@ export type UpdateOrganizationInput = {
 };
 
 export type UpdateProjectInput = {
+  branchUpdateMethod: InputMaybe<BranchUpdateMethod>;
   conflictEnvironments: InputMaybe<Array<Scalars['String']['input']>>;
+  defaultParentBranch: InputMaybe<Scalars['String']['input']>;
   flagReminderIntervalDays: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
   name: InputMaybe<Scalars['String']['input']>;
   repo: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateReleaseBranchInput = {
+  releaseId: Scalars['ID']['input'];
+};
+
+export type UpdateReleaseBranchResultType = {
+  __typename?: 'UpdateReleaseBranchResultType';
+  commitsAdded: Scalars['Int']['output'];
+  headSha: Scalars['String']['output'];
+  method: BranchUpdateMethod;
+  sourceRef: Scalars['String']['output'];
 };
 
 export type UpdateReleaseInput = {
@@ -2646,6 +2701,20 @@ export type SetReleaseFlagDecisionMutationVariables = Exact<{
 
 export type SetReleaseFlagDecisionMutation = { __typename?: 'Mutation', setReleaseFlagDecision: { __typename?: 'ReleaseFlagDecisionResultType', id: string, releaseId: string, trackedFlagId: string, decision: ReleaseFlagDecisionType, decidedAt: string | null, decidedById: string | null } };
 
+export type UpdateReleaseBranchMutationVariables = Exact<{
+  input: UpdateReleaseBranchInput;
+}>;
+
+
+export type UpdateReleaseBranchMutation = { __typename?: 'Mutation', updateReleaseBranch: { __typename?: 'UpdateReleaseBranchResultType', commitsAdded: number, headSha: string, method: BranchUpdateMethod, sourceRef: string } };
+
+export type SetReleaseSourceRefMutationVariables = Exact<{
+  input: SetReleaseSourceRefInput;
+}>;
+
+
+export type SetReleaseSourceRefMutation = { __typename?: 'Mutation', setReleaseSourceRef: { __typename?: 'ReleaseObjectType', id: string, sourceRef: string | null } };
+
 export type GetReleasesPageQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
   limit: Scalars['Float']['input'];
@@ -2709,6 +2778,13 @@ export type InProgressFlagRemindersQueryVariables = Exact<{
 
 
 export type InProgressFlagRemindersQuery = { __typename?: 'Query', inProgressFlagReminders: Array<{ __typename?: 'InProgressFlagReminderType', trackedFlagId: string, key: string, releaseId: string, releaseVersion: string, decidedAt: string | null, featureId: string | null }> };
+
+export type GetReleaseBranchStatusQueryVariables = Exact<{
+  releaseId: Scalars['ID']['input'];
+}>;
+
+
+export type GetReleaseBranchStatusQuery = { __typename?: 'Query', releaseBranchStatus: { __typename?: 'ReleaseBranchStatusType', behindBy: number, canFastForward: boolean, detected: boolean, ownCommits: number, sourceRef: string | null, updateMethod: BranchUpdateMethod } };
 
 export type BlockBranchMutationVariables = Exact<{
   input: BlockBranchInput;
@@ -2926,6 +3002,20 @@ export type UpdateProjectConflictEnvironmentsMutationVariables = Exact<{
 
 export type UpdateProjectConflictEnvironmentsMutation = { __typename?: 'Mutation', updateProject: { __typename?: 'ProjectType', id: string, conflictEnvironments: Array<string> } };
 
+export type GetProjectReleaseBranchesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetProjectReleaseBranchesQuery = { __typename?: 'Query', getProject: { __typename?: 'ProjectType', id: string, branchUpdateMethod: BranchUpdateMethod, defaultParentBranch: string | null } };
+
+export type UpdateProjectReleaseBranchesMutationVariables = Exact<{
+  input: UpdateProjectInput;
+}>;
+
+
+export type UpdateProjectReleaseBranchesMutation = { __typename?: 'Mutation', updateProject: { __typename?: 'ProjectType', id: string, branchUpdateMethod: BranchUpdateMethod, defaultParentBranch: string | null } };
+
 export type SummaryProfilesQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
 }>;
@@ -3039,6 +3129,8 @@ export const ResyncReleasePullRequestsDocument = {"kind":"Document","definitions
 export const ConfirmReleaseAdditionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ConfirmReleaseAdditions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"confirmReleaseAdditions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"releaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<ConfirmReleaseAdditionsMutation, ConfirmReleaseAdditionsMutationVariables>;
 export const ClearReleaseFlagDecisionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ClearReleaseFlagDecision"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ClearReleaseFlagDecisionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clearReleaseFlagDecision"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<ClearReleaseFlagDecisionMutation, ClearReleaseFlagDecisionMutationVariables>;
 export const SetReleaseFlagDecisionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetReleaseFlagDecision"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SetReleaseFlagDecisionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setReleaseFlagDecision"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"trackedFlagId"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}},{"kind":"Field","name":{"kind":"Name","value":"decidedAt"}},{"kind":"Field","name":{"kind":"Name","value":"decidedById"}}]}}]}}]} as unknown as DocumentNode<SetReleaseFlagDecisionMutation, SetReleaseFlagDecisionMutationVariables>;
+export const UpdateReleaseBranchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateReleaseBranch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateReleaseBranchInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateReleaseBranch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"commitsAdded"}},{"kind":"Field","name":{"kind":"Name","value":"headSha"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"sourceRef"}}]}}]}}]} as unknown as DocumentNode<UpdateReleaseBranchMutation, UpdateReleaseBranchMutationVariables>;
+export const SetReleaseSourceRefDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetReleaseSourceRef"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SetReleaseSourceRefInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setReleaseSourceRef"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sourceRef"}}]}}]}}]} as unknown as DocumentNode<SetReleaseSourceRefMutation, SetReleaseSourceRefMutationVariables>;
 export const GetReleasesPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetReleasesPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getReleasesPage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"hasMore"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"baseRef"}},{"kind":"Field","name":{"kind":"Name","value":"compareRef"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"tags"}},{"kind":"Field","name":{"kind":"Name","value":"prUrl"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]}}]} as unknown as DocumentNode<GetReleasesPageQuery, GetReleasesPageQueryVariables>;
 export const GetReleaseTreeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetReleaseTree"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getReleaseTree"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"release"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"baseRef"}},{"kind":"Field","name":{"kind":"Name","value":"compareRef"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"allowedNextStatuses"}},{"kind":"Field","name":{"kind":"Name","value":"tags"}},{"kind":"Field","name":{"kind":"Name","value":"prUrl"}},{"kind":"Field","name":{"kind":"Name","value":"summary"}},{"kind":"Field","name":{"kind":"Name","value":"summaryEditedAt"}},{"kind":"Field","name":{"kind":"Name","value":"summaryModel"}},{"kind":"Field","name":{"kind":"Name","value":"summaryProfileId"}},{"kind":"Field","name":{"kind":"Name","value":"aiDraftStatus"}},{"kind":"Field","name":{"kind":"Name","value":"summaryStatus"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"features"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"feature"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"suggested"}},{"kind":"Field","name":{"kind":"Name","value":"currentState"}},{"kind":"Field","name":{"kind":"Name","value":"tags"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"clientAvailabilityKey"}},{"kind":"Field","name":{"kind":"Name","value":"excludedFromSummary"}},{"kind":"Field","name":{"kind":"Name","value":"flagState"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"staging"}},{"kind":"Field","name":{"kind":"Name","value":"production"}}]}},{"kind":"Field","name":{"kind":"Name","value":"prs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"number"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"author"}},{"kind":"Field","name":{"kind":"Name","value":"mergedAt"}},{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"featureId"}},{"kind":"Field","name":{"kind":"Name","value":"pendingAddition"}},{"kind":"Field","name":{"kind":"Name","value":"aiConfidence"}},{"kind":"Field","name":{"kind":"Name","value":"aiRationale"}},{"kind":"Field","name":{"kind":"Name","value":"summary"}},{"kind":"Field","name":{"kind":"Name","value":"summaryEditedAt"}},{"kind":"Field","name":{"kind":"Name","value":"tickets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"issueId"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"confidence"}}]}},{"kind":"Field","name":{"kind":"Name","value":"commits"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sha"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"author"}},{"kind":"Field","name":{"kind":"Name","value":"date"}}]}},{"kind":"Field","name":{"kind":"Name","value":"flagChanges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagKey"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"existsInFlagsmith"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"unassignedPrs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"number"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"author"}},{"kind":"Field","name":{"kind":"Name","value":"mergedAt"}},{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"featureId"}},{"kind":"Field","name":{"kind":"Name","value":"pendingAddition"}},{"kind":"Field","name":{"kind":"Name","value":"aiConfidence"}},{"kind":"Field","name":{"kind":"Name","value":"aiRationale"}},{"kind":"Field","name":{"kind":"Name","value":"summary"}},{"kind":"Field","name":{"kind":"Name","value":"summaryEditedAt"}},{"kind":"Field","name":{"kind":"Name","value":"tickets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"issueId"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"confidence"}}]}},{"kind":"Field","name":{"kind":"Name","value":"commits"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sha"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"author"}},{"kind":"Field","name":{"kind":"Name","value":"date"}}]}},{"kind":"Field","name":{"kind":"Name","value":"flagChanges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagKey"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"existsInFlagsmith"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetReleaseTreeQuery, GetReleaseTreeQueryVariables>;
 export const GetCoverageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCoverage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getCoverage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"releaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"assigned"}},{"kind":"Field","name":{"kind":"Name","value":"ready"}}]}}]}}]} as unknown as DocumentNode<GetCoverageQuery, GetCoverageQueryVariables>;
@@ -3047,6 +3139,7 @@ export const CompareRefsDocument = {"kind":"Document","definitions":[{"kind":"Op
 export const CarriedOverFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CarriedOverFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"carriedOverFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"releaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackedFlagId"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"featureId"}},{"kind":"Field","name":{"kind":"Name","value":"featureName"}},{"kind":"Field","name":{"kind":"Name","value":"featureKind"}},{"kind":"Field","name":{"kind":"Name","value":"featureDescription"}},{"kind":"Field","name":{"kind":"Name","value":"addedInPullRequest"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"number"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"summary"}},{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"originReleaseId"}},{"kind":"Field","name":{"kind":"Name","value":"originReleaseName"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}},{"kind":"Field","name":{"kind":"Name","value":"deploymentStatus"}},{"kind":"Field","name":{"kind":"Name","value":"decidedAt"}},{"kind":"Field","name":{"kind":"Name","value":"decidedInThisRelease"}},{"kind":"Field","name":{"kind":"Name","value":"featureReleaseState"}}]}}]}}]} as unknown as DocumentNode<CarriedOverFlagsQuery, CarriedOverFlagsQueryVariables>;
 export const ReleaseFlagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ReleaseFlags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"releaseFlags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"releaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}},{"kind":"Field","name":{"kind":"Name","value":"decidedAt"}},{"kind":"Field","name":{"kind":"Name","value":"existsInFlagsmith"}},{"kind":"Field","name":{"kind":"Name","value":"closedAt"}},{"kind":"Field","name":{"kind":"Name","value":"environments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"feature"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"changes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"detectedFile"}},{"kind":"Field","name":{"kind":"Name","value":"prNumber"}},{"kind":"Field","name":{"kind":"Name","value":"prTitle"}},{"kind":"Field","name":{"kind":"Name","value":"prUrl"}}]}}]}}]}}]} as unknown as DocumentNode<ReleaseFlagsQuery, ReleaseFlagsQueryVariables>;
 export const InProgressFlagRemindersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"InProgressFlagReminders"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"excludeReleaseId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inProgressFlagReminders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"excludeReleaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"excludeReleaseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackedFlagId"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"releaseId"}},{"kind":"Field","name":{"kind":"Name","value":"releaseVersion"}},{"kind":"Field","name":{"kind":"Name","value":"decidedAt"}},{"kind":"Field","name":{"kind":"Name","value":"featureId"}}]}}]}}]} as unknown as DocumentNode<InProgressFlagRemindersQuery, InProgressFlagRemindersQueryVariables>;
+export const GetReleaseBranchStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetReleaseBranchStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"releaseBranchStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"releaseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"releaseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"behindBy"}},{"kind":"Field","name":{"kind":"Name","value":"canFastForward"}},{"kind":"Field","name":{"kind":"Name","value":"detected"}},{"kind":"Field","name":{"kind":"Name","value":"ownCommits"}},{"kind":"Field","name":{"kind":"Name","value":"sourceRef"}},{"kind":"Field","name":{"kind":"Name","value":"updateMethod"}}]}}]}}]} as unknown as DocumentNode<GetReleaseBranchStatusQuery, GetReleaseBranchStatusQueryVariables>;
 export const BlockBranchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"BlockBranch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"BlockBranchInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"blockBranch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"branchName"}},{"kind":"Field","name":{"kind":"Name","value":"reason"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}}]}}]}}]} as unknown as DocumentNode<BlockBranchMutation, BlockBranchMutationVariables>;
 export const UnblockBranchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UnblockBranch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UnblockBranchInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unblockBranch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<UnblockBranchMutation, UnblockBranchMutationVariables>;
 export const DeleteGithubBranchesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteGithubBranches"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeleteGithubBranchesInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteGithubBranches"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"branchName"}},{"kind":"Field","name":{"kind":"Name","value":"deleted"}},{"kind":"Field","name":{"kind":"Name","value":"reason"}}]}}]}}]} as unknown as DocumentNode<DeleteGithubBranchesMutation, DeleteGithubBranchesMutationVariables>;
@@ -3077,6 +3170,8 @@ export const UpdateProjectFlagReminderDocument = {"kind":"Document","definitions
 export const FlagsmithEnvironmentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FlagsmithEnvironments"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flagsmithEnvironments"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}]}]}}]} as unknown as DocumentNode<FlagsmithEnvironmentsQuery, FlagsmithEnvironmentsQueryVariables>;
 export const GetProjectConflictEnvironmentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProjectConflictEnvironments"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"conflictEnvironments"}}]}}]}}]} as unknown as DocumentNode<GetProjectConflictEnvironmentsQuery, GetProjectConflictEnvironmentsQueryVariables>;
 export const UpdateProjectConflictEnvironmentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProjectConflictEnvironments"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProjectInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"conflictEnvironments"}}]}}]}}]} as unknown as DocumentNode<UpdateProjectConflictEnvironmentsMutation, UpdateProjectConflictEnvironmentsMutationVariables>;
+export const GetProjectReleaseBranchesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProjectReleaseBranches"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"branchUpdateMethod"}},{"kind":"Field","name":{"kind":"Name","value":"defaultParentBranch"}}]}}]}}]} as unknown as DocumentNode<GetProjectReleaseBranchesQuery, GetProjectReleaseBranchesQueryVariables>;
+export const UpdateProjectReleaseBranchesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProjectReleaseBranches"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProjectInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"branchUpdateMethod"}},{"kind":"Field","name":{"kind":"Name","value":"defaultParentBranch"}}]}}]}}]} as unknown as DocumentNode<UpdateProjectReleaseBranchesMutation, UpdateProjectReleaseBranchesMutationVariables>;
 export const SummaryProfilesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SummaryProfiles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"summaryProfiles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"outputTemplate"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"rules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"}}]}},{"kind":"Field","name":{"kind":"Name","value":"examples"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"explanation"}}]}}]}}]}}]} as unknown as DocumentNode<SummaryProfilesQuery, SummaryProfilesQueryVariables>;
 export const SummaryProfileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SummaryProfile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"profileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"summaryProfile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"profileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"profileId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"outputTemplate"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"rules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"}}]}},{"kind":"Field","name":{"kind":"Name","value":"examples"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"explanation"}}]}}]}}]}}]} as unknown as DocumentNode<SummaryProfileQuery, SummaryProfileQueryVariables>;
 export const CreateSummaryProfileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSummaryProfile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateSummaryProfileInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSummaryProfile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"outputTemplate"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"rules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"}}]}},{"kind":"Field","name":{"kind":"Name","value":"examples"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"explanation"}}]}}]}}]}}]} as unknown as DocumentNode<CreateSummaryProfileMutation, CreateSummaryProfileMutationVariables>;

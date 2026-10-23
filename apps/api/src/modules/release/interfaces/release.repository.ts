@@ -18,6 +18,7 @@ export abstract class IReleaseRepository implements IBaseRepository<IRelease> {
   abstract create: RepositoryMethod<[data: ICreateReleaseData], IRelease>
   abstract update: RepositoryMethod<[id: string, data: IUpdateReleaseData], IRelease>
   abstract updateStatus: RepositoryMethod<[id: string, status: ReleaseStatus, prUrl: string | null], IRelease>
+  abstract setSourceRef: RepositoryMethod<[id: string, sourceRef: string], IRelease>
   abstract setStatus: RepositoryMethod<[id: string, status: ReleaseStatus], IRelease>
   abstract setDeployedStatus: RepositoryMethod<
     [id: string, status: ReleaseStatus, deployedAt: Date, githubDeploymentId: string | null],

@@ -20,6 +20,9 @@ export class ReleaseObjectType {
   @Field(() => String)
   compareRef: string
 
+  @Field(() => String, { nullable: true })
+  sourceRef: string | null
+
   @Field(() => ReleaseStatus)
   status: ReleaseStatus
 

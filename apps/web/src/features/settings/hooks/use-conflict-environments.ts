@@ -34,6 +34,8 @@ export function useConflictEnvironments(projectId: string) {
           name: undefined,
           repo: undefined,
           flagReminderIntervalDays: undefined,
+          branchUpdateMethod: undefined,
+          defaultParentBranch: undefined,
         },
       },
     })

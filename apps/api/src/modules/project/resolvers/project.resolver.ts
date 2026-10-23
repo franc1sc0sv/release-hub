@@ -70,6 +70,8 @@ export class ProjectResolver {
         input.repo,
         input.flagReminderIntervalDays,
         input.conflictEnvironments,
+        input.defaultParentBranch,
+        input.branchUpdateMethod,
       ),
     )
   }

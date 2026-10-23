@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ReleaseStatusControl } from './ReleaseStatusControl'
 import { SyncNewPrsButton } from './SyncNewPrsButton'
+import { ReleaseBranchUpdateControl } from './ReleaseBranchUpdateControl'
 import { DeleteReleaseButton } from './DeleteReleaseButton'
 import { ConfirmReleaseButton } from './ConfirmReleaseButton'
 import { ReleaseStatusValue } from '../constants/release-enums'
@@ -124,7 +125,8 @@ export function ReleaseWorkspaceHeader({
             highlight={openFlags > 0 ? 'attention' : 'good'}
           />
         </dl>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {canSync && <ReleaseBranchUpdateControl releaseId={release.id} projectId={projectId} />}
           {canSync && <SyncNewPrsButton releaseId={release.id} />}
           <DeleteReleaseButton
             releaseId={release.id}

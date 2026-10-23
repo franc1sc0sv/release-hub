@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import type { TxClient } from '@release-hub/db'
 import { DEFAULT_FEATURES, DEFAULT_SUMMARY_PROFILE, OrgRole, GithubInstallationStatus } from '@release-hub/db'
+import type { BranchUpdateMethod } from '../../../common/types/branch-update-method.enum'
 import { IProjectRepository } from '../interfaces/project.repository'
 import type {
   IProject,
@@ -189,6 +190,8 @@ export class ProjectRepository extends IProjectRepository {
         ...(data.conflictEnvironments !== undefined && {
           conflictEnvironments: data.conflictEnvironments,
         }),
+        ...(data.defaultParentBranch !== undefined && { defaultParentBranch: data.defaultParentBranch }),
+        ...(data.branchUpdateMethod !== undefined && { branchUpdateMethod: data.branchUpdateMethod }),
       },
       include: {
         organization: {
@@ -321,6 +324,8 @@ export class ProjectRepository extends IProjectRepository {
       slackEnabled: boolean
       flagReminderIntervalDays: number
       conflictEnvironments: string[]
+      defaultParentBranch: string | null
+      branchUpdateMethod: BranchUpdateMethod
       createdAt: Date
       updatedAt: Date
       organization: {
@@ -341,6 +346,8 @@ export class ProjectRepository extends IProjectRepository {
       slackEnabled: row.slackEnabled,
       flagReminderIntervalDays: row.flagReminderIntervalDays,
       conflictEnvironments: row.conflictEnvironments,
+      defaultParentBranch: row.defaultParentBranch,
+      branchUpdateMethod: row.branchUpdateMethod,
       integrations: {
         github: orgHasActiveInstallation || row.githubInstallationId !== null,
         linear: row.linearEnabled,

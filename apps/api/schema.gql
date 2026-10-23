@@ -168,6 +168,11 @@ enum BranchSignalFilter {
   UNREFERENCED
 }
 
+enum BranchUpdateMethod {
+  MERGE
+  REBASE
+}
+
 type CarriedOverFlagPullRequestType {
   number: Int!
   summary: String
@@ -278,6 +283,7 @@ input CreateReleaseInput {
   baseRef: String!
   compareRef: String!
   projectId: ID!
+  sourceRef: String
   tags: [String!]
 }
 
@@ -834,6 +840,7 @@ type Mutation {
   setFlagRegistry(input: SetFlagRegistryInput!): FlagRegistryConfigType!
   setFlagStates(input: SetFlagStatesInput!): FlagWriteReportType!
   setReleaseFlagDecision(input: SetReleaseFlagDecisionInput!): ReleaseFlagDecisionResultType!
+  setReleaseSourceRef(input: SetReleaseSourceRefInput!): ReleaseObjectType!
   setReleaseStatus(input: SetReleaseStatusInput!): ReleaseObjectType!
   setSlackChannel(channelId: String!, channelName: String!, projectId: ID!): SlackConnectionStatus!
   shipRelease(input: ShipReleaseInput!): ReleaseObjectType!
@@ -848,6 +855,7 @@ type Mutation {
   updateOrganization(input: UpdateOrganizationInput!): OrganizationType!
   updateProject(input: UpdateProjectInput!): ProjectType!
   updateRelease(input: UpdateReleaseInput!): ReleaseObjectType!
+  updateReleaseBranch(input: UpdateReleaseBranchInput!): UpdateReleaseBranchResultType!
   updateSlackNotificationSettings(notifyOnCreated: Boolean!, notifyOnDeployed: Boolean!, notifyOnShipped: Boolean!, projectId: ID!): SlackConnectionStatus!
   updateSummaryProfile(input: UpdateSummaryProfileInput!): SummaryProfileType!
 }
@@ -952,9 +960,11 @@ type ProjectTagType {
 }
 
 type ProjectType {
+  branchUpdateMethod: BranchUpdateMethod!
   conflictEnvironments: [String!]!
   connectionHealth: ConnectionHealthType!
   createdAt: DateTime!
+  defaultParentBranch: String
   flagReminderIntervalDays: Int!
   id: ID!
   integrations: ProjectIntegrationsType!
@@ -1026,6 +1036,7 @@ type Query {
   notificationPreferences(projectId: ID!): [NotificationPreferenceEntryType!]!
   notifications(input: NotificationsPageInput!): NotificationsPageType!
   projectTags(projectId: ID!): [ProjectTagType!]!
+  releaseBranchStatus(releaseId: ID!): ReleaseBranchStatusType!
   releaseFlags(releaseId: ID!): [ReleaseFlagType!]!
   releasePullRequestsPage(limit: Float! = 20, offset: Float! = 0, releaseId: ID!, search: String): ReleasePullRequestsPageType!
   repoFileSearch(input: RepoFileSearchInput!): [String!]!
@@ -1079,6 +1090,15 @@ input RegisterInput {
 
 input RejectSuggestedFeatureInput {
   featureId: ID!
+}
+
+type ReleaseBranchStatusType {
+  behindBy: Int!
+  canFastForward: Boolean!
+  detected: Boolean!
+  ownCommits: Int!
+  sourceRef: String
+  updateMethod: BranchUpdateMethod!
 }
 
 type ReleaseFeatureNodeType {
@@ -1146,6 +1166,7 @@ type ReleaseObjectType {
   name: String
   prUrl: String
   projectId: ID!
+  sourceRef: String
   status: ReleaseStatus!
   summary: String
   summaryEditedAt: DateTime
@@ -1259,6 +1280,11 @@ input SetReleaseFlagDecisionInput {
   decision: ReleaseFlagDecisionType!
   releaseId: ID!
   trackedFlagId: ID!
+}
+
+input SetReleaseSourceRefInput {
+  releaseId: ID!
+  sourceRef: String!
 }
 
 input SetReleaseStatusInput {
@@ -1455,11 +1481,24 @@ input UpdateOrganizationInput {
 }
 
 input UpdateProjectInput {
+  branchUpdateMethod: BranchUpdateMethod
   conflictEnvironments: [String!]
+  defaultParentBranch: String
   flagReminderIntervalDays: Int
   id: ID!
   name: String
   repo: String
+}
+
+input UpdateReleaseBranchInput {
+  releaseId: ID!
+}
+
+type UpdateReleaseBranchResultType {
+  commitsAdded: Int!
+  headSha: String!
+  method: BranchUpdateMethod!
+  sourceRef: String!
 }
 
 input UpdateReleaseInput {
