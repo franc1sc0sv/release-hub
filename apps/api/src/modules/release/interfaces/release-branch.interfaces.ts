@@ -22,6 +22,14 @@ export interface IParentCandidatesInput {
   compareRef: string
 }
 
+export interface IReleaseBranchWriteCheck {
+  compareRef: string
+  baseRef: string
+  repoDefaultBranch: string
+  defaultParentBranch: string | null
+  isProtected: boolean
+}
+
 export interface IBranchUpdateDecisionInput {
   method: BranchUpdateMethod
   behindBy: number

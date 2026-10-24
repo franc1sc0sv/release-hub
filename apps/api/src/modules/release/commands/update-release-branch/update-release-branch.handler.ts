@@ -24,6 +24,7 @@ import {
 import { UpdateReleaseBranchResultType } from '../../types/update-release-branch-result.type'
 import { ReleaseBranchUpdatedEvent } from '../../events/release-branch-updated.event'
 import { decideBranchUpdate } from '../../utils/decide-branch-update'
+import { isWritableReleaseBranch } from '../../utils/is-writable-release-branch'
 import { resolveReleaseParent } from '../../utils/resolve-release-parent'
 import { UpdateReleaseBranchCommand } from './update-release-branch.command'
 
@@ -81,11 +82,13 @@ export class UpdateReleaseBranchHandler extends PreparedCommandHandler<
           ErrorCode.CONFLICT,
         )
       case BranchUpdateAction.FAST_FORWARD: {
+        await this.assertWritableReleaseBranch(source)
         const headSha = await this.gitHubClient.getRefSha(source.repo, sourceRef, source.accessToken)
         await this.gitHubClient.fastForwardBranch(source.repo, source.compareRef, headSha, source.accessToken)
         return { ...base, commitsAdded: parent.behindBy, headSha }
       }
       case BranchUpdateAction.MERGE: {
+        await this.assertWritableReleaseBranch(source)
         const merge = await this.gitHubClient.mergeBranch(
           source.repo,
           source.compareRef,
@@ -129,6 +132,28 @@ export class UpdateReleaseBranchHandler extends PreparedCommandHandler<
     result.commitsAdded = prepared.commitsAdded
     result.headSha = prepared.headSha
     return result
+  }
+
+  private async assertWritableReleaseBranch(source: IReleaseBranchSource): Promise<void> {
+    const [repoDefaultBranch, isProtected] = await Promise.all([
+      this.gitHubClient.getDefaultBranch(source.repo, source.accessToken),
+      this.gitHubClient.isBranchProtected(source.repo, source.compareRef, source.accessToken),
+    ])
+
+    const writable = isWritableReleaseBranch({
+      compareRef: source.compareRef,
+      baseRef: source.baseRef,
+      repoDefaultBranch,
+      defaultParentBranch: source.defaultParentBranch,
+      isProtected,
+    })
+
+    if (!writable) {
+      throw new AppException(
+        `${source.compareRef} is a protected, default, base, or parent branch, so Release Hub will not write to it. Update it in GitHub or a terminal.`,
+        ErrorCode.FORBIDDEN,
+      )
+    }
   }
 
   private refusalMessage(compareRef: string, sourceRef: string, parent: IResolvedReleaseParent): string {

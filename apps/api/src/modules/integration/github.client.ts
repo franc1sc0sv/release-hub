@@ -221,6 +221,21 @@ export class GitHubClient extends IGitHubClient {
     }
   }
 
+  async isBranchProtected(repo: string, branch: string, accessToken: string): Promise<boolean> {
+    const [owner, repoName] = repo.split('/')
+    if (!owner || !repoName) {
+      throw new AppException(`Invalid repo format: ${repo}`, ErrorCode.VALIDATION_ERROR)
+    }
+
+    const octokit = new Octokit({ auth: accessToken })
+    try {
+      const response = await octokit.repos.getBranch({ owner, repo: repoName, branch })
+      return response.data.protected
+    } catch (error) {
+      this.mapOctokitError(error)
+    }
+  }
+
   async createReleaseTag(
     repo: string,
     tag: string,

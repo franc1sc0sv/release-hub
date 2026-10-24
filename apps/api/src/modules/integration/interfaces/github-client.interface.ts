@@ -145,6 +145,8 @@ export abstract class IGitHubClient {
 
   abstract getRefSha(repo: string, ref: string, accessToken: string): Promise<string>
 
+  abstract isBranchProtected(repo: string, branch: string, accessToken: string): Promise<boolean>
+
   abstract listUserRepositories(accessToken: string): Promise<IGithubRepository[]>
 
   abstract listBranches(repo: string, accessToken: string): Promise<IGitHubBranch[]>
