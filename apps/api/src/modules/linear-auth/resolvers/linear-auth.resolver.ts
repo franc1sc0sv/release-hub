@@ -60,7 +60,7 @@ export class LinearAuthResolver {
       client_id: clientId,
       redirect_uri: callbackUrl,
       response_type: 'code',
-      scope: 'read',
+      scope: 'read,write',
       state: signedState,
       actor: 'user',
       prompt: 'consent',

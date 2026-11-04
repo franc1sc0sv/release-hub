@@ -129,6 +129,21 @@ enum TicketSource {
   @@map("ticket_source")
 }
 
+enum LinearSyncActionKind {
+  move_to_production
+  flag_label
+
+  @@map("linear_sync_action_kind")
+}
+
+enum LinearSyncActionStatus {
+  done
+  skipped
+  failed
+
+  @@map("linear_sync_action_status")
+}
+
 enum OrgRole {
   owner
   member
@@ -367,6 +382,7 @@ model Project {
   flagHistoryEvents     FlagHistoryEvent[]
   notifications         Notification[]
   summaryProfiles       SummaryProfile[]
+  linearSyncActions     LinearSyncAction[]
 
   @@index([deletedAt])
   @@index([organizationId])
@@ -445,6 +461,7 @@ model Release {
   flagDecisions     ReleaseFlagDecision[]
   flagHistoryEvents FlagHistoryEvent[]
   featureStateEvents FeatureStateEvent[]
+  linearSyncActions LinearSyncAction[]
   summaryProfile    SummaryProfile?   @relation(fields: [summaryProfileId], references: [id], onDelete: SetNull)
 
   @@index([projectId, deletedAt])
@@ -556,6 +573,7 @@ model TrackedFlag {
   releaseDecisions  ReleaseFlagDecision[]
   flagsmithFlags    FlagsmithFlag[]
   historyEvents     FlagHistoryEvent[]
+  linearSyncActions LinearSyncAction[]
 
   @@unique([projectId, key])
   @@index([projectId, deletedAt])
@@ -610,6 +628,30 @@ model ReleaseFlagDecision {
 
   @@unique([releaseId, trackedFlagId])
   @@map("release_flag_decision")
+}
+
+model LinearSyncAction {
+  id              String                 @id @default(cuid())
+  projectId       String                 @map("project_id")
+  releaseId       String?                @map("release_id")
+  trackedFlagId   String?                @map("tracked_flag_id")
+  issueIdentifier String                 @map("issue_identifier")
+  kind            LinearSyncActionKind
+  status          LinearSyncActionStatus
+  dedupeKey       String                 @map("dedupe_key")
+  signature       String?
+  detail          String
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  release     Release?     @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+  trackedFlag TrackedFlag? @relation(fields: [trackedFlagId], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, dedupeKey])
+  @@index([releaseId])
+  @@index([trackedFlagId])
+  @@map("linear_sync_actions")
 }
 
 model ProjectTag {

@@ -399,7 +399,8 @@
       "prs": "Pull requests",
       "flags": "Flags de este release",
       "carryOver": "Decisiones pendientes",
-      "summary": "Resumen para el cliente"
+      "summary": "Resumen para el cliente",
+      "linear": "Linear"
     },
     "summaryReady": "Listo",
     "summaryMissing": "Ninguno",
@@ -466,6 +467,26 @@
       "bulk": {
         "label_one": "Preparar para el flag listado ({{count}}):",
         "label_other": "Preparar para los {{count}} flags listados:"
+      }
+    },
+    "linear": {
+      "description": "Cuando el release se despliega, Release Hub mueve a In Production los tickets nombrados en los mensajes de commit, y marca los tickets cuyo flag está apagado en producción con la etiqueta Flag off in prod y un comentario.",
+      "syncButton": "Sincronizar Linear ahora",
+      "syncing": "Sincronizando…",
+      "synced": "Linear está al día",
+      "failedCount_one": "No se pudo actualizar {{count}} ticket",
+      "failedCount_other": "No se pudieron actualizar {{count}} tickets",
+      "error": "No se pudo sincronizar Linear",
+      "empty": "Aún no hay cambios en Linear. Usa Sincronizar Linear ahora para ejecutar la sincronización.",
+      "notDeployed": "Linear se sincroniza cuando este release se despliega.",
+      "groups": {
+        "status": "Estado de los tickets",
+        "flags": "Feature flags"
+      },
+      "status": {
+        "done": "Hecho",
+        "skipped": "Omitido",
+        "failed": "Falló"
       }
     },
     "carryOver": {

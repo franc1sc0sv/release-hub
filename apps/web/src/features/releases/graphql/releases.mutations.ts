@@ -204,3 +204,16 @@ export const SET_RELEASE_SOURCE_REF = graphql(`
     }
   }
 `)
+
+export const SYNC_RELEASE_TO_LINEAR = graphql(`
+  mutation SyncReleaseToLinear($projectId: ID!, $releaseId: ID!) {
+    syncReleaseToLinear(projectId: $projectId, releaseId: $releaseId) {
+      id
+      issueIdentifier
+      kind
+      status
+      detail
+      updatedAt
+    }
+  }
+`)

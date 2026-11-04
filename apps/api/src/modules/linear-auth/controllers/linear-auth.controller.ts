@@ -19,6 +19,7 @@ interface ILinearTokenResponse {
   refresh_token?: string
   expires_in?: number
   token_type?: string
+  scope?: string | string[]
   error?: string
 }
 
@@ -141,7 +142,7 @@ export class LinearAuthController {
           expiresAt,
           viewer.id,
           viewer.name,
-          null,
+          Array.isArray(tokenData.scope) ? tokenData.scope.join(',') : (tokenData.scope ?? null),
         ),
       )
 

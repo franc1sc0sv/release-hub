@@ -28,6 +28,7 @@ import { SummaryProfileModule } from './modules/summary-profile/summary-profile.
 import { GithubAuthModule } from './modules/github-auth/github-auth.module'
 import { GithubAppModule } from './modules/github-app/github-app.module'
 import { LinearAuthModule } from './modules/linear-auth/linear-auth.module'
+import { LinearSyncModule } from './modules/linear-sync/linear-sync.module'
 import { FlagTrackingModule } from './modules/flag-tracking/flag-tracking.module'
 import { WebhooksModule } from './modules/webhooks/webhooks.module'
 import { SlackAuthModule } from './modules/slack-auth/slack-auth.module'
@@ -89,6 +90,7 @@ import { RepoOpsModule } from './modules/repo-ops/repo-ops.module'
     GithubAuthModule,
     GithubAppModule,
     LinearAuthModule,
+    LinearSyncModule,
     FlagTrackingModule,
     WebhooksModule,
     SlackAuthModule,

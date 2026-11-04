@@ -748,6 +748,26 @@ type LinearConnectionStatus {
   linearUser: String
 }
 
+enum LinearSyncActionKind {
+  FLAG_LABEL
+  MOVE_TO_PRODUCTION
+}
+
+enum LinearSyncActionStatus {
+  DONE
+  FAILED
+  SKIPPED
+}
+
+type LinearSyncActionType {
+  detail: String!
+  id: ID!
+  issueIdentifier: String!
+  kind: LinearSyncActionKind!
+  status: LinearSyncActionStatus!
+  updatedAt: DateTime!
+}
+
 input ListFeaturesPageInput {
   assignableOnly: Boolean = false
   limit: Int = 20
@@ -847,6 +867,7 @@ type Mutation {
   startSummaryGeneration(input: StartSummaryGenerationInput!): ReleaseObjectType!
   syncFlagsmithFlags(projectId: ID!): FlagSyncReportType!
   syncGithubDeployments(releaseId: ID!): SyncGithubDeploymentsResultType!
+  syncReleaseToLinear(projectId: ID!, releaseId: ID!): [LinearSyncActionType!]!
   triggerFlagDigest(projectId: ID!): Boolean!
   unblockBranch(input: UnblockBranchInput!): Boolean!
   updateConnectionSettings(input: UpdateConnectionSettingsInput!): ConnectionSettingsType!
@@ -1038,6 +1059,7 @@ type Query {
   projectTags(projectId: ID!): [ProjectTagType!]!
   releaseBranchStatus(releaseId: ID!): ReleaseBranchStatusType!
   releaseFlags(releaseId: ID!): [ReleaseFlagType!]!
+  releaseLinearSync(releaseId: ID!): [LinearSyncActionType!]!
   releasePullRequestsPage(limit: Float! = 20, offset: Float! = 0, releaseId: ID!, search: String): ReleasePullRequestsPageType!
   repoFileSearch(input: RepoFileSearchInput!): [String!]!
   searchGithubBranches(limit: Float! = 50, projectId: ID!, search: String): GithubBranchSearchResultType!

@@ -256,3 +256,16 @@ export const GET_RELEASE_BRANCH_STATUS = graphql(`
     }
   }
 `)
+
+export const RELEASE_LINEAR_SYNC = graphql(`
+  query ReleaseLinearSync($releaseId: ID!) {
+    releaseLinearSync(releaseId: $releaseId) {
+      id
+      issueIdentifier
+      kind
+      status
+      detail
+      updatedAt
+    }
+  }
+`)

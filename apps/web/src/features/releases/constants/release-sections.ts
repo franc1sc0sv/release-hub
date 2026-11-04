@@ -5,6 +5,7 @@ export const ReleaseSectionValue = {
   FLAGS: 'flags',
   CARRY_OVER: 'carry-over',
   SUMMARY: 'summary',
+  LINEAR: 'linear',
 } as const
 
 export type ReleaseSection = (typeof ReleaseSectionValue)[keyof typeof ReleaseSectionValue]
@@ -22,6 +23,7 @@ export const CONFIRMED_RELEASE_SECTIONS: ReleaseSection[] = [
   ReleaseSectionValue.FLAGS,
   ReleaseSectionValue.CARRY_OVER,
   ReleaseSectionValue.SUMMARY,
+  ReleaseSectionValue.LINEAR,
 ]
 
 export const RELEASE_SECTION_QUERY_PARAM = 'section'

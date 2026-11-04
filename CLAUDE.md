@@ -70,7 +70,7 @@ Release Hub turns a repository's history into a client-ready release. A **Projec
 
 - **GitHub (required)** — GitHub App; branch diff → merged PRs with nested commits.
 - **Flagsmith (optional, connection-gated)** — Admin API + Organisation API token; flag matrix (staging × prod), parity gate (blocks the "live in prod / off in staging" quadrant), orphan/ghost detection vs a static code scan. Off → no flag gate; states set manually.
-- **Linear (optional, connection-gated)** — read-only; detect PR issue refs → confirm via API → pull title/description for AI context. Behind a `TicketSource` interface so Jira can slot in later. Off → manual naming, thinner AI draft.
+- **Linear (optional, connection-gated)** — detect PR issue refs → confirm via API → pull title/description for AI context. Behind a `TicketSource` interface so Jira can slot in later. Off → manual naming, thinner AI draft. With the `write` scope, the `linear-sync` module moves the tickets named in a deployed release's commit messages to "In Production" and keeps the "Flag off in prod" label and a comment in step with each flag's production state (`LinearSyncAction` records each change once).
 
 Optional integrations degrade gracefully when disconnected — their UI hides and dependent gates relax.
 

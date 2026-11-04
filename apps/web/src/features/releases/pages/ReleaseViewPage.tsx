@@ -30,6 +30,7 @@ import { ReleasePrsSection } from '../components/ReleasePrsSection'
 import { ReleaseFlagsSection } from '../components/ReleaseFlagsSection'
 import { CarryOverDecisionsSection } from '../components/CarryOverDecisionsSection'
 import { ReleaseSummarySection } from '../components/ReleaseSummarySection'
+import { LinearSyncSection } from '../components/LinearSyncSection'
 import type { AiDraftStatus, AiSummaryStatus, GetReleaseTreeQuery } from '@/generated/graphql'
 
 type ReleaseTree = GetReleaseTreeQuery['getReleaseTree']
@@ -90,6 +91,8 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
             <StatusBadge tone={StatusBadgeTone.SLATE}>{t('workspace.summaryMissing')}</StatusBadge>
           ),
         }
+      case ReleaseSectionValue.LINEAR:
+        return { section: entry, label: t('workspace.sections.linear'), badge: null }
     }
   }
 
@@ -141,6 +144,13 @@ function ReleaseWorkspace({ tree, projectId, releasesPath }: ReleaseWorkspacePro
           )}
           {section === ReleaseSectionValue.CARRY_OVER && <CarryOverDecisionsSection releaseId={release.id} releaseName={release.name ?? `${release.baseRef} → ${release.compareRef}`} />}
           {section === ReleaseSectionValue.SUMMARY && <ReleaseSummarySection release={release} features={features} />}
+          {section === ReleaseSectionValue.LINEAR && (
+            <LinearSyncSection
+              releaseId={release.id}
+              projectId={projectId}
+              isDeployed={release.status === ReleaseStatusValue.DEPLOYED}
+            />
+          )}
         </main>
       </div>
     </div>
